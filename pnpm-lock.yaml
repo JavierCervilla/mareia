@@ -38,7 +38,11 @@ importers:
 
   packages/adapters: {}
 
-  packages/domain-core: {}
+  packages/domain-core:
+    devDependencies:
+      '@neaps/tide-predictor':
+        specifier: ^0.11.0
+        version: 0.11.0
 
   packages/module-contract: {}
 
@@ -606,6 +610,9 @@ packages:
     peerDependencies:
       '@emnapi/core': ^1.7.1 || ^2.0.0-alpha.4
       '@emnapi/runtime': ^1.7.1 || ^2.0.0-alpha.4
+
+  '@neaps/tide-predictor@0.11.0':
+    resolution: {integrity: sha512-aBjaTMthLvkAmTURoGsdfjobd2PwNm1FJ6laoAmi3ZlM9IMrAjcAerdUtGJ39de0mXl6wTZRH+CAXY4AmCi6Xg==}
 
   '@oslojs/encoding@1.1.0':
     resolution: {integrity: sha512-70wQhgYmndg4GCPxPPxPGevRKqTIJ2Nh4OkiMWmDAVYsTQ+Ta7Sq+rPevXyXGdzr30/qZBnyOalCszoMxlyldQ==}
@@ -2797,6 +2804,8 @@ snapshots:
       '@emnapi/runtime': 1.11.3
       '@tybys/wasm-util': 0.10.3
     optional: true
+
+  '@neaps/tide-predictor@0.11.0': {}
 
   '@oslojs/encoding@1.1.0': {}
 

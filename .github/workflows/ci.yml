@@ -30,7 +30,7 @@ jobs:
       - run: pnpm lint
 
   web:
-    name: Web · build Astro + typecheck de packages
+    name: Web · build Astro + typecheck + tests de packages
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -43,6 +43,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web build
       - run: pnpm typecheck
+      # Tests de los packages con el runner nativo de Node (type stripping de Node 22): sin
+      # framework ni dependencias extra. En T-02 son los golden tests del motor de mareas.
       - run: pnpm test
 
   api:

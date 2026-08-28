@@ -11,8 +11,8 @@
   "scripts": {
     "build": "pnpm --filter web build",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "test": "pnpm -r test"
+    "test": "pnpm -r --if-present test",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^22.20.1",
