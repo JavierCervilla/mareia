@@ -25,6 +25,9 @@
 > pidiendo que se retire el trinquete para que el ataque quede como gate permanente. Mismo caveat:
 > se conforma con que el cuerpo falle por cualquier motivo, por eso cada assert es específico y el
 > motivo se imprime en cada run.
+>
+> **Los cinco trinquetes están retirados** (commit `9c6cf5a`): los hallazgos se
+> corrigieron y los cinco cuerpos, **sin tocar un solo assert**, se quedan como gates permanentes.
 
 ## Promesa
 
@@ -74,6 +77,11 @@ bundle). Ninguno es una vulnerabilidad; **los cuatro primeros son la página afi
 propios datos desmienten**, que en un producto cuyo argumento de venta es la transparencia es el
 peor sitio donde fallar.
 
+> **Los cinco están corregidos en este PR** (commit `9c6cf5a`; ver el «Estado» de cada
+> uno). Los trinquetes se han retirado y los mismos cuerpos —ni un assert tocado— se quedan como
+> gates permanentes en `apps/web/src/adversario-t09-tranche2.test.ts`: un recorrido adversario
+> arreglado no se borra, se queda vigilando.
+
 ### A-8 · A12 · La página le dice a Cádiz que su marea «es de centímetros», encima de una tabla de 2,90 m
 
 - **Qué se consigue:** quien abre `/mareas/andalucia/cadiz/cadiz/` lee, en el bloque más destacado
@@ -95,7 +103,12 @@ peor sitio donde fallar.
 - **Repro:** `apps/web/src/adversario-t09-tranche2.test.ts` → `A-8 · el aviso «de centímetros» solo
   sale donde la carrera es de centímetros`.
 - **Bundle:** `docs/qa/bundles/t09-tranche2/FAILURE.md` § A-8.
-- **Estado:** **abierto** (trinquete puesto).
+- **Estado:** ~~abierto (trinquete puesto)~~ → **corregido en este PR** (`9c6cf5a`). El
+  aviso lo dispara ahora la **carrera de marea medida** sobre los extremos del mes que la propia
+  página publica (`carreraMensualM` en `datos/pagina-puerto.ts`, umbral `CARRERA_MICROMAREAL_M =
+  0,40 m`), no el grade del QC: micromareales son Cabo de Palos, La Manga y Palma (0,19-0,26 m según
+  el mes) y Cádiz —3,43 m de carrera mensual— deja de llevar el cartel. Su `null` estrena la frase
+  que le toca (ver A-11).
 - **Severidad:** **alta para el dominio**. No es un aviso de más: es un aviso que le dice a quien
   marisquea en La Caleta que la marea no importa, en uno de los puertos de España donde más importa.
   Y erosiona el propio aviso donde sí es cierto: un aviso que se ve obviamente falso en una página se
@@ -120,7 +133,10 @@ peor sitio donde fallar.
 - **Repro:** `apps/web/src/adversario-t09-tranche2.test.ts` → `A-9 · la fila de la Luna habla de su
   propia efeméride`.
 - **Bundle:** `docs/qa/bundles/t09-tranche2/FAILURE.md` § A-9 y A-10.
-- **Estado:** **abierto** (trinquete puesto).
+- **Estado:** ~~abierto (trinquete puesto)~~ → **corregido en este PR** (`9c6cf5a`).
+  `cielo.ts` traduce el orto y el ocaso **en par** (`efemeridesDeHorizonte`) y compone cada ausencia
+  desde la fila que la va a mostrar: «La Luna no sale hoy: ya estaba en el cielo al empezar el día y
+  se pone a las 08:57».
 - **Severidad:** media — dato contradictorio en el bloque que la página vende como «lo que hay que
   saber para decidir si habrá luz».
 - **Escalado:** no.
@@ -153,7 +169,12 @@ peor sitio donde fallar.
   horizonte y sobre él a la vez` (cuatro días, dos direcciones; el assert usa **solo lo que la propia
   página publica**: si afirma «bajo el horizonte», el paso superior tiene que ser ≤ 0°).
 - **Bundle:** `docs/qa/bundles/t09-tranche2/FAILURE.md` § A-9 y A-10.
-- **Estado:** **abierto** (trinquete puesto).
+- **Estado:** ~~abierto (trinquete puesto)~~ → **corregido en este PR** (`9c6cf5a`), y
+  **sin tocar el dominio**: la afirmación circumpolar solo se hace cuando queda **demostrada**, que
+  es cuando faltan las **dos** efemérides del día; si falta una y la otra existe, el cuerpo cruzó el
+  horizonte y la página cuenta lo que de verdad pasó. El motivo del DTO (`always-above` /
+  `always-below`, inferido de la altura en mitad de la ventana) sigue siendo correcto para lo que
+  fue escrito —el caso polar— y solo se usa ahí.
 - **Severidad:** media-alta — dato astronómico falso publicado como cierto, ~25 días al año y en
   todas las páginas a la vez (la Luna es la misma para los doce puertos).
 - **Escalado:** no.
@@ -181,7 +202,12 @@ peor sitio donde fallar.
 - **Repro:** `apps/web/src/adversario-t09-tranche2.test.ts` → `A-11 · la nota de calidad no inventa
   una observación`.
 - **Bundle:** `docs/qa/bundles/t09-tranche2/FAILURE.md` § A-11.
-- **Estado:** **abierto** (trinquete puesto).
+- **Estado:** ~~abierto (trinquete puesto)~~ → **corregido en este PR** (`9c6cf5a`). La
+  sección separa los dos `null`: sin RMSE (no hubo observación) las dos filas dicen «no hay
+  observación de este puerto con la que medirlo» y el grade se explica como «predicción sin validar
+  contra observación: no hay mareógrafo con el que comprobarla»; con RMSE y sin p95 se mantiene «sin
+  pleamares medibles en la observación», que ahí es cierto. Y Cádiz gana en la cabecera el aviso que
+  le corresponde (`AvisoSinObservacion.astro`), que es el hueco que dejó A-8.
 - **Severidad:** media — no cambia ninguna hora, pero le miente al único lector que se molestó en
   bajar a comprobar de dónde sale el número.
 - **Escalado:** no.
@@ -197,7 +223,11 @@ peor sitio donde fallar.
 - **Repro:** `apps/web/src/adversario-t09-tranche2.test.ts` → `A-12 · el sitio construido tiene
   página de «no encontrado»`.
 - **Bundle:** `docs/qa/bundles/t09-tranche2/FAILURE.md` § A-12.
-- **Estado:** **abierto** (trinquete puesto).
+- **Estado:** ~~abierto (trinquete puesto)~~ → **corregido en este PR** (`9c6cf5a`):
+  `apps/web/src/pages/404.astro` → `dist/404.html`, con la identidad del sitio, el «No apto para
+  navegación» y las dos salidas que sirven (el índice de regiones y la lista de puertos por región).
+  Se arregla **dentro** de T-09 porque es el artefacto que este PR publica; la configuración del
+  hosting para servirla sigue siendo de T-15.
 - **Severidad:** baja-media, y el más discutible de los cinco: **el arreglo puede vivir fuera de
   T-09** (una `src/pages/404.astro`, o la configuración del hosting en T-15). Lo reporto como
   comportamiento observable del artefacto que este PR publica, no como decisión de dónde ponerlo.
@@ -282,6 +312,28 @@ relojería en CI.
 **5 reproducidos · 19 no reproducidos · 3 juicios de producto (J-3, J-4 y J-1 heredado)** → al ledger
 (`Contexto_Base_SRE/04_Logs_de_Trayectoria/adversarial_ledger.md`).
 
-Los cinco quedan **abiertos con trinquete**: CI sigue verde y cada run imprime el motivo. El día que
-alguien los arregle —aunque sea sin querer— el test dirá «ya no falla, quita el trinquete» y el
-ataque pasará a gate permanente, como los siete de la tranche 1.
+El trinquete hizo exactamente lo que prometía: al llegar el arreglo, los cinco se pusieron en rojo
+con «ya no falla, quita el trinquete», y con eso se retiraron.
+
+## Estado tras la corrección (este PR)
+
+Los cinco hallazgos corregidos en `9c6cf5a`, los cinco trinquetes retirados y los cinco
+cuerpos en verde como gate permanente, junto a los siete de la tranche 1. Los tres juicios de
+producto (J-3, J-4 y J-1 heredado) **siguen abiertos**: son decisiones de producto, no defectos, y
+no se cierran desde aquí.
+
+| Comando | Resultado |
+|---|---|
+| `pnpm lint` (gate anti-slop, con `.astro`) | ✅ verde |
+| `pnpm typecheck` | ✅ verde |
+| `pnpm --filter web check` (`astro check`) | ✅ 43 ficheros, 0 errores |
+| `pnpm --filter web build` | ✅ **33** páginas (32 + `404.html`) |
+| `pnpm test` (monorepo) | ✅ 251/251 — `apps/web` 38/38, **0 skipped, 0 trinquetes** |
+| Build de un día sin orto de Luna (`BUILD_DATE=2026-04-05`) + tests | ✅ la fila «Sale» de Santander dice «La Luna no sale hoy: ya estaba en el cielo al empezar el día y se pone a las 08:57» |
+
+**Carrera de marea del mes, los 12 puertos** (extremos de `getTides`, agosto de 2026), que es lo que
+decide el aviso: Palma 0,19 · Cabo de Palos y La Manga 0,24 · **Málaga 0,65** · Santa Cruz 2,45 ·
+Las Palmas 2,53 · Huelva 3,43 · **Cádiz 3,43** · Vigo 3,57 · A Coruña 3,85 · Santander 4,22 ·
+Bilbao 4,25 m. El umbral (0,40 m) deja los tres micromareales a un lado con holgura y a Málaga
+—el siguiente— al otro; la separación se mantiene mes a mes (comprobado en enero, marzo, junio,
+agosto y noviembre de 2026).
