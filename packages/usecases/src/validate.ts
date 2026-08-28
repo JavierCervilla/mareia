@@ -32,6 +32,9 @@ export const MAX_CURVE_SAMPLES = 6_000;
 
 const MS_PER_DAY = 86_400_000;
 
+/** Un año del almanaque tal y como se escribe en la URL: exactamente cuatro dígitos. */
+const FOUR_DIGIT_YEAR = /^\d{4}$/u;
+
 /**
  * Límites UTC de un día civil, traduciendo el fallo del dominio a un 400.
  *
@@ -114,9 +117,18 @@ export function resolveCurveStep(
  * (su zona horaria, no la del servidor: en Nochevieja no son el mismo año).
  */
 export function resolveAlmanacYear(raw: string | number, nowUtcMs: number, timeZone: string): number {
+  const notAYear = new InvalidQueryError(
+    `El año debe ser un entero de cuatro cifras; llegó ${JSON.stringify(raw)}`,
+  );
+  // La comprobación va sobre **el crudo** y no sobre el `Number`: `Number("0x7ea")`, `Number("+2026")`
+  // y `Number(" 2026 ")` valen todos 2026, así que sin esto tres URLs distintas servirían el mismo
+  // almanaque —y una caché intermedia guardaría tres copias de lo mismo—. Un año son cuatro dígitos.
+  if (typeof raw === "string" && !FOUR_DIGIT_YEAR.test(raw)) {
+    throw notAYear;
+  }
   const year = Number(raw);
   if (!Number.isInteger(year)) {
-    throw new InvalidQueryError(`El año debe ser un entero de cuatro cifras; llegó ${JSON.stringify(raw)}`);
+    throw notAYear;
   }
   const currentYear = Number(
     new Intl.DateTimeFormat("en-US", { timeZone, year: "numeric" }).format(new Date(nowUtcMs)),

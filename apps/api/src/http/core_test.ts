@@ -153,6 +153,10 @@ Deno.test("la validación es ruidosa: cada límite publicado responde 400 dicien
     [`/v1/ports/vigo/tides?from=${DAY}&to=${DAY}&step=0`, /'step'/],
     [`/v1/ports/vigo/tides?from=${DAY}&to=${DAY}&from=2026-08-29`, /repetido/],
     ["/v1/ports/vigo/almanac/2032", /2025 a 2027/],
+    // `Number("0x7ea") === 2026`: sin validar el crudo, esta URL serviría el almanaque de 2026 y
+    // cada caché intermedia guardaría una copia más de la misma respuesta.
+    ["/v1/ports/vigo/almanac/0x7ea", /cuatro cifras/],
+    ["/v1/ports/vigo/almanac/%2B2026", /cuatro cifras/],
     ["/v1/ports/vigo/astro", /'date'/],
     ["/v1/ports/vigo/solunar?date=ayer", /YYYY-MM-DD/],
   ];
