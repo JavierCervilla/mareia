@@ -4,8 +4,31 @@
 // Nota: el scaffolder genera por defecto una config de Next; Mareia no es Next, así que la base es
 // typescript-eslint plano. Los .astro quedan fuera del linter en T-01 (requieren eslint-plugin-astro).
 import importPlugin from "eslint-plugin-import";
+import sonarjs from "eslint-plugin-sonarjs";
 import tseslint from "typescript-eslint";
 import antiSlop from "./eslint.anti-slop.mjs";
+
+// --- Registries de producción: re-armar el gate anti-slop ----------------------------------------
+// El preset relaja sus reglas en `**/*.config.*` («configs» = tooling, código no-de-producción). Los
+// registries `apps/*/src/modules.config.ts` casan con ese glob por su nombre, pero NO son tooling:
+// los importa el composition root de la API y (desde T-09) la página de puerto, y en T-08/T-10/T-11
+// van a crecer con módulos reales. Sin esto, un `any` o un `console.log` colado al registrar un
+// módulo pasaría sin ruido. Se re-arman aquí las cinco reglas que apaga el bloque relajado del
+// preset, con la misma severidad y opciones que tienen en su bloque base (el preset no se toca:
+// debe seguir byte-idéntico a la skill `code-anti-slop`).
+const registriesDeProduccion = [
+  {
+    files: ["**/modules.config.ts"],
+    plugins: { sonarjs },
+    rules: {
+      "no-console": ["error", { allow: ["warn", "error"] }],
+      "@typescript-eslint/no-explicit-any": "error",
+      "sonarjs/cognitive-complexity": ["warn", 15],
+      "sonarjs/no-duplicate-string": ["warn", { threshold: 5 }],
+      "sonarjs/no-identical-functions": "warn",
+    },
+  },
+];
 
 // --- Zona «capas»: el test de arquitectura del contrato de módulos (T-06) ------------------------
 // El dominio es CIEGO a los módulos: si domain-core o usecases pudieran importar un módulo (o
@@ -100,5 +123,6 @@ export default [
   },
   ...tseslint.configs.recommended,
   ...antiSlop,
+  ...registriesDeProduccion,
   ...capas,
 ];
