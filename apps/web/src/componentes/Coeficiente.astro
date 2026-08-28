@@ -1,0 +1,44 @@
+---
+/**
+ * Coeficiente de marea del día: la cifra grande de la cabecera.
+ *
+ * Mide **la marea del día**, no el puerto: sale de la predicción de Brest y de la unidad de altura
+ * de la escala francesa (U = 3,05 m), así que el mismo número vale para los doce puertos. Por eso
+ * el bloque lo dice en su nota, en vez de dejar que se lea como una propiedad del sitio.
+ *
+ * Se enseñan los dos coeficientes del día —los almanaques los publican así— pero la cifra grande es
+ * una sola: la mayor, que es la que marca hasta dónde llega la marea (ver `datos/coeficiente.ts`).
+ */
+import type { TidalCoefficientDay } from "@mareia/domain-core";
+
+import { coeficienteRepresentativo, etiquetaDeCoeficiente } from "../datos/coeficiente.ts";
+
+interface Props {
+  coeficiente: TidalCoefficientDay;
+}
+
+const { coeficiente } = Astro.props;
+
+const valor = coeficienteRepresentativo(coeficiente);
+const detalle = [
+  coeficiente.morning === undefined ? undefined : `mañana ${coeficiente.morning.value}`,
+  coeficiente.afternoon === undefined ? undefined : `tarde ${coeficiente.afternoon.value}`,
+]
+  .filter((tramo) => tramo !== undefined)
+  .join(" · ");
+---
+
+<div class="coeficiente">
+  <span class="coeficiente__circulo">{valor ?? "—"}</span>
+  <span class="coeficiente__texto">
+    <span class="etiqueta etiqueta--corta">Coeficiente</span>
+    {
+      valor === undefined ? (
+        <em class="coeficiente__calificacion">sin pleamar en Brest hoy</em>
+      ) : (
+        <em class="coeficiente__calificacion">{etiquetaDeCoeficiente(valor)}</em>
+      )
+    }
+    <span class="coeficiente__detalle">{detalle}</span>
+  </span>
+</div>

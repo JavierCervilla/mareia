@@ -1,0 +1,45 @@
+---
+/**
+ * Los trozos de página que aportan los **módulos** (contrato `AppModule`, T-06).
+ *
+ * Hoy no renderiza nada: `activeModules` está vacío y ningún módulo declara `pageSections` con UI
+ * (pesca llega en T-10 y meteo en T-11). Lo que sí existe ya es el **hueco** —este componente y su
+ * llamada en la página de puerto—, para que dar de alta un módulo con interfaz siga siendo editar
+ * el registry y añadir su renderizador, sin cirugía en la plantilla.
+ *
+ * Y falla ruidoso: si un módulo declara una sección cuyo `component` nadie sabe renderizar, el
+ * build se rompe nombrándola. La alternativa —ignorarla— publicaría 12 páginas a las que les falta
+ * un trozo sin que nadie se entere hasta que un usuario lo eche de menos.
+ */
+import type { PageSection } from "@mareia/module-contract";
+
+import { RENDERIZADORES_DE_SECCION } from "../secciones.ts";
+
+interface Props {
+  secciones: readonly PageSection[];
+}
+
+const { secciones } = Astro.props;
+
+const sinRenderizador = secciones.filter(
+  (seccion) => RENDERIZADORES_DE_SECCION[seccion.component] === undefined,
+);
+if (sinRenderizador.length > 0) {
+  throw new Error(
+    `Secciones de módulo sin renderizador en apps/web: ` +
+      `${sinRenderizador.map((seccion) => `${seccion.id} (${seccion.component})`).join(", ")}. ` +
+      `Regístralas en src/secciones.ts o quita el módulo del registry.`,
+  );
+}
+---
+
+{
+  secciones.map((seccion) => {
+    const Seccion = RENDERIZADORES_DE_SECCION[seccion.component];
+    return (
+      <section id={seccion.id} class="bloque">
+        <Seccion />
+      </section>
+    );
+  })
+}

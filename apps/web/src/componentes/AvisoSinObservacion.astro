@@ -1,0 +1,44 @@
+---
+/**
+ * Aviso de estación **sin observación**: la predicción está calculada, pero no comprobada.
+ *
+ * Es el otro significado del `hw_time_err_p95_min: null` del QC de T-05, y hasta el pase adversario
+ * de T-09 (hallazgos A-8 y A-11) la página lo confundía con el caso micromareal: a Cádiz, que sube
+ * y baja casi tres metros, le colgaba el cartel de «aquí la marea es de centímetros».
+ *
+ * Lo que falta aquí no es marea, es medida nuestra: sin observaciones del mareógrafo no podemos
+ * decir cuánto se aleja la predicción de la marea real ni con cuántos minutos de error da la hora
+ * de la pleamar. Se dice arriba, con el resto de avisos, porque quien planifica una salida merece
+ * saber antes de leer la tabla que este puerto no tiene el mismo respaldo que los demás.
+ */
+import { metros } from "../formato.ts";
+
+interface Props {
+  puerto: string;
+  /** Carrera de marea del mes publicado, en metros: lo que sí sabemos de este puerto. */
+  carreraMensualM: number;
+}
+
+const { puerto, carreraMensualM } = Astro.props;
+---
+
+<aside class="aviso-sin-observacion">
+  <p class="aviso-sin-observacion__titulo">
+    En {puerto} no hemos podido comprobar la predicción con un mareógrafo
+  </p>
+  <p>
+    Las horas y alturas de abajo son la predicción astronómica de esta estación, calculada con sus
+    constantes armónicas igual que en el resto de puertos. Lo que no tenemos son <strong
+      >observaciones del mareógrafo</strong
+    > de este puerto con las que contrastarla: por eso aquí no publicamos ni el error medio frente a
+    la observación ni el error de hora de la pleamar. Lo que falta no es marea, es medida nuestra:
+    el cálculo dice que este mes hay {metros(carreraMensualM)} entre la bajamar más baja y la
+    pleamar más alta, y no tenemos con qué comprobarlo.
+  </p>
+  <p>
+    Úsala como lo que es, un cálculo sin comprobar, y contrasta con la tabla oficial de tu autoridad
+    hidrográfica antes de una salida. El detalle de qué se validó y con qué está en la <a
+      href="#transparencia">nota de calidad del dato</a
+    >.
+  </p>
+</aside>

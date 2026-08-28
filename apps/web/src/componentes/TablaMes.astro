@@ -1,0 +1,62 @@
+---
+/**
+ * Tabla mensual de mareas y coeficientes: la página del anuario que uno se lleva impresa.
+ *
+ * Es información **consultable** (design-brief §1): cuerpo pequeño, al final de la página y con las
+ * reglas de impresión pensadas para ella —sin partir filas entre hojas, en tinta negra—. En
+ * pantalla sirve para planificar la semana; en papel, para el mes entero sin cobertura.
+ *
+ * Cada fila trae los extremos del día y **los dos coeficientes** de ese día, que es la progresión
+ * mensual: de un vistazo se ve la sucesión vivas → muertas → vivas del ciclo lunar.
+ */
+import type { DiaDelMes } from "../datos/pagina-puerto.ts";
+import { esFinDeSemana, fechaCorta, hora, mesYAno, metros } from "../formato.ts";
+
+interface Props {
+  dias: readonly DiaDelMes[];
+  timezone: string;
+  /** Día que publica la página: se destaca en la tabla. */
+  fechaIso: string;
+  puerto: string;
+}
+
+const { dias, timezone, fechaIso, puerto } = Astro.props;
+
+const NOMBRE = { high: "PM", low: "BM" } as const;
+---
+
+<table class="tabla-mes">
+  <caption>
+    Pleamares (PM), bajamares (BM) y coeficiente de {puerto} en {mesYAno(fechaIso)}, en hora local.
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">Día</th>
+      <th scope="col">Mareas</th>
+      <th scope="col">Coef.</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      dias.map((dia) => (
+        <tr
+          data-hoy={dia.dateIso === fechaIso ? "si" : "no"}
+          data-finde={esFinDeSemana(dia.dateIso) ? "si" : "no"}
+        >
+          <th scope="row">
+            <time datetime={dia.dateIso}>{fechaCorta(dia.dateIso)}</time>
+          </th>
+          <td class="tabla-mes__mareas">
+            {dia.eventos.map((evento, indice) => (
+              <>
+                {indice > 0 && " · "}
+                {NOMBRE[evento.kind]} {hora(evento.timeUtcMs, timezone)} {metros(evento.height_m)}
+              </>
+            ))}
+          </td>
+          <td class="tabla-mes__coeficiente">{dia.coeficientes.join(" / ")}</td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

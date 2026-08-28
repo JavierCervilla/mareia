@@ -1,0 +1,405 @@
+/* =============================================================================
+ * Página de puerto. Hereda el armazón y los rótulos de `almanaque.css`; aquí solo
+ * están los bloques propios: identidad, coeficiente, tabla del día, curva, sol y
+ * luna, tabla mensual y transparencia del dato.
+ *
+ * Orden de lectura (design-brief §1): crítico → contextual → consultable. En móvil
+ * es el orden del DOM; en escritorio, la retícula de dos columnas lo respeta
+ * colocando la tabla del día arriba a la izquierda, que es donde cae la vista.
+ * ========================================================================== */
+
+/* --- Identidad del puerto + coeficiente del día -------------------------- */
+.identidad {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.identidad__nombre {
+  font-family: var(--m-font-display);
+  font-size: var(--m-text-display);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.identidad__meta {
+  font-size: var(--m-text-small);
+  color: var(--m-sub);
+}
+
+.coeficiente {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.coeficiente__circulo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 58px;
+  height: 58px;
+  border: 1.5px solid var(--m-terra);
+  border-radius: 50%;
+  font-family: var(--m-font-display);
+  font-size: var(--m-text-coef);
+  color: var(--m-terra);
+}
+
+.coeficiente__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.coeficiente__calificacion {
+  font-size: var(--m-text-lead);
+  color: var(--m-terra);
+}
+
+.coeficiente__detalle {
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+}
+
+/* --- Avisos del puerto: la marea aquí no es lo que manda, o no está medida --- */
+.aviso-micromareal,
+.aviso-sin-observacion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-left: 3px solid var(--m-terra);
+  padding: 10px 0 10px 14px;
+  font-size: var(--m-text-body);
+}
+
+.aviso-micromareal__titulo,
+.aviso-sin-observacion__titulo {
+  font-weight: 600;
+  color: var(--m-terra);
+}
+
+/* --- Cuerpo: una columna en móvil, dos en escritorio --------------------- */
+.cuerpo {
+  display: grid;
+  /* `minmax(0, 1fr)`: el ancho intrínseco del SVG de la curva (620) haría crecer la pista y
+     desbordaría la página en móvil. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--m-gap-bloque);
+}
+
+/* --- Tabla de mareas del día -------------------------------------------- */
+.tabla-mareas {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-mareas tr {
+  border-top: 1px solid var(--m-rule-soft);
+}
+
+.tabla-mareas tr:first-child {
+  border-top: 1.5px solid var(--m-rule);
+}
+
+.tabla-mareas tr:last-child {
+  border-bottom: 1.5px solid var(--m-rule);
+}
+
+.tabla-mareas th,
+.tabla-mareas td {
+  padding: 11px 0;
+  vertical-align: baseline;
+}
+
+.tabla-mareas th {
+  font-size: var(--m-text-meta);
+  font-weight: 400;
+  letter-spacing: var(--m-track-tide);
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--m-sub);
+}
+
+.tabla-mareas tr[data-tipo="pleamar"] th {
+  color: var(--m-navy);
+}
+
+.tabla-mareas__hora {
+  text-align: center;
+  font-size: var(--m-text-hora);
+  /* Cifras de ancho fijo: en una columna de horas, un «1» estrecho descoloca la lectura. */
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla-mareas__altura {
+  text-align: right;
+  font-size: var(--m-text-lead);
+  font-style: italic;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla-mareas__vacia {
+  padding: 11px 0;
+  color: var(--m-sub);
+}
+
+/* --- Curva de 24 h -------------------------------------------------------- */
+.grafico__lienzo {
+  width: 100%;
+  height: auto;
+}
+
+.grafico__nivel {
+  stroke: var(--m-ink);
+  stroke-width: 0.6;
+  stroke-dasharray: 2 5;
+  opacity: 0.5;
+}
+
+.grafico__trazo {
+  fill: none;
+  stroke: var(--m-navy);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}
+
+.grafico__extremo {
+  fill: var(--m-bg);
+  stroke: var(--m-navy);
+  stroke-width: 1.8;
+}
+
+.grafico__horas {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--m-text-meta);
+  font-style: italic;
+  color: var(--m-sub);
+}
+
+/* --- Sol y luna ----------------------------------------------------------- */
+.astros {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--m-gap-bloque);
+}
+
+.astro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--m-gap-fila);
+}
+
+.astro__cabecera {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.astro__icono {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.astro__icono--sol {
+  stroke: var(--m-terra);
+}
+
+.astro__icono--luna {
+  stroke: var(--m-navy);
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--m-gap-fila);
+  font-size: var(--m-text-body);
+}
+
+.datos__fila {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--m-rule-soft);
+  padding-top: var(--m-gap-fila);
+}
+
+.datos__valor {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.datos__nota {
+  font-size: var(--m-text-meta);
+  font-style: italic;
+  color: var(--m-sub);
+}
+
+/* --- Tabla mensual: lo consultable, pensada para papel ------------------- */
+.tabla-mes {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--m-text-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla-mes caption {
+  padding-bottom: 8px;
+  font-size: var(--m-text-meta);
+  font-style: italic;
+  text-align: left;
+  color: var(--m-sub);
+}
+
+.tabla-mes thead th {
+  border-bottom: 1.5px solid var(--m-rule);
+  padding: 6px 8px 6px 0;
+  font-size: var(--m-text-eyebrow);
+  font-weight: 400;
+  letter-spacing: var(--m-track-eyebrow);
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--m-sub);
+}
+
+.tabla-mes tbody th,
+.tabla-mes tbody td {
+  border-top: 1px solid var(--m-rule-soft);
+  padding: 6px 8px 6px 0;
+  text-align: left;
+  vertical-align: baseline;
+}
+
+.tabla-mes tbody th {
+  font-weight: 400;
+  white-space: nowrap;
+  color: var(--m-sub);
+}
+
+.tabla-mes tr[data-hoy="si"] th,
+.tabla-mes tr[data-hoy="si"] td {
+  font-weight: 600;
+  color: var(--m-ink);
+}
+
+.tabla-mes tr[data-finde="si"] th {
+  font-style: italic;
+}
+
+.tabla-mes__coeficiente {
+  color: var(--m-terra);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tabla-mes__mareas {
+  /* La lista de extremos del día cabe en una celda: horas y alturas, separadas por espacios finos. */
+  line-height: 1.6;
+}
+
+/* --- Transparencia: grade de la estación y método ------------------------ */
+.transparencia {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--m-rule-soft);
+  padding-top: 12px;
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+}
+
+.grade {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.grade__letra {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid var(--m-navy);
+  border-radius: 50%;
+  font-family: var(--m-font-display);
+  font-size: var(--m-text-lead);
+  color: var(--m-navy);
+}
+
+.grade__letra[data-grade="C"] {
+  border-color: var(--m-terra);
+  color: var(--m-terra);
+}
+
+.grade__texto {
+  color: var(--m-ink);
+}
+
+/* --- Escritorio: la retícula de dos columnas del almanaque --------------- */
+@media (min-width: 1100px) {
+  .identidad {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .coeficiente {
+    flex-direction: row-reverse;
+    gap: 16px;
+  }
+
+  .coeficiente__texto {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .coeficiente__circulo {
+    width: 72px;
+    height: 72px;
+    border-width: 2px;
+  }
+
+  .cuerpo {
+    grid-template-columns: minmax(0, 400px) minmax(0, 1fr);
+    grid-template-areas:
+      "mareas grafico"
+      "mareas astros";
+    align-items: start;
+    column-gap: 56px;
+    row-gap: var(--m-gap-bloque);
+  }
+
+  .cuerpo__mareas {
+    grid-area: mareas;
+  }
+
+  .cuerpo__grafico {
+    grid-area: grafico;
+  }
+
+  .cuerpo__astros {
+    grid-area: astros;
+  }
+
+  .astros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 40px;
+  }
+
+  .tabla-mareas th,
+  .tabla-mareas td {
+    padding: 13px 0;
+  }
+
+  .tabla-mes {
+    font-size: var(--m-text-small);
+  }
+}

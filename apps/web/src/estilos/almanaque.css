@@ -1,0 +1,225 @@
+/* =============================================================================
+ * Base del almanaque: lo que comparten TODAS las páginas del portal —reset, ritmo
+ * tipográfico, cabecera de marca, migas, banner de aviso, pie y reglas de impresión.
+ *
+ * Vive en un `.css` y no en un `<style>` de `.astro` a propósito: el linter determinista de UI
+ * (skill `frontend-anti-slop`) escanea `.css` y no `.astro`, así que el CSS que no está aquí es CSS
+ * que nadie audita. La decisión, con su precio (perder el scoping automático de Astro, compensado
+ * con nombres BEM) está escrita en `apps/web/design-brief.md` §8.
+ *
+ * Ningún literal de color ni de fuente: todo sale de `@mareia/ui/tokens.css`.
+ * ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--m-bg);
+  color: var(--m-ink);
+  font-family: var(--m-font-text);
+  font-size: var(--m-text-body);
+  line-height: 1.45;
+}
+
+h1,
+h2,
+h3,
+p,
+figure,
+figcaption {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: var(--m-navy);
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+svg {
+  display: block;
+}
+
+/* --- Armazón: una columna estrecha en móvil, la medida del almanaque en escritorio --- */
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--m-gap-bloque);
+  min-height: 100vh;
+  max-width: var(--m-medida);
+  margin: 0 auto;
+  padding: 18px 20px 32px;
+}
+
+/* --- Rótulos en versalita: el mecanismo de jerarquía del almanaque -------- */
+.etiqueta {
+  font-size: var(--m-text-eyebrow);
+  font-weight: 400;
+  letter-spacing: var(--m-track-label);
+  text-transform: uppercase;
+  color: var(--m-sub);
+}
+
+.etiqueta--corta {
+  letter-spacing: var(--m-track-eyebrow);
+}
+
+/* --- Cabecera de marca + migas ------------------------------------------- */
+/* Marca a la izquierda, fecha del build a la derecha y el filete doble cruzando debajo: la
+   cabecera de una página de anuario. Rejilla y no flex, para que el filete ocupe las dos columnas
+   sin depender de un `flex-basis: 100%` que se lee peor. */
+.marca {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.filete-doble {
+  grid-column: 1 / -1;
+}
+
+.marca__nombre {
+  font-size: var(--m-text-small);
+  font-weight: 600;
+  letter-spacing: var(--m-track-wordmark);
+  text-indent: var(--m-track-wordmark);
+  text-transform: uppercase;
+  color: var(--m-navy);
+  text-decoration: none;
+}
+
+.marca__fecha {
+  font-size: var(--m-text-meta);
+  font-style: italic;
+  color: var(--m-sub);
+}
+
+.filete-doble {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.filete-doble span:first-child {
+  border-top: 2px solid var(--m-rule);
+}
+
+.filete-doble span:last-child {
+  border-top: 1px solid var(--m-rule);
+}
+
+.migas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+}
+
+.migas__separador {
+  color: var(--m-sub);
+}
+
+/* --- Banner permanente: no es decoración, es la advertencia -------------- */
+.aviso-navegacion {
+  border-top: 1.5px solid var(--m-terra);
+  border-bottom: 1.5px solid var(--m-terra);
+  padding: 8px 0;
+  font-size: var(--m-text-meta);
+  color: var(--m-terra);
+  text-align: center;
+}
+
+.aviso-navegacion strong {
+  letter-spacing: var(--m-track-tide);
+  text-transform: uppercase;
+}
+
+/* Solo para lectores de pantalla: el nombre accesible de una tabla cuyo rótulo visible es el <h2>
+   de su sección. No es `display: none`, que la sacaría también del árbol de accesibilidad. */
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- Bloques de la página ------------------------------------------------ */
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bloque__titulo {
+  font-family: var(--m-font-display);
+  font-size: var(--m-text-lead);
+  font-weight: 400;
+}
+
+/* --- Pie: procedencia, licencias y el aviso otra vez --------------------- */
+.pie {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  border-top: 2px solid var(--m-rule);
+  padding-top: 12px;
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+}
+
+.pie__fuentes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* =============================================================================
+ * Impresión. La tabla mensual existe para llevársela en papel al muelle, así que
+ * imprimir NO es un caso degradado: es un caso de uso.
+ * ========================================================================== */
+@media print {
+  /* La paleta de impresión (tinta negra sobre papel blanco) la fija el tema, en
+     `@mareia/ui/tokens.css`: el color vive en la capa de tokens y solo ahí. */
+  .no-imprimir,
+  .migas,
+  .grafico {
+    display: none;
+  }
+
+  .pagina {
+    max-width: none;
+    min-height: 0;
+    padding: 0;
+  }
+
+  /* Una fila de marea partida entre dos hojas es una fila que hay que releer. */
+  tr,
+  .bloque {
+    break-inside: avoid;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}

@@ -56,6 +56,50 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   `/almanac/0x7ea` ya no sirve el de 2026), **`listPorts` ordena de verdad** por región, provincia y
   puerto con `Intl.Collator("es")` —el orden pasa a ser contrato verificado— y el **`--allow-read`
   de la API queda acotado al dataset** en vez de a todo el disco.
+## 2026-08-28 — T-09 · la página de puerto, y el gate de UI que la vigila
+
+- **El portal existe**: 32 páginas estáticas construidas desde el dataset —12 puertos bajo
+  `/mareas/<región>/<provincia>/<puerto>/` más los índices de provincia, región, `/mareas/` y la
+  portada—, con **cero JavaScript de cliente**. La página de puerto trae la tabla de pleamares y
+  bajamares del día, la curva de 24 h en SVG con sus extremos marcados, el coeficiente con su
+  etiqueta de la escala francesa, sol y luna (ortos y ocasos con acimut, los tres crepúsculos, fase
+  e iluminación) y la tabla del mes entero, pensada para imprimirla y llevársela.
+- **Los datos se calculan en build con los casos de uso del API** (`getTides`, `getAstro`,
+  `getPort`): la web no tiene su propia versión de la marea, tiene la misma. El día que publica el
+  sitio es un parámetro (`BUILD_DATE`, o el día UTC del reloj) y se enseña en la página —«datos
+  generados el …»—, así que el build es reproducible y el `dist/` se puede testear contra el
+  dominio. El coeficiente, que todavía no tiene endpoint, se calcula con el dominio y se memoiza:
+  es el mismo para los doce puertos y solo cambia dónde se corta el día civil.
+- **Transparencia en la propia página**: grade de la estación con lo que significa, RMSE, error de
+  hora p95 y su motivo cuando falta, cero hidrográfico y las atribuciones **de esa estación**
+  —cambian de licencia entre puertos—. Y **dos avisos distintos** antes de la tabla, porque son dos
+  cosas distintas: en Cabo de Palos, La Manga y Palma, que la marea astronómica es de centímetros
+  (19-24 cm de carrera al mes) y quien manda es el residuo meteorológico; en Cádiz, que la
+  predicción **no se ha podido comprobar** con un mareógrafo —su marea sube y baja 3,4 m en el mes
+  que publica—.
+- **SEO**: canónicas, `sitemap.xml` con el `lastmod` del build, JSON-LD (`Place` +
+  `BreadcrumbList`, generado del mismo array que pinta las migas) y anclas por sección.
+- **Gate de UI** (deuda de T-01, prerrequisito de esta trayectoria): brief de diseño commiteado
+  antes de la primera vista (`apps/web/design-brief.md`), tokens en OKLCH con su contraste medido
+  —el peor par, 5,4:1—, linter determinista de frontend en CI, `eslint-plugin-astro` (`pnpm lint`
+  cubre ya los `.astro`) y `astro check` en el job web. Se cierran también las deudas menores del
+  verificador de T-01: pin de semgrep y `--frozen` en los `deno task` del CI.
+- El **pase adversario** de la tranche 1 sigue siendo gate: sus siete hallazgos se re-apuntan al
+  sujeto nuevo —la curva se ataca en los 12 puertos; enlaces rotos y landmarks, en las 32 páginas— y
+  la promesa «lo que se lee es lo que se calculó» se comprueba ahora contra los casos de uso.
+- **Y una tranche 2 sobre las 32 páginas ya construidas**, con cinco hallazgos más, corregidos aquí
+  y convertidos en gate permanente:
+  - El aviso de «marea de centímetros» lo decide ahora la **carrera de marea medida** del mes, no el
+    grade del QC. Con el criterio viejo Cádiz leía que su marea no importaba encima de su propia
+    tabla, que ese día marcaba 2,90 m de carrera; era el aviso más grave de la página, en el puerto
+    equivocado.
+  - La **nota de calidad ya no habla de observaciones que no existen**: donde no hubo mareógrafo lo
+    dice con esas palabras, en vez de confundirlo con «no hay pleamares medibles».
+  - **Sol y Luna**: los ~25 días al año en que el orto o el ocaso de la Luna caen fuera del día
+    civil se cuentan bien. La fila «Sale» ya no anunciaba el ocaso, y la página ya no afirma que la
+    Luna «está todo el día bajo el horizonte» junto a la hora de su propio ocaso.
+  - **Página de «no encontrado»** (`404.html`): una URL vieja o mal escrita ya no es un callejón sin
+    salida, sino la portada del portal con el índice de puertos.
 ## 2026-08-28 — T-16 · especificación de widgets de pantalla de inicio (PWA + Capacitor)
 
 - **Spec v1 en `docs/espec-widgets-pwa-capacitor.md`**: widgets iOS (WidgetKit) y Android (Glance)

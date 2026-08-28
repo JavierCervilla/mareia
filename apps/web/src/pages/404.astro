@@ -1,0 +1,57 @@
+---
+/**
+ * Página de «no encontrado»: `404.html`.
+ *
+ * Astro la construye como fichero estático y el servidor la sirve ante cualquier URL que no exista,
+ * así que es la única página que puede recoger a quien llega con un tramo mal escrito, con un
+ * enlace viejo compartido por WhatsApp o con un slug que cambió al ampliar el catálogo. Sin ella,
+ * la respuesta es el 404 crudo del servidor: sin cabecera, sin aviso de navegación y sin una sola
+ * vía de vuelta al portal (hallazgo A-12 del pase adversario de T-09).
+ *
+ * Ofrece las dos salidas que sirven de verdad —el índice de regiones y la lista de puertos por
+ * región— porque el modo de llegada dominante es el buscador y quien cae aquí venía a por **un**
+ * puerto, no a por una disculpa.
+ */
+import Indice from "../componentes/Indice.astro";
+import { cargarCatalogo, puertosDeRegion } from "../datos/catalogo.ts";
+import AlmanaqueLayout from "../layouts/AlmanaqueLayout.astro";
+import { RUTA_MAREAS, rutaPuerto, rutaRegion } from "../rutas.ts";
+
+const regiones = await cargarCatalogo();
+
+const titulo = "Esta página no existe · Mareia";
+const descripcion =
+  "La dirección que has abierto no corresponde a ninguna página de Mareia. Desde aquí puedes " +
+  "volver al índice de regiones y llegar a la página de tu puerto.";
+---
+
+{/* Sin canónica: una página de error no es la versión preferida de nada. */}
+<AlmanaqueLayout titulo={titulo} descripcion={descripcion}>
+  <header class="portada">
+    <h1 class="portada__titulo">Esta página no existe</h1>
+    <p class="portada__entradilla">
+      La dirección que has abierto no corresponde a ninguna página del portal. Puede que el enlace
+      sea antiguo, que falte un tramo de la ruta o que el puerto que buscas todavía no esté en el
+      catálogo. Las páginas de puerto viven en <code>/mareas/región/provincia/puerto/</code>.
+    </p>
+    <p><a href={RUTA_MAREAS}>Ver todas las regiones</a></p>
+  </header>
+
+  {
+    regiones.map((region) => (
+      <section class="grupo" aria-labelledby={`region-${region.slug}`}>
+        <h2 class="etiqueta" id={`region-${region.slug}`}>
+          <a href={rutaRegion(region.slug)}>{region.nombre}</a>
+        </h2>
+        <Indice
+          titulo={`Puertos de ${region.nombre}`}
+          entradas={puertosDeRegion(region).map((puerto) => ({
+            nombre: puerto.name,
+            ruta: rutaPuerto(puerto),
+            meta: puerto.province.name,
+          }))}
+        />
+      </section>
+    ))
+  }
+</AlmanaqueLayout>
