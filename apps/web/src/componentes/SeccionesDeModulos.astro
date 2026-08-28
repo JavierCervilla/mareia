@@ -2,10 +2,14 @@
 /**
  * Los trozos de página que aportan los **módulos** (contrato `AppModule`, T-06).
  *
- * Hoy no renderiza nada: `activeModules` está vacío y ningún módulo declara `pageSections` con UI
- * (pesca llega en T-10 y meteo en T-11). Lo que sí existe ya es el **hueco** —este componente y su
- * llamada en la página de puerto—, para que dar de alta un módulo con interfaz siga siendo editar
- * el registry y añadir su renderizador, sin cirugía en la plantilla.
+ * Desde T-11 renderiza la sección meteo. Lo que no ha cambiado es el mecanismo: dar de alta (o de
+ * baja) un módulo con interfaz es editar el registry y su renderizador, sin cirugía en la
+ * plantilla; con el registry vacío este componente no pinta nada y la página sigue construyendo.
+ *
+ * Cada sección recibe el `contexto` del puerto —slug, nombre y zona horaria— porque una sección de
+ * módulo no puede saber en qué página está de otra manera: el contrato la identifica por una cadena
+ * y no le pasa nada más. Es lo mínimo con lo que un módulo puede pedir su dato al API y escribir
+ * horas en la hora del sitio del que habla.
  *
  * Y falla ruidoso: si un módulo declara una sección cuyo `component` nadie sabe renderizar, el
  * build se rompe nombrándola. La alternativa —ignorarla— publicaría 12 páginas a las que les falta
@@ -13,13 +17,15 @@
  */
 import type { PageSection } from "@mareia/module-contract";
 
+import type { ContextoDeSeccion } from "../secciones.ts";
 import { RENDERIZADORES_DE_SECCION } from "../secciones.ts";
 
 interface Props {
   secciones: readonly PageSection[];
+  contexto: ContextoDeSeccion;
 }
 
-const { secciones } = Astro.props;
+const { secciones, contexto } = Astro.props;
 
 const sinRenderizador = secciones.filter(
   (seccion) => RENDERIZADORES_DE_SECCION[seccion.component] === undefined,
@@ -38,7 +44,7 @@ if (sinRenderizador.length > 0) {
     const Seccion = RENDERIZADORES_DE_SECCION[seccion.component];
     return (
       <section id={seccion.id} class="bloque">
-        <Seccion />
+        <Seccion contexto={contexto} />
       </section>
     );
   })

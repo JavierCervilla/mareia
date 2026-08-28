@@ -1,0 +1,23 @@
+{
+  "port": {
+    "slug": "vigo"
+  },
+  "zone": {
+    "code": "36",
+    "name": "Costa de Pontevedra",
+    "verified": false
+  },
+  "attributions": [
+    {
+      "name": "AEMET — Agencia Estatal de Meteorología",
+      "url": "https://www.aemet.es/es/nota_legal",
+      "license": "Uso condicionado al reconocimiento de AEMET como autora de los datos"
+    }
+  ],
+  "credential": {
+    "status": "missing",
+    "message": "AEMET no está configurada en esta instancia (falta AEMET_API_KEY): el boletín oficial no se publica"
+  },
+  "status": "unavailable",
+  "reason": "AEMET no está configurada en esta instancia: falta la variable de entorno AEMET_API_KEY"
+}

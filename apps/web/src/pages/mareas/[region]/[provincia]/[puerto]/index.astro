@@ -132,7 +132,10 @@ const jsonLd = grafo([
     </div>
   </div>
 
-  <SeccionesDeModulos secciones={sectionsForPort({ slug: port.slug })} />
+  <SeccionesDeModulos
+    secciones={sectionsForPort({ slug: port.slug })}
+    contexto={{ slug: port.slug, nombre: port.name, zonaHoraria: port.timezone }}
+  />
 
   <section class="bloque" id="tabla-mensual" aria-labelledby="titulo-mes">
     <h2 class="bloque__titulo" id="titulo-mes">Mareas de {mesYAno(datos.fechaIso)}</h2>

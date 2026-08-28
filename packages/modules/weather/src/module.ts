@@ -12,7 +12,7 @@
  *   - `GET .../bulletin?port=<slug>` — boletín costero de AEMET para la zona del puerto.
  */
 
-import type { AppModule, Attribution, Health } from "@mareia/module-contract";
+import type { AppModule, Health } from "@mareia/module-contract";
 // @ts-types="@types/express"
 import express, { type Request, type RequestHandler, type Response, type Router } from "express";
 
@@ -20,17 +20,14 @@ import { AEMET_ATTRIBUTION, fetchCoastalBulletin } from "./aemet.ts";
 import type { AemetKeyState } from "./aemet-key.ts";
 import { inspectAemetKey, needsHumanAction } from "./aemet-key.ts";
 import type { WeatherCache } from "./cache.ts";
-import type { Cell } from "./cell.ts";
 import { cellKey, toCell } from "./cell.ts";
-import type { ForecastConditions, MarineConditions } from "./open-meteo.ts";
-import { OPEN_METEO_ATTRIBUTION, fetchForecast, fetchMarine } from "./open-meteo.ts";
+import { WEATHER_ATTRIBUTIONS, WEATHER_MODULE_VERSION } from "./meta.ts";
+import { fetchForecast, fetchMarine } from "./open-meteo.ts";
+import type { BulletinData, BulletinPayload, PortLocation, WeatherPayload } from "./payload.ts";
 import type { SourceReport } from "./source.ts";
 import { resolveSource } from "./source.ts";
-import type { CoastalZone } from "./zones.ts";
+import { WEATHER_PAGE_SECTIONS } from "./ui.ts";
 import { zoneForPort } from "./zones.ts";
-
-/** Versión del módulo, publicada en `/v1/modules`. Debe ir a la par con su `package.json`. */
-export const WEATHER_MODULE_VERSION = "0.1.0";
 
 /**
  * Cuánto tiempo se considera fresco cada dato. Salen de la cadencia real de las fuentes: los
@@ -46,13 +43,6 @@ export const BULLETIN_TTL_SECONDS = 21_600;
  * un dato caducado todavía se sirve (marcado `stale`) si la fuente no responde.
  */
 const RETAIN_FACTOR = 4;
-
-/** Lo mínimo que el módulo necesita saber de un puerto: dónde está. */
-export interface PortLocation {
-  readonly slug: string;
-  readonly lat: number;
-  readonly lon: number;
-}
 
 /**
  * Catálogo de puertos visto por el módulo. Es a propósito **más estrecho** que el `PortRepository`
@@ -79,65 +69,6 @@ export interface WeatherModuleDeps {
     readonly aemet?: string | undefined;
   };
 }
-
-/** Respuesta de `GET .../weather?port=<slug>`. */
-export interface WeatherPayload {
-  readonly port: PortLocation;
-  /**
-   * Celda de la malla a la que corresponde el dato: dice a qué punto se le pidió, no solo qué se
-   * pidió. **Cuándo** no va aquí sino en cada fuente (`fetchedAt`, `ageSeconds`, `stale` y el
-   * `observedAt` del dato): marine y forecast se refrescan por separado y pueden traer instantes
-   * distintos, así que un único instante en la raíz solo podría ser verdad para una de las dos.
-   */
-  readonly cell: Cell;
-  /** `partial` = una de las dos fuentes respondió; `unavailable` = ninguna. */
-  readonly status: "ok" | "partial" | "unavailable";
-  readonly marine: SourceReport<MarineConditions>;
-  readonly forecast: SourceReport<ForecastConditions>;
-  readonly attributions: readonly Attribution[];
-}
-
-/** Datos del boletín, cuando AEMET responde. */
-export interface BulletinData {
-  readonly issuedAt: string | null;
-  readonly document: unknown;
-}
-
-/**
- * Respuesta de `GET .../bulletin?port=<slug>`.
- *
- * Aquí el estado va **en la raíz** y no anidado como en `weather`: hay una sola fuente, y quien
- * consume el boletín pregunta antes que nada si lo hay. Sin clave de AEMET esto es
- * `{"status": "unavailable", "reason": "..."}` con HTTP 200: la instancia funciona, lo que falta es
- * una credencial, y eso no es un error del cliente ni una caída del servidor.
- */
-export type BulletinPayload = {
-  readonly port: { readonly slug: string };
-  /** `null` si el puerto no tiene zona marítima asignada en `aemet-zones.json`. */
-  readonly zone: CoastalZone | null;
-  readonly attributions: readonly Attribution[];
-  /**
-   * Estado de la credencial de AEMET. Viaja siempre, también cuando el boletín sale bien: quien
-   * opera la instancia se entera de que la clave muere **antes** de que empiece a fallar, y quien
-   * consume el API puede decir por qué dejó de haber boletín.
-   */
-  readonly credential: AemetKeyState;
-} & (
-  | {
-      readonly status: "ok";
-      readonly fetchedAt: string;
-      readonly ageSeconds: number;
-      readonly stale: boolean;
-      readonly issuedAt: string | null;
-      readonly document: unknown;
-    }
-  | { readonly status: "unavailable"; readonly reason: string }
-);
-
-const ATTRIBUTIONS: readonly [Attribution, ...Attribution[]] = [
-  OPEN_METEO_ATTRIBUTION,
-  AEMET_ATTRIBUTION,
-];
 
 /** Resultado de un handler antes de convertirse en respuesta HTTP. */
 interface HttpResult {
@@ -286,7 +217,14 @@ function weatherHandler(deps: WeatherModuleDeps, health: HealthTracker): Request
     health.record("forecast", forecast);
 
     const status = aggregateStatus([marine, forecast]);
-    const body: WeatherPayload = { port, cell, status, marine, forecast, attributions: ATTRIBUTIONS };
+    const body: WeatherPayload = {
+      port,
+      cell,
+      status,
+      marine,
+      forecast,
+      attributions: WEATHER_ATTRIBUTIONS,
+    };
     // Solo se deja cachear fuera la respuesta entera: congelar una degradada en el CDN es alargar
     // la avería más allá de lo que dure.
     return status === "ok" ? { status: 200, body, maxAgeSeconds: 300 } : { status: 200, body };
@@ -370,7 +308,11 @@ export function createWeatherModule(deps: WeatherModuleDeps): AppModule<Router> 
   return {
     id: "weather",
     version: WEATHER_MODULE_VERSION,
-    attributions: ATTRIBUTIONS,
+    attributions: WEATHER_ATTRIBUTIONS,
+    // La sección de la página de puerto se declara aquí también —y no solo en `WEATHER_UI_MODULE`—
+    // para que el módulo montado en la API publique la misma cara que la web renderiza: si algún
+    // día `/v1/modules` expone las secciones, no puede contar una historia distinta.
+    pageSections: WEATHER_PAGE_SECTIONS,
     api: () => {
       const router: Router = express.Router();
       router.get("/weather", weatherHandler(deps, health));

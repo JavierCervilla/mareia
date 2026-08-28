@@ -1,0 +1,28 @@
+{
+  "port": {
+    "slug": "vigo"
+  },
+  "zone": {
+    "code": "36",
+    "name": "Costa de Pontevedra",
+    "verified": false
+  },
+  "attributions": [
+    {
+      "name": "AEMET — Agencia Estatal de Meteorología",
+      "url": "https://www.aemet.es/es/nota_legal",
+      "license": "Uso condicionado al reconocimiento de AEMET como autora de los datos"
+    }
+  ],
+  "credential": {
+    "status": "expired",
+    "expiresAtMs": 1784505600000,
+    "expiresAt": "2026-07-20T00:00:00.000Z",
+    "daysLeft": -40,
+    "source": "jwt-exp",
+    "thresholdDays": 0,
+    "message": "La AEMET_API_KEY caducó hace 40 día(s) (2026-07-20T00:00:00.000Z, según su propio campo `exp`). Renuévala en opendata.aemet.es/centrodedescargas/altaUsuario y actualiza el secreto."
+  },
+  "status": "unavailable",
+  "reason": "AEMET boletín costero no respondió: HTTP 401"
+}

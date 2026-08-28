@@ -216,3 +216,68 @@ test("cada página de puerto declara canónica y JSON-LD parseable", async (t) =
     );
   }
 });
+
+// --- La sección meteo en el HTML publicado (T-11) ------------------------------------------------
+// Lo que se comprueba aquí es la mitad estructural de ADR-01: que el dato que caduca **no está
+// dentro del HTML**. Si algún día alguien decide hornear la meteo en build, estos tests se ponen
+// rojos, que es exactamente lo que tienen que hacer.
+
+test("cada página de puerto trae la sección meteo anclada a su puerto y a su zona horaria", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  for (const puerto of await cargarPuertos()) {
+    const html = paginaDe(rutaPuerto(puerto));
+    assert.match(html, /<section id="meteo" class="bloque">/u, `${puerto.slug}: sin sección meteo`);
+    assert.match(
+      html,
+      new RegExp(`data-meteo-puerto="${puerto.slug}" data-meteo-zona="${puerto.timezone}"`, "u"),
+      `${puerto.slug}: la isla no sabe de qué puerto ni en qué hora habla`,
+    );
+  }
+});
+
+test("el HTML construido no lleva NI UNA magnitud meteorológica dentro (ADR-01)", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  // Unidades que solo puede escribir la sección meteo. Si aparecen en el HTML es que el dato se
+  // horneó en build, y entonces envejece hasta el siguiente rebuild sin poder decir cuánto.
+  const unidadesDeMeteo = /\d[\d,]*\s*(km\/h|hPa|°C)\b|Índice UV|Mar de fondo|Temperatura del agua/u;
+  for (const puerto of await cargarPuertos()) {
+    const html = paginaDe(rutaPuerto(puerto));
+    assert.doesNotMatch(html, unidadesDeMeteo, `${puerto.slug}: hay meteo horneada en el HTML`);
+  }
+});
+
+test("sin JavaScript, la sección meteo explica el hueco en vez de quedarse muda", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  const html = paginaDe(rutaPuerto((await cargarPuertos())[0]!));
+
+  assert.match(html, /El estado del mar todavía no ha llegado/u);
+  assert.match(html, /o tu navegador no ejecuta JavaScript/u);
+  // Y las atribuciones no dependen de que la petición salga: son HTML estático.
+  assert.match(html, /<a href="https:\/\/open-meteo\.com\/">Open-Meteo<\/a> · CC-BY-4\.0/u);
+  assert.match(html, /AEMET — Agencia Estatal de Meteorología<\/a> · Uso condicionado/u);
+});
+
+test("el único JavaScript de una página de puerto es la isla meteo: el core sigue sin JS", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  const html = paginaDe(rutaPuerto((await cargarPuertos())[0]!));
+  const scripts = [...html.matchAll(/<script[^>]*>/gu)].map((encontrado) => encontrado[0]);
+
+  assert.equal(scripts.length, 2, `scripts inesperados en la página: ${scripts.join(" ")}`);
+  assert.match(scripts[0] ?? "", /type="application\/ld\+json"/u, "el JSON-LD son datos, no código");
+  assert.match(scripts[1] ?? "", /src="\/_astro\/Meteo\.astro[^"]*\.js"/u);
+
+  // Los índices geográficos no tienen módulos: siguen con cero JavaScript.
+  assert.equal([...paginaDe(RUTA_MAREAS).matchAll(/<script[^>]*src=/gu)].length, 0);
+});

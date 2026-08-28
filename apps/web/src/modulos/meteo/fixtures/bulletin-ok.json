@@ -1,0 +1,53 @@
+{
+  "port": {
+    "slug": "vigo"
+  },
+  "zone": {
+    "code": "36",
+    "name": "Costa de Pontevedra",
+    "verified": false
+  },
+  "attributions": [
+    {
+      "name": "AEMET — Agencia Estatal de Meteorología",
+      "url": "https://www.aemet.es/es/nota_legal",
+      "license": "Uso condicionado al reconocimiento de AEMET como autora de los datos"
+    }
+  ],
+  "credential": {
+    "status": "valid",
+    "expiresAtMs": 1795132800000,
+    "expiresAt": "2026-11-20T00:00:00.000Z",
+    "daysLeft": 83,
+    "source": "jwt-exp",
+    "message": "La AEMET_API_KEY es válida 83 día(s) más (2026-11-20T00:00:00.000Z, según su propio campo `exp`)."
+  },
+  "status": "ok",
+  "fetchedAt": "2026-08-28T17:49:00Z",
+  "ageSeconds": 0,
+  "stale": false,
+  "issuedAt": "2026-08-28T11:00:00Z",
+  "document": [
+    {
+      "origen": {
+        "productor": "Agencia Estatal de Meteorología - AEMET. Gobierno de España",
+        "web": "https://www.aemet.es",
+        "enlace": "https://www.aemet.es/es/eltiempo/prediccion/maritima",
+        "language": "es",
+        "copyright": "© AEMET. Autorizado el uso de la información y su reproducción citando a AEMET como autora de la misma.",
+        "notaLegal": "https://www.aemet.es/es/nota_legal"
+      },
+      "elaborado": "2026-08-28T11:00:00Z",
+      "nombre": "Costa de Pontevedra",
+      "aviso": {
+        "texto": "Sin avisos costeros en vigor para esta zona."
+      },
+      "situacion": {
+        "texto": "Altas presiones al noroeste de la Península. Flujo del noroeste moderado en la costa gallega."
+      },
+      "prediccion": {
+        "texto": "Viento del noroeste fuerza 4 a 5, arreciando a 5 a 6 por la tarde en las Rías Bajas. Mar rizada o marejada, aumentando a marejadilla o marejada. Mar de fondo del noroeste de 1 a 2 metros. Visibilidad buena, localmente regular por bancos de niebla matinales."
+      }
+    }
+  ]
+}

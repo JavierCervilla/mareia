@@ -4,15 +4,18 @@ import {
   type PortRef,
   selectPageSections,
 } from "@mareia/module-contract";
+import { WEATHER_UI_MODULE } from "@mareia/module-weather/ui";
 
 /**
  * Registry de módulos activos en el portal. **Dar de alta o de baja un módulo es editar este array
  * y nada más**: sus `pageSections` aparecen (o desaparecen) de la página de puerto.
  *
- * Vacío a propósito: la web compila y se construye sin ningún módulo (test de arquitectura en
- * `modules.config.test.ts`). Los módulos reales llegan en T-10 (pesca) y T-11 (meteo).
+ * `WEATHER_UI_MODULE` es el módulo meteo **visto desde la UI**: identidad, atribuciones y secciones,
+ * sin su parte servidor (que necesita `fetch`, caché KV y la clave de AEMET, y el build de la web no
+ * tiene ninguna de las tres). Borrar esa línea deja la página sin sección meteo y **sin JavaScript
+ * de cliente**, y sigue construyendo: es lo que comprueba `modules.config.test.ts`.
  */
-export const activeModules: readonly AppModule[] = [];
+export const activeModules: readonly AppModule[] = [WEATHER_UI_MODULE];
 
 /**
  * Secciones que la página de un puerto debe renderizar, ordenadas por `order`. El layout que las

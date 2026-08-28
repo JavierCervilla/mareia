@@ -13,14 +13,13 @@ import { fileURLToPath } from "node:url";
 import express from "express";
 
 import { createMemoryWeatherCache } from "../cache.ts";
+import { WEATHER_MODULE_VERSION } from "../meta.ts";
 import {
-  WEATHER_MODULE_VERSION,
   createWeatherModule,
-  type BulletinPayload,
   type PortLocationRepository,
   type WeatherModuleDeps,
-  type WeatherPayload,
 } from "../module.ts";
+import type { BulletinPayload, WeatherPayload } from "../payload.ts";
 import type { SourceReport } from "../source.ts";
 import { FORECAST_FIXTURE, MARINE_FIXTURE, fakeClock, fetchSpy, type FetchSpy } from "./fakes.ts";
 
