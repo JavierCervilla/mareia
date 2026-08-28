@@ -34,6 +34,10 @@
 - [ ] T-13 · ~200–300 puertos con grade ≥ B o flag «estimado»
 - [ ] T-14 · Metodología pública + QC navegable + dataset CC-BY + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario
+      (incluye cerrar el peldaño 1 del gate de seguridad sobre lo que hoy no mira: `actionlint`
+      sobre `.github/workflows/` —es el único que lee los `run:` embebidos— y `shellcheck -S error`
+      sobre los 6 `.sh` del repo; y el healthcheck del API, que queda fuera del enrutado público
+      porque solo se publica `/v1/*`)
 
 ## Fase 2 (rumbo, sin comprometer)
 

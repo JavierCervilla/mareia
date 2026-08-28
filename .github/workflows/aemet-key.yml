@@ -27,6 +27,9 @@ jobs:
         id: check
         env:
           AEMET_API_KEY: ${{ secrets.AEMET_API_KEY }}
+          # Deno colorea su stderr aunque haya CI: sin esto, el error que acaba dentro del issue
+          # llega lleno de escapes ANSI y quien lo lee ve basura donde debería ver la avería.
+          NO_COLOR: "1"
         run: |
           set +e
           salida="$(deno run --allow-env=AEMET_API_KEY scripts/check-aemet-key.ts 2>&1)"
@@ -39,7 +42,11 @@ jobs:
           # este workflow existe para impedir, una capa más abajo. Códigos esperados: 0 (nada que
           # hacer) y 1 (hace falta un humano); cualquier otro, o unas líneas maquinales que no
           # llegaron, significa que quien tenía que avisar es el que está averiado.
-          if [ -z "$estado" ] || { [ "$codigo" -ne 0 ] && [ "$codigo" -ne 1 ]; }; then
+          # La tercera forma de romperse es morir ENTRE dos líneas maquinales: el estado llega y el
+          # aviso no. Estrecha, pero de la misma familia, y la guarda cuesta una línea.
+          sin_aviso=""
+          case "$estado" in valid | missing | "") ;; *) [ -z "$aviso" ] && sin_aviso="si" ;; esac
+          if [ -z "$estado" ] || [ -n "$sin_aviso" ] || { [ "$codigo" -ne 0 ] && [ "$codigo" -ne 1 ]; }; then
             estado="roto"
             aviso="aemet:comprobador-roto:$(date -u +%F)"
           fi

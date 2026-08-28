@@ -48,7 +48,10 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   **lleva la fecha de caducidad de la clave concreta**, así que una clave renovada estrena sus
   avisos en lugar de heredar el silencio de los del ciclo anterior; el issue, además, **se cierra
   solo** en cuanto el secreto vuelve a tener una clave válida. Que la clave *falte* no cierra nada:
-  un secreto borrado por accidente apagaría justo la alarma que lo delata.
+  un secreto borrado por accidente apagaría justo la alarma que lo delata. Y si **el comprobador
+  mismo** se avería —una permisión corta, un import roto, el binario ausente—, eso no pasa por
+  silencio: abre su propio aviso, sin afirmar que la clave esté mal, y **el job sale en rojo**. Un
+  canal de alarma que se rompe en verde no es un canal.
 - Arrastrados de T-07: el **año del almanaque se valida sobre el crudo** (`/^\d{4}$/`, así que
   `/almanac/0x7ea` ya no sirve el de 2026), **`listPorts` ordena de verdad** por región, provincia y
   puerto con `Intl.Collator("es")` —el orden pasa a ser contrato verificado— y el **`--allow-read`
