@@ -1,6 +1,9 @@
 import type { AppModule } from "@mareia/module-contract";
+import { createWeatherModule } from "@mareia/module-weather";
 // @ts-types="@types/express"
 import type { Router } from "express";
+
+import { createWeatherDeps } from "./weather-deps.ts";
 
 /**
  * Un módulo visto por esta API: el contrato es agnóstico del framework HTTP (`AppModule<TRouter>`)
@@ -14,7 +17,8 @@ export type ApiModule = AppModule<Router>;
  * nada más**: el composition root (`src/http/server.ts`) monta cada `api()` bajo
  * `/v1/modules/<id>` y los publica en `GET /v1/modules`.
  *
- * Vacío a propósito: el core funciona sin ningún módulo (test de arquitectura en
- * `src/http/modules_test.ts`). Los módulos reales llegan en T-08 (weather) y T-10/T-11.
+ * Cada módulo se construye con sus dependencias ya resueltas (`create<X>Deps()`), que es donde vive
+ * todo lo que el módulo no debe saber: el entorno, el disco, el runtime. Aquí solo se declara
+ * **quién está activo**.
  */
-export const activeModules: readonly ApiModule[] = [];
+export const activeModules: readonly ApiModule[] = [createWeatherModule(createWeatherDeps())];

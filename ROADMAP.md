@@ -18,7 +18,9 @@
       (Portus no publica constantes por vía automatizable; ver el informe QC)
 - [x] T-07 · Endpoints core (`tides`, `astro`, `solunar`, `almanac`, `ports`) con contract tests
       (el de coeficiente se añade cuando merjee T-04)
-- [ ] T-08 · Módulo weather backend (Open-Meteo + AEMET + caché Deno KV)
+- [x] T-08 · Módulo weather backend (Open-Meteo + AEMET + caché Deno KV)
+      (los códigos de zona costera de AEMET quedan sin verificar hasta que haya `AEMET_API_KEY`;
+      la caducidad de esa clave se vigila sola y avisa a 21, 7 y 1 días)
 
 ## Hito 3 — Portal (10 puertos piloto)
 
@@ -34,6 +36,10 @@
 - [ ] T-13 · ~200–300 puertos con grade ≥ B o flag «estimado»
 - [ ] T-14 · Metodología pública + QC navegable + dataset CC-BY + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario
+      (incluye cerrar el peldaño 1 del gate de seguridad sobre lo que hoy no mira: `actionlint`
+      sobre `.github/workflows/` —es el único que lee los `run:` embebidos— y `shellcheck -S error`
+      sobre los 6 `.sh` del repo; y el healthcheck del API, que queda fuera del enrutado público
+      porque solo se publica `/v1/*`)
 
 ## Fase 2 (rumbo, sin comprometer)
 

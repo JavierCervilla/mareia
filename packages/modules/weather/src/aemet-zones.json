@@ -1,0 +1,38 @@
+{
+  "schema": "aemet-costera/v1",
+  "endpoint": "/prediccion/maritima/costera/costa/{code}",
+  "note": "Mapeo puerto → zona del boletín marítimo costero de AEMET. El parámetro {code} de AEMET es el código INE de la provincia costera; los códigos de aquí son esos códigos INE y están marcados verified:false porque el catálogo de zonas de AEMET Open Data solo se puede consultar con una API key y este repositorio no la tiene. Ver el TODO de aemet.ts: al conseguir una clave se comprueba zona a zona y se pone verified:true (o se corrige el código) sin tocar código.",
+  "zones": [
+    { "code": "11", "name": "Costa de Cádiz", "verified": false, "ports": ["cadiz"] },
+    { "code": "21", "name": "Costa de Huelva", "verified": false, "ports": ["huelva"] },
+    { "code": "29", "name": "Costa de Málaga", "verified": false, "ports": ["malaga"] },
+    {
+      "code": "35",
+      "name": "Costa de Las Palmas",
+      "verified": false,
+      "ports": ["las-palmas-de-gran-canaria"]
+    },
+    {
+      "code": "38",
+      "name": "Costa de Santa Cruz de Tenerife",
+      "verified": false,
+      "ports": ["santa-cruz-de-tenerife"]
+    },
+    { "code": "39", "name": "Costa de Cantabria", "verified": false, "ports": ["santander"] },
+    { "code": "15", "name": "Costa de A Coruña", "verified": false, "ports": ["a-coruna"] },
+    { "code": "36", "name": "Costa de Pontevedra", "verified": false, "ports": ["vigo"] },
+    {
+      "code": "07",
+      "name": "Costa de Illes Balears",
+      "verified": false,
+      "ports": ["palma-de-mallorca"]
+    },
+    { "code": "48", "name": "Costa de Bizkaia", "verified": false, "ports": ["bilbao"] },
+    {
+      "code": "30",
+      "name": "Costa de Murcia",
+      "verified": false,
+      "ports": ["cabo-de-palos", "la-manga-del-mar-menor"]
+    }
+  ]
+}

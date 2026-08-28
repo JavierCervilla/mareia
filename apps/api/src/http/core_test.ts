@@ -79,6 +79,22 @@ Deno.test("GET /v1/ports sirve el catálogo cacheable, sin filtrar dónde vive e
 
     const ports = body["ports"] as readonly Record<string, unknown>[];
     assertEquals(ports.length, 12);
+    // El orden es parte del contrato: región, provincia y puerto, alfabético en español. Quien
+    // pinte el catálogo (la web, un cliente) no tiene que volver a ordenarlo ni ponerse de acuerdo.
+    assertEquals(ports.map((port) => port["slug"]), [
+      "cadiz",
+      "huelva",
+      "malaga",
+      "las-palmas-de-gran-canaria",
+      "santa-cruz-de-tenerife",
+      "santander",
+      "a-coruna",
+      "vigo",
+      "palma-de-mallorca",
+      "bilbao",
+      "cabo-de-palos",
+      "la-manga-del-mar-menor",
+    ]);
     const vigo = ports.find((port) => port["slug"] === "vigo");
     assertEquals(vigo?.["name"], "Vigo");
     assertEquals(vigo?.["timezone"], "Europe/Madrid");
@@ -153,6 +169,10 @@ Deno.test("la validación es ruidosa: cada límite publicado responde 400 dicien
     [`/v1/ports/vigo/tides?from=${DAY}&to=${DAY}&step=0`, /'step'/],
     [`/v1/ports/vigo/tides?from=${DAY}&to=${DAY}&from=2026-08-29`, /repetido/],
     ["/v1/ports/vigo/almanac/2032", /2025 a 2027/],
+    // `Number("0x7ea") === 2026`: sin validar el crudo, esta URL serviría el almanaque de 2026 y
+    // cada caché intermedia guardaría una copia más de la misma respuesta.
+    ["/v1/ports/vigo/almanac/0x7ea", /cuatro cifras/],
+    ["/v1/ports/vigo/almanac/%2B2026", /cuatro cifras/],
     ["/v1/ports/vigo/astro", /'date'/],
     ["/v1/ports/vigo/solunar?date=ayer", /YYYY-MM-DD/],
   ];

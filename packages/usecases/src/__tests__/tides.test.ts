@@ -91,3 +91,17 @@ test("el almanaque solo sirve el año en curso ±1, contado en la zona del puert
     await assert.rejects(() => getAlmanac(deps, { slug: "vigo", year }), InvalidQueryError);
   }
 });
+
+test("el año se valida sobre el crudo: ni hexadecimales, ni signos, ni espacios", async () => {
+  const deps = fakeDeps();
+  // Para `Number()` todos estos valen 2026. Si pasaran, la misma respuesta viviría en un puñado de
+  // URLs distintas y cada caché intermedia guardaría su propia copia.
+  for (const year of ["0x7ea", "+2026", " 2026", "2026 ", "2026.0", "2_026", "2026e0", ""]) {
+    await assert.rejects(
+      () => getAlmanac(deps, { slug: "vigo", year }),
+      InvalidQueryError,
+      `'${year}' no debería servir un almanaque`,
+    );
+  }
+  assert.equal((await getAlmanac(deps, { slug: "vigo", year: "2026" })).year, 2026);
+});

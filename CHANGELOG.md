@@ -2,6 +2,60 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-28 — T-08 · el módulo weather, primer módulo real del registry
+
+- **`GET /v1/modules/weather/weather?port=<slug>`**: estado del mar (olas total/wind/swell con
+  altura, dirección y periodo, y temperatura del agua) y de la atmósfera (viento, rachas, presión,
+  visibilidad, UV) desde **Open-Meteo**, sin API key. Cada fuente viaja con su `fetchedAt`, su
+  `ageSeconds` y su `stale`, y la respuesta dice de qué **celda** habla (el *cuándo* va en cada
+  fuente: las dos se refrescan por separado y pueden traer instantes distintos).
+- **`GET /v1/modules/weather/bulletin?port=<slug>`**: boletín marítimo costero de **AEMET** para la
+  zona del puerto (patrón de dos llamadas, con la clave en cabecera y nunca en la URL). El documento
+  se pasa tal cual y se decodifica con el charset que declare AEMET (ISO-8859-15 en buena parte de
+  sus productos). Los códigos de zona son los INE de provincia y van marcados `verified: false`:
+  comprobarlos exige una API key, y cuando la haya será un cambio de datos, no de código.
+- **Degradar en vez de romper**, con tres escalones: caché fresca (cero red) → red → caché caducada
+  marcada `stale`. Solo cuando no hay ninguna de las tres se contesta `unavailable` con el motivo, y
+  siempre con HTTP 200: un dato de hace tres horas sirve para decidir si sales a navegar; un 500,
+  no. **Sin `AEMET_API_KEY` la instancia funciona**: el boletín dice que falta la credencial.
+- **Caché por celda de 0,1°** sobre **Deno KV**, con TTL por fuente (1 h mar, 30 min atmósfera, 6 h
+  boletín) y una ventana de retención de 4 TTL para poder degradar. Dos peticiones seguidas del
+  mismo puerto salen a la red **una sola vez**, y la caché sobrevive al reinicio del proceso. Si KV
+  no está disponible, degrada a memoria. La clave es **tipo + celda, sin instante**: una clave que
+  rotara con la hora dejaría el dato guardado ilegible justo en el momento en que la fuente se cae,
+  que es para lo que se guarda.
+- **Las atribuciones viajan solas**: `/v1/modules` publica Open-Meteo (CC-BY 4.0) y AEMET, y además
+  van en cada respuesta. El contrato de T-06 no deja compilar un módulo sin ellas.
+- Solo se deja cachear fuera (`Cache-Control`) lo que salió entero; una respuesta degradada va con
+  `no-store` para no congelar la avería en un CDN.
+- **Cero red en CI**: el `fetch` entra inyectado en los dos adaptadores y los fixtures son capturas
+  reales de las APIs. 57 tests del módulo y 5 de integración en la API, incluido el de oro (segunda
+  llamada a la misma celda → 0 peticiones), el de degradación sin clave y los dos que defienden la
+  ventana de retención: un dato de un minuto cruzando la hora en punto se sirve con el upstream
+  caído, y pasado el TTL se sirve marcado `stale` mientras dure la retención.
+- **La caducidad de la clave de AEMET se lee y se avisa antes de que muerda**. AEMET emite claves
+  con tres meses de vida, y las emitidas sin fecha dejan de valer el **15-10-2026**; el alta lleva
+  reCAPTCHA y dos correos, así que renovarla es un trámite humano y lo único que puede hacer el
+  software es que la fecha no llegue por sorpresa. `inspectAemetKey` lee el `exp` del propio JWT
+  **sin gastar una petición**; una clave sin `exp` no se da por eterna, hereda la fecha anunciada, y
+  una que no se deja leer se declara ilegible en vez de inventarle un plazo. El estado viaja en
+  `/bulletin` y entra en el healthcheck —una clave que caduca en tres días es un problema hoy, no el
+  día del 401— y un workflow diario abre el aviso en el repositorio con los pasos exactos de
+  renovación. Los avisos van **por escalones (21, 7 y 1 días)**, uno por escalón y no uno al día: un
+  aviso que aparece cada mañana durante tres semanas se deja de leer, que es justo lo contrario de
+  lo que se busca. **Ya caducada sí insiste** —un aviso al día mientras el boletín siga roto—,
+  porque ahí el coste de repetirse es menor que el de que nadie mire. Y la identidad del aviso
+  **lleva la fecha de caducidad de la clave concreta**, así que una clave renovada estrena sus
+  avisos en lugar de heredar el silencio de los del ciclo anterior; el issue, además, **se cierra
+  solo** en cuanto el secreto vuelve a tener una clave válida. Que la clave *falte* no cierra nada:
+  un secreto borrado por accidente apagaría justo la alarma que lo delata. Y si **el comprobador
+  mismo** se avería —una permisión corta, un import roto, el binario ausente—, eso no pasa por
+  silencio: abre su propio aviso, sin afirmar que la clave esté mal, y **el job sale en rojo**. Un
+  canal de alarma que se rompe en verde no es un canal.
+- Arrastrados de T-07: el **año del almanaque se valida sobre el crudo** (`/^\d{4}$/`, así que
+  `/almanac/0x7ea` ya no sirve el de 2026), **`listPorts` ordena de verdad** por región, provincia y
+  puerto con `Intl.Collator("es")` —el orden pasa a ser contrato verificado— y el **`--allow-read`
+  de la API queda acotado al dataset** en vez de a todo el disco.
 ## 2026-08-28 — T-09 · la página de puerto, y el gate de UI que la vigila
 
 - **El portal existe**: 32 páginas estáticas construidas desde el dataset —12 puertos bajo

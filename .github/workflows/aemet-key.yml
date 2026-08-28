@@ -1,0 +1,159 @@
+name: Aviso de caducidad — AEMET
+
+# La clave de AEMET vive 3 meses y su alta lleva un reCAPTCHA: no se puede renovar sola. Este
+# workflow existe para que la caducidad se sepa con semanas de antelación en vez de descubrirse
+# el día que el boletín empieza a devolver 401.
+on:
+  schedule:
+    # Cada día a las 07:10 UTC. Minuto no redondo para no coincidir con el pico de la hora en punto.
+    - cron: "10 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  caducidad:
+    name: ¿Hay que renovar la API key de AEMET?
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Comprobar la caducidad (se lee del JWT, sin llamar a AEMET)
+        id: check
+        env:
+          AEMET_API_KEY: ${{ secrets.AEMET_API_KEY }}
+          # Deno colorea su stderr aunque haya CI: sin esto, el error que acaba dentro del issue
+          # llega lleno de escapes ANSI y quien lo lee ve basura donde debería ver la avería.
+          NO_COLOR: "1"
+        run: |
+          set +e
+          salida="$(deno run --allow-env=AEMET_API_KEY scripts/check-aemet-key.ts 2>&1)"
+          codigo=$?
+          echo "$salida"
+          campo() { printf '%s' "$salida" | sed -n "s/^$1=//p" | tail -1; }
+          estado="$(campo estado)"
+          aviso="$(campo aviso_id)"
+          # Un comprobador que se rompe NO puede acabar en verde y callado: sería el mismo fallo que
+          # este workflow existe para impedir, una capa más abajo. Códigos esperados: 0 (nada que
+          # hacer) y 1 (hace falta un humano); cualquier otro, o unas líneas maquinales que no
+          # llegaron, significa que quien tenía que avisar es el que está averiado.
+          # La tercera forma de romperse es morir ENTRE dos líneas maquinales: el estado llega y el
+          # aviso no. Estrecha, pero de la misma familia, y la guarda cuesta una línea.
+          sin_aviso=""
+          case "$estado" in valid | missing | "") ;; *) [ -z "$aviso" ] && sin_aviso="si" ;; esac
+          if [ -z "$estado" ] || [ -n "$sin_aviso" ] || { [ "$codigo" -ne 0 ] && [ "$codigo" -ne 1 ]; }; then
+            estado="roto"
+            aviso="aemet:comprobador-roto:$(date -u +%F)"
+          fi
+          # El resumen es lo ÚNICO que va a leer un humano: las líneas maquinales se quedan fuera.
+          {
+            echo "resumen<<FIN"
+            printf '%s\n' "$salida" | grep -Ev '^(estado|escalon|aviso_id)='
+            echo "FIN"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "estado=$estado"
+            echo "aviso_id=$aviso"
+          } >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Abrir o actualizar el aviso
+        if: steps.check.outputs.aviso_id != ''
+        uses: actions/github-script@v7
+        env:
+          RESUMEN: ${{ steps.check.outputs.resumen }}
+          AVISO_ID: ${{ steps.check.outputs.aviso_id }}
+          ESTADO: ${{ steps.check.outputs.estado }}
+        with:
+          script: |
+            const roto = process.env.ESTADO === 'roto';
+            const titulo = roto
+              ? 'El comprobador de la API key de AEMET está averiado'
+              : 'Renovar la API key de AEMET';
+            // La marca es la identidad del aviso, y la calcula el script (probado): lleva la fecha
+            // de caducidad de ESTA clave, así que una clave renovada estrena avisos aunque el issue
+            // del ciclo anterior siga abierto. Mientras la marca no cambie no hay nada nuevo que
+            // contar, y nadie recibe otra notificación.
+            const marca = `<!-- aemet-aviso:${process.env.AVISO_ID} -->`;
+            const cuerpo = [
+              roto
+                ? 'El script que vigila la caducidad de la clave **no pudo ejecutarse**: mientras siga así, nadie está mirando la fecha.'
+                : 'La credencial de AEMET necesita una renovación manual (su alta tiene reCAPTCHA).',
+              '',
+              '```',
+              process.env.RESUMEN,
+              '```',
+              '',
+              roto
+                ? 'La clave puede estar perfectamente bien: lo que falló es el comprobador. El estado real lo sigue diciendo `credential` en la respuesta de `/bulletin`.'
+                : 'Mientras tanto el módulo `weather` **degrada de forma explícita**: el boletín oficial deja de publicarse con su motivo, el resto de la meteorología (Open-Meteo) sigue, y `credential` en la respuesta de `/bulletin` dice lo mismo que este aviso.',
+              '',
+              'Este aviso se cierra solo en cuanto el comprobador vuelva a ver una clave válida.',
+            ].join('\n');
+            // Paginado y por el issue MÁS ANTIGUO: con dos issues con la etiqueta (uno abierto a
+            // mano), quedarse con `data[0]` mandaría los escalones al más nuevo y dejaría mudo al
+            // otro. Y la marca se busca en todos: si ya se contó en alguno, está contado.
+            const abiertos = (await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'aemet-key', per_page: 100,
+            })).sort((a, b) => a.number - b.number);
+            if (abiertos.length > 0) {
+              for (const issue of abiertos) {
+                // Paginado: con el issue lleno de comentarios humanos, una marca fuera de la primera
+                // página se leería como «no avisado» y el aviso volvería a repetirse cada día.
+                const previos = await github.paginate(github.rest.issues.listComments, {
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: issue.number, per_page: 100,
+                });
+                if (previos.some((c) => (c.body ?? '').includes(marca)) || (issue.body ?? '').includes(marca)) {
+                  core.info(`El aviso ${process.env.AVISO_ID} ya está en el issue #${issue.number}: no se repite.`);
+                  return;
+                }
+              }
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: abiertos[0].number, body: `${cuerpo}\n\n${marca}`,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title: titulo, body: `${cuerpo}\n\n${marca}`, labels: ['aemet-key'],
+              });
+            }
+
+      - name: Cerrar el aviso cuando la clave vuelve a ser válida
+        # Solo con `valid`. Que falte la clave (`missing`) NO es motivo para cerrar un aviso de
+        # renovación: un secreto borrado por accidente apagaría justo la alarma que lo delata.
+        if: steps.check.outputs.estado == 'valid'
+        uses: actions/github-script@v7
+        env:
+          RESUMEN: ${{ steps.check.outputs.resumen }}
+        with:
+          script: |
+            const abiertos = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'aemet-key', per_page: 100,
+            });
+            for (const issue of abiertos) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number,
+                body: `Renovada. \`\`\`\n${process.env.RESUMEN}\n\`\`\`\n\nSe cierra solo; el próximo ciclo abrirá su propio aviso.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue.number, state: 'closed', state_reason: 'completed',
+              });
+            }
+
+      - name: El comprobador averiado también sale en rojo
+        # El issue avisa a quien mira el repositorio; este paso avisa a quien mira los workflows.
+        # Un canal de alarma que se rompe en verde no es un canal.
+        if: steps.check.outputs.estado == 'roto'
+        run: |
+          echo "::error::El comprobador de la clave de AEMET no pudo ejecutarse; nadie está vigilando la caducidad."
+          exit 1
