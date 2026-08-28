@@ -2,6 +2,36 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-28 — T-08 · el módulo weather, primer módulo real del registry
+
+- **`GET /v1/modules/weather/weather?port=<slug>`**: estado del mar (olas total/wind/swell con
+  altura, dirección y periodo, y temperatura del agua) y de la atmósfera (viento, rachas, presión,
+  visibilidad, UV) desde **Open-Meteo**, sin API key. Cada fuente viaja con su `fetchedAt`, su
+  `ageSeconds` y su `stale`, y la respuesta dice de qué **celda y hora** habla.
+- **`GET /v1/modules/weather/bulletin?port=<slug>`**: boletín marítimo costero de **AEMET** para la
+  zona del puerto (patrón de dos llamadas, con la clave en cabecera y nunca en la URL). El documento
+  se pasa tal cual y se decodifica con el charset que declare AEMET (ISO-8859-15 en buena parte de
+  sus productos). Los códigos de zona son los INE de provincia y van marcados `verified: false`:
+  comprobarlos exige una API key, y cuando la haya será un cambio de datos, no de código.
+- **Degradar en vez de romper**, con tres escalones: caché fresca (cero red) → red → caché caducada
+  marcada `stale`. Solo cuando no hay ninguna de las tres se contesta `unavailable` con el motivo, y
+  siempre con HTTP 200: un dato de hace tres horas sirve para decidir si sales a navegar; un 500,
+  no. **Sin `AEMET_API_KEY` la instancia funciona**: el boletín dice que falta la credencial.
+- **Caché por celda de 0,1° y hora UTC** sobre **Deno KV**, con TTL por fuente (1 h mar, 30 min
+  atmósfera, 6 h boletín). Dos peticiones seguidas del mismo puerto salen a la red **una sola vez**,
+  y la caché sobrevive al reinicio del proceso. Si KV no está disponible, degrada a memoria.
+- **Las atribuciones viajan solas**: `/v1/modules` publica Open-Meteo (CC-BY 4.0) y AEMET, y además
+  van en cada respuesta. El contrato de T-06 no deja compilar un módulo sin ellas.
+- Solo se deja cachear fuera (`Cache-Control`) lo que salió entero; una respuesta degradada va con
+  `no-store` para no congelar la avería en un CDN.
+- **Cero red en CI**: el `fetch` entra inyectado en los dos adaptadores y los fixtures son capturas
+  reales de las APIs. 46 tests del módulo y 5 de integración en la API, incluido el de oro (segunda
+  llamada a la misma celda y hora → 0 peticiones) y el de degradación sin clave.
+- Arrastrados de T-07: el **año del almanaque se valida sobre el crudo** (`/^\d{4}$/`, así que
+  `/almanac/0x7ea` ya no sirve el de 2026), **`listPorts` ordena de verdad** por región, provincia y
+  puerto con `Intl.Collator("es")` —el orden pasa a ser contrato verificado— y el **`--allow-read`
+  de la API queda acotado al dataset** en vez de a todo el disco.
+
 ## 2026-08-28 — T-04 · coeficiente de mareas y dos mejoras del motor
 
 - **Coeficiente de marea** (escala francesa 20-120) en `@mareia/domain-core/coefficient`: un valor
