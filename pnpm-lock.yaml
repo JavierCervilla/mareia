@@ -39,6 +39,10 @@ importers:
   packages/adapters: {}
 
   packages/domain-core:
+    dependencies:
+      astronomy-engine:
+        specifier: 2.1.19
+        version: 2.1.19
     devDependencies:
       '@neaps/tide-predictor':
         specifier: ^0.11.0
@@ -910,6 +914,9 @@ packages:
     peerDependenciesMeta:
       '@astrojs/markdown-remark':
         optional: true
+
+  astronomy-engine@2.1.19:
+    resolution: {integrity: sha512-8yWKNf7UeNbH458h3sAJ6ZgAjE5jTXp/mNNRFoC20j2SHwZIjAQeEsBB2Q3uCFRaTCCJRv33K2XhkhZQMXoX6w==}
 
   async-function@1.0.0:
     resolution: {integrity: sha512-hsU18Ae8CDTR6Kgu9DYf0EbCr/a5iGL0rytQDobUcdpYOKokk8LEjVphnXkDkgpi0wYVsqrXuP0bZxJaTqdgoA==}
@@ -3196,6 +3203,8 @@ snapshots:
       - tsx
       - uploadthing
       - yaml
+
+  astronomy-engine@2.1.19: {}
 
   async-function@1.0.0: {}
 
