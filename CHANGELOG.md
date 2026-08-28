@@ -41,9 +41,14 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   una que no se deja leer se declara ilegible en vez de inventarle un plazo. El estado viaja en
   `/bulletin` y entra en el healthcheck —una clave que caduca en tres días es un problema hoy, no el
   día del 401— y un workflow diario abre el aviso en el repositorio con los pasos exactos de
-  renovación. Los avisos van **por escalones (21, 7 y 1 días, y caducada)**, uno por escalón y no uno
-  al día: un aviso que aparece cada mañana durante tres semanas se deja de leer, que es justo lo
-  contrario de lo que se busca.
+  renovación. Los avisos van **por escalones (21, 7 y 1 días)**, uno por escalón y no uno al día: un
+  aviso que aparece cada mañana durante tres semanas se deja de leer, que es justo lo contrario de
+  lo que se busca. **Ya caducada sí insiste** —un aviso al día mientras el boletín siga roto—,
+  porque ahí el coste de repetirse es menor que el de que nadie mire. Y la identidad del aviso
+  **lleva la fecha de caducidad de la clave concreta**, así que una clave renovada estrena sus
+  avisos en lugar de heredar el silencio de los del ciclo anterior; el issue, además, **se cierra
+  solo** en cuanto el secreto vuelve a tener una clave válida. Que la clave *falte* no cierra nada:
+  un secreto borrado por accidente apagaría justo la alarma que lo delata.
 - Arrastrados de T-07: el **año del almanaque se valida sobre el crudo** (`/^\d{4}$/`, así que
   `/almanac/0x7ea` ya no sirve el de 2026), **`listPorts` ordena de verdad** por región, provincia y
   puerto con `Intl.Collator("es")` —el orden pasa a ser contrato verificado— y el **`--allow-read`

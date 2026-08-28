@@ -31,7 +31,7 @@ export const LEGACY_KEYS_DIE_AT_MS = Date.UTC(2026, 9, 15, 0, 0, 0);
  */
 export const WARNING_THRESHOLDS_DAYS = [21, 7, 1] as const;
 
-/** Escalón alcanzado. `0` = ya caducada, que es su propio escalón (y el único que insiste). */
+/** Escalón alcanzado. `0` = ya caducada, que es su propio escalón (y el único que repite cada día). */
 export type WarningThreshold = (typeof WARNING_THRESHOLDS_DAYS)[number] | 0;
 
 const MS_PER_DAY = 86_400_000;
@@ -168,4 +168,36 @@ export function inspectAemetKey(rawKey: string | undefined, nowMs: number): Aeme
 /** ¿Merece este estado un aviso al humano? Lo usan el cron y el arranque del servidor. */
 export function needsHumanAction(state: AemetKeyState): boolean {
   return state.status === "expiring" || state.status === "expired" || state.status === "unreadable";
+}
+
+function utcDay(nowMs: number): string {
+  return new Date(nowMs).toISOString().slice(0, 10);
+}
+
+/**
+ * Identidad del aviso: la unidad de repetición del canal que avisa al humano.
+ *
+ * Quien avisa (el cron) no debe repetir el mismo aviso, pero **sí** debe volver a hablar cuando lo
+ * que hay que contar es distinto. Eso hace del identificador una decisión de diseño, no un detalle:
+ *
+ * - Lleva **la fecha de caducidad de la clave concreta**, así que una clave nueva estrena avisos
+ *   aunque el aviso viejo siga por ahí. Sin eso, el segundo ciclo de renovación caduca en silencio:
+ *   el peor fallo posible en un canal cuya única razón de ser es que se note.
+ * - Mientras la clave solo *va a* caducar, la unidad es **el escalón**: 21, 7 y 1 son tres avisos,
+ *   no veintidós.
+ * - Cuando ya caducó —el boletín está roto ahora mismo— la unidad pasa a ser **el día**: aquí sí se
+ *   insiste, porque el coste de repetirse es menor que el de que nadie mire.
+ * - Una clave ilegible se trata como la caducada (se insiste a diario) y no se ata a ninguna fecha:
+ *   justamente no sabemos cuál es.
+ *
+ * Devuelve `undefined` cuando no hay nada que avisar.
+ */
+export function noticeId(state: AemetKeyState, nowMs: number): string | undefined {
+  if (state.status === "unreadable") return `aemet:ilegible:${utcDay(nowMs)}`;
+  if (state.expiresAt === undefined) return undefined;
+  if (state.status === "expired") return `aemet:${state.expiresAt}:vencida:${utcDay(nowMs)}`;
+  if (state.status === "expiring" && state.thresholdDays !== undefined) {
+    return `aemet:${state.expiresAt}:d${state.thresholdDays}`;
+  }
+  return undefined;
 }

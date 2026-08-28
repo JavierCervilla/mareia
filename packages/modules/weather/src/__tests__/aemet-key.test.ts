@@ -13,6 +13,7 @@ import {
   inspectAemetKey,
   LEGACY_KEYS_DIE_AT_MS,
   needsHumanAction,
+  noticeId,
 } from "../aemet-key.ts";
 
 /** Un JWT sintético: cabecera y firma de relleno, el payload es lo único que se lee. */
@@ -99,4 +100,92 @@ test("el estado se calcula con el reloj que se le pasa, no con el del sistema", 
   assert.equal(inspectAemetKey(key, NOW).status, "valid");
   assert.equal(inspectAemetKey(key, NOW + 25 * day).status, "expiring");
   assert.equal(inspectAemetKey(key, NOW + 31 * day).status, "expired");
+});
+
+/**
+ * El canal de aviso, simulado entero: un cron que corre cada día y solo habla cuando el
+ * identificador del aviso es nuevo. Es exactamente la regla que aplica el workflow, y aquí se
+ * puede recorrer una vida de clave completa —o dos seguidas— en milisegundos.
+ */
+function avisosEmitidos(
+  claves: readonly { readonly key: string; readonly desdeMs: number; readonly hastaMs: number }[],
+  yaContados: Set<string>,
+): string[] {
+  const emitidos: string[] = [];
+  for (const { key, desdeMs, hastaMs } of claves) {
+    for (let nowMs = desdeMs; nowMs <= hastaMs; nowMs += day) {
+      const id = noticeId(inspectAemetKey(key, nowMs), nowMs);
+      if (id === undefined || yaContados.has(id)) continue;
+      yaContados.add(id);
+      emitidos.push(id);
+    }
+  }
+  return emitidos;
+}
+
+test("una clave que solo va a caducar avisa tres veces en su vida, no una por día", () => {
+  const expiraMs = Date.UTC(2026, 10, 1);
+  const clave = fakeJwt({ exp: expiraMs / 1000 });
+  const emitidos = avisosEmitidos(
+    [{ key: clave, desdeMs: expiraMs - 40 * day, hastaMs: expiraMs - day }],
+    new Set(),
+  );
+
+  // 21, 7 y 1: los tres escalones, y ni un aviso más en las cuarenta mañanas que corre el cron.
+  assert.deepEqual(emitidos, [
+    "aemet:2026-11-01T00:00:00.000Z:d21",
+    "aemet:2026-11-01T00:00:00.000Z:d7",
+    "aemet:2026-11-01T00:00:00.000Z:d1",
+  ]);
+});
+
+test("caducada, el aviso SÍ insiste: uno por día mientras el boletín siga roto", () => {
+  const expiraMs = Date.UTC(2026, 10, 1);
+  const clave = fakeJwt({ exp: expiraMs / 1000 });
+  const emitidos = avisosEmitidos(
+    [{ key: clave, desdeMs: expiraMs + day, hastaMs: expiraMs + 3 * day }],
+    new Set(),
+  );
+
+  assert.deepEqual(emitidos, [
+    "aemet:2026-11-01T00:00:00.000Z:vencida:2026-11-02",
+    "aemet:2026-11-01T00:00:00.000Z:vencida:2026-11-03",
+    "aemet:2026-11-01T00:00:00.000Z:vencida:2026-11-04",
+  ]);
+});
+
+test("la clave renovada estrena avisos aunque los del ciclo anterior sigan a la vista", () => {
+  // El fallo que esto impide: si el identificador solo llevara el escalón, las marcas del ciclo
+  // anterior taparían los tres escalones del siguiente y la clave nueva caducaría en silencio.
+  const primera = Date.UTC(2026, 10, 1);
+  const segunda = Date.UTC(2027, 1, 1);
+  const yaContados = new Set<string>();
+
+  const ciclo1 = avisosEmitidos(
+    [{ key: fakeJwt({ exp: primera / 1000 }), desdeMs: primera - 30 * day, hastaMs: primera - day }],
+    yaContados,
+  );
+  const ciclo2 = avisosEmitidos(
+    [{ key: fakeJwt({ exp: segunda / 1000 }), desdeMs: segunda - 30 * day, hastaMs: segunda - day }],
+    yaContados,
+  );
+
+  assert.equal(ciclo1.length, 3);
+  assert.equal(ciclo2.length, 3);
+  assert.ok(ciclo2.every((id) => id.includes("2027-02-01")));
+});
+
+test("una clave ilegible insiste a diario y no se ata a ninguna fecha de caducidad", () => {
+  const primero = noticeId(inspectAemetKey("esto-no-es-un-jwt", NOW), NOW);
+  const mismoDia = noticeId(inspectAemetKey("esto-no-es-un-jwt", NOW + 3600_000), NOW + 3600_000);
+  const siguiente = noticeId(inspectAemetKey("esto-no-es-un-jwt", NOW + day), NOW + day);
+
+  assert.equal(primero, "aemet:ilegible:2026-08-28");
+  assert.equal(mismoDia, primero);
+  assert.equal(siguiente, "aemet:ilegible:2026-08-29");
+});
+
+test("lo que no pide acción humana no genera aviso: ni sin clave ni con clave sana", () => {
+  assert.equal(noticeId(inspectAemetKey(undefined, NOW), NOW), undefined);
+  assert.equal(noticeId(inspectAemetKey(fakeJwt({ exp: (NOW + 90 * day) / 1000 }), NOW), NOW), undefined);
 });
