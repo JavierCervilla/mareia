@@ -106,8 +106,10 @@ function fM2({ bigI, omega, i }: Angles): number {
  * f(M3) — SP-98 Tabla 2: f = cos⁶(½I)/0,8758, con u = 3ξ − 3ν.
  *
  * El 0,8758 que imprime Schureman es el valor medio cos⁶(½ω)·cos⁶(½i), que aquí se evalúa a partir
- * de ω e i como el resto del módulo, en vez de copiar la constante redondeada (0,87545 con los ω e
- * i de la efeméride: 4·10⁻⁴ relativo, 0,3 mm sobre la amplitud de M3 más grande del catálogo).
+ * de ω e i como el resto del módulo, en vez de copiar la constante redondeada. Con la ω de la
+ * efeméride sale **0,875977** en 2026 (0,875969-0,875993 entre 2020 y 2038): un **+0,02 %** sobre
+ * el valor impreso —mayor, no menor—, así que este f queda un 0,02 % por debajo del que da la
+ * constante. Sobre la mayor amplitud de M3 del dataset (Brest, 1,98 cm) son 4 µm.
  *
  * Es la forma **publicada**, y no la derivada `f(M2)^1,5` que usaba este motor: analíticamente son
  * la misma expresión —f(M2) = cos⁴(½I)/[cos⁴(½ω)cos⁴(½i)], elevarla a 3/2 da exactamente cos⁶(½I)

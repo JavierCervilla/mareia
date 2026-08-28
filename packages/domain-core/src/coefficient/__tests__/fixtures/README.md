@@ -28,3 +28,18 @@ Coeficientes de marea **publicados** para Brest en 2026, con los que se contrast
 
 Los constituyentes de Brest con los que se predice **no** están duplicados aquí: el test lee
 `data/brest/constituents.json`, que es el fichero que T-05 dejó committeado justo para esto.
+
+## Aviso para T-13 (regeneración del dataset)
+
+El fichero de Brest de hoy está truncado al catálogo **anterior** a T-04, así que le faltan los
+cinco constituyentes que esta trayectoria añadió al motor: **6,75 cm** de amplitud en total
+(EP2 1,97 · 2MS6 1,68 · MB2 1,24 · MA2 1,10 · MKS2 0,76 cm), de los cuales **5,07 cm son de especie
+2** y entran por tanto en el cálculo del coeficiente.
+
+Simulado sobre estos mismos 32 valores —añadiendo a Brest los cuatro semidiurnos descartados—, los
+coeficientes se mueven **hasta 2 unidades** y **tres se irían a 3 unidades de error** (12-mar #1,
+20-mar #1 y #2): fuera de la tolerancia de ±2. Cuando T-13 regenere el dataset, este golden puede
+ponerse en rojo, y será un rojo **honesto**: toca volver a medir el sesgo con las constantes nuevas
+y decidir entonces —con el dato delante— si lo que cambia es la tolerancia o el conjunto que entra
+en el coeficiente (MA2 y MB2 son modulación radiacional de M2, no marea astronómica pura). Lo que
+no vale es apagar el test.

@@ -14,7 +14,7 @@
  *    publicados de una misma jornada son casi iguales entre sí (102/102, 93/93…), mientras que la
  *    marea real de Brest tiene desigualdad diurna: la pleamar de la tarde no es la de la mañana.
  *    Medido contra los valores publicados de 2026 (ver `__tests__/fixtures/`), la predicción
- *    completa se desvía hasta 7 unidades y la reducción semidiurna se queda en 2. La escala
+ *    completa se desvía hasta 5 unidades y la reducción semidiurna se queda en 2. La escala
  *    caracteriza la parte semidiurna de la marea astronómica, así que aquí se filtra la estación a
  *    los constituyentes de especie 2 antes de predecir.
  * 2. **El semirrango se mide contra las dos bajamares adyacentes** (la de antes y la de después de
