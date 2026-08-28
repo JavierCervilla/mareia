@@ -1,0 +1,346 @@
+{
+  "schema": "station/v1",
+  "id": "es-bi-bilbao",
+  "name": "Bilbao",
+  "lat": 43.355,
+  "lon": -3.045,
+  "timezone": "Europe/Madrid",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 2.428
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "bilbaotg-bil-esp-cmems",
+      "station_name": "Bilbao",
+      "lat": 43.356998,
+      "lon": -3.05,
+      "distance_km": 0.461,
+      "analysis_epoch": {
+        "start": "2006-06-30",
+        "end": "2025-06-30"
+      },
+      "license": "cc-by-nc-4.0"
+    },
+    "fallback": [],
+    "dropped_constituents": [
+      {
+        "name": "EP2",
+        "amplitude_m": 0.010928,
+        "phase_deg": 26.621
+      },
+      {
+        "name": "MB2",
+        "amplitude_m": 0.005585,
+        "phase_deg": 75.7914
+      },
+      {
+        "name": "3L2",
+        "amplitude_m": 0.005235,
+        "phase_deg": 262.92
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.004441,
+        "phase_deg": 304.6817
+      },
+      {
+        "name": "SGM",
+        "amplitude_m": 0.004164,
+        "phase_deg": 59.4282
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.00414,
+        "phase_deg": 118.8295
+      },
+      {
+        "name": "MKS2",
+        "amplitude_m": 0.004098,
+        "phase_deg": 64.4156
+      },
+      {
+        "name": "MA2",
+        "amplitude_m": 0.003666,
+        "phase_deg": 357.1887
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.003448,
+        "phase_deg": 228.7265
+      },
+      {
+        "name": "2MS6",
+        "amplitude_m": 0.003085,
+        "phase_deg": 182.374
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.002004,
+        "phase_deg": 85.016
+      },
+      {
+        "name": "3N2",
+        "amplitude_m": 0.001292,
+        "phase_deg": 280.3482
+      },
+      {
+        "name": "MTM",
+        "amplitude_m": 0.001114,
+        "phase_deg": 208.1698
+      },
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.000909,
+        "phase_deg": 337.3281
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 0.000438,
+        "phase_deg": 342.5134
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 0.000236,
+        "phase_deg": 135.8058
+      }
+    ],
+    "derived_at": "2026-08-28T01:51:56Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-nc-4.0",
+        "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+        "role": "constantes armónicas",
+        "notes": "Upstream GESLA data provider restricts commercial use. See https://gesla787883612.wordpress.com/license/"
+      },
+      {
+        "name": "neaps/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 1.311378,
+      "phase_deg": 92.4781
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.277397,
+      "phase_deg": 72.8047
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.458091,
+      "phase_deg": 124.3971
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.129969,
+      "phase_deg": 121.7446
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.039258,
+      "phase_deg": 53.326
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.004188,
+      "phase_deg": 44.2148
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.063511,
+      "phase_deg": 68.8727
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.020137,
+      "phase_deg": 56.9712
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.069965,
+      "phase_deg": 321.2049
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.022061,
+      "phase_deg": 274.408
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.001752,
+      "phase_deg": 306.2453
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.026701,
+      "phase_deg": 324.8793
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.004138,
+      "phase_deg": 254.8033
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.005872,
+      "phase_deg": 200.8772
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.046469,
+      "phase_deg": 215.3805
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.02767,
+      "phase_deg": 90.1234
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.024741,
+      "phase_deg": 120.5578
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.002028,
+      "phase_deg": 104.7699
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.031392,
+      "phase_deg": 106.8522
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.003548,
+      "phase_deg": 121.9646
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.004022,
+      "phase_deg": 227.8952
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.003497,
+      "phase_deg": 160.1167
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.013243,
+      "phase_deg": 327.5208
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.04673,
+      "phase_deg": 51.1102
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.052609,
+      "phase_deg": 75.0054
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.007612,
+      "phase_deg": 97.3685
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.013297,
+      "phase_deg": 279.6634
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.008465,
+      "phase_deg": 30.7649
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 0.004125,
+      "phase_deg": 129.0135
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 0.000595,
+      "phase_deg": 265.6635
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 0.000561,
+      "phase_deg": 78.7649
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.001125,
+      "phase_deg": 215.7613
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.003756,
+      "phase_deg": 280.5545
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.001506,
+      "phase_deg": 325.4741
+    }
+  ],
+  "quality": {
+    "rmse_m": 0.0494,
+    "hw_time_err_p95_min": 9.5,
+    "grade": "A",
+    "validated_against": "IOC bil3",
+    "grade_reason": "cumple todos los umbrales de grade A",
+    "metrics": {
+      "window_start": "2026-07-29T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 43164,
+      "predicted_range_m": 4.2495,
+      "rmse_m": 0.0494,
+      "nrmse": 0.01163,
+      "r2": 0.99747,
+      "hw_time_err_p95_min": 9.5,
+      "hw_height_err_p95_m": 0.0854,
+      "matched_extremes": 116,
+      "predicted_extremes": 116,
+      "cross_rmse_m": null,
+      "cross_source": null,
+      "cross_rmse_worst_m": null,
+      "cross_source_worst": null,
+      "truncation_rms_m": 0.00945,
+      "dropped_amplitude_m": 0.05478,
+      "dropped_amplitude_fraction": 0.019662,
+      "dropped_constituents": [
+        "EP2",
+        "MB2",
+        "3L2",
+        "R3",
+        "SGM",
+        "T3",
+        "MKS2",
+        "MA2",
+        "N4",
+        "2MS6",
+        "S3",
+        "3N2",
+        "MTM",
+        "MSQM",
+        "2MK5",
+        "2MO5"
+      ],
+      "observation_source": "IOC bil3"
+    }
+  }
+}

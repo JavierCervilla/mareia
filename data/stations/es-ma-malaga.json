@@ -1,0 +1,359 @@
+{
+  "schema": "station/v1",
+  "id": "es-ma-malaga",
+  "name": "Málaga",
+  "lat": 36.713,
+  "lon": -4.416,
+  "timezone": "Europe/Madrid",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 0.41
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "malaga-mala-esp-ieo",
+      "station_name": "Malaga",
+      "lat": 36.7127,
+      "lon": -4.4154,
+      "distance_km": 0.063,
+      "analysis_epoch": {
+        "start": "1993-12-31",
+        "end": "2012-12-31"
+      },
+      "license": "cc-by-4.0"
+    },
+    "fallback": [
+      {
+        "dataset": "TICON-4",
+        "station_id": "malagatg-mal-esp-cmems",
+        "station_name": "Malaga",
+        "lat": 36.712002,
+        "lon": -4.417,
+        "distance_km": 0.142,
+        "analysis_epoch": {
+          "start": "2006-06-30",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      }
+    ],
+    "dropped_constituents": [
+      {
+        "name": "MTM",
+        "amplitude_m": 0.001629,
+        "phase_deg": 133.311
+      },
+      {
+        "name": "EP2",
+        "amplitude_m": 0.001488,
+        "phase_deg": 342.0746
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.001379,
+        "phase_deg": 79.8805
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.000939,
+        "phase_deg": 195.1368
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.000843,
+        "phase_deg": 13.6338
+      },
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.000747,
+        "phase_deg": 218.0123
+      },
+      {
+        "name": "MB2",
+        "amplitude_m": 0.000714,
+        "phase_deg": 203.2369
+      },
+      {
+        "name": "3L2",
+        "amplitude_m": 0.000524,
+        "phase_deg": 171.4882
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.000436,
+        "phase_deg": 316.8585
+      },
+      {
+        "name": "SGM",
+        "amplitude_m": 0.000434,
+        "phase_deg": 2.8122
+      },
+      {
+        "name": "3N2",
+        "amplitude_m": 0.000404,
+        "phase_deg": 126.9548
+      },
+      {
+        "name": "MKS2",
+        "amplitude_m": 0.000332,
+        "phase_deg": 41.2221
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 0.000193,
+        "phase_deg": 166.611
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 0.000121,
+        "phase_deg": 35.8094
+      },
+      {
+        "name": "MA2",
+        "amplitude_m": 9.7e-05,
+        "phase_deg": 315.51
+      },
+      {
+        "name": "2MS6",
+        "amplitude_m": 8e-05,
+        "phase_deg": 291.1902
+      }
+    ],
+    "derived_at": "2026-08-28T01:51:56Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "constantes armónicas"
+      },
+      {
+        "name": "neaps/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 0.188071,
+      "phase_deg": 51.1366
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.037831,
+      "phase_deg": 34.604
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.073537,
+      "phase_deg": 74.6987
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.020315,
+      "phase_deg": 71.2433
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.005129,
+      "phase_deg": 14.6068
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.004956,
+      "phase_deg": 56.4133
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.031485,
+      "phase_deg": 151.0019
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.01103,
+      "phase_deg": 147.1839
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.018243,
+      "phase_deg": 124.7109
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.001969,
+      "phase_deg": 136.2632
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.001581,
+      "phase_deg": 47.7503
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.018208,
+      "phase_deg": 165.6884
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.002612,
+      "phase_deg": 271.8611
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.001801,
+      "phase_deg": 164.1768
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.052186,
+      "phase_deg": 182.7241
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.011191,
+      "phase_deg": 81.3882
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.004192,
+      "phase_deg": 68.2434
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.001112,
+      "phase_deg": 156.0299
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.004049,
+      "phase_deg": 65.5165
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.000893,
+      "phase_deg": 95.6033
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.000438,
+      "phase_deg": 156.6561
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.002307,
+      "phase_deg": 74.72
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.003108,
+      "phase_deg": 186.4826
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.006183,
+      "phase_deg": 5.7669
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.00752,
+      "phase_deg": 39.2273
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.000848,
+      "phase_deg": 48.3948
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.006952,
+      "phase_deg": 124.843
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.012349,
+      "phase_deg": 229.8961
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 0.0003,
+      "phase_deg": 257.8107
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 0.000141,
+      "phase_deg": 12.1991
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 0.000852,
+      "phase_deg": 92.6725
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.000579,
+      "phase_deg": 141.7431
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.000304,
+      "phase_deg": 115.5361
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.000245,
+      "phase_deg": 127.2129
+    }
+  ],
+  "quality": {
+    "rmse_m": 0.0576,
+    "hw_time_err_p95_min": 11.51,
+    "grade": "B",
+    "validated_against": "IOC mal3",
+    "grade_reason": "no alcanza A: RMSE normalizado 0.089 > 0.05",
+    "metrics": {
+      "window_start": "2026-07-29T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 43136,
+      "predicted_range_m": 0.6481,
+      "rmse_m": 0.0576,
+      "nrmse": 0.08888,
+      "r2": 0.86197,
+      "hw_time_err_p95_min": 11.51,
+      "hw_height_err_p95_m": 0.0805,
+      "matched_extremes": 116,
+      "predicted_extremes": 116,
+      "cross_rmse_m": 0.0054,
+      "cross_source": "malagatg-mal-esp-cmems",
+      "cross_rmse_worst_m": 0.0054,
+      "cross_source_worst": "malagatg-mal-esp-cmems",
+      "truncation_rms_m": 0.0024,
+      "dropped_amplitude_m": 0.01036,
+      "dropped_amplitude_fraction": 0.019084,
+      "dropped_constituents": [
+        "MTM",
+        "EP2",
+        "N4",
+        "T3",
+        "R3",
+        "MSQM",
+        "MB2",
+        "3L2",
+        "S3",
+        "SGM",
+        "3N2",
+        "MKS2",
+        "2MO5",
+        "2MK5",
+        "MA2",
+        "2MS6"
+      ],
+      "observation_source": "IOC mal3"
+    }
+  }
+}

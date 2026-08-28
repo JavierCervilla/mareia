@@ -1,0 +1,359 @@
+{
+  "schema": "station/v1",
+  "id": "es-s-santander",
+  "name": "Santander",
+  "lat": 43.4623,
+  "lon": -3.79,
+  "timezone": "Europe/Madrid",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 2.396
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "santander-sant-esp-ieo",
+      "station_name": "Santander",
+      "lat": 43.4614,
+      "lon": -3.7908,
+      "distance_km": 0.119,
+      "analysis_epoch": {
+        "start": "1997-12-31",
+        "end": "2016-12-31"
+      },
+      "license": "cc-by-4.0"
+    },
+    "fallback": [
+      {
+        "dataset": "TICON-4",
+        "station_id": "santandertg-san-esp-cmems",
+        "station_name": "Santander",
+        "lat": 43.460999,
+        "lon": -3.791,
+        "distance_km": 0.166,
+        "analysis_epoch": {
+          "start": "2006-06-30",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      }
+    ],
+    "dropped_constituents": [
+      {
+        "name": "2MS6",
+        "amplitude_m": 0.008909,
+        "phase_deg": 229.8571
+      },
+      {
+        "name": "EP2",
+        "amplitude_m": 0.008644,
+        "phase_deg": 41.3007
+      },
+      {
+        "name": "MB2",
+        "amplitude_m": 0.008436,
+        "phase_deg": 86.7886
+      },
+      {
+        "name": "MA2",
+        "amplitude_m": 0.005838,
+        "phase_deg": 22.8963
+      },
+      {
+        "name": "3L2",
+        "amplitude_m": 0.005253,
+        "phase_deg": 264.016
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.004361,
+        "phase_deg": 306.2537
+      },
+      {
+        "name": "SGM",
+        "amplitude_m": 0.00365,
+        "phase_deg": 65.1944
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.003625,
+        "phase_deg": 120.2801
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.003231,
+        "phase_deg": 236.1221
+      },
+      {
+        "name": "MTM",
+        "amplitude_m": 0.003038,
+        "phase_deg": 224.8379
+      },
+      {
+        "name": "3N2",
+        "amplitude_m": 0.002254,
+        "phase_deg": 191.6438
+      },
+      {
+        "name": "MKS2",
+        "amplitude_m": 0.001884,
+        "phase_deg": 87.8821
+      },
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.001123,
+        "phase_deg": 299.8633
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 0.000825,
+        "phase_deg": 148.7174
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.000821,
+        "phase_deg": 140.9472
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 0.000663,
+        "phase_deg": 63.6125
+      }
+    ],
+    "derived_at": "2026-08-28T01:51:56Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "constantes armónicas"
+      },
+      {
+        "name": "neaps/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 1.312472,
+      "phase_deg": 94.8579
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.274812,
+      "phase_deg": 75.6835
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.454396,
+      "phase_deg": 127.4954
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.128803,
+      "phase_deg": 125.1709
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.038633,
+      "phase_deg": 57.0782
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.004628,
+      "phase_deg": 29.2724
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.064238,
+      "phase_deg": 70.9286
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.021118,
+      "phase_deg": 58.1683
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.07051,
+      "phase_deg": 323.7071
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.021664,
+      "phase_deg": 276.9884
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.001585,
+      "phase_deg": 333.3624
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.025562,
+      "phase_deg": 334.0173
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.003852,
+      "phase_deg": 256.8622
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.006406,
+      "phase_deg": 197.8008
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.043604,
+      "phase_deg": 235.8215
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.023094,
+      "phase_deg": 88.5592
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.025067,
+      "phase_deg": 119.9488
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.002182,
+      "phase_deg": 118.2835
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.033346,
+      "phase_deg": 105.5889
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.003651,
+      "phase_deg": 122.0079
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.003914,
+      "phase_deg": 232.2901
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.00375,
+      "phase_deg": 102.5075
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.012795,
+      "phase_deg": 331.7289
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.042442,
+      "phase_deg": 61.0631
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.05221,
+      "phase_deg": 76.681
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.010042,
+      "phase_deg": 87.6149
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.012487,
+      "phase_deg": 288.9712
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.010037,
+      "phase_deg": 47.716
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 0.008447,
+      "phase_deg": 187.9728
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 0.000828,
+      "phase_deg": 14.9389
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 0.000463,
+      "phase_deg": 194.3138
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.00141,
+      "phase_deg": 217.7124
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.003865,
+      "phase_deg": 281.2008
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.003321,
+      "phase_deg": 312.6118
+    }
+  ],
+  "quality": {
+    "rmse_m": 0.0581,
+    "hw_time_err_p95_min": 12.81,
+    "grade": "B",
+    "validated_against": "IOC san2",
+    "grade_reason": "no alcanza A: coste de truncar al catálogo del motor 1.1 cm RMS > 1 cm",
+    "metrics": {
+      "window_start": "2026-07-29T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 42139,
+      "predicted_range_m": 4.2151,
+      "rmse_m": 0.0581,
+      "nrmse": 0.01377,
+      "r2": 0.99651,
+      "hw_time_err_p95_min": 12.81,
+      "hw_height_err_p95_m": 0.1077,
+      "matched_extremes": 115,
+      "predicted_extremes": 116,
+      "cross_rmse_m": 0.0102,
+      "cross_source": "santandertg-san-esp-cmems",
+      "cross_rmse_worst_m": 0.0102,
+      "cross_source_worst": "santandertg-san-esp-cmems",
+      "truncation_rms_m": 0.01059,
+      "dropped_amplitude_m": 0.06256,
+      "dropped_amplitude_fraction": 0.022436,
+      "dropped_constituents": [
+        "2MS6",
+        "EP2",
+        "MB2",
+        "MA2",
+        "3L2",
+        "R3",
+        "SGM",
+        "T3",
+        "N4",
+        "MTM",
+        "3N2",
+        "MKS2",
+        "MSQM",
+        "2MO5",
+        "S3",
+        "2MK5"
+      ],
+      "observation_source": "IOC san2"
+    }
+  }
+}

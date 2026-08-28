@@ -59,6 +59,31 @@ jobs:
       - run: deno task check
       - run: deno task test
 
+  # Pipeline de datos (data/pipeline). Sólo el camino OFFLINE: el motor de predicción armónica
+  # contra la tabla publicada de velocidades y contra el fixture de la implementación de referencia,
+  # más la validación de los JSON commiteados contra el schema station/v1 y contra el catálogo de
+  # constituyentes que soporta el motor de producción. Regenerar el dataset (`make build`) necesita
+  # red y no corre en CI a propósito: el dataset se commitea.
+  data-pipeline:
+    name: Datos · motor armónico + schema station/v1
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      PYTHONPATH: ${{ github.workspace }}/data/pipeline
+    defaults:
+      run:
+        working-directory: data/pipeline
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: data/pipeline/requirements.txt
+      - run: pip install --requirement requirements.txt
+      - run: python -m pytest tests -q
+      - run: python run.py check
+
   # Gate del Guardián (skill security-gate): escalera determinista secretos → SAST → deps, con el
   # ruleset vendorizado en .claude/skills/security-gate/presets. Sin cloud: nada sale del runner.
   # NO se corre pnpm install a propósito: así la escalera no escanea node_modules (osv-scanner lee

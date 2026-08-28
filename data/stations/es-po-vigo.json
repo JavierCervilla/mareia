@@ -1,0 +1,385 @@
+{
+  "schema": "station/v1",
+  "id": "es-po-vigo",
+  "name": "Vigo",
+  "lat": 42.2406,
+  "lon": -8.7207,
+  "timezone": "Europe/Madrid",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 1.982
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "vigo-vigo-esp-ieo",
+      "station_name": "Vigo",
+      "lat": 42.238,
+      "lon": -8.73,
+      "distance_km": 0.818,
+      "analysis_epoch": {
+        "start": "1997-12-31",
+        "end": "2016-12-31"
+      },
+      "license": "cc-by-4.0"
+    },
+    "fallback": [
+      {
+        "dataset": "TICON-4",
+        "station_id": "vigo-208a-esp-uhslc_rq",
+        "station_name": "Vigo",
+        "lat": 42.233,
+        "lon": -8.733,
+        "distance_km": 1.319,
+        "analysis_epoch": {
+          "start": "1971-12-31",
+          "end": "1990-12-31"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "vigotg-vig-esp-cmems",
+        "station_name": "Vigo",
+        "lat": 42.243,
+        "lon": -8.726,
+        "distance_km": 0.511,
+        "analysis_epoch": {
+          "start": "2006-06-30",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "marintg-mar-esp-cmems",
+        "station_name": "Marin",
+        "lat": 42.406101,
+        "lon": -8.6911,
+        "distance_km": 18.563,
+        "analysis_epoch": {
+          "start": "2010-01-01",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      }
+    ],
+    "dropped_constituents": [
+      {
+        "name": "MB2",
+        "amplitude_m": 0.01367,
+        "phase_deg": 262.9747
+      },
+      {
+        "name": "MA2",
+        "amplitude_m": 0.009578,
+        "phase_deg": 293.5367
+      },
+      {
+        "name": "EP2",
+        "amplitude_m": 0.008936,
+        "phase_deg": 10.3182
+      },
+      {
+        "name": "MKS2",
+        "amplitude_m": 0.008009,
+        "phase_deg": 233.6497
+      },
+      {
+        "name": "MTM",
+        "amplitude_m": 0.005351,
+        "phase_deg": 223.729
+      },
+      {
+        "name": "SGM",
+        "amplitude_m": 0.003763,
+        "phase_deg": 54.1261
+      },
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.002879,
+        "phase_deg": 220.0155
+      },
+      {
+        "name": "3L2",
+        "amplitude_m": 0.002676,
+        "phase_deg": 257.5368
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.002533,
+        "phase_deg": 275.2213
+      },
+      {
+        "name": "2MS6",
+        "amplitude_m": 0.002472,
+        "phase_deg": 204.1139
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.002272,
+        "phase_deg": 89.324
+      },
+      {
+        "name": "3N2",
+        "amplitude_m": 0.001795,
+        "phase_deg": 328.8663
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.000811,
+        "phase_deg": 148.389
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.000441,
+        "phase_deg": 175.5742
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 0.000148,
+        "phase_deg": 257.9577
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 5.6e-05,
+        "phase_deg": 118.5338
+      }
+    ],
+    "derived_at": "2026-08-28T01:51:56Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "constantes armónicas"
+      },
+      {
+        "name": "neaps/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 1.078897,
+      "phase_deg": 77.4527
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.230366,
+      "phase_deg": 58.4863
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.376747,
+      "phase_deg": 106.0681
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.105008,
+      "phase_deg": 103.747
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.033366,
+      "phase_deg": 41.0656
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.005679,
+      "phase_deg": 57.8023
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.072099,
+      "phase_deg": 62.2229
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.024142,
+      "phase_deg": 53.5124
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.06353,
+      "phase_deg": 319.4209
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.019469,
+      "phase_deg": 268.5247
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.002216,
+      "phase_deg": 316.0597
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.006529,
+      "phase_deg": 231.6087
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.003062,
+      "phase_deg": 54.8715
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.004536,
+      "phase_deg": 205.9064
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.058963,
+      "phase_deg": 223.7061
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.048828,
+      "phase_deg": 136.2289
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.018958,
+      "phase_deg": 114.036
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.002579,
+      "phase_deg": 99.6197
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.02381,
+      "phase_deg": 90.6333
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.007883,
+      "phase_deg": 167.3543
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.003605,
+      "phase_deg": 227.7987
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.00596,
+      "phase_deg": 74.4475
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.006477,
+      "phase_deg": 302.4598
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.039858,
+      "phase_deg": 33.6465
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.042985,
+      "phase_deg": 65.8632
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.00452,
+      "phase_deg": 82.7786
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.002616,
+      "phase_deg": 180.7499
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.003484,
+      "phase_deg": 343.2344
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 0.002342,
+      "phase_deg": 153.8194
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 0.000576,
+      "phase_deg": 268.1593
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 0.000791,
+      "phase_deg": 62.5051
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.001156,
+      "phase_deg": 187.524
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.003502,
+      "phase_deg": 270.5928
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.000308,
+      "phase_deg": 318.2233
+    }
+  ],
+  "quality": {
+    "rmse_m": 0.0671,
+    "hw_time_err_p95_min": 15.69,
+    "grade": "B",
+    "validated_against": "IOC vig2",
+    "grade_reason": "no alcanza A: coste de truncar al catálogo del motor 1.3 cm RMS > 1 cm",
+    "metrics": {
+      "window_start": "2026-07-29T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 30083,
+      "predicted_range_m": 3.565,
+      "rmse_m": 0.0671,
+      "nrmse": 0.01881,
+      "r2": 0.99285,
+      "hw_time_err_p95_min": 15.69,
+      "hw_height_err_p95_m": 0.1386,
+      "matched_extremes": 83,
+      "predicted_extremes": 116,
+      "cross_rmse_m": 0.0249,
+      "cross_source": "vigotg-vig-esp-cmems",
+      "cross_rmse_worst_m": 0.4175,
+      "cross_source_worst": "vigo-208a-esp-uhslc_rq",
+      "truncation_rms_m": 0.01297,
+      "dropped_amplitude_m": 0.06539,
+      "dropped_amplitude_fraction": 0.027588,
+      "dropped_constituents": [
+        "MB2",
+        "MA2",
+        "EP2",
+        "MKS2",
+        "MTM",
+        "SGM",
+        "MSQM",
+        "3L2",
+        "R3",
+        "2MS6",
+        "T3",
+        "3N2",
+        "N4",
+        "S3",
+        "2MK5",
+        "2MO5"
+      ],
+      "observation_source": "IOC vig2"
+    }
+  }
+}

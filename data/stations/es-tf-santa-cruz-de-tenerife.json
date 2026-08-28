@@ -1,0 +1,385 @@
+{
+  "schema": "station/v1",
+  "id": "es-tf-santa-cruz-de-tenerife",
+  "name": "Santa Cruz de Tenerife",
+  "lat": 28.478,
+  "lon": -16.234,
+  "timezone": "Atlantic/Canary",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 1.381
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "tenerife-228a-esp-uhslc_rq",
+      "station_name": "Tenerife",
+      "lat": 28.478,
+      "lon": -16.24,
+      "distance_km": 0.586,
+      "analysis_epoch": {
+        "start": "2000-07-18",
+        "end": "2019-07-18"
+      },
+      "license": "cc-by-4.0"
+    },
+    "fallback": [
+      {
+        "dataset": "TICON-4",
+        "station_id": "tenerife-ten-esp-da_mm",
+        "station_name": "Tenerife",
+        "lat": 28.48,
+        "lon": -16.24,
+        "distance_km": 0.627,
+        "analysis_epoch": {
+          "start": "1994-01-22",
+          "end": "2012-12-29"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "tenerifetg-ten-esp-cmems",
+        "station_name": "Tenerife",
+        "lat": 28.48,
+        "lon": -16.24,
+        "distance_km": 0.627,
+        "analysis_epoch": {
+          "start": "2006-06-30",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "tenerife2tg-ten-esp-cmems",
+        "station_name": "Tenerife",
+        "lat": 28.477209,
+        "lon": -16.241131,
+        "distance_km": 0.703,
+        "analysis_epoch": {
+          "start": "2019-11-01",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      }
+    ],
+    "dropped_constituents": [
+      {
+        "name": "MB2",
+        "amplitude_m": 0.008126,
+        "phase_deg": 77.891
+      },
+      {
+        "name": "EP2",
+        "amplitude_m": 0.006259,
+        "phase_deg": 326.3421
+      },
+      {
+        "name": "MA2",
+        "amplitude_m": 0.005018,
+        "phase_deg": 83.5446
+      },
+      {
+        "name": "SGM",
+        "amplitude_m": 0.002768,
+        "phase_deg": 25.4066
+      },
+      {
+        "name": "2MS6",
+        "amplitude_m": 0.002372,
+        "phase_deg": 15.1402
+      },
+      {
+        "name": "3L2",
+        "amplitude_m": 0.002343,
+        "phase_deg": 150.7326
+      },
+      {
+        "name": "3N2",
+        "amplitude_m": 0.001694,
+        "phase_deg": 94.4236
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.001493,
+        "phase_deg": 166.2378
+      },
+      {
+        "name": "MKS2",
+        "amplitude_m": 0.001463,
+        "phase_deg": 89.2854
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.001267,
+        "phase_deg": 317.399
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.001198,
+        "phase_deg": 327.4418
+      },
+      {
+        "name": "MTM",
+        "amplitude_m": 0.000769,
+        "phase_deg": 87.1847
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.00072,
+        "phase_deg": 15.3832
+      },
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.000452,
+        "phase_deg": 269.6158
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 0.000354,
+        "phase_deg": 94.2418
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 5.2e-05,
+        "phase_deg": 212.87
+      }
+    ],
+    "derived_at": "2026-08-28T01:51:56Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "constantes armónicas"
+      },
+      {
+        "name": "neaps/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 0.717833,
+      "phase_deg": 29.245
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.149302,
+      "phase_deg": 15.4907
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.275617,
+      "phase_deg": 52.6243
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.077709,
+      "phase_deg": 49.3479
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.021106,
+      "phase_deg": 359.563
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.004972,
+      "phase_deg": 14.4829
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.063601,
+      "phase_deg": 40.7802
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.020074,
+      "phase_deg": 26.7426
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.047481,
+      "phase_deg": 293.1007
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.014682,
+      "phase_deg": 239.8756
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.001882,
+      "phase_deg": 294.6471
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.008644,
+      "phase_deg": 114.6337
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.003283,
+      "phase_deg": 323.6083
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.009297,
+      "phase_deg": 4.0016
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.071513,
+      "phase_deg": 156.0739
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.018495,
+      "phase_deg": 18.9912
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.016413,
+      "phase_deg": 55.9944
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.002598,
+      "phase_deg": 67.709
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.016435,
+      "phase_deg": 38.0297
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.004099,
+      "phase_deg": 64.6722
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.002801,
+      "phase_deg": 193.7554
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.002117,
+      "phase_deg": 40.409
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.004427,
+      "phase_deg": 158.5554
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.028136,
+      "phase_deg": 350.6088
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.027177,
+      "phase_deg": 18.8989
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.003727,
+      "phase_deg": 20.0611
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.003626,
+      "phase_deg": 67.2901
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.005212,
+      "phase_deg": 185.3106
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 0.001821,
+      "phase_deg": 315.7317
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 0.000521,
+      "phase_deg": 155.482
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 0.001073,
+      "phase_deg": 262.6452
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.000684,
+      "phase_deg": 145.1669
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.002504,
+      "phase_deg": 244.6755
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.001902,
+      "phase_deg": 229.7277
+    }
+  ],
+  "quality": {
+    "rmse_m": 0.0415,
+    "hw_time_err_p95_min": 13.14,
+    "grade": "A",
+    "validated_against": "IOC tene",
+    "grade_reason": "cumple todos los umbrales de grade A",
+    "metrics": {
+      "window_start": "2026-07-29T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 43156,
+      "predicted_range_m": 2.4411,
+      "rmse_m": 0.0415,
+      "nrmse": 0.01701,
+      "r2": 0.99388,
+      "hw_time_err_p95_min": 13.14,
+      "hw_height_err_p95_m": 0.0871,
+      "matched_extremes": 116,
+      "predicted_extremes": 116,
+      "cross_rmse_m": 0.0084,
+      "cross_source": "tenerifetg-ten-esp-cmems",
+      "cross_rmse_worst_m": 0.3487,
+      "cross_source_worst": "tenerife-ten-esp-da_mm",
+      "truncation_rms_m": 0.00894,
+      "dropped_amplitude_m": 0.03635,
+      "dropped_amplitude_fraction": 0.021803,
+      "dropped_constituents": [
+        "MB2",
+        "EP2",
+        "MA2",
+        "SGM",
+        "2MS6",
+        "3L2",
+        "3N2",
+        "R3",
+        "MKS2",
+        "T3",
+        "S3",
+        "MTM",
+        "N4",
+        "MSQM",
+        "2MK5",
+        "2MO5"
+      ],
+      "observation_source": "IOC tene"
+    }
+  }
+}

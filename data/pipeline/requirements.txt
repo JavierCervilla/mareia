@@ -1,0 +1,8 @@
+# Dependencias del pipeline de estaciones, pinneadas para que la reejecución sea reproducible.
+# Todo lo demás (HTTP, tar, JSON) sale de la biblioteca estándar a propósito: menos superficie que
+# fijar y menos que pueda romperse dentro de un año.
+numpy==2.4.6
+jsonschema==4.25.1
+
+# Sólo para `make test`.
+pytest==9.1.1
