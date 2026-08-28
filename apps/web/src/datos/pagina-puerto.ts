@@ -37,8 +37,9 @@ const PASO_MES_MIN = 60;
  * Se mide sobre los extremos del **mes** que la página publica, que es el ciclo completo de vivas y
  * muertas: la carrera de un día suelto depende de en qué punto del ciclo caiga. En el catálogo
  * piloto separa con holgura los tres puertos micromareales de verdad (Cabo de Palos, La Manga y
- * Palma: 0,19-0,26 m según el mes) del siguiente (Málaga, 0,62-0,66 m) y de los mareales
- * atlánticos (2,2-4,3 m). Antes el aviso lo disparaba el grade del QC, y eso le colgó a Cádiz
+ * Palma: 0,15-0,27 m, medido mes a mes en 2026 y 2027) del siguiente (Málaga, 0,59-0,70 m) y de los
+ * mareales atlánticos (2,0-4,6 m). Ningún puerto del catálogo cruza el umbral en ninguno de esos 24
+ * meses: la clasificación no depende del mes que toque construir. Antes el aviso lo disparaba el grade del QC, y eso le colgó a Cádiz
  * —2,90 m de carrera— el cartel de micromareal (hallazgo A-8 del pase adversario de T-09).
  */
 export const CARRERA_MICROMAREAL_M = 0.4;
@@ -112,8 +113,21 @@ function porDiaCivil(
  * Sin extremos no hay carrera que medir y devuelve 0, que es lo que la deja fuera del aviso: un
  * aviso sobre una carrera desconocida sería exactamente el error que este cálculo viene a arreglar.
  */
-function carreraDe(eventos: readonly TideEventDto[]): number {
-  if (eventos.length === 0) return 0;
+/**
+ * Carrera de marea de un conjunto de extremos: de la bajamar más baja a la pleamar más alta.
+ *
+ * Exportada por su test: es la que decide si un puerto lleva el aviso de «marea de centímetros», y
+ * el caso que importa —quedarse sin extremos— no lo produce ningún puerto del catálogo piloto.
+ */
+export function carreraDe(eventos: readonly TideEventDto[], mes: string, slug: string): number {
+  if (eventos.length === 0) {
+    // Un mes sin un solo extremo no es «marea nula»: es un dataset roto. Devolver 0 apagaba el
+    // aviso de micromareal en silencio —justo el peor sitio para fallar callado—, y con 200-300
+    // puertos en T-13 eso pasa de imposible a cuestión de tiempo. Que rompa el build.
+    throw new Error(
+      `El mes ${mes} de ${slug} no tiene ni un extremo de marea: el dataset de la estación está roto.`,
+    );
+  }
   const alturas = eventos.map((evento) => evento.height_m);
   return Math.max(...alturas) - Math.min(...alturas);
 }
@@ -138,7 +152,7 @@ export async function cargarDatosDePuerto(
 
   const { port, station } = ficha;
   const coeficientes = await coeficientesDelMes(fechaIso, port.timezone);
-  const carreraMensualM = carreraDe(mes.events);
+  const carreraMensualM = carreraDe(mes.events, `${primero}..${ultimo}`, slug);
   const eventosPorDia = porDiaCivil(mes.events, port.timezone);
   const coeficientePorDia = new Map(coeficientes.map((dia) => [dia.dateIso, dia]));
   const delDia = coeficientePorDia.get(fechaIso);
@@ -168,7 +182,7 @@ export async function cargarDatosDePuerto(
     coeficiente: delDia,
     astro,
     carreraMensualM,
-    micromareal: carreraMensualM > 0 && carreraMensualM < CARRERA_MICROMAREAL_M,
+    micromareal: carreraMensualM < CARRERA_MICROMAREAL_M,
     sinObservacion: station.quality.rmse_m === null,
   };
 }

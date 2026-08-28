@@ -21,8 +21,8 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   —cambian de licencia entre puertos—. Y **dos avisos distintos** antes de la tabla, porque son dos
   cosas distintas: en Cabo de Palos, La Manga y Palma, que la marea astronómica es de centímetros
   (19-24 cm de carrera al mes) y quien manda es el residuo meteorológico; en Cádiz, que la
-  predicción **no se ha podido comprobar** con un mareógrafo —su marea sube y baja casi tres
-  metros—.
+  predicción **no se ha podido comprobar** con un mareógrafo —su marea sube y baja 3,4 m en el mes
+  que publica—.
 - **SEO**: canónicas, `sitemap.xml` con el `lastmod` del build, JSON-LD (`Place` +
   `BreadcrumbList`, generado del mismo array que pinta las migas) y anclas por sección.
 - **Gate de UI** (deuda de T-01, prerrequisito de esta trayectoria): brief de diseño commiteado
@@ -37,7 +37,8 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   y convertidos en gate permanente:
   - El aviso de «marea de centímetros» lo decide ahora la **carrera de marea medida** del mes, no el
     grade del QC. Con el criterio viejo Cádiz leía que su marea no importaba encima de su propia
-    tabla de 2,90 m; era el aviso más grave de la página, en el puerto equivocado.
+    tabla, que ese día marcaba 2,90 m de carrera; era el aviso más grave de la página, en el puerto
+    equivocado.
   - La **nota de calidad ya no habla de observaciones que no existen**: donde no hubo mareógrafo lo
     dice con esas palabras, en vez de confundirlo con «no hay pleamares medibles».
   - **Sol y Luna**: los ~25 días al año en que el orto o el ocaso de la Luna caen fuera del día
