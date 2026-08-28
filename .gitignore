@@ -9,6 +9,12 @@ apps/web/dist/
 # Caché local de Deno (DENO_DIR apuntado al repo en CI/local)
 .deno/
 
+# Pipeline Python de estaciones: descargas cacheadas y entorno virtual
+data/pipeline/.cache/
+data/pipeline/.venv/
+__pycache__/
+.pytest_cache/
+
 # Entorno
 .env
 .env.*

@@ -119,6 +119,10 @@ export default [
       ".deno/**",
       "qa-bundles/**",
       "qa-shots/**",
+      // Entorno virtual y caché del pipeline Python: traen JS vendorizado dentro de paquetes de
+      // pip (urllib3 lleva un worker de Emscripten) que no es código nuestro y no se lintea.
+      "data/pipeline/.venv/**",
+      "data/pipeline/.cache/**",
     ],
   },
   ...tseslint.configs.recommended,

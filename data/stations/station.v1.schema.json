@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mareia.dev/schemas/station.v1.schema.json",
+  "title": "Mareia station/v1",
+  "description": "Constantes armónicas y metadatos de calidad de un puerto del dataset de Mareia.",
+  "type": "object",
+  "required": ["schema", "id", "name", "lat", "lon", "timezone", "datum", "source", "constituents", "quality"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "station/v1" },
+    "id": {
+      "type": "string",
+      "description": "Identificador canónico <país>-<provincia>-<slug>.",
+      "pattern": "^[a-z]{2}-[a-z0-9]{1,4}-[a-z0-9-]+$"
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+    "lon": { "type": "number", "minimum": -180, "maximum": 180 },
+    "timezone": { "type": "string", "minLength": 1 },
+    "datum": {
+      "type": "object",
+      "required": ["reference", "msl_offset_m"],
+      "additionalProperties": false,
+      "properties": {
+        "reference": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Cero hidrográfico al que se refieren las alturas (p. ej. LAT)."
+        },
+        "msl_offset_m": {
+          "type": "number",
+          "description": "Altura del nivel medio del mar sobre ese cero, en metros."
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["primary", "fallback", "dropped_constituents", "derived_at", "attribution"],
+      "additionalProperties": false,
+      "properties": {
+        "primary": { "$ref": "#/$defs/gauge" },
+        "fallback": {
+          "type": "array",
+          "description": "Candidatas descartadas por la política de reconciliación, en su orden.",
+          "items": { "$ref": "#/$defs/gauge" }
+        },
+        "dropped_constituents": {
+          "type": "array",
+          "description": "Constantes que la fuente publica pero el motor de producción no soporta, descartadas al truncar al juego estándar de 37 de NOAA. Se conservan aquí para poder estimar el error de truncado.",
+          "items": { "$ref": "#/$defs/constituent" }
+        },
+        "derived_at": { "type": "string", "format": "date-time" },
+        "attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "url", "license", "role"],
+            "additionalProperties": true,
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "url": { "type": "string", "minLength": 1 },
+              "license": { "type": "string", "minLength": 1 },
+              "license_url": { "type": "string" },
+              "role": { "type": "string", "minLength": 1 },
+              "notes": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "constituents": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Constantes armónicas truncadas al juego que soporta el motor de producción.",
+      "items": { "$ref": "#/$defs/constituent" }
+    },
+    "quality": {
+      "type": "object",
+      "required": ["rmse_m", "hw_time_err_p95_min", "grade", "validated_against"],
+      "additionalProperties": true,
+      "properties": {
+        "rmse_m": {
+          "type": ["number", "null"],
+          "description": "RMSE contra observaciones, con las medias alineadas. Cota superior: incluye el residuo meteorológico."
+        },
+        "hw_time_err_p95_min": {
+          "type": ["number", "null"],
+          "description": "Percentil 95 del error absoluto de hora de pleamar/bajamar, en minutos."
+        },
+        "grade": { "enum": ["A", "B", "C"] },
+        "validated_against": { "type": "string", "minLength": 1 },
+        "grade_reason": { "type": "string" },
+        "metrics": { "type": "object" }
+      }
+    }
+  },
+  "$defs": {
+    "constituent": {
+      "type": "object",
+      "required": ["name", "amplitude_m", "phase_deg"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "pattern": "^[A-Z0-9]+$" },
+        "amplitude_m": { "type": "number", "minimum": 0 },
+        "phase_deg": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 360,
+          "description": "Fase de Greenwich (referida a UTC), en grados."
+        }
+      }
+    },
+    "gauge": {
+      "type": "object",
+      "required": ["dataset", "station_id", "station_name", "lat", "lon", "distance_km", "license"],
+      "additionalProperties": false,
+      "properties": {
+        "dataset": { "type": "string", "minLength": 1 },
+        "station_id": { "type": "string", "minLength": 1 },
+        "station_name": { "type": "string" },
+        "lat": { "type": "number" },
+        "lon": { "type": "number" },
+        "distance_km": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Distancia del mareógrafo a la dársena del puerto."
+        },
+        "analysis_epoch": {
+          "type": "object",
+          "required": ["start", "end"],
+          "additionalProperties": false,
+          "properties": { "start": { "type": "string" }, "end": { "type": "string" } }
+        },
+        "license": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

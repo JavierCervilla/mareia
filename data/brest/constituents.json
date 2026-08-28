@@ -1,0 +1,414 @@
+{
+  "schema": "station/v1",
+  "id": "fr-29-brest",
+  "name": "Brest",
+  "lat": 48.3828,
+  "lon": -4.4949,
+  "timezone": "Europe/Paris",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 3.781
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "brest-3-fra-refmar",
+      "station_name": "Brest",
+      "lat": 48.3829,
+      "lon": -4.49504,
+      "distance_km": 0.015,
+      "analysis_epoch": {
+        "start": "2006-03-31",
+        "end": "2025-03-31"
+      },
+      "license": "cc-by-4.0"
+    },
+    "fallback": [
+      {
+        "dataset": "TICON-4",
+        "station_id": "brest-822-fra-uhslc_fd",
+        "station_name": "Brest",
+        "lat": 48.383,
+        "lon": -4.5,
+        "distance_km": 0.377,
+        "analysis_epoch": {
+          "start": "2006-06-30",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "le_conquet-152-fra-refmar",
+        "station_name": "Le Conquet",
+        "lat": 48.359098,
+        "lon": -4.78075,
+        "distance_km": 21.279,
+        "analysis_epoch": {
+          "start": "2006-03-31",
+          "end": "2025-03-31"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "brest-822a-fra-uhslc_rq",
+        "station_name": "Brest",
+        "lat": 48.383,
+        "lon": -4.495,
+        "distance_km": 0.023,
+        "analysis_epoch": {
+          "start": "2000-01-05",
+          "end": "2018-12-31"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "bresttg_60minute-bre-fra-cmems",
+        "station_name": "Brest",
+        "lat": 48.3829,
+        "lon": -4.4951,
+        "distance_km": 0.018,
+        "analysis_epoch": {
+          "start": "2006-03-31",
+          "end": "2025-03-31"
+        },
+        "license": "cc-by-nc-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "leconquettg_60minute-lec-fra-cmems",
+        "station_name": "Le Conquet",
+        "lat": 48.359299,
+        "lon": -4.7809,
+        "distance_km": 21.287,
+        "analysis_epoch": {
+          "start": "2006-03-31",
+          "end": "2025-03-31"
+        },
+        "license": "cc-by-nc-4.0"
+      }
+    ],
+    "dropped_constituents": [
+      {
+        "name": "EP2",
+        "amplitude_m": 0.019687,
+        "phase_deg": 89.4347
+      },
+      {
+        "name": "2MS6",
+        "amplitude_m": 0.016788,
+        "phase_deg": 53.3496
+      },
+      {
+        "name": "MB2",
+        "amplitude_m": 0.012439,
+        "phase_deg": 101.15
+      },
+      {
+        "name": "MA2",
+        "amplitude_m": 0.011018,
+        "phase_deg": 39.4504
+      },
+      {
+        "name": "3L2",
+        "amplitude_m": 0.008246,
+        "phase_deg": 276.7206
+      },
+      {
+        "name": "MKS2",
+        "amplitude_m": 0.007598,
+        "phase_deg": 174.8149
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.005635,
+        "phase_deg": 342.1945
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.005276,
+        "phase_deg": 165.3946
+      },
+      {
+        "name": "SGM",
+        "amplitude_m": 0.003746,
+        "phase_deg": 68.2198
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.003024,
+        "phase_deg": 149.6405
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.00292,
+        "phase_deg": 9.561
+      },
+      {
+        "name": "3N2",
+        "amplitude_m": 0.00217,
+        "phase_deg": 308.5061
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 0.00199,
+        "phase_deg": 313.9119
+      },
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.001169,
+        "phase_deg": 250.3153
+      },
+      {
+        "name": "MTM",
+        "amplitude_m": 0.001129,
+        "phase_deg": 135.118
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 0.000966,
+        "phase_deg": 51.3608
+      }
+    ],
+    "derived_at": "2026-08-28T02:27:59Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "constantes armónicas"
+      },
+      {
+        "name": "openwatersio/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 2.051102,
+      "phase_deg": 108.993
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.416936,
+      "phase_deg": 90.6177
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.748911,
+      "phase_deg": 148.2821
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.213677,
+      "phase_deg": 145.8897
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.057029,
+      "phase_deg": 72.8069
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.007957,
+      "phase_deg": 11.5042
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.064336,
+      "phase_deg": 75.0882
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.022545,
+      "phase_deg": 63.6506
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.065842,
+      "phase_deg": 327.8869
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.020459,
+      "phase_deg": 281.3478
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.002339,
+      "phase_deg": 298.7815
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.054472,
+      "phase_deg": 105.9006
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.004432,
+      "phase_deg": 203.9745
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.010282,
+      "phase_deg": 177.577
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.049317,
+      "phase_deg": 244.9521
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.02051,
+      "phase_deg": 98.0757
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.041688,
+      "phase_deg": 138.5623
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.002373,
+      "phase_deg": 123.3866
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.063873,
+      "phase_deg": 102.9201
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.005339,
+      "phase_deg": 157.8724
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.003782,
+      "phase_deg": 234.4622
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.00333,
+      "phase_deg": 27.1388
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.019768,
+      "phase_deg": 15.8574
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.08572,
+      "phase_deg": 105.0718
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.077785,
+      "phase_deg": 86.6005
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.02627,
+      "phase_deg": 75.8183
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.019426,
+      "phase_deg": 60.4427
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.032688,
+      "phase_deg": 181.7466
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 0.031456,
+      "phase_deg": 354.8529
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 0.002311,
+      "phase_deg": 231.9992
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 0.00216,
+      "phase_deg": 288.6668
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.001388,
+      "phase_deg": 212.7798
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.00336,
+      "phase_deg": 284.2351
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.017315,
+      "phase_deg": 312.0507
+    }
+  ],
+  "quality": {
+    "rmse_m": 0.0794,
+    "hw_time_err_p95_min": 14.53,
+    "grade": "B",
+    "validated_against": "IOC bres",
+    "grade_reason": "no alcanza A: coste de truncar al catálogo del motor 2.2 cm RMS > 1 cm",
+    "metrics": {
+      "window_start": "2026-07-29T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 42556,
+      "predicted_range_m": 6.6059,
+      "rmse_m": 0.0794,
+      "nrmse": 0.01203,
+      "r2": 0.99731,
+      "hw_time_err_p95_min": 14.53,
+      "hw_height_err_p95_m": 0.1465,
+      "matched_extremes": 116,
+      "predicted_extremes": 116,
+      "predicted_extremes_in_window": 116,
+      "observed_extremes": 117,
+      "extremes_usable": true,
+      "cross_rmse_m": 0.0001,
+      "cross_source": "bresttg_60minute-bre-fra-cmems",
+      "cross_rmse_worst_m": 0.0022,
+      "cross_source_worst": "brest-822-fra-uhslc_fd",
+      "truncation_rms_m": 0.0223,
+      "dropped_amplitude_m": 0.1038,
+      "dropped_amplitude_fraction": 0.02384,
+      "dropped_constituents": [
+        "EP2",
+        "2MS6",
+        "MB2",
+        "MA2",
+        "3L2",
+        "MKS2",
+        "R3",
+        "T3",
+        "SGM",
+        "S3",
+        "N4",
+        "3N2",
+        "2MK5",
+        "MSQM",
+        "MTM",
+        "2MO5"
+      ],
+      "observation_source": "IOC bres"
+    }
+  }
+}

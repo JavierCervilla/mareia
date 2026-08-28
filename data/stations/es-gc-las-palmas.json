@@ -1,0 +1,427 @@
+{
+  "schema": "station/v1",
+  "id": "es-gc-las-palmas",
+  "name": "Las Palmas de Gran Canaria",
+  "lat": 28.142,
+  "lon": -15.413,
+  "timezone": "Atlantic/Canary",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 1.407
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "pluz-pluz-esp-ieo",
+      "station_name": "Pluz",
+      "lat": 28.1467,
+      "lon": -15.4076,
+      "distance_km": 0.744,
+      "analysis_epoch": {
+        "start": "1997-12-31",
+        "end": "2016-12-31"
+      },
+      "license": "cc-by-4.0"
+    },
+    "fallback": [
+      {
+        "dataset": "TICON-4",
+        "station_id": "las_palmas-217-esp-uhslc_fd",
+        "station_name": "Las Palmas",
+        "lat": 28.148,
+        "lon": -15.407,
+        "distance_km": 0.889,
+        "analysis_epoch": {
+          "start": "2005-09-24",
+          "end": "2024-09-24"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "las_palmas-217d-esp-uhslc_rq",
+        "station_name": "Las Palmas",
+        "lat": 28.133,
+        "lon": -15.417,
+        "distance_km": 1.075,
+        "analysis_epoch": {
+          "start": "1998-12-31",
+          "end": "2017-12-31"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "las_palmas-217b-esp-uhslc_rq",
+        "station_name": "Las Palmas",
+        "lat": 28.1,
+        "lon": -15.4,
+        "distance_km": 4.841,
+        "analysis_epoch": {
+          "start": "1971-01-01",
+          "end": "1983-05-17"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "las_palmas-217c-esp-uhslc_rq",
+        "station_name": "Las Palmas",
+        "lat": 28.1,
+        "lon": -15.4,
+        "distance_km": 4.841,
+        "analysis_epoch": {
+          "start": "1983-06-23",
+          "end": "1991-12-31"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "las_palmas-217a-esp-uhslc_rq",
+        "station_name": "Las Palmas",
+        "lat": 28.1,
+        "lon": -15.4,
+        "distance_km": 4.841,
+        "analysis_epoch": {
+          "start": "1985-01-01",
+          "end": "1991-12-31"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "laspalmastg-las-esp-cmems",
+        "station_name": "Las Palmas",
+        "lat": 28.141001,
+        "lon": -15.412,
+        "distance_km": 0.148,
+        "analysis_epoch": {
+          "start": "2006-08-07",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      }
+    ],
+    "dropped_constituents": [
+      {
+        "name": "EP2",
+        "amplitude_m": 0.007363,
+        "phase_deg": 322.3778
+      },
+      {
+        "name": "MB2",
+        "amplitude_m": 0.006494,
+        "phase_deg": 107.123
+      },
+      {
+        "name": "MA2",
+        "amplitude_m": 0.004196,
+        "phase_deg": 124.8398
+      },
+      {
+        "name": "SGM",
+        "amplitude_m": 0.003074,
+        "phase_deg": 30.8233
+      },
+      {
+        "name": "3L2",
+        "amplitude_m": 0.002754,
+        "phase_deg": 150.9696
+      },
+      {
+        "name": "MKS2",
+        "amplitude_m": 0.001788,
+        "phase_deg": 348.7396
+      },
+      {
+        "name": "2MS6",
+        "amplitude_m": 0.00175,
+        "phase_deg": 12.3301
+      },
+      {
+        "name": "MTM",
+        "amplitude_m": 0.001253,
+        "phase_deg": 66.9269
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.001188,
+        "phase_deg": 160.6227
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.001106,
+        "phase_deg": 332.536
+      },
+      {
+        "name": "3N2",
+        "amplitude_m": 0.001083,
+        "phase_deg": 70.899
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.000758,
+        "phase_deg": 18.4222
+      },
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.000381,
+        "phase_deg": 236.5592
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.000353,
+        "phase_deg": 348.9524
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 0.00026,
+        "phase_deg": 124.3315
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 7.5e-05,
+        "phase_deg": 226.2508
+      }
+    ],
+    "derived_at": "2026-08-28T02:27:59Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "constantes armónicas"
+      },
+      {
+        "name": "openwatersio/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 0.748144,
+      "phase_deg": 28.2068
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.154943,
+      "phase_deg": 14.6011
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.285374,
+      "phase_deg": 52.4298
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.080201,
+      "phase_deg": 48.395
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.022666,
+      "phase_deg": 0.9433
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.003911,
+      "phase_deg": 347.7385
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.061555,
+      "phase_deg": 40.2536
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.017924,
+      "phase_deg": 29.8638
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.048613,
+      "phase_deg": 293.1926
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.015998,
+      "phase_deg": 242.878
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.001506,
+      "phase_deg": 325.7023
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.006796,
+      "phase_deg": 119.3357
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.003468,
+      "phase_deg": 329.415
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.00758,
+      "phase_deg": 4.6473
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.039442,
+      "phase_deg": 167.0575
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.011354,
+      "phase_deg": 36.002
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.017222,
+      "phase_deg": 55.2731
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.002338,
+      "phase_deg": 71.9848
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.016629,
+      "phase_deg": 36.9235
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.004356,
+      "phase_deg": 61.8822
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.002912,
+      "phase_deg": 200.5165
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.00235,
+      "phase_deg": 52.989
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.004292,
+      "phase_deg": 160.5964
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.030296,
+      "phase_deg": 349.8568
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.02988,
+      "phase_deg": 18.7068
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.004957,
+      "phase_deg": 19.1065
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.003033,
+      "phase_deg": 72.0008
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.003939,
+      "phase_deg": 187.9378
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 0.001359,
+      "phase_deg": 305.283
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 0.00035,
+      "phase_deg": 159.708
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 0.000973,
+      "phase_deg": 276.1437
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.000606,
+      "phase_deg": 145.898
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.002875,
+      "phase_deg": 248.7899
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.001591,
+      "phase_deg": 214.4034
+    }
+  ],
+  "quality": {
+    "rmse_m": 0.0468,
+    "hw_time_err_p95_min": 13.24,
+    "grade": "A",
+    "validated_against": "IOC lasp",
+    "grade_reason": "cumple todos los umbrales de grade A",
+    "metrics": {
+      "window_start": "2026-07-29T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 43178,
+      "predicted_range_m": 2.5296,
+      "rmse_m": 0.0468,
+      "nrmse": 0.01849,
+      "r2": 0.99328,
+      "hw_time_err_p95_min": 13.24,
+      "hw_height_err_p95_m": 0.0689,
+      "matched_extremes": 115,
+      "predicted_extremes": 116,
+      "predicted_extremes_in_window": 115,
+      "observed_extremes": 121,
+      "extremes_usable": true,
+      "cross_rmse_m": 0.0036,
+      "cross_source": "las_palmas-217-esp-uhslc_fd",
+      "cross_rmse_worst_m": 0.2822,
+      "cross_source_worst": "las_palmas-217a-esp-uhslc_rq",
+      "truncation_rms_m": 0.00839,
+      "dropped_amplitude_m": 0.03388,
+      "dropped_amplitude_fraction": 0.020246,
+      "dropped_constituents": [
+        "EP2",
+        "MB2",
+        "MA2",
+        "SGM",
+        "3L2",
+        "MKS2",
+        "2MS6",
+        "MTM",
+        "R3",
+        "T3",
+        "3N2",
+        "N4",
+        "MSQM",
+        "S3",
+        "2MK5",
+        "2MO5"
+      ],
+      "observation_source": "IOC lasp"
+    }
+  }
+}
