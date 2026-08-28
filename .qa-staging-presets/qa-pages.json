@@ -1,0 +1,6 @@
+{
+  "_comment": "Rutas clave que captura el smoke de QA. Config versionada de referencia: la fuente efectiva es el array PAGES del spec. En T-01 solo existe la home; las fichas de puerto llegan en T-02+.",
+  "pages": [
+    { "name": "home", "route": "/" }
+  ]
+}

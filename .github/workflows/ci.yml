@@ -1,0 +1,126 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ASTRO_TELEMETRY_DISABLED: "1"
+
+jobs:
+  # Gate anti-slop determinista (skill code-anti-slop): preset ESLint + sonarjs sobre el TS del
+  # monorepo. Rojo = no merge. Los .astro aún no se lintean (falta eslint-plugin-astro, T-02+).
+  anti-slop:
+    name: Anti-slop · ESLint + sonarjs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+  web:
+    name: Web · build Astro + typecheck de packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter web build
+      - run: pnpm typecheck
+
+  api:
+    name: API · deno check + test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v5
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno task check
+      - run: deno task test
+
+  # Gate del Guardián (skill security-gate): escalera determinista secretos → SAST → deps, con el
+  # ruleset vendorizado en .claude/skills/security-gate/presets. Sin cloud: nada sale del runner.
+  # NO se corre pnpm install a propósito: así la escalera no escanea node_modules (osv-scanner lee
+  # el lockfile). Si aparecieran CVE PRE-EXISTENTES de transitivas, el ratchet honesto es añadir
+  # --deps-advisory (secretos y SAST nunca degradan).
+  security:
+    name: Guardián · escalera de seguridad (secretos + SAST + deps)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Instalar semgrep (pip)
+        run: pipx install semgrep || pip install --user semgrep
+
+      - name: Instalar gitleaks (binario de release)
+        run: |
+          GL_VER="8.21.2"
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GL_VER}/gitleaks_${GL_VER}_linux_x64.tar.gz" \
+            | tar -xz -C /usr/local/bin gitleaks
+          gitleaks version
+
+      - name: Instalar osv-scanner (binario de release)
+        run: |
+          OSV_VER="1.9.2"
+          curl -sSL -o /usr/local/bin/osv-scanner \
+            "https://github.com/google/osv-scanner/releases/download/v${OSV_VER}/osv-scanner_linux_amd64"
+          chmod +x /usr/local/bin/osv-scanner
+          osv-scanner --version
+
+      - name: Escalera de seguridad (skill security-gate)
+        run: bash .claude/skills/security-gate/scripts/security-gate.sh .
+
+  # Rol qa (skill qa-staging). En T-01 la UI es un hello: no hay recorridos Playwright todavía
+  # (llegan en T-09+), así que el job comprueba la PRESENCIA del esqueleto y es informativo.
+  qa:
+    name: Guardián · QA (presencia del esqueleto)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - name: Presencia del esqueleto de QA
+        run: |
+          set -e
+          for f in .qa-staging .qa-staging-presets/qa-pages.json .qa-adversarial \
+                   tests/e2e/fixtures/qa-bundle.ts tests/e2e/journeys/adversarial/README.md; do
+            [ -e "$f" ] || { echo "FALTA $f"; exit 1; }
+            echo "  OK $f"
+          done
+          echo "T-01: sin recorridos Playwright todavía (T-09+); este job es informativo."
+
+  # Check de PRESENCIA del pase adversario (skill qa-adversarial): si el PR toca UI, exige informe
+  # bien formado en docs/qa/. No juzga agresividad. Escape en el asunto del commit: [skip-adv].
+  adversarial:
+    name: Guardián · presencia del pase adversario
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # El check diffea contra la base del PR: con fetch-depth 1 no hay base y degrada a fail-open.
+          fetch-depth: 0
+      - run: bash .claude/skills/qa-adversarial/scripts/adversarial-presence.sh

@@ -1,0 +1,7 @@
+{
+  "skill": "qa-adversarial",
+  "version": 1,
+  "uiPattern": "^apps/web/src/|[^ ]*\\.(astro|tsx|jsx|css)$",
+  "excludePattern": "(^|/)(tests?|__tests__|e2e)/|\\.spec\\.(ts|tsx|js)$|\\.test\\.(ts|tsx|js)$",
+  "reportPattern": "^docs/qa/informe-adversario[^/]*\\.md$"
+}
