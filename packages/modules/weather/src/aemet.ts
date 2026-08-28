@@ -57,7 +57,7 @@ export interface AemetDeps {
   readonly fetch: typeof fetch;
   /** Clave de AEMET Open Data. `undefined` = la API no la tiene configurada; se degrada. */
   readonly apiKey?: string | undefined;
-  readonly baseUrl?: string;
+  readonly baseUrl?: string | undefined;
 }
 
 /**

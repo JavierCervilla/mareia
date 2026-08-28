@@ -35,3 +35,19 @@ export { AEMET_ATTRIBUTION, AEMET_BASE_URL, fetchCoastalBulletin } from "./aemet
 
 export type { CoastalZone } from "./zones.ts";
 export { COASTAL_ZONES, zoneForPort } from "./zones.ts";
+
+export type {
+  BulletinData,
+  BulletinPayload,
+  PortLocation,
+  PortLocationRepository,
+  WeatherModuleDeps,
+  WeatherPayload,
+} from "./module.ts";
+export {
+  BULLETIN_TTL_SECONDS,
+  FORECAST_TTL_SECONDS,
+  MARINE_TTL_SECONDS,
+  WEATHER_MODULE_VERSION,
+  createWeatherModule,
+} from "./module.ts";

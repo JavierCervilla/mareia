@@ -1,5 +1,7 @@
 {
   "license": "AGPL-3.0-or-later",
+  "//unstable": "Deno KV (la caché del módulo meteo) sigue siendo API inestable: se habilita aquí, para todas las tareas y para 'deno check', en vez de repetir --unstable-kv en cada una.",
+  "unstable": ["kv"],
   "tasks": {
     "dev": "deno run --allow-net --allow-env --allow-read --watch src/main.ts",
     "start": "deno run --allow-net --allow-env --allow-read src/main.ts",
@@ -11,6 +13,7 @@
     "@mareia/adapters": "../../packages/adapters/src/index.ts",
     "@mareia/domain-core": "../../packages/domain-core/src/index.ts",
     "@mareia/module-contract": "../../packages/module-contract/src/index.ts",
+    "@mareia/module-weather": "../../packages/modules/weather/src/index.ts",
     "@mareia/usecases": "../../packages/usecases/src/index.ts",
     "astronomy-engine": "npm:astronomy-engine@2.1.19",
     "express": "npm:express@4",

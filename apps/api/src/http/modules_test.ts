@@ -43,8 +43,14 @@ async function withServer(
   }
 }
 
-Deno.test("el registry de producción arranca vacío (el core no conoce ningún módulo)", () => {
-  assertEquals(activeModules, []);
+Deno.test("el registry de producción declara weather, y todo módulo suyo trae atribuciones", () => {
+  assertEquals(
+    activeModules.map((module) => module.id),
+    ["weather"],
+  );
+  for (const module of activeModules) {
+    assertEquals(module.attributions.length > 0, true, `${module.id} no declara atribuciones`);
+  }
 });
 
 Deno.test("sin módulos activos, /v1/modules lista vacío y /health sigue intacto", async () => {

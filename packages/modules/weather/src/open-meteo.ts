@@ -77,8 +77,8 @@ export interface ForecastConditions {
 /** Lo que los dos adaptadores necesitan del exterior. */
 export interface OpenMeteoDeps {
   readonly fetch: typeof fetch;
-  readonly marineUrl?: string;
-  readonly forecastUrl?: string;
+  readonly marineUrl?: string | undefined;
+  readonly forecastUrl?: string | undefined;
 }
 
 function currentUrl(baseUrl: string, cell: Cell, variables: readonly string[]): string {
