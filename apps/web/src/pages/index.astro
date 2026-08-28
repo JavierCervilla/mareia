@@ -9,7 +9,7 @@
 import Indice from "../componentes/Indice.astro";
 import { cargarCatalogo, puertosDeRegion } from "../datos/catalogo.ts";
 import AlmanaqueLayout from "../layouts/AlmanaqueLayout.astro";
-import { RUTA_MAREAS, rutaPuerto, rutaRegion } from "../rutas.ts";
+import { RUTA_MAREAS, rutaPuerto, rutaRegion, urlAbsoluta } from "../rutas.ts";
 
 const regiones = await cargarCatalogo();
 const puertos = regiones.flatMap(puertosDeRegion).length;
@@ -21,7 +21,11 @@ const descripcion =
   "publicados. Sin publicidad y no comercial.";
 ---
 
-<AlmanaqueLayout titulo={titulo} descripcion={descripcion}>
+<AlmanaqueLayout
+  titulo={titulo}
+  descripcion={descripcion}
+  canonica={urlAbsoluta("/", Astro.site)}
+>
   <header class="portada">
     <h1 class="portada__titulo">Mareia</h1>
     <p class="portada__entradilla">

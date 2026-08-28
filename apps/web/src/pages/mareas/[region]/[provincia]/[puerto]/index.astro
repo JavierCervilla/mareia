@@ -28,6 +28,8 @@ import { trazarCurvaMarea } from "../../../../../grafico-marea.ts";
 import AlmanaqueLayout from "../../../../../layouts/AlmanaqueLayout.astro";
 import { migasDePuerto } from "../../../../../migas.ts";
 import { sectionsForPort } from "../../../../../modules.config.ts";
+import { rutaPuerto, urlAbsoluta } from "../../../../../rutas.ts";
+import { grafo, lugarEstructurado, migasEstructuradas } from "../../../../../seo.ts";
 
 export async function getStaticPaths() {
   const puertos = await cargarPuertos();
@@ -68,10 +70,23 @@ const descripcion =
   `Pleamares y bajamares de hoy en ${port.name} (${port.province.name}): tabla del día y del mes, ` +
   `curva de 24 horas, coeficiente de marea y horas de sol y luna. Cálculo propio con fuentes ` +
   `abiertas, sin publicidad.`;
+
+const migas = migasDePuerto(port.region, port.province, port.name);
+const ruta = rutaPuerto(port);
+const canonica = urlAbsoluta(ruta, Astro.site);
+const jsonLd = grafo([
+  lugarEstructurado(port, ruta, Astro.site),
+  migasEstructuradas(migas, Astro.site),
+]);
 ---
 
-<AlmanaqueLayout titulo={titulo} descripcion={descripcion}>
-  <Migas slot="migas" migas={migasDePuerto(port.region, port.province, port.name)} />
+<AlmanaqueLayout
+  titulo={titulo}
+  descripcion={descripcion}
+  canonica={canonica}
+  jsonLd={jsonLd}
+>
+  <Migas slot="migas" migas={migas} />
 
   <header class="identidad">
     <div>

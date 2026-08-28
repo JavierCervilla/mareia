@@ -11,7 +11,8 @@ import { cargarCatalogo } from "../../../../datos/catalogo.ts";
 import type { Provincia, Region } from "../../../../datos/catalogo.ts";
 import AlmanaqueLayout from "../../../../layouts/AlmanaqueLayout.astro";
 import { migasDeProvincia } from "../../../../migas.ts";
-import { rutaPuerto } from "../../../../rutas.ts";
+import { rutaProvincia, rutaPuerto, urlAbsoluta } from "../../../../rutas.ts";
+import { grafo, migasEstructuradas } from "../../../../seo.ts";
 
 export async function getStaticPaths() {
   const regiones = await cargarCatalogo();
@@ -34,16 +35,20 @@ const titulo = `Mareas en ${provincia.nombre} · Mareia`;
 const descripcion =
   `Tabla de mareas, coeficiente y horas de sol y luna de los puertos de ${provincia.nombre} ` +
   `(${region.nombre}): ${provincia.puertos.map((puerto) => puerto.name).join(", ")}.`;
+
+const migas = migasDeProvincia(
+  { slug: region.slug, name: region.nombre },
+  { slug: provincia.slug, name: provincia.nombre },
+);
 ---
 
-<AlmanaqueLayout titulo={titulo} descripcion={descripcion}>
-  <Migas
-    slot="migas"
-    migas={migasDeProvincia(
-      { slug: region.slug, name: region.nombre },
-      { slug: provincia.slug, name: provincia.nombre },
-    )}
-  />
+<AlmanaqueLayout
+  titulo={titulo}
+  descripcion={descripcion}
+  canonica={urlAbsoluta(rutaProvincia(region.slug, provincia.slug), Astro.site)}
+  jsonLd={grafo([migasEstructuradas(migas, Astro.site)])}
+>
+  <Migas slot="migas" migas={migas} />
 
   <header class="portada">
     <h1 class="portada__titulo">Mareas en {provincia.nombre}</h1>
