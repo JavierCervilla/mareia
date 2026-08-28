@@ -1,0 +1,23 @@
+# Dependencias
+node_modules/
+
+# Builds
+dist/
+apps/web/dist/
+.astro/
+
+# Caché local de Deno (DENO_DIR apuntado al repo en CI/local)
+.deno/
+
+# Entorno
+.env
+.env.*
+!.env.example
+
+# Artefactos de QA (failure bundles y capturas; en CI suben como artifact)
+qa-bundles/
+qa-shots/
+
+# Sistema
+.DS_Store
+*.log

@@ -1,0 +1,23 @@
+{
+  "license": "AGPL-3.0-or-later",
+  "tasks": {
+    "dev": "deno run --allow-net --allow-env --watch src/main.ts",
+    "start": "deno run --allow-net --allow-env src/main.ts",
+    "check": "deno check src/",
+    "test": "deno test --allow-net --allow-env src/"
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^1.0.0",
+    "express": "npm:express@4",
+    "@types/express": "npm:@types/express@4"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
+  },
+  "fmt": {
+    "lineWidth": 100
+  }
+}

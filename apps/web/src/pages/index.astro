@@ -1,0 +1,25 @@
+---
+const title = "Mareia";
+const tagline = "Portal OpenSource de mareas, actividad solunar y meteorología marina.";
+const disclaimer = "No apto para navegación";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={tagline} />
+  </head>
+  <body>
+    <main>
+      <h1>{title}</h1>
+      <p>{tagline}</p>
+      <p role="note">
+        <strong>{disclaimer}.</strong> Las predicciones se calculan con fuentes abiertas y métodos
+        publicados; para navegación consulte las publicaciones oficiales de su autoridad hidrográfica.
+      </p>
+    </main>
+  </body>
+</html>
