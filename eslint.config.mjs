@@ -2,7 +2,10 @@
 // `code-anti-slop`, copiado tal cual: las reglas NO se relajan aquí).
 //
 // Nota: el scaffolder genera por defecto una config de Next; Mareia no es Next, así que la base es
-// typescript-eslint plano. Los .astro quedan fuera del linter en T-01 (requieren eslint-plugin-astro).
+// typescript-eslint plano. Los `.astro` entran en el linter con `eslint-plugin-astro` (T-09): su
+// parser abre el frontmatter y las expresiones de la plantilla, así que las reglas del preset
+// anti-slop (`any`, `console`, duplicación) valen igual dentro de una página que en un `.ts`.
+import astro from "eslint-plugin-astro";
 import importPlugin from "eslint-plugin-import";
 import sonarjs from "eslint-plugin-sonarjs";
 import tseslint from "typescript-eslint";
@@ -110,6 +113,19 @@ const capas = [
   },
 ];
 
+// --- Páginas y layouts `.astro`: veto del `set:html` ---------------------------------------------
+// `set:html` es la única vía por la que un dato del dataset puede introducir marcado en el HTML
+// construido, y el pase adversario de la tranche 1 ya reprodujo el caso hermano (A-4: `<`/`>` sin
+// escapar dentro de un atributo). No está en el `recommended` del plugin, así que se arma aquí:
+// donde de verdad haga falta —el JSON-LD, que es JSON serializado por nosotros y con `<` escapado
+// como `<`— se documenta con un `eslint-disable-next-line` y su razón.
+const astroSinHtmlCrudo = [
+  {
+    files: ["**/*.astro"],
+    rules: { "astro/no-set-html-directive": "error" },
+  },
+];
+
 export default [
   {
     ignores: [
@@ -126,6 +142,10 @@ export default [
     ],
   },
   ...tseslint.configs.recommended,
+  // Va DESPUÉS de tseslint: su bloque `**/*.astro` fija el parser de Astro, y el último que casa
+  // gana.
+  ...astro.configs.recommended,
+  ...astroSinHtmlCrudo,
   ...antiSlop,
   ...registriesDeProduccion,
   ...capas,

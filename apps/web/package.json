@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "check": "astro check",
     "preview": "astro preview",
     "test": "node --experimental-strip-types --test src/*.test.ts"
   },
@@ -14,5 +15,9 @@
     "@mareia/module-contract": "workspace:*",
     "@mareia/ui": "workspace:*",
     "astro": "^7.2.9"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^5.9.3"
   }
 }

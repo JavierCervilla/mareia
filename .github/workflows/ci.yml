@@ -14,9 +14,9 @@ env:
 
 jobs:
   # Gate anti-slop determinista (skill code-anti-slop): preset ESLint + sonarjs sobre el TS del
-  # monorepo. Rojo = no merge. Los .astro aún no se lintean (falta eslint-plugin-astro, T-02+).
+  # monorepo, `.astro` incluidos desde T-09 (eslint-plugin-astro). Rojo = no merge.
   anti-slop:
-    name: Anti-slop · ESLint + sonarjs
+    name: Anti-slop · ESLint + sonarjs + UI
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -29,8 +29,17 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
 
+      # Gate de UI (skill frontend-anti-slop, vendorizada): linter determinista de tipografía,
+      # color y código de presentación. Escanea `.ts`/`.css` y NO `.astro`, así que el CSS de la
+      # web vive en ficheros `.css` importados y no en bloques `<style>` de página — ver
+      # `apps/web/design-brief.md` §8 (el brief que exige el paso 1 de la skill).
+      - name: Gate de UI · anti-slop de frontend
+        run: |
+          bash .claude/skills/frontend-anti-slop/scripts/audit-anti-slop.sh packages/ui/src
+          bash .claude/skills/frontend-anti-slop/scripts/audit-anti-slop.sh apps/web/src
+
   web:
-    name: Web · build Astro + typecheck + tests de packages
+    name: Web · build Astro + astro check + typecheck + tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -42,6 +51,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web build
+      # `astro check`: diagnósticos de las páginas y del layout (props, tipos del frontmatter), que
+      # `tsc --noEmit` no ve porque no entra en los `.astro`.
+      - run: pnpm --filter web check
       - run: pnpm typecheck
       # Tests de los packages con el runner nativo de Node (type stripping de Node 22): sin
       # framework ni dependencias extra. En T-02 son los golden tests del motor de mareas.
@@ -59,8 +71,10 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno task check
-      - run: deno task test
+      # `--frozen`: si `deno.lock` no está al día, el job falla en vez de resolver dependencias
+      # nuevas en silencio (el equivalente de `pnpm install --frozen-lockfile` del lado Node).
+      - run: deno task check --frozen
+      - run: deno task test --frozen
 
   # Pipeline de datos (data/pipeline). Sólo el camino OFFLINE: el motor de predicción armónica
   # contra la tabla publicada de velocidades y contra el fixture de la implementación de referencia,
@@ -99,8 +113,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # Versión FIJADA: un escáner sin pin cambia de reglas entre dos ejecuciones del mismo commit,
+      # y entonces el gate deja de ser determinista (rojo hoy, verde mañana, sin que nadie toque el
+      # código). Subir el pin es un cambio deliberado, con su PR.
       - name: Instalar semgrep (pip)
-        run: pipx install semgrep || pip install --user semgrep
+        run: pipx install semgrep==1.175.0 || pip install --user semgrep==1.175.0
 
       - name: Instalar gitleaks (binario de release)
         run: |
