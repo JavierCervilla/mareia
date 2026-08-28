@@ -8,9 +8,10 @@ import { resolveStation } from "./resolve.ts";
 import type { Port, UseCaseDeps } from "./types.ts";
 
 /**
- * Orden alfabético **en español**: con `<` o con el orden por defecto, «Á» va detrás de «Z» y
- * «Andalucía» acabaría después de «País Vasco». El colador se construye una vez porque crearlo es
- * caro y el catálogo se ordena en cada petición.
+ * Orden alfabético **en español**: comparar con `<` compara unidades de código, así que «Á» (U+00C1)
+ * va detrás de «Z» y «Águilas» acabaría después de «Zumaia» —y la «ñ», detrás de la «z», en vez de
+ * entre la «n» y la «o»—. El colador se construye una vez porque crearlo es caro y el catálogo se
+ * ordena en cada petición.
  */
 const SPANISH = new Intl.Collator("es");
 

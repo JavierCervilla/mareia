@@ -38,10 +38,14 @@ test("el catálogo publica la ficha del puerto y NO por dónde se guarda su esta
 });
 
 test("el catálogo sale ordenado por región, provincia y puerto, en español", async () => {
-  // Entra desordenado y con acentos y dígrafos que el orden por defecto de JS coloca mal: «Á» iría
-  // detrás de «Z», así que «Andalucía» acabaría después de «País Vasco».
+  // Entra desordenado y con un caso que el orden por defecto de JS coloca mal: comparando con `<`
+  // se comparan unidades de código, y «Á» (U+00C1) va detrás de «Z», así que «Águilas» acabaría
+  // después de «La Manga del Mar Menor» en vez de abrir los puertos de Murcia. Los demás nombres
+  // llevan acentos que NO deciden nada («Andalucía» empieza por A plana y «Cádiz» se separa de
+  // «Huelva» en la C): si el fixture fuera solo eso, quitar el colador dejaría el test verde.
   const desordenado = [
     port("santander", "Santander", "Cantabria", "Cantabria"),
+    port("aguilas", "Águilas", "Murcia", "Región de Murcia"),
     port("vigo", "Vigo", "Pontevedra", "Galicia"),
     port("bilbao", "Bilbao", "Bizkaia", "País Vasco"),
     port("malaga", "Málaga", "Málaga", "Andalucía"),
@@ -64,6 +68,7 @@ test("el catálogo sale ordenado por región, provincia y puerto, en español", 
       "a-coruna",
       "vigo",
       "bilbao",
+      "aguilas",
       "cabo-de-palos",
       "la-manga-del-mar-menor",
     ],
