@@ -12,5 +12,9 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["packages/*/src/**/*.ts", "packages/modules/*/src/**/*.ts"]
+  "include": [
+    "apps/web/src/**/*.ts",
+    "packages/*/src/**/*.ts",
+    "packages/modules/*/src/**/*.ts"
+  ]
 }
