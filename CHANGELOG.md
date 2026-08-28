@@ -2,6 +2,19 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-28 — T-16 · especificación de widgets de pantalla de inicio (PWA + Capacitor)
+
+- **Spec v1 en `docs/espec-widgets-pwa-capacitor.md`**: widgets iOS (WidgetKit) y Android (Glance)
+  alimentados por la PWA vía Capacitor, adaptada al dominio de Mareia — el widget muestra la tabla
+  del día del puerto favorito (siguiente pleamar/bajamar, coeficiente, eventos del día civil del
+  puerto) generada **sin red** desde el mismo almanaque que precacheará T-12.
+- El contrato es un único JSON versionado (`WidgetPayload`, clave `widget_payload_v1`): widgets
+  «tontos» que solo pintan, 4 estados obligatorios (normal/vacío/desactualizado/error), textos ya
+  localizados por la web, deeplinks `mareia://` y `expiresAt` en la medianoche local del puerto.
+- Solo documentación: el shell Capacitor y las extensiones nativas son trayectorias futuras
+  (nueva línea en Fase 2 del roadmap). Decisiones abiertas señaladas en la propia spec (bundle
+  id/App Group, esquema de deeplink definitivo, validación sin zod).
+
 ## 2026-08-28 — T-04 · coeficiente de mareas y dos mejoras del motor
 
 - **Coeficiente de marea** (escala francesa 20-120) en `@mareia/domain-core/coefficient`: un valor
