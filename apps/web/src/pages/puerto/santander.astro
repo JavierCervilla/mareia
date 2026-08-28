@@ -42,7 +42,7 @@ const { meteo, procedencia } = puerto;
 ---
 
 <AlmanaqueLayout titulo={titulo} descripcion={descripcion}>
-  <div class="pagina">
+  <main class="pagina">
     <header class="cabecera">
       <a class="cabecera__volver" href="/">&lsaquo; Puertos</a>
       <time class="cabecera__fecha" datetime={puerto.fechaISO}>{puerto.fechaTexto}</time>
@@ -86,7 +86,8 @@ const { meteo, procedencia } = puerto;
             ))
           }
         </svg>
-        <ol class="grafico__horas">
+        {/* `role="list"`: WebKit retira la semántica de lista cuando la viñeta es `none`. */}
+        <ol class="grafico__horas" role="list">
           {
             HORAS_EJE.map((hora) => (
               <li class={hora.soloEscritorio ? "grafico__hora grafico__hora--amplia" : "grafico__hora"}>
@@ -161,7 +162,8 @@ const { meteo, procedencia } = puerto;
 
       <section class="solunar">
         <h2 class="etiqueta">Solunar &middot; actividad de pesca</h2>
-        <ul class="solunar__lista">
+        {/* `role="list"`: WebKit retira la semántica de lista cuando la viñeta es `none`. */}
+        <ul class="solunar__lista" role="list">
           {
             puerto.solunar.map((periodo) => (
               <li class="solunar__fila">
@@ -195,14 +197,13 @@ const { meteo, procedencia } = puerto;
 
     <footer class="pie">
       <p>
-        Constituyentes {procedencia.constituyentes} &middot; calidad {procedencia.calidad} &middot;
-        método {procedencia.metodo} &middot; <a href="/metodologia/">metodología</a> &middot; datos {
+        {procedencia.fuente} &middot; método {procedencia.metodo} &middot; datos {
           procedencia.licencia
         }
       </p>
       <p class="pie__aviso"><em>No apto para navegación.</em></p>
     </footer>
-  </div>
+  </main>
 </AlmanaqueLayout>
 
 <style>

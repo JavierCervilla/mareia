@@ -8,6 +8,7 @@
  * sistema, sin script de detección.
  */
 import "@mareia/ui/tokens.css";
+import { escaparMarcado } from "../escapar-marcado.ts";
 
 interface Props {
   titulo: string;
@@ -29,7 +30,8 @@ const FUENTES =
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titulo}</title>
-    <meta name="description" content={descripcion} />
+    {/* `escaparMarcado`: Astro no escapa `<`/`>` en un valor de atributo — ver el módulo. */}
+    <meta name="description" content={escaparMarcado(descripcion)} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href={FUENTES} />
@@ -40,9 +42,8 @@ const FUENTES =
 </html>
 
 <style is:global>
-  :root {
-    color-scheme: light dark;
-  }
+  /* `color-scheme` lo fija el tema en `@mareia/ui/tokens.css`, junto a la paleta: declararlo
+     también aquí dejaba el tema forzado por `data-theme` sin efecto sobre los widgets de UA (A-7). */
 
   *,
   *::before,

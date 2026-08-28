@@ -1,0 +1,5 @@
+{
+  "skill": "security-gate",
+  "version": 1,
+  "nota": "gate a nivel de repo: CI corre security-gate.sh . sobre el arbol entero"
+}

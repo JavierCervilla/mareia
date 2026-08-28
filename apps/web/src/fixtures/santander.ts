@@ -55,8 +55,13 @@ export interface DatosPuerto {
     readonly fuente: string;
   };
   readonly procedencia: {
-    readonly constituyentes: string;
-    readonly calidad: string;
+    /**
+     * De dónde salen las cifras, tal cual se imprime en el pie. Es un texto y no un par
+     * constituyentes/calidad a propósito: mientras el dato sea este fixture el pie tiene que poder
+     * decirlo, y cuando T-05 traiga el motor armónico pasará a «Constituyentes REDMAR · calidad A»
+     * sin tocar la página.
+     */
+    readonly fuente: string;
     readonly metodo: string;
     readonly licencia: string;
   };
@@ -95,8 +100,7 @@ export const SANTANDER: DatosPuerto = {
     fuente: "Open-Meteo",
   },
   procedencia: {
-    constituyentes: "REDMAR",
-    calidad: "A",
+    fuente: "Datos de muestra (fixture) — pendiente REDMAR",
     metodo: "Foreman (1977)",
     licencia: "CC-BY 4.0",
   },

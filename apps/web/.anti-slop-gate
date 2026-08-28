@@ -1,0 +1,5 @@
+{
+  "skill": "code-anti-slop",
+  "version": 1,
+  "nota": "gate a nivel de repo: eslint.anti-slop.mjs en la raiz cubre el arbol entero (pnpm lint)"
+}

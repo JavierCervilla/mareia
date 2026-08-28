@@ -62,15 +62,33 @@ export function minutosDesdeHora(hora: string): number {
 }
 
 /**
- * Añade un extremo virtual a cada lado para que la curva llegue a medianoche por los dos bordes:
+ * Añade extremos virtuales a cada lado para que la curva llegue a medianoche por los dos bordes:
  * la marea no empieza ni acaba en el primer y último extremo del día. Cada extremo virtual refleja
- * la separación y la altura de su vecino, de modo que la alternancia pleamar/bajamar se mantiene.
+ * la separación y la altura de su vecino, de modo que la alternancia pleamar/bajamar y el periodo
+ * del día (~6 h 12 min en un puerto semidiurno) continúan igual más allá del borde.
+ *
+ * El reflejo se repite hasta **rebasar** las 00:00 y las 24:00. Con un solo reflejo bastaba para
+ * los días de cuatro extremos, pero se quedaba corto en los de TRES —~1 de cada 7— y la curva se
+ * aplanaba hasta 295 min en el borde del día (A-1 del pase adversario).
  */
 function nodosDelDia(extremos: readonly ExtremoAltura[]): readonly Nodo[] {
-  const nodos = extremos.map((extremo) => ({
-    minutos: minutosDesdeHora(extremo.hora),
-    alturaM: extremo.alturaM,
-  }));
+  const nodos: Nodo[] = [];
+  let horaPrevia = "";
+  for (const extremo of extremos) {
+    const minutos = minutosDesdeHora(extremo.hora);
+    const previo = nodos.at(-1);
+    // Sin orden estricto la interpolación devuelve una curva de aspecto normal que no pasa por sus
+    // propios extremos: mejor romper el build que dibujar una marea falsa (A-2).
+    if (previo && minutos <= previo.minutos) {
+      throw new Error(
+        `Los extremos del día deben venir en orden temporal estricto: "${extremo.hora}" no va ` +
+          `después de "${horaPrevia}". Ordénalos en el origen antes de trazar la curva.`,
+      );
+    }
+    nodos.push({ minutos, alturaM: extremo.alturaM });
+    horaPrevia = extremo.hora;
+  }
+
   const primero = nodos[0];
   const segundo = nodos[1];
   const ultimo = nodos.at(-1);
@@ -79,11 +97,27 @@ function nodosDelDia(extremos: readonly ExtremoAltura[]): readonly Nodo[] {
     throw new Error("La curva de marea necesita al menos dos extremos del día.");
   }
 
-  return [
-    { minutos: primero.minutos - (segundo.minutos - primero.minutos), alturaM: segundo.alturaM },
-    ...nodos,
-    { minutos: ultimo.minutos + (ultimo.minutos - penultimo.minutos), alturaM: penultimo.alturaM },
-  ];
+  // Periodo con el que se extrapola cada borde: el intervalo del propio día en ese lado. Es > 0
+  // porque el orden es estricto, así que los dos recuentos de reflejos son finitos.
+  const periodoInicial = segundo.minutos - primero.minutos;
+  const periodoFinal = ultimo.minutos - penultimo.minutos;
+
+  const antes = Array.from(
+    { length: Math.ceil(primero.minutos / periodoInicial) },
+    (_, vuelta) => ({
+      minutos: primero.minutos - (vuelta + 1) * periodoInicial,
+      alturaM: vuelta % 2 === 0 ? segundo.alturaM : primero.alturaM,
+    }),
+  ).reverse();
+  const despues = Array.from(
+    { length: Math.ceil((MINUTOS_DIA - ultimo.minutos) / periodoFinal) },
+    (_, vuelta) => ({
+      minutos: ultimo.minutos + (vuelta + 1) * periodoFinal,
+      alturaM: vuelta % 2 === 0 ? penultimo.alturaM : ultimo.alturaM,
+    }),
+  );
+
+  return [...antes, ...nodos, ...despues];
 }
 
 /** Media coseno entre dos extremos consecutivos. `fraccion` recorre 0 → 1 de `desde` a `hasta`. */
@@ -99,8 +133,8 @@ export function alturaEnMinutos(extremos: readonly ExtremoAltura[], minutos: num
   if (!primero || !ultimo) {
     throw new Error("La curva de marea necesita al menos dos extremos del día.");
   }
-  // Fuera del tramo cubierto por los extremos virtuales la curva se aplana en vez de dispararse:
-  // red de seguridad para días con extremos muy juntos, no el caso normal.
+  // Los extremos virtuales cubren siempre las 24 h completas, así que este recorte solo entra si
+  // alguien pregunta por un minuto fuera del día: se aplana en vez de dispararse.
   const instante = Math.min(Math.max(minutos, primero.minutos), ultimo.minutos);
 
   for (let indice = 1; indice < nodos.length; indice += 1) {

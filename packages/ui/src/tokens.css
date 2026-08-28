@@ -13,12 +13,17 @@
  * Los dos bloques repiten la paleta a propósito: CSS no tiene mixins y una lista compartida
  * obligaría a un tercer alias por token, más indirección que la que ahorra.
  *
+ * Cada bloque fija también `color-scheme`, y es el ÚNICO sitio donde se declara: si el tema cambia
+ * la paleta pero no el `color-scheme`, los widgets de la UA (barras de scroll, gutter de
+ * overscroll, controles de formulario) se quedan en el tema del SO sobre una página del otro tema.
+ *
  * Las familias tipográficas se declaran aquí pero se CARGAN en el layout (`AlmanaqueLayout.astro`),
  * que es quien controla el `<head>`.
  * ========================================================================== */
 
 :root {
   /* --- Paleta · tema claro ------------------------------------------------ */
+  color-scheme: light;
   --m-bg: #f6f1e4;
   --m-ink: #202c38;
   --m-sub: #56605c;
@@ -74,6 +79,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="claro"]) {
+    color-scheme: dark;
     --m-bg: #12171d;
     --m-ink: #e9e2d0;
     --m-sub: #a0a894;
@@ -85,6 +91,7 @@
 }
 
 :root[data-theme="noche"] {
+  color-scheme: dark;
   --m-bg: #12171d;
   --m-ink: #e9e2d0;
   --m-sub: #a0a894;
