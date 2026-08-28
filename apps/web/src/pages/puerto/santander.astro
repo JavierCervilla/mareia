@@ -1,0 +1,632 @@
+---
+/**
+ * Página de puerto (T-09). HTML estático, cero JavaScript de cliente: el gráfico de marea es un
+ * SVG generado en build a partir de los extremos del día.
+ *
+ * Los datos vienen todavía del fixture `src/fixtures/santander.ts` — ver la cabecera de ese fichero:
+ * T-05 (motor armónico) y T-07 (sol/luna/solunar/meteo) los sustituirán por los reales sin tocar
+ * este renderizado.
+ */
+import AlmanaqueLayout from "../../layouts/AlmanaqueLayout.astro";
+import { RATING_MAXIMO, SANTANDER } from "../../fixtures/santander.ts";
+import { trazarCurvaMarea } from "../../grafico-marea.ts";
+
+const puerto = SANTANDER;
+const curva = trazarCurvaMarea(puerto.mareas);
+
+/** Coma decimal: en castellano «4,82 m», no «4.82 m». */
+const conComa = (valor: number, decimales = 2): string => valor.toFixed(decimales).replace(".", ",");
+const metros = (valor: number, decimales = 2): string => `${conComa(valor, decimales)} m`;
+
+/** El eje del gráfico: en móvil solo cabe cada 12 h, en escritorio cada 6 h. */
+const HORAS_EJE = [
+  { texto: "00 h", soloEscritorio: false },
+  { texto: "06 h", soloEscritorio: true },
+  { texto: "12 h", soloEscritorio: false },
+  { texto: "18 h", soloEscritorio: true },
+  { texto: "24 h", soloEscritorio: false },
+];
+
+const puntosDeRating = (rating: number): readonly boolean[] =>
+  Array.from({ length: RATING_MAXIMO }, (_, indice) => indice < rating);
+
+const resumenMareas = puerto.mareas
+  .map((marea) => `${marea.tipo} a las ${marea.hora}, ${metros(marea.alturaM)}`)
+  .join("; ");
+
+const titulo = `Mareas en ${puerto.nombre} · ${puerto.fechaTexto} · Mareia`;
+const descripcion =
+  `Mareas, coeficiente, sol, luna, actividad solunar y estado de la mar en ${puerto.nombre} ` +
+  `(${puerto.region}) el ${puerto.fechaTexto.toLowerCase()}.`;
+const { meteo, procedencia } = puerto;
+---
+
+<AlmanaqueLayout titulo={titulo} descripcion={descripcion}>
+  <main class="pagina">
+    <header class="cabecera">
+      <a class="cabecera__volver" href="/">&lsaquo; Puertos</a>
+      <time class="cabecera__fecha" datetime={puerto.fechaISO}>{puerto.fechaTexto}</time>
+      <span class="cabecera__marca">Mareia</span>
+      <div class="filete-doble" aria-hidden="true"><span></span><span></span></div>
+    </header>
+
+    <div class="identidad">
+      <div class="identidad__puerto">
+        <h1>{puerto.nombre}</h1>
+        <p class="identidad__meta">{puerto.region} &middot; {puerto.coordenadas}</p>
+      </div>
+      <div class="coeficiente">
+        <span class="coeficiente__circulo">{puerto.coeficiente.valor}</span>
+        <span class="coeficiente__texto">
+          <span class="etiqueta etiqueta--corta">Coeficiente</span>
+          <em class="coeficiente__calificacion">{puerto.coeficiente.calificacion}</em>
+        </span>
+      </div>
+    </div>
+
+    <div class="cuerpo">
+      <section class="grafico">
+        <h2 class="etiqueta">Altura de marea &middot; 24 horas</h2>
+        <svg
+          class="grafico__lienzo"
+          viewBox={`0 0 ${curva.ancho} ${curva.alto}`}
+          role="img"
+          aria-label={`Curva de altura de marea de las 24 horas: ${resumenMareas}.`}
+        >
+          <line
+            class="grafico__nivel"
+            x1="0"
+            y1={curva.nivelMedioY}
+            x2={curva.ancho}
+            y2={curva.nivelMedioY}></line>
+          <path class="grafico__trazo" d={curva.path}></path>
+          {
+            curva.extremos.map((punto) => (
+              <circle class="grafico__extremo" cx={punto.x} cy={punto.y} r="4" />
+            ))
+          }
+        </svg>
+        {/* `role="list"`: WebKit retira la semántica de lista cuando la viñeta es `none`. */}
+        <ol class="grafico__horas" role="list">
+          {
+            HORAS_EJE.map((hora) => (
+              <li class={hora.soloEscritorio ? "grafico__hora grafico__hora--amplia" : "grafico__hora"}>
+                {hora.texto}
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class="mareas">
+        <h2 class="etiqueta">Mareas de hoy</h2>
+        <table class="tabla-mareas">
+          <tbody>
+            {
+              puerto.mareas.map((marea) => (
+                <tr data-tipo={marea.tipo}>
+                  <th scope="row">{marea.tipo}</th>
+                  <td class="tabla-mareas__hora">{marea.hora}</td>
+                  <td class="tabla-mareas__altura">{metros(marea.alturaM)}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <section class="astros">
+        <div class="astro">
+          <svg
+            class="astro__icono astro__icono--sol"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="4.5"></circle>
+            <line x1="12" y1="2.5" x2="12" y2="5"></line>
+            <line x1="12" y1="19" x2="12" y2="21.5"></line>
+            <line x1="2.5" y1="12" x2="5" y2="12"></line>
+            <line x1="19" y1="12" x2="21.5" y2="12"></line>
+            <line x1="5.3" y1="5.3" x2="7" y2="7"></line>
+            <line x1="17" y1="17" x2="18.7" y2="18.7"></line>
+            <line x1="5.3" y1="18.7" x2="7" y2="17"></line>
+            <line x1="17" y1="7" x2="18.7" y2="5.3"></line>
+          </svg>
+          <div class="astro__texto">
+            <span class="etiqueta etiqueta--corta">Sol</span>
+            <span>{puerto.sol.amanecer}&ndash;{puerto.sol.ocaso}</span>
+          </div>
+        </div>
+        <div class="astro">
+          <svg
+            class="astro__icono astro__icono--luna"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M19.5 13.5 A 8 8 0 1 1 10.5 4.5 A 6.5 6.5 0 0 0 19.5 13.5 Z"></path>
+          </svg>
+          <div class="astro__texto">
+            <span class="etiqueta etiqueta--corta">
+              Luna &middot; {puerto.luna.iluminacionPct} %
+            </span>
+            <em>{puerto.luna.fase}</em>
+          </div>
+        </div>
+      </section>
+
+      <section class="solunar">
+        <h2 class="etiqueta">Solunar &middot; actividad de pesca</h2>
+        {/* `role="list"`: WebKit retira la semántica de lista cuando la viñeta es `none`. */}
+        <ul class="solunar__lista" role="list">
+          {
+            puerto.solunar.map((periodo) => (
+              <li class="solunar__fila">
+                <span>
+                  Periodo {periodo.tipo} &middot; {periodo.inicio}&ndash;{periodo.fin}
+                </span>
+                <span
+                  class="puntos"
+                  role="img"
+                  aria-label={`Actividad ${periodo.rating} de ${RATING_MAXIMO}`}
+                >
+                  {puntosDeRating(periodo.rating).map((lleno) => (
+                    <span class={lleno ? "punto punto--lleno" : "punto"} />
+                  ))}
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="meteo">
+        <h2 class="etiqueta">Mar y viento &middot; {meteo.fuente}</h2>
+        <p>
+          Viento {meteo.vientoDireccion} {meteo.vientoNudos} kn &middot; Olas {
+            metros(meteo.olasM, 1)
+          } &middot; Agua {meteo.aguaC}&deg; &middot; Aire {meteo.aireC}&deg;
+        </p>
+      </section>
+    </div>
+
+    <footer class="pie">
+      <p>
+        {procedencia.fuente} &middot; método {procedencia.metodo} &middot; datos {
+          procedencia.licencia
+        }
+      </p>
+      <p class="pie__aviso"><em>No apto para navegación.</em></p>
+    </footer>
+  </main>
+</AlmanaqueLayout>
+
+<style>
+  /* --- Armazón de la página ------------------------------------------------ */
+  .pagina {
+    display: flex;
+    flex-direction: column;
+    gap: var(--m-gap-bloque);
+    min-height: 100vh;
+    max-width: var(--m-medida);
+    margin: 0 auto;
+    padding: 22px 26px 32px;
+  }
+
+  /* --- Cabecera: enlace, fecha, marca y filete doble ----------------------- */
+  .cabecera {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      "volver fecha"
+      "marca marca"
+      "filete filete";
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .cabecera__volver {
+    grid-area: volver;
+    font-size: var(--m-text-small);
+    font-style: italic;
+    text-decoration: none;
+  }
+
+  .cabecera__fecha {
+    grid-area: fecha;
+    font-size: var(--m-text-meta);
+    font-style: italic;
+    color: var(--m-sub);
+  }
+
+  .cabecera__marca {
+    grid-area: marca;
+    justify-self: center;
+    font-size: var(--m-text-small);
+    font-weight: 600;
+    letter-spacing: var(--m-track-wordmark);
+    text-indent: var(--m-track-wordmark);
+    text-transform: uppercase;
+    color: var(--m-navy);
+  }
+
+  .filete-doble {
+    grid-area: filete;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .filete-doble span:first-child {
+    border-top: 2px solid var(--m-rule);
+  }
+
+  .filete-doble span:last-child {
+    border-top: 1px solid var(--m-rule);
+  }
+
+  /* --- Identidad del puerto y coeficiente ---------------------------------- */
+  .identidad {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .identidad h1 {
+    font-family: var(--m-font-display);
+    font-size: var(--m-text-display);
+    font-weight: 400;
+    line-height: 1.05;
+  }
+
+  .identidad__meta {
+    font-size: var(--m-text-small);
+    color: var(--m-sub);
+  }
+
+  .coeficiente {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .coeficiente__circulo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 58px;
+    height: 58px;
+    border: 1.5px solid var(--m-terra);
+    border-radius: 50%;
+    font-family: var(--m-font-display);
+    font-size: var(--m-text-coef);
+    color: var(--m-terra);
+  }
+
+  .coeficiente__texto {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    text-align: left;
+  }
+
+  .coeficiente__calificacion {
+    font-size: var(--m-text-lead);
+    color: var(--m-terra);
+  }
+
+  /* --- Rótulos en versalita ------------------------------------------------ */
+  .etiqueta {
+    font-size: var(--m-text-eyebrow);
+    font-weight: 400;
+    letter-spacing: var(--m-track-label);
+    text-transform: uppercase;
+    color: var(--m-sub);
+  }
+
+  .etiqueta--corta {
+    letter-spacing: var(--m-track-eyebrow);
+  }
+
+  /* --- Cuerpo: una columna en móvil, dos en escritorio --------------------- */
+  .cuerpo {
+    display: grid;
+    /* `minmax(0, 1fr)` y no `auto`: el ancho intrínseco del SVG del gráfico (620) haría crecer la
+       pista y desbordaría la página en móvil. */
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--m-gap-bloque);
+  }
+
+  /* --- Gráfico de marea ---------------------------------------------------- */
+  .grafico {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .grafico__lienzo {
+    width: 100%;
+    height: auto;
+  }
+
+  .grafico__nivel {
+    stroke: var(--m-ink);
+    stroke-width: 0.6;
+    stroke-dasharray: 2 5;
+    opacity: 0.5;
+  }
+
+  .grafico__trazo {
+    fill: none;
+    stroke: var(--m-navy);
+    stroke-width: 2.2;
+    stroke-linejoin: round;
+  }
+
+  .grafico__extremo {
+    fill: var(--m-bg);
+    stroke: var(--m-navy);
+    stroke-width: 1.8;
+  }
+
+  .grafico__horas {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--m-text-meta);
+    font-style: italic;
+    color: var(--m-sub);
+  }
+
+  .grafico__hora--amplia {
+    display: none;
+  }
+
+  /* --- Tabla de mareas ----------------------------------------------------- */
+  .mareas {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mareas .etiqueta {
+    padding-bottom: 8px;
+  }
+
+  .tabla-mareas {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .tabla-mareas tr {
+    border-top: 1px solid var(--m-rule-soft);
+  }
+
+  .tabla-mareas tr:first-child {
+    border-top: 1.5px solid var(--m-rule);
+  }
+
+  .tabla-mareas tr:last-child {
+    border-bottom: 1.5px solid var(--m-rule);
+  }
+
+  .tabla-mareas th,
+  .tabla-mareas td {
+    padding: 11px 0;
+    vertical-align: baseline;
+  }
+
+  .tabla-mareas th {
+    font-size: var(--m-text-meta);
+    font-weight: 400;
+    letter-spacing: var(--m-track-tide);
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--m-sub);
+  }
+
+  .tabla-mareas tr[data-tipo="pleamar"] th {
+    color: var(--m-navy);
+  }
+
+  .tabla-mareas__hora {
+    text-align: center;
+    font-size: var(--m-text-hora);
+  }
+
+  .tabla-mareas__altura {
+    text-align: right;
+    font-size: var(--m-text-lead);
+    font-style: italic;
+  }
+
+  /* --- Sol y luna ---------------------------------------------------------- */
+  .astros {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .astro {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .astro__icono {
+    flex: none;
+    width: 22px;
+    height: 22px;
+  }
+
+  .astro__icono--sol {
+    stroke: var(--m-terra);
+  }
+
+  .astro__icono--luna {
+    stroke: var(--m-navy);
+  }
+
+  .astro__texto {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* --- Solunar ------------------------------------------------------------- */
+  .solunar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--m-gap-fila);
+    border-top: 1px solid var(--m-rule-soft);
+    padding-top: 12px;
+  }
+
+  .solunar__lista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--m-gap-fila);
+  }
+
+  .solunar__fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .puntos {
+    display: flex;
+    flex: none;
+    gap: 4px;
+  }
+
+  .punto {
+    width: 8px;
+    height: 8px;
+    border: 1px solid var(--m-terra);
+    border-radius: 50%;
+  }
+
+  .punto--lleno {
+    background: var(--m-terra);
+  }
+
+  /* --- Mar y viento -------------------------------------------------------- */
+  .meteo {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    border-top: 1px solid var(--m-rule-soft);
+    padding-top: 12px;
+  }
+
+  /* --- Pie: procedencia del dato y aviso ----------------------------------- */
+  .pie {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: auto;
+    border-top: 2px solid var(--m-rule);
+    padding-top: 10px;
+    font-size: 11.5px;
+    color: var(--m-sub);
+  }
+
+  /* --- Escritorio: la disposición a dos columnas del artboard de 1440 ------ */
+  @media (min-width: 1100px) {
+    .pagina {
+      padding: 30px 24px 36px;
+    }
+
+    .cabecera {
+      grid-template-columns: 1fr auto 1fr;
+      grid-template-areas:
+        "volver marca fecha"
+        "filete filete filete";
+      justify-content: normal;
+      gap: 10px;
+    }
+
+    .cabecera__fecha {
+      justify-self: end;
+      font-size: var(--m-text-small);
+    }
+
+    .identidad {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+    }
+
+    .coeficiente {
+      flex-direction: row-reverse;
+      gap: 16px;
+    }
+
+    .coeficiente__circulo {
+      width: 72px;
+      height: 72px;
+      border-width: 2px;
+    }
+
+    .coeficiente__texto {
+      align-items: flex-end;
+      text-align: right;
+    }
+
+    .cuerpo {
+      grid-template-columns: minmax(0, 430px) minmax(0, 1fr);
+      grid-template-areas:
+        "mareas grafico"
+        "astros solunar"
+        "meteo solunar";
+      align-items: start;
+      column-gap: 56px;
+      row-gap: 22px;
+    }
+
+    .grafico {
+      grid-area: grafico;
+    }
+
+    .mareas {
+      grid-area: mareas;
+    }
+
+    .astros {
+      grid-area: astros;
+    }
+
+    .solunar {
+      grid-area: solunar;
+    }
+
+    .meteo {
+      grid-area: meteo;
+    }
+
+    .grafico__hora--amplia {
+      display: block;
+    }
+
+    .tabla-mareas th,
+    .tabla-mareas td {
+      padding: 13px 0;
+    }
+
+    .pie {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 12.5px;
+    }
+  }
+</style>

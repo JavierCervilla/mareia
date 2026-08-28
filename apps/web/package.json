@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@mareia/module-contract": "workspace:*",
+    "@mareia/ui": "workspace:*",
     "astro": "^7.2.9"
   }
 }

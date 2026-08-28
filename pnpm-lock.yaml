@@ -32,6 +32,9 @@ importers:
       '@mareia/module-contract':
         specifier: workspace:*
         version: link:../../packages/module-contract
+      '@mareia/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       astro:
         specifier: ^7.2.9
         version: 7.2.9(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@22.20.1)(yaml@2.9.0)

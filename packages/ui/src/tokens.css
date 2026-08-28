@@ -1,0 +1,102 @@
+/* =============================================================================
+ * Tokens del design system «almanaque» de Mareia.
+ *
+ * Única fuente de verdad de color, tipografía y escala para toda la web. Las páginas NO escriben
+ * literales de color ni familias de fuente: consumen estas custom properties.
+ *
+ * Tema: los valores del tema CLARO viven en `:root`. El tema NOCHE se aplica por dos vías, y el
+ * override es explícito en ambos sentidos:
+ *   1. preferencia del sistema — `@media (prefers-color-scheme: dark)`, con la guarda
+ *      `:root:not([data-theme="claro"])` para que un `data-theme="claro"` explícito gane a la
+ *      preferencia del SO;
+ *   2. elección explícita — `:root[data-theme="noche"]`, que fuerza noche aunque el SO pida claro.
+ * Los dos bloques repiten la paleta a propósito: CSS no tiene mixins y una lista compartida
+ * obligaría a un tercer alias por token, más indirección que la que ahorra.
+ *
+ * Cada bloque fija también `color-scheme`, y es el ÚNICO sitio donde se declara: si el tema cambia
+ * la paleta pero no el `color-scheme`, los widgets de la UA (barras de scroll, gutter de
+ * overscroll, controles de formulario) se quedan en el tema del SO sobre una página del otro tema.
+ *
+ * Las familias tipográficas se declaran aquí pero se CARGAN en el layout (`AlmanaqueLayout.astro`),
+ * que es quien controla el `<head>`.
+ * ========================================================================== */
+
+:root {
+  /* --- Paleta · tema claro ------------------------------------------------ */
+  color-scheme: light;
+  --m-bg: #f6f1e4;
+  --m-ink: #202c38;
+  --m-sub: #56605c;
+  --m-navy: #1e3a5f;
+  --m-terra: #a8402e;
+  /* Filete fuerte (cabecera de tabla, cierre de página): el mismo tono que la tinta. */
+  --m-rule: var(--m-ink);
+  /* Filete tenue (separación entre filas y bloques). */
+  --m-rule-soft: rgba(32, 44, 56, 0.3);
+
+  /* --- Tipografía --------------------------------------------------------- */
+  --m-font-display: "Instrument Serif", Georgia, serif;
+  --m-font-text: "Newsreader", Georgia, serif;
+
+  /* --- Escala tipográfica (valores móvil; el escritorio los sube por media query) --- */
+  --m-text-eyebrow: 11px; /* rótulos versaleta: COEFICIENTE, SOL, LUNA */
+  --m-text-meta: 12px; /* fecha, ejes del gráfico, tipo de marea */
+  --m-text-small: 13px; /* subtítulo del puerto, marca en cabecera */
+  --m-text-body: 15px; /* texto corriente */
+  --m-text-lead: 17px; /* altura de marea, cualificador del coeficiente */
+  --m-text-hora: 21px; /* hora del extremo de marea */
+  --m-text-coef: 27px; /* cifra del coeficiente */
+  --m-text-display: 46px; /* nombre del puerto */
+
+  /* --- Interletraje de los rótulos ---------------------------------------- */
+  --m-track-wordmark: 0.42em;
+  --m-track-label: 0.22em;
+  --m-track-eyebrow: 0.18em;
+  --m-track-tide: 0.14em;
+
+  /* --- Ritmo vertical ------------------------------------------------------ */
+  --m-gap-bloque: 20px;
+  --m-gap-fila: 7px;
+  --m-medida: 1160px; /* ancho máximo del contenido en escritorio */
+}
+
+/* Escritorio (artboard de 1440): la escala tipográfica sube un peldaño. Es propiedad del design
+   system, no de una página: cualquier superficie que use los tokens escala igual. */
+@media (min-width: 1100px) {
+  :root {
+    --m-text-eyebrow: 12px;
+    --m-text-meta: 13px;
+    --m-text-small: 15px;
+    --m-text-body: 16px;
+    --m-text-lead: 19px;
+    --m-text-hora: 24px;
+    --m-text-coef: 34px;
+    --m-text-display: 64px;
+    --m-gap-bloque: 26px;
+    --m-gap-fila: 9px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="claro"]) {
+    color-scheme: dark;
+    --m-bg: #12171d;
+    --m-ink: #e9e2d0;
+    --m-sub: #a0a894;
+    --m-navy: #8fb0cd;
+    --m-terra: #d07a5c;
+    --m-rule: var(--m-ink);
+    --m-rule-soft: rgba(233, 226, 208, 0.45);
+  }
+}
+
+:root[data-theme="noche"] {
+  color-scheme: dark;
+  --m-bg: #12171d;
+  --m-ink: #e9e2d0;
+  --m-sub: #a0a894;
+  --m-navy: #8fb0cd;
+  --m-terra: #d07a5c;
+  --m-rule: var(--m-ink);
+  --m-rule-soft: rgba(233, 226, 208, 0.45);
+}
