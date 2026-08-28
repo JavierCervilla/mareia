@@ -2,6 +2,25 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-28 — T-04 · coeficiente de mareas y dos mejoras del motor
+
+- **Coeficiente de marea** (escala francesa 20-120) en `@mareia/domain-core/coefficient`: un valor
+  por pleamar y el reparto mañana/tarde del día civil, calculados con predicción propia de Brest y
+  la unidad de altura `U = 3,05 m`. Los constituyentes entran por parámetro; el dominio sigue sin
+  tocar disco. Contrastado contra **32 coeficientes publicados de 2026**: error máximo de **2
+  unidades** y sesgo de +0,9.
+- Se calcula sobre la **onda semidiurna** de Brest, no sobre la predicción completa: los valores
+  publicados de un mismo día son casi iguales entre sí y la marea real tiene desigualdad diurna.
+  Con la marea completa el error subiría a 5 unidades. Va documentado y con su test.
+- **Cinco constituyentes nuevos en el motor** —EP2, MA2, MB2, MKS2 y 2MS6—, los que el QC de T-05
+  señaló como techo del dataset (2,2 cm RMS de truncado en Brest, y el grado A fuera de alcance para
+  Vigo y Santander). El catálogo del motor y el del pipeline vuelven a ser el mismo contrato en dos
+  idiomas. **El dataset se regenera en T-13**: hasta entonces sigue truncado a los 37 anteriores.
+- **`f(M3)` pasa a la forma publicada de Schureman** (SP-98) en vez de derivarse como `f(M2)^1,5`.
+  Medido: las dos formas son la misma expresión (4·10⁻¹⁶ de diferencia), y lo único que separa a
+  este motor del pipeline es el redondeo del 0,8758 impreso — 0,022 %, no el 1 % que se sospechaba.
+- Los golden tests contra NOAA CO-OPS no se mueven un dígito con ninguno de los dos cambios.
+
 ## 2026-08-28 — T-05 · Cabo de Palos y La Manga, y arreglo de la detección de extremos
 
 - **Dos puertos nuevos** en el piloto: **Cabo de Palos** y **La Manga** (lado mediterráneo, no la
