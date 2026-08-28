@@ -106,7 +106,7 @@
         "phase_deg": 185.707
       }
     ],
-    "derived_at": "2026-08-28T02:15:20Z",
+    "derived_at": "2026-08-28T02:27:59Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -298,7 +298,7 @@
     }
   ],
   "quality": {
-    "rmse_m": 0.0393,
+    "rmse_m": 0.0394,
     "hw_time_err_p95_min": 22.91,
     "grade": "B",
     "validated_against": "IOC huel",
@@ -308,13 +308,14 @@
       "window_days": 30.0,
       "samples": 42985,
       "predicted_range_m": 3.4232,
-      "rmse_m": 0.0393,
-      "nrmse": 0.01149,
+      "rmse_m": 0.0394,
+      "nrmse": 0.0115,
       "r2": 0.99747,
       "hw_time_err_p95_min": 22.91,
       "hw_height_err_p95_m": 0.064,
       "matched_extremes": 115,
       "predicted_extremes": 116,
+      "predicted_extremes_in_window": 115,
       "observed_extremes": 117,
       "extremes_usable": true,
       "cross_rmse_m": null,

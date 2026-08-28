@@ -119,7 +119,12 @@ Dos cosas que el grade **no** puede medir y por eso las declara en vez de invent
   usuario está en el solunar y la meteorología, no en la tabla de pleamares.
 - Cuando la observación tiene muchos más extremos que la marea —justo el caso anterior—, el error de
   hora de pleamar **no se publica**. Emparejar contra un registro así siempre encuentra un extremo
-  al lado y devuelve un número excelente y falso.
+  al lado y devuelve un número excelente y falso. El corte está en
+  `validate.MAX_OBSERVED_EXTREMES_RATIO` (hoy **×2**) y se aplica contra los extremos predichos
+  **dentro de la ventana que el mareógrafo llegó a cubrir**, no contra los de los 30 días: si la
+  serie sólo abarca diez, comparar con treinta disimularía el exceso. Los dos contadores se publican
+  en `quality.metrics` (`observed_extremes` y `predicted_extremes_in_window`), de modo que la
+  decisión se puede rehacer desde el JSON sin ejecutar nada.
 
 ## Añadir un puerto
 

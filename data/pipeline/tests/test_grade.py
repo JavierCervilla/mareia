@@ -21,6 +21,7 @@ _EXCELLENT = Metrics(
     hw_height_err_p95_m=0.09,
     matched_extremes=116,
     predicted_extremes=116,
+    predicted_extremes_in_window=116,
     observed_extremes=116,
     extremes_usable=True,
     cross_rmse_m=0.004,

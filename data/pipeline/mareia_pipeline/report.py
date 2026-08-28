@@ -6,6 +6,7 @@ import datetime as dt
 from dataclasses import dataclass
 
 from mareia_pipeline import grade as grading
+from mareia_pipeline import validate
 from mareia_pipeline.reconcile import Selection
 from mareia_pipeline.validate import Metrics
 
@@ -42,6 +43,19 @@ def _thresholds_table() -> str:
         f"| Años de registro analizado | años | ≥ {grading.MIN_EPOCH_YEARS['A']:.0f} "
         f"| ≥ {grading.MIN_EPOCH_YEARS['B']:.0f} |"
     )
+    lines += [
+        "",
+        "Y un umbral que no reparte grade sino que decide si una métrica **se publica o no**:",
+        "",
+        "| Umbral | Unidad | Valor | Qué hace |",
+        "|---|---|---|---|",
+        f"| Extremos observados por cada uno de marea | × | "
+        f"{validate.MAX_OBSERVED_EXTREMES_RATIO:g} | Por encima de esta proporción se considera "
+        "que el registro no tiene pleamares identificables y **no se publica** el error de hora "
+        "(en vez de publicar uno falso). La comparación es contra los extremos predichos **dentro "
+        "de la ventana realmente observada**, que es el campo `predicted_extremes_in_window` de "
+        "`quality.metrics`. |",
+    ]
     return "\n".join(lines)
 
 
@@ -158,14 +172,22 @@ def render(
                 f"peor `{metrics.cross_source_worst}` ({metrics.cross_rmse_worst_m:.3f} m)"
             )
         if metrics.samples and not metrics.extremes_usable:
+            # El término de comparación es el de la ventana observada, que es el que usa la
+            # decisión: publicar aquí el de los 30 días haría que las cuentas del informe no
+            # cuadrasen con su propia conclusión.
+            in_window = metrics.predicted_extremes_in_window
+            ratio = metrics.observed_extremes / max(in_window, 1)
             extremes = (
                 f"**hora de extremo no medible**: {metrics.observed_extremes} extremos observados "
-                f"frente a {metrics.predicted_extremes} de marea, así que el registro no tiene "
-                "pleamares identificables y emparejarlos no mediría nada"
+                f"frente a {in_window} de marea en la ventana realmente cubierta "
+                f"(×{ratio:.1f}, por encima del ×{validate.MAX_OBSERVED_EXTREMES_RATIO:g} "
+                "admitido), así que el registro no tiene pleamares identificables y emparejarlos "
+                "no mediría nada"
             )
         else:
             extremes = (
-                f"{metrics.matched_extremes}/{metrics.predicted_extremes} extremos emparejados"
+                f"{metrics.matched_extremes}/{metrics.predicted_extremes_in_window} extremos "
+                "emparejados en la ventana observada"
             )
         lines.append(f"  ({metrics.samples} muestras, {extremes}); {corroboration}.")
         if rejected:

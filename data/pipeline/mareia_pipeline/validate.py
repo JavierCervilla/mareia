@@ -72,6 +72,10 @@ class Metrics:
     hw_height_err_p95_m: float | None
     matched_extremes: int
     predicted_extremes: int
+    #: Extremos predichos que caen **dentro de la ventana realmente observada**. Es el término con
+    #: el que se compara ``observed_extremes``, así que sin él la decisión de medibilidad no se
+    #: puede rehacer desde los artefactos publicados.
+    predicted_extremes_in_window: int
     observed_extremes: int
     #: ``False`` cuando la observación tiene tantos extremos que no son la marea (residuo
     #: meteorológico en puerto micromareal) que emparejarlos no mediría nada.
@@ -177,6 +181,7 @@ def evaluate(
     matched = 0
     samples = 0
     observed_count = 0
+    in_window = 0
     extremes_usable = False
     if observations is not None and len(observations.times) > 2:
         observed_hours = np.array([hours_since_epoch(t) for t in observations.times])
@@ -201,9 +206,11 @@ def evaluate(
             if observations.times[0] <= e.when <= observations.times[-1]
         ]
         observed_count = len(observed_extremes)
-        extremes_usable = observed_count <= MAX_OBSERVED_EXTREMES_RATIO * max(
-            len(centred_predicted), 1
-        )
+        # El término de comparación es el número de extremos predichos **dentro de la ventana que
+        # el mareógrafo llegó a cubrir**, no los de los 30 días: si la serie sólo abarca 10 días,
+        # contrastar contra los 30 disimularía el exceso de extremos y la decisión saldría al revés.
+        in_window = len(centred_predicted)
+        extremes_usable = observed_count <= MAX_OBSERVED_EXTREMES_RATIO * max(in_window, 1)
         if extremes_usable:
             time_errors, height_errors = match_extremes(centred_predicted, observed_extremes)
             matched = len(time_errors)
@@ -223,6 +230,7 @@ def evaluate(
         hw_height_err_p95_m=None if height_p95 is None else round(height_p95, 4),
         matched_extremes=matched,
         predicted_extremes=len(predicted_extremes),
+        predicted_extremes_in_window=in_window,
         observed_extremes=observed_count,
         extremes_usable=extremes_usable,
         cross_rmse_m=None if best is None else round(best[0], 4),

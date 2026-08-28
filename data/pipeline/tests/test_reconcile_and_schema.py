@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import json
+import pathlib
 
 import pytest
 
 from mareia_pipeline import grade as grading
+from mareia_pipeline import validate
 from mareia_pipeline.geo import haversine_km
 from mareia_pipeline.ports import PILOT_PORTS
 from mareia_pipeline.reconcile import select
@@ -45,6 +47,13 @@ def _gauge(
         disclaimers="",
         constituents=[{"name": "M2", "amplitude": 1.0, "phase": 30.0}],
     )
+
+
+def _latest_qc_report() -> str:
+    """El informe QC más reciente de `reports/`, que es el que acompaña al dataset commiteado."""
+    reports = sorted((pathlib.Path(__file__).parents[1] / "reports").glob("QC-*.md"))
+    assert reports, "no hay informe QC commiteado"
+    return reports[-1].read_text(encoding="utf-8")
 
 
 PORT = PILOT_PORTS[0]
@@ -124,3 +133,34 @@ def test_a_borrowed_gauge_cannot_be_published_as_grade_a(path) -> None:
     document = json.loads(path.read_text(encoding="utf-8"))
     if document["source"]["primary"]["distance_km"] > grading.MAX_GAUGE_DISTANCE_KM["A"]:
         assert document["quality"]["grade"] != "A"
+
+
+def test_report_justifies_unmeasurability_with_the_in_window_counter() -> None:
+    """El informe debe citar el mismo contador con el que se toma la decisión.
+
+    El término de comparación es el de la ventana observada, no el de los 30 días. Publicar el de
+    los 30 días dejaba un informe cuyas propias cuentas contradecían su conclusión: en Cartagena,
+    "197 frente a 104" da ×1,9 —por debajo del corte— cuando el ratio realmente aplicado era ×5,8.
+    """
+    report_text = _latest_qc_report()
+    for path in station_files():
+        document = json.loads(path.read_text(encoding="utf-8"))
+        metrics = document["quality"]["metrics"]
+        if metrics["extremes_usable"] or not metrics["samples"]:
+            continue
+        in_window = metrics["predicted_extremes_in_window"]
+        observed = metrics["observed_extremes"]
+        assert observed > validate.MAX_OBSERVED_EXTREMES_RATIO * max(in_window, 1)
+        assert f"{observed} extremos observados frente a {in_window} de marea" in report_text
+
+
+def test_report_publishes_the_measurability_threshold() -> None:
+    assert "Extremos observados por cada uno de marea" in _latest_qc_report()
+
+
+def test_every_station_publishes_both_extreme_counters() -> None:
+    """Sin los dos contadores en el JSON, la decisión no es reproducible desde los artefactos."""
+    for path in station_files():
+        metrics = json.loads(path.read_text(encoding="utf-8"))["quality"]["metrics"]
+        assert "observed_extremes" in metrics
+        assert "predicted_extremes_in_window" in metrics
