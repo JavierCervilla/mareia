@@ -8,7 +8,7 @@
  * continua y cambia de signo dentro del intervalo localizado.
  */
 
-import { heightAt, heightRateAt, prepareStation, stepToMilliseconds } from "./harmonic.ts";
+import { assertValidRange, heightAt, heightRateAt, prepareStation, stepToMilliseconds } from "./harmonic.ts";
 import type { PreparedStation } from "./harmonic.ts";
 import type { EpochMs, TideExtreme, TideExtremeKind, TideStation } from "./types.ts";
 
@@ -93,12 +93,7 @@ export function findExtremes(
   toUtcMs: EpochMs,
   options: FindExtremesOptions = {},
 ): readonly TideExtreme[] {
-  if (!Number.isFinite(fromUtcMs) || !Number.isFinite(toUtcMs)) {
-    throw new RangeError("El rango temporal debe estar formado por instantes finitos");
-  }
-  if (toUtcMs < fromUtcMs) {
-    throw new RangeError("El final del rango no puede ser anterior al inicio");
-  }
+  assertValidRange(fromUtcMs, toUtcMs);
   const stepMs = stepToMilliseconds(options.coarseStepMinutes ?? DEFAULT_COARSE_STEP_MINUTES);
   const toleranceMs = options.toleranceMs ?? DEFAULT_TOLERANCE_MS;
   if (!Number.isFinite(toleranceMs) || toleranceMs <= 0) {

@@ -110,7 +110,8 @@ export function predictHeight(station: TideStation, atUtcMs: EpochMs): number {
   return heightAt(prepareStation(station), atUtcMs);
 }
 
-function assertValidRange(fromUtcMs: EpochMs, toUtcMs: EpochMs): void {
+/** @throws {RangeError} si el rango no es un intervalo finito y bien orientado. */
+export function assertValidRange(fromUtcMs: EpochMs, toUtcMs: EpochMs): void {
   if (!Number.isFinite(fromUtcMs) || !Number.isFinite(toUtcMs)) {
     throw new RangeError("El rango temporal debe estar formado por instantes finitos");
   }
