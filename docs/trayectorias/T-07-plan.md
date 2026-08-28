@@ -29,5 +29,17 @@ sirviendo el dominio ya mergeado (motor de mareas T-02, astro/solunar T-03) y el
 Módulo weather (T-08), coeficiente en el API (se añade cuando T-04 merjee — si T-04 ya está en main
 al empezar, inclúyelo como `GET /v1/ports/:slug/coefficient?date`; si no, déjalo fuera y anótalo).
 
+### Pendiente de integración: coeficiente (T-04)
+T-04 **no estaba en `main`** al ejecutar esta trayectoria (va en paralelo), así que el endpoint
+`GET /v1/ports/:slug/coefficient?date` **queda fuera** de T-07. Cuando T-04 merjee, añadirlo es:
+
+1. un caso de uso `getCoefficient` en `packages/usecases` (con `data/brest/constituents.json` detrás
+   de un puerto propio, igual que `StationRepository`),
+2. su adaptador en `packages/adapters` y su entrada en `createCoreDeps`,
+3. una línea en `registerCoreRoutes` con el mismo `route(...)` y `sendDeterministic(...)` que las
+   otras seis.
+
+No hace falta tocar ni el dominio ni el contrato de módulos.
+
 ## DoD extra (doctrina T-161)
 Checkbox T-07 en ROADMAP.md + entrada CHANGELOG.md en commit final separado. Sin `[skip-traj]`.
