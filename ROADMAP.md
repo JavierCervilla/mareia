@@ -41,6 +41,8 @@
 
 ## Fase 2 (rumbo, sin comprometer)
 
+- [ ] App móvil (shell Capacitor) con widgets de pantalla de inicio (iOS WidgetKit / Android
+      Glance) — spec v1 cerrada en `docs/espec-widgets-pwa-capacitor.md` (T-16)
 - [ ] Módulo navegación (carta OSM seamark, batimetría GEBCO/EMODnet, AIS)
 - [ ] Módulo pesca ampliado (especies GBIF/OBIS, vedas/tallas por CCAA curadas)
 - [ ] Cobertura internacional (NOAA EEUU, FES2022 global)
