@@ -2,6 +2,36 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-28 — T-09 · la página de puerto, y el gate de UI que la vigila
+
+- **El portal existe**: 32 páginas estáticas construidas desde el dataset —12 puertos bajo
+  `/mareas/<región>/<provincia>/<puerto>/` más los índices de provincia, región, `/mareas/` y la
+  portada—, con **cero JavaScript de cliente**. La página de puerto trae la tabla de pleamares y
+  bajamares del día, la curva de 24 h en SVG con sus extremos marcados, el coeficiente con su
+  etiqueta de la escala francesa, sol y luna (ortos y ocasos con acimut, los tres crepúsculos, fase
+  e iluminación) y la tabla del mes entero, pensada para imprimirla y llevársela.
+- **Los datos se calculan en build con los casos de uso del API** (`getTides`, `getAstro`,
+  `getPort`): la web no tiene su propia versión de la marea, tiene la misma. El día que publica el
+  sitio es un parámetro (`BUILD_DATE`, o el día UTC del reloj) y se enseña en la página —«datos
+  generados el …»—, así que el build es reproducible y el `dist/` se puede testear contra el
+  dominio. El coeficiente, que todavía no tiene endpoint, se calcula con el dominio y se memoiza:
+  es el mismo para los doce puertos y solo cambia dónde se corta el día civil.
+- **Transparencia en la propia página**: grade de la estación con lo que significa, RMSE, error de
+  hora p95 (o «sin pleamares medibles», que es lo que dice el QC en los micromareales), cero
+  hidrográfico y las atribuciones **de esa estación** —cambian de licencia entre puertos—. En Cabo
+  de Palos, La Manga, Cádiz y Palma, un aviso destacado antes de la tabla: allí la marea
+  astronómica es de centímetros y quien manda es el residuo meteorológico.
+- **SEO**: canónicas, `sitemap.xml` con el `lastmod` del build, JSON-LD (`Place` +
+  `BreadcrumbList`, generado del mismo array que pinta las migas) y anclas por sección.
+- **Gate de UI** (deuda de T-01, prerrequisito de esta trayectoria): brief de diseño commiteado
+  antes de la primera vista (`apps/web/design-brief.md`), tokens en OKLCH con su contraste medido
+  —el peor par, 5,4:1—, linter determinista de frontend en CI, `eslint-plugin-astro` (`pnpm lint`
+  cubre ya los `.astro`) y `astro check` en el job web. Se cierran también las deudas menores del
+  verificador de T-01: pin de semgrep y `--frozen` en los `deno task` del CI.
+- El **pase adversario** de la tranche 1 sigue siendo gate: sus siete hallazgos se re-apuntan al
+  sujeto nuevo —la curva se ataca en los 12 puertos; enlaces rotos y landmarks, en las 32 páginas— y
+  la promesa «lo que se lee es lo que se calculó» se comprueba ahora contra los casos de uso.
+
 ## 2026-08-28 — T-04 · coeficiente de mareas y dos mejoras del motor
 
 - **Coeficiente de marea** (escala francesa 20-120) en `@mareia/domain-core/coefficient`: un valor

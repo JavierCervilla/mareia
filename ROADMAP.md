@@ -22,7 +22,9 @@
 
 ## Hito 3 — Portal (10 puertos piloto)
 
-- [ ] T-09 · Página de puerto SSG (tabla + gráfico + coeficiente + sol/luna), SEO ≥ 95
+- [x] T-09 · Página de puerto SSG (tabla + gráfico + coeficiente + sol/luna) + índices geográficos,
+      con canónicas, sitemap y JSON-LD (la medida Lighthouse SEO ≥ 95 queda pendiente de T-15: no
+      hay navegador en CI; el comando está documentado en `apps/web/design-brief.md` §8)
 - [ ] T-10 · Módulo pesca UI (overlay solunar + rating)
 - [ ] T-11 · Módulo weather UI (isla meteo con estados ok/error/stale)
 - [ ] T-12 · PWA offline (almanaque de favoritos sin red)

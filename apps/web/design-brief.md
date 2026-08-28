@@ -140,7 +140,17 @@ pnpm lint      # ESLint (preset anti-slop) — incluye .astro vía eslint-plugin
 pnpm --filter web check   # astro check: tipos de las páginas y del layout
 ```
 
-Los tres son gates duros de los jobs `anti-slop` y `web` del CI. Toda excepción del linter va con
+La medida de **Lighthouse** (SEO ≥ 95, el objetivo del ROADMAP) **no corre en CI**: necesita un
+navegador y aquí no hay ninguno instalado. El comando, para ejecutarlo a mano sobre el `dist/`
+servido —o en el despliegue de T-15, que es donde tiene sentido medirlo—:
+
+```bash
+pnpm --filter web build && pnpm --filter web preview   # sirve dist/ en :4321
+npx lighthouse http://localhost:4321/mareas/galicia/pontevedra/vigo/ \
+  --only-categories=seo,accessibility,performance --quiet --chrome-flags="--headless"
+```
+
+Los tres primeros son gates duros de los jobs `anti-slop` y `web` del CI. Toda excepción del linter va con
 `anti-slop-allow: <razón>` en la línea y traza a una decisión de este brief.
 
 **Regla de dónde vive el CSS**: el linter de la skill escanea `.ts`, `.css` y `.html`, pero **no**
