@@ -37,6 +37,28 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   tienen mareógrafo disponible bajo **CC-BY-NC 4.0**; está declarado estación por estación.
 - CI: nuevo job `data-pipeline` con el camino offline (tests + validación contra el schema).
 
+## 2026-08-28 — astronomía y periodos solunares (T-03)
+
+- `astronomy/` en `@mareia/domain-core`: ortos y ocasos de Sol y Luna con acimut, crepúsculos civil,
+  náutico y astronómico, fase lunar (edad real desde la nueva anterior, iluminación y próximos
+  cuartos), tránsito superior e inferior y distancia lunar. Los casos polares no devuelven `null`:
+  `SkySearch` es una unión discriminada que distingue el sol de medianoche de la noche polar.
+- **Primera y única dependencia de runtime del dominio**: `astronomy-engine` (MIT, pinneada, sin
+  dependencias transitivas), importada por un solo fichero y escondida tras la interfaz
+  `AstronomyGateway`. Es la excepción del Design Doc bajo «matemática vendorizada»: una efeméride
+  reimplementada a mano no falla ruidosamente, devuelve una hora plausible y falsa.
+- Golden tests contra efemérides publicadas del **USNO** (8 fechas de 2026 × Madrid y Las Palmas,
+  descargadas con su script y commiteadas con las URLs exactas): error máximo 0,49 min en ortos,
+  ocasos, tránsitos y crepúsculo civil —frente a tolerancias de ±2 y ±3 min— y 1,33 min en los 50
+  cuartos lunares del año, frente a ±1 h. El USNO tabula al minuto: ≤0,5 min es acuerdo exacto.
+- `solunar/`: periodos mayores (2 h centradas en cada tránsito lunar) y menores (1 h 30 min en el
+  orto y el ocaso de la Luna) del día civil de una zona IANA, con rating de actividad 0-100 y
+  etiqueta. El cálculo es en UTC de punta a punta; la zona solo decide qué periodos caen en el día,
+  y eso está verificado comparando Madrid, UTC y Auckland.
+- El rating se documenta como la convención que es, con su desglose auditable: 100 y 0 solo se
+  alcanzan por exactitud de la fórmula (nunca por redondeo) y los umbrales de etiqueta son los
+  cuartos iguales del rango alcanzable, no números inventados.
+
 ## 2026-08-28 — motor de predicción de mareas propio (T-02)
 
 - Motor de predicción de mareas propio en `@mareia/domain-core`: suma armónica con correcciones
