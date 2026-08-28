@@ -8,6 +8,7 @@
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@^1.0.0",
+    "@mareia/module-contract": "../../packages/module-contract/src/index.ts",
     "express": "npm:express@4",
     "@types/express": "npm:@types/express@4"
   },

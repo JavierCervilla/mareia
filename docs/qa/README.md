@@ -15,3 +15,6 @@ mientras el bug está abierto.
 
 - **T-01** (`[skip-adv]`): el único "UI" del PR de scaffold es la página hello — no hay promesa de
   feature que atacar. El primer pase adversario real llega con las páginas de puerto (T-09+).
+- **T-06** (`[skip-adv]`): el toque a `apps/web/src/` es el registry tipado de módulos
+  (`modules.config.ts` + `sectionsForPort`, sin render ni superficie visible). La promesa del contrato
+  de módulos se atacará cuando haya UI que lo consuma (T-09/T-10/T-11).
