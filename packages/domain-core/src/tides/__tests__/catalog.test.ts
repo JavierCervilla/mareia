@@ -11,7 +11,7 @@
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { computeAstronomicalArguments } from "../astronomy.ts";
+import { computeAstronomicalArguments, DEG_TO_RAD } from "../astronomy.ts";
 import { findConstituent } from "../constituents.ts";
 import { computeNodalCorrection } from "../nodal.ts";
 
@@ -69,4 +69,35 @@ describe("catálogo · corrección nodal de los compuestos añadidos", () => {
       assert.deepEqual(computeNodalCorrection(definitionOf(name).nodal, args), { f: 1, u: 0 }, name);
     }
   });
+});
+
+/**
+ * El factor nodal de M3 en la forma publicada, contra la constante impresa de Schureman.
+ *
+ * Este motor evalúa el valor medio a partir de ω e i en vez de copiar el 0,8758 de la tabla; el
+ * test comprueba que ambas lecturas coinciden a lo largo del ciclo nodal de 18,6 años, que es lo
+ * que demuestra que el denominador analítico es el que Schureman redondeó.
+ */
+describe("catálogo · factor nodal de M3 (SP-98, forma publicada)", () => {
+  /** Valor medio impreso en SP-98 para M3: cos⁶(½ω)·cos⁶(½i). */
+  const SCHUREMAN_M3_MEAN = 0.8758;
+  /** Un instante por año a lo largo de un ciclo nodal completo. */
+  const YEARS = Array.from({ length: 19 }, (_, index) => Date.parse(`${2020 + index}-07-01T00:00:00Z`));
+
+  for (const atUtcMs of YEARS) {
+    const iso = new Date(atUtcMs).toISOString().slice(0, 10);
+    it(`reproduce cos⁶(I/2)/0,8758 en ${iso}`, () => {
+      const args = computeAstronomicalArguments(atUtcMs);
+      const { f, u } = computeNodalCorrection(definitionOf("M3").nodal, args);
+      const published =
+        Math.cos(0.5 * args.inclination * DEG_TO_RAD) ** 6 / SCHUREMAN_M3_MEAN;
+      const relative = Math.abs(f - published) / published;
+      assert.ok(
+        relative < 1e-3,
+        `f(M3) = ${f.toFixed(6)} frente a ${published.toFixed(6)} (${(relative * 100).toFixed(3)} %)`,
+      );
+      const m2 = computeNodalCorrection(definitionOf("M2").nodal, args);
+      assert.ok(Math.abs(u - 1.5 * m2.u) < 1e-9, `u(M3) = ${u} debe ser 3ξ − 3ν = 1,5·u(M2)`);
+    });
+  }
 });

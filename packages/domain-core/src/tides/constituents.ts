@@ -95,7 +95,7 @@ const DEFINITIONS: readonly ConstituentDefinition[] = [
   define("2Q1", [1, -3, 0, 2, 0, 0, 1], nodal(["O1", 1])),
   define("P1", [1, 1, -2, 0, 0, 0, 1], nodal()),
   define("2SM2", [2, 4, -4, 0, 0, 0, 0], nodal(["M2", -1])),
-  define("M3", [3, 0, 0, 0, 0, 0, -2], nodal(["M2", 1.5])),
+  define("M3", [3, 0, 0, 0, 0, 0, -2], nodal(["M3", 1])),
   define("L2", [2, 1, 0, -1, 0, 0, -2], nodal(["L2", 1])),
   define("2MK3", [3, -1, 0, 0, 0, 0, 1], nodal(["M2", 2], ["K1", -1])),
   define("K2", [2, 2, 0, 0, 0, 0, 0], nodal(["K2", 1])),

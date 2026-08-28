@@ -5,7 +5,7 @@
  * Special Publication 98 — en adelante SP-98. Los factores f son los de las eqs. 73-80 divididos
  * por su valor medio (eqs. 65-72), de modo que f ≈ 1 promediado sobre el ciclo nodal de 18,6 años.
  *
- * Solo diez constituyentes tienen corrección propia («fundamentales»); el resto la derivan de
+ * Solo once constituyentes tienen corrección propia («fundamentales»); el resto la derivan de
  * ellos como producto/suma ponderada (ver `constituents.ts`).
  */
 
@@ -13,7 +13,18 @@ import type { AstronomicalArguments } from "./astronomy.ts";
 import { DEG_TO_RAD, RAD_TO_DEG } from "./astronomy.ts";
 
 /** Constituyentes con fórmula propia de f y u en SP-98. */
-export type NodalFundamental = "Mm" | "Mf" | "O1" | "J1" | "OO1" | "M1" | "M2" | "K1" | "K2" | "L2";
+export type NodalFundamental =
+  | "Mm"
+  | "Mf"
+  | "O1"
+  | "J1"
+  | "OO1"
+  | "M1"
+  | "M2"
+  | "M3"
+  | "K1"
+  | "K2"
+  | "L2";
 
 /** Corrección nodal: factor de amplitud f (adimensional) y desfase u en grados. */
 export interface NodalCorrection {
@@ -23,7 +34,7 @@ export interface NodalCorrection {
 
 /**
  * Aportación de un fundamental a la corrección de un constituyente derivado.
- * El factor puede ser negativo (constituyentes compuestos por diferencia) o fraccionario (M3).
+ * El factor es un entero, negativo en los constituyentes compuestos por diferencia.
  */
 export interface NodalTerm {
   readonly fundamental: NodalFundamental;
@@ -91,6 +102,23 @@ function fM2({ bigI, omega, i }: Angles): number {
   return Math.cos(0.5 * bigI) ** 4 / (Math.cos(0.5 * omega) ** 4 * Math.cos(0.5 * i) ** 4);
 }
 
+/**
+ * f(M3) — SP-98 Tabla 2: f = cos⁶(½I)/0,8758, con u = 3ξ − 3ν.
+ *
+ * El 0,8758 que imprime Schureman es el valor medio cos⁶(½ω)·cos⁶(½i), que aquí se evalúa a partir
+ * de ω e i como el resto del módulo, en vez de copiar la constante redondeada (0,87545 con los ω e
+ * i de la efeméride: 4·10⁻⁴ relativo, 0,3 mm sobre la amplitud de M3 más grande del catálogo).
+ *
+ * Es la forma **publicada**, y no la derivada `f(M2)^1,5` que usaba este motor: analíticamente son
+ * la misma expresión —f(M2) = cos⁴(½I)/[cos⁴(½ω)cos⁴(½i)], elevarla a 3/2 da exactamente cos⁶(½I)
+ * sobre el mismo denominador—, pero escrita así se lee contra la referencia y deja de depender de
+ * un exponente fraccionario en la composición de fundamentales, que es un caso especial que no
+ * tiene ningún otro constituyente.
+ */
+function fM3({ bigI, omega, i }: Angles): number {
+  return Math.cos(0.5 * bigI) ** 6 / (Math.cos(0.5 * omega) ** 6 * Math.cos(0.5 * i) ** 6);
+}
+
 /** f(K1) — SP-98 eqs. 79 y 71. */
 function fK1({ bigI, omega, i, nu }: Angles): number {
   const sin2I = Math.sin(2 * bigI);
@@ -144,6 +172,7 @@ const FUNDAMENTAL_FORMULAS: Readonly<Record<NodalFundamental, FundamentalFormula
   J1: (args) => ({ f: fJ1(anglesInRadians(args)), u: -args.nu }),
   OO1: (args) => ({ f: fOO1(anglesInRadians(args)), u: -2 * args.xi - args.nu }),
   M2: (args) => ({ f: fM2(anglesInRadians(args)), u: 2 * args.xi - 2 * args.nu }),
+  M3: (args) => ({ f: fM3(anglesInRadians(args)), u: 3 * args.xi - 3 * args.nu }),
   K1: (args) => ({ f: fK1(anglesInRadians(args)), u: -args.nuPrime }),
   K2: (args) => ({ f: fK2(anglesInRadians(args)), u: -2 * args.nuBiPrime }),
   M1: (args) => {
