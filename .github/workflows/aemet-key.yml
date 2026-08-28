@@ -1,0 +1,76 @@
+name: Aviso de caducidad — AEMET
+
+# La clave de AEMET vive 3 meses y su alta lleva un reCAPTCHA: no se puede renovar sola. Este
+# workflow existe para que la caducidad se sepa con semanas de antelación en vez de descubrirse
+# el día que el boletín empieza a devolver 401.
+on:
+  schedule:
+    # Cada día a las 07:10 UTC. Minuto no redondo para no coincidir con el pico de la hora en punto.
+    - cron: "10 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  caducidad:
+    name: ¿Hay que renovar la API key de AEMET?
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Comprobar la caducidad (se lee del JWT, sin llamar a AEMET)
+        id: check
+        env:
+          AEMET_API_KEY: ${{ secrets.AEMET_API_KEY }}
+        run: |
+          set +e
+          salida="$(deno run --allow-env scripts/check-aemet-key.ts 2>&1)"
+          codigo=$?
+          echo "$salida"
+          {
+            echo "resumen<<FIN"
+            echo "$salida"
+            echo "FIN"
+          } >> "$GITHUB_OUTPUT"
+          echo "hay_que_actuar=$codigo" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Abrir o actualizar el aviso
+        if: steps.check.outputs.hay_que_actuar != '0'
+        uses: actions/github-script@v7
+        env:
+          RESUMEN: ${{ steps.check.outputs.resumen }}
+        with:
+          script: |
+            const titulo = 'Renovar la API key de AEMET';
+            const cuerpo = [
+              'La credencial de AEMET necesita una renovación manual (su alta tiene reCAPTCHA).',
+              '',
+              '```',
+              process.env.RESUMEN,
+              '```',
+              '',
+              'Mientras tanto el módulo `weather` **degrada de forma explícita**: el boletín oficial',
+              'deja de publicarse con su motivo, el resto de la meteorología (Open-Meteo) sigue, y',
+              '`credential` en la respuesta de `/bulletin` dice lo mismo que este aviso.',
+            ].join('\n');
+            const abiertos = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'aemet-key',
+            });
+            if (abiertos.data.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: abiertos.data[0].number, body: cuerpo,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title: titulo, body: cuerpo, labels: ['aemet-key'],
+              });
+            }

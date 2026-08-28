@@ -17,6 +17,8 @@ import type { AppModule, Attribution, Health } from "@mareia/module-contract";
 import express, { type Request, type RequestHandler, type Response, type Router } from "express";
 
 import { AEMET_ATTRIBUTION, fetchCoastalBulletin } from "./aemet.ts";
+import type { AemetKeyState } from "./aemet-key.ts";
+import { inspectAemetKey, needsHumanAction } from "./aemet-key.ts";
 import type { WeatherCache } from "./cache.ts";
 import type { Cell } from "./cell.ts";
 import { cellKey, toCell } from "./cell.ts";
@@ -114,6 +116,12 @@ export type BulletinPayload = {
   /** `null` si el puerto no tiene zona marítima asignada en `aemet-zones.json`. */
   readonly zone: CoastalZone | null;
   readonly attributions: readonly Attribution[];
+  /**
+   * Estado de la credencial de AEMET. Viaja siempre, también cuando el boletín sale bien: quien
+   * opera la instancia se entera de que la clave muere **antes** de que empiece a fallar, y quien
+   * consume el API puede decir por qué dejó de haber boletín.
+   */
+  readonly credential: AemetKeyState;
 } & (
   | {
       readonly status: "ok";
@@ -145,7 +153,7 @@ interface HealthTracker {
   snapshot(): Health;
 }
 
-function createHealthTracker(hasAemetKey: boolean): HealthTracker {
+function createHealthTracker(keyState: () => AemetKeyState): HealthTracker {
   const lastSeen = new Map<string, string>();
 
   return {
@@ -159,13 +167,17 @@ function createHealthTracker(hasAemetKey: boolean): HealthTracker {
 
     snapshot(): Health {
       const problems = [...lastSeen.values()].filter((problem) => problem !== "");
-      if (!hasAemetKey) {
-        problems.push("AEMET no configurada (falta AEMET_API_KEY): no se sirven boletines");
+      const credential = keyState();
+      // La credencial entra en la salud aunque nadie haya pedido un boletín: una clave que caduca
+      // en tres días es un problema hoy, no el día que devuelva 401.
+      const credentialIsAProblem = credential.status === "missing" || needsHumanAction(credential);
+      if (credentialIsAProblem) {
+        problems.push(credential.message);
       }
       if (lastSeen.size === 0) {
-        return hasAemetKey
-          ? { status: "ok", detail: "sin peticiones todavía" }
-          : { status: "degraded", detail: problems.join("; ") };
+        return credentialIsAProblem
+          ? { status: "degraded", detail: problems.join("; ") }
+          : { status: "ok", detail: "sin peticiones todavía" };
       }
       if (problems.length === 0) {
         return { status: "ok" };
@@ -299,6 +311,7 @@ function bulletinHandler(deps: WeatherModuleDeps, health: HealthTracker): Reques
           status: "unavailable",
           reason: `El puerto '${port.slug}' no tiene zona marítima de AEMET asignada`,
           attributions: [AEMET_ATTRIBUTION],
+          credential: inspectAemetKey(deps.aemetApiKey, deps.now()),
         } satisfies BulletinPayload,
       };
     }
@@ -319,7 +332,12 @@ function bulletinHandler(deps: WeatherModuleDeps, health: HealthTracker): Reques
     });
     health.record("bulletin", report);
 
-    const head = { port, zone, attributions: [AEMET_ATTRIBUTION] };
+    const head = {
+      port,
+      zone,
+      attributions: [AEMET_ATTRIBUTION],
+      credential: inspectAemetKey(deps.aemetApiKey, deps.now()),
+    };
     if (report.status === "unavailable") {
       return { status: 200, body: { ...head, status: "unavailable", reason: report.reason } };
     }
@@ -344,9 +362,10 @@ function bulletinHandler(deps: WeatherModuleDeps, health: HealthTracker): Reques
  * saber es si lo último que se sirvió salió bien.
  */
 export function createWeatherModule(deps: WeatherModuleDeps): AppModule<Router> {
-  const health = createHealthTracker(
-    deps.aemetApiKey !== undefined && deps.aemetApiKey.trim() !== "",
-  );
+  // El estado de la credencial se recalcula en cada consulta con el reloj inyectado: una clave
+  // caduca por el paso del tiempo, no por un redespliegue.
+  const credentialState = (): AemetKeyState => inspectAemetKey(deps.aemetApiKey, deps.now());
+  const health = createHealthTracker(credentialState);
 
   return {
     id: "weather",

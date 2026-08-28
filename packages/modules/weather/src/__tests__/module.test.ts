@@ -64,6 +64,18 @@ function upstream(fallan: readonly string[] = []): FetchSpy {
   });
 }
 
+/**
+ * Clave de AEMET de prueba: un JWT sintético con `exp` lejano al reloj de los tests. Desde T-08 el
+ * módulo lee la caducidad de la propia clave, así que una cadena cualquiera ya no sirve de doble:
+ * sería una credencial ilegible y el healthcheck —con razón— lo cantaría como problema.
+ */
+const TEST_API_KEY = ((): string => {
+  const b64 = (value: unknown): string =>
+    btoa(JSON.stringify(value)).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+  // 90 días de vida desde T0, como una clave recién pedida a AEMET.
+  return `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ exp: (T0 + 90 * 86_400_000) / 1000 })}.firma`;
+})();
+
 function moduleDeps(
   spy: FetchSpy,
   clock: { now: () => number },
@@ -296,7 +308,7 @@ test("GET /bulletin sin AEMET_API_KEY degrada con estado explícito, no con un 5
 test("GET /bulletin con clave sirve el documento con su zona y su procedencia", async () => {
   const spy = upstream();
   const clock = fakeClock(T0);
-  await withModule(moduleDeps(spy, clock, "clave-de-mentira"), async (baseUrl) => {
+  await withModule(moduleDeps(spy, clock, TEST_API_KEY), async (baseUrl) => {
     const body = await bulletinBody(await fetch(`${baseUrl}/bulletin?port=vigo`));
 
     assertBulletinServed(body);
@@ -316,7 +328,7 @@ test("GET /bulletin con clave sirve el documento con su zona y su procedencia", 
 test("el boletín se cachea por zona: dos puertos de la misma zona, una llamada", async () => {
   const spy = upstream();
   const clock = fakeClock(T0);
-  await withModule(moduleDeps(spy, clock, "clave-de-mentira"), async (baseUrl) => {
+  await withModule(moduleDeps(spy, clock, TEST_API_KEY), async (baseUrl) => {
     await fetch(`${baseUrl}/bulletin?port=vigo`);
     clock.advance(60_000);
     const second = await bulletinBody(await fetch(`${baseUrl}/bulletin?port=vigo`));
@@ -330,7 +342,7 @@ test("el boletín se cachea por zona: dos puertos de la misma zona, una llamada"
 test("el healthcheck no sale a la red y cuenta lo último que pasó", async () => {
   const spy = upstream();
   const clock = fakeClock(T0);
-  await withModule(moduleDeps(spy, clock, "clave-de-mentira"), async (baseUrl, healthcheck) => {
+  await withModule(moduleDeps(spy, clock, TEST_API_KEY), async (baseUrl, healthcheck) => {
     assert.deepEqual(await healthcheck(), { status: "ok", detail: "sin peticiones todavía" });
 
     await fetch(`${baseUrl}/weather?port=vigo`);
@@ -350,7 +362,7 @@ test("sin clave de AEMET la salud es 'degraded' aunque el resto funcione", async
 
 test("con todas las fuentes caídas la salud es 'down'", async () => {
   const spy = upstream([MARINE_URL, FORECAST_URL]);
-  await withModule(moduleDeps(spy, fakeClock(T0), "clave-de-mentira"), async (baseUrl, healthcheck) => {
+  await withModule(moduleDeps(spy, fakeClock(T0), TEST_API_KEY), async (baseUrl, healthcheck) => {
     await fetch(`${baseUrl}/weather?port=vigo`);
     const health = await healthcheck();
     assert.equal((health as { status: string }).status, "down");

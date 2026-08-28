@@ -131,8 +131,9 @@ Deno.test("sin AEMET_API_KEY, /bulletin degrada con 200 y estado explícito", as
 
 Deno.test("el core puede consultar la salud del módulo sin salir a la red", async () => {
   const api = weatherUnderTest().api?.({});
-  assertEquals(await api?.healthcheck(), {
-    status: "degraded",
-    detail: "AEMET no configurada (falta AEMET_API_KEY): no se sirven boletines",
-  });
+  const health = await api?.healthcheck();
+  assertEquals(health?.status, "degraded");
+  // El detalle lo redacta el inspector de la credencial (T-08): además de decir que falta, ese
+  // mismo texto es el que avisa de una clave a punto de caducar, así que el core lo publica tal cual.
+  assertStringIncludes(health?.detail ?? "", "AEMET_API_KEY");
 });
