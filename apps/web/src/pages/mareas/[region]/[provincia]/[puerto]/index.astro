@@ -7,10 +7,11 @@
  * versión de la marea. Cero JavaScript de cliente: todo lo que se ve aquí es HTML y CSS.
  *
  * El orden de los bloques es el de la jerarquía del brief (crítico → contextual → consultable):
- * aviso si el puerto es micromareal, tabla del día, curva, sol y luna, tabla del mes y, al final,
- * la calidad del dato y sus fuentes.
+ * los avisos del puerto (marea de centímetros, estación sin observación con la que validar), tabla
+ * del día, curva, sol y luna, tabla del mes y, al final, la calidad del dato y sus fuentes.
  */
 import AvisoMicromareal from "../../../../../componentes/AvisoMicromareal.astro";
+import AvisoSinObservacion from "../../../../../componentes/AvisoSinObservacion.astro";
 import Coeficiente from "../../../../../componentes/Coeficiente.astro";
 import GraficoMarea from "../../../../../componentes/GraficoMarea.astro";
 import Migas from "../../../../../componentes/Migas.astro";
@@ -101,7 +102,19 @@ const jsonLd = grafo([
     </section>
   </header>
 
-  {datos.micromareal && <AvisoMicromareal puerto={port.name} />}
+  {/* Los dos avisos son independientes: uno habla de la marea del puerto (su carrera real) y el
+      otro de nuestra validación (si hubo observación con la que medir el error). Confundirlos fue
+      el hallazgo A-8 del pase adversario. */}
+  {
+    datos.micromareal && (
+      <AvisoMicromareal puerto={port.name} carreraMensualM={datos.carreraMensualM} />
+    )
+  }
+  {
+    datos.sinObservacion && (
+      <AvisoSinObservacion puerto={port.name} carreraMensualM={datos.carreraMensualM} />
+    )
+  }
 
   <div class="cuerpo">
     <section class="bloque cuerpo__mareas" id="tabla-de-mareas" aria-labelledby="titulo-hoy">

@@ -21,12 +21,25 @@ interface Props {
 const { station } = Astro.props;
 const calidad = station.quality;
 
+/**
+ * El `null` del QC tiene dos significados y esta sección los separa: sin RMSE es que **no hubo
+ * observación** con la que comparar nada; con RMSE y sin p95 es que la observación existe pero no
+ * tiene pleamares identificables (la marea es de centímetros). Decirlos con la misma frase le
+ * atribuía a Cádiz una observación que nunca existió — hallazgo A-11 del pase adversario de T-09.
+ */
+const SIN_OBSERVACION = calidad.rmse_m === null;
+const NO_MEDIBLE = "no hay observación de este puerto con la que medirlo";
+
 /** Qué significa cada grade del QC, en una frase. */
 const SIGNIFICADO: Readonly<Record<string, string>> = {
   A: "predicción validada contra observación con error muy bajo",
   B: "predicción validada contra observación con error bajo",
   C: "predicción validada con reservas: el error relativo es alto o no hay pleamares medibles",
 };
+
+const significado = SIN_OBSERVACION
+  ? "predicción sin validar contra observación: no hay mareógrafo con el que comprobarla"
+  : (SIGNIFICADO[calidad.grade] ?? "calidad declarada por el control de calidad del dataset");
 ---
 
 <section class="transparencia" id="transparencia" aria-labelledby="titulo-transparencia">
@@ -35,9 +48,7 @@ const SIGNIFICADO: Readonly<Record<string, string>> = {
   <div class="grade">
     <span class="grade__letra" data-grade={calidad.grade} aria-hidden="true">{calidad.grade}</span>
     <p class="grade__texto">
-      Estación <strong>{station.name}</strong> ({station.id}), grade {calidad.grade}: {
-        SIGNIFICADO[calidad.grade] ?? "calidad declarada por el control de calidad del dataset"
-      }.
+      Estación <strong>{station.name}</strong> ({station.id}), grade {calidad.grade}: {significado}.
       {calidad.grade_reason && <> {calidad.grade_reason}.</>}
     </p>
   </div>
@@ -46,7 +57,7 @@ const SIGNIFICADO: Readonly<Record<string, string>> = {
     <p class="datos__fila">
       <span>Error cuadrático medio frente a la observación</span>
       <span class="datos__valor">
-        {calidad.rmse_m === null ? "no medido" : metros(calidad.rmse_m, 3)}
+        {calidad.rmse_m === null ? NO_MEDIBLE : metros(calidad.rmse_m, 3)}
       </span>
     </p>
     <p class="datos__fila">
@@ -54,7 +65,7 @@ const SIGNIFICADO: Readonly<Record<string, string>> = {
       <span class="datos__valor">
         {
           calidad.hw_time_err_p95_min === null ? (
-            <>sin pleamares medibles en la observación</>
+            <>{SIN_OBSERVACION ? NO_MEDIBLE : "sin pleamares medibles en la observación"}</>
           ) : (
             <>{numero(calidad.hw_time_err_p95_min, 1)} min</>
           )

@@ -2,29 +2,38 @@
 /**
  * Aviso de puerto **micromareal**: aquí la marea astronómica no es lo que manda.
  *
- * Es una decisión de producto del QC de T-05, no un adorno. En estos puertos —Mediterráneo y
- * Baleares— la carrera de marea es de centímetros: la observación no tiene pleamares
- * identificables, así que el pipeline no publica error de hora (`hw_time_err_p95_min: null`) y el
- * grade se queda en C. Lo que de verdad mueve el nivel del agua esos días es el **residuo
- * meteorológico** (presión, viento), que esta página **no** calcula todavía.
+ * Lo dispara la **carrera de marea medida** sobre los extremos del mes que la propia página
+ * publica (`carreraMensualM`, umbral en `datos/pagina-puerto.ts`), no el grade del QC: el grade C
+ * significa varias cosas a la vez y una de ellas —una estación sin observación con la que
+ * validar— no dice nada de la marea del puerto. Con el criterio viejo, Cádiz leía «aquí la marea
+ * es de centímetros» encima de su propia tabla de 2,90 m (hallazgo A-8 del pase adversario).
  *
- * Publicar la tabla sin decirlo sería publicar una precisión que no existe. Va arriba, antes que la
- * tabla, porque un aviso que se lee después del dato llega tarde.
+ * Donde sí sale —Mar Menor, Palma— la carrera es de dos decenas de centímetros y lo que de verdad
+ * mueve el nivel del agua es el **residuo meteorológico** (presión, viento), que esta página **no**
+ * calcula todavía. Publicar la tabla sin decirlo sería publicar una precisión que no existe. Va
+ * arriba, antes que la tabla, porque un aviso que se lee después del dato llega tarde.
  */
+import { centimetros } from "../formato.ts";
+
 interface Props {
   puerto: string;
+  /** Carrera de marea del mes publicado, en metros: la cifra que justifica el aviso. */
+  carreraMensualM: number;
 }
 
-const { puerto } = Astro.props;
+const { puerto, carreraMensualM } = Astro.props;
 ---
 
 <aside class="aviso-micromareal">
   <p class="aviso-micromareal__titulo">En {puerto} la marea astronómica es de centímetros</p>
   <p>
-    La carrera de marea de este puerto es tan pequeña que el nivel del agua lo decide sobre todo
-    el <strong>residuo meteorológico</strong>: la presión atmosférica y el viento mueven aquí más
-    que la Luna. Las horas y alturas de abajo son la predicción astronómica y son correctas como
-    tal, pero un día de borrasca el nivel real puede alejarse de ellas más de lo que suben o bajan.
+    Entre la bajamar más baja y la pleamar más alta de este mes hay <strong
+      >{centimetros(carreraMensualM)}</strong
+    >. Con una carrera así, el nivel del agua lo decide sobre todo el <strong
+      >residuo meteorológico</strong
+    >: la presión atmosférica y el viento mueven aquí más que la Luna. Las horas y alturas de abajo
+    son la predicción astronómica y son correctas como tal, pero un día de borrasca el nivel real
+    puede alejarse de ellas más de lo que suben o bajan.
   </p>
   <p>
     Para planificar en este puerto, mira el <a href="#coeficiente">coeficiente</a> como referencia

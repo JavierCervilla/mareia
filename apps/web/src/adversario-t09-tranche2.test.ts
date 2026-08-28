@@ -16,13 +16,11 @@
  * Informe: `docs/qa/informe-adversario-t09-tranche2.md` (hallazgos A-8…A-12, clases atacadas,
  * no reproducidos y bundles).
  *
- * TRINQUETE — `test.fail()` es de Playwright y aquí el arnés es `node --test`; el equivalente es
- * `hallazgoAbierto()`, con la misma tabla de verdad: el cuerpo afirma **el comportamiento
- * correcto**, CI se queda verde mientras el bug esté abierto (con el motivo impreso como
- * diagnóstico en cada ejecución) y se pone **rojo el día que alguien lo arregle**, pidiendo que se
- * retire el trinquete para que el ataque quede como gate permanente. Mismo caveat: se conforma con
- * que el cuerpo falle por cualquier motivo, así que cada assert es específico y el motivo se
- * imprime en cada run.
+ * TRINQUETE RETIRADO — los cinco hallazgos (A-8…A-12) están **corregidos**, así que sus cuerpos ya
+ * no van envueltos en el trinquete `hallazgoAbierto()`: son **tests normales y gates permanentes**,
+ * que es para lo que se escribieron. El mecanismo cumplió su función —CI verde mientras el bug
+ * estaba abierto y rojo el día que se arregló, pidiendo exactamente esto—; lo que se conserva
+ * intacto es lo que importa, el cuerpo del ataque: ni un assert ha cambiado al cerrarlos.
  */
 
 import test from "node:test";
@@ -37,7 +35,7 @@ import { getAstro } from "@mareia/usecases";
 import { cargarPuertos } from "./datos/catalogo.ts";
 import { cargarDatosDePuerto } from "./datos/pagina-puerto.ts";
 import { deps } from "./datos/deps.ts";
-import { efemerideDeHorizonte } from "./cielo.ts";
+import { efemeridesDeHorizonte } from "./cielo.ts";
 import { rutaPuerto } from "./rutas.ts";
 
 const DIST = join(dirname(fileURLToPath(import.meta.url)), "..", "dist");
@@ -69,17 +67,14 @@ function exigirBuild(): void {
 }
 
 /**
- * TRINQUETE. Envuelve un cuerpo que afirma el comportamiento CORRECTO de un hallazgo **abierto**.
+ * GATE PERMANENTE: el ataque de un hallazgo ya corregido. El cuerpo afirma el comportamiento
+ * correcto y el test se pone rojo el día que alguien lo reintroduzca.
  *
- * | Estado del bug | Resultado del run | CI |
- * |---|---|---|
- * | abierto  | el cuerpo falla → se imprime el motivo como diagnóstico | 🟢 |
- * | arreglado| el cuerpo pasa → este test **falla** pidiendo retirar el trinquete | 🔴 |
- * | arreglado y trinquete retirado | el cuerpo pasa | 🟢 gate permanente |
+ * Lo único que envuelve es el salto por falta de `dist/`: sin sitio construido el ataque no se
+ * puede juzgar y un rojo ahí sería falso (CI construye antes de testear).
  */
-function hallazgoAbierto(nombre: string, cuerpo: () => Promise<void> | void): void {
-  test(`${nombre} · TRINQUETE (hallazgo abierto)`, async (t: TestContext) => {
-    let motivo: string | undefined;
+function gatePermanente(nombre: string, cuerpo: () => Promise<void> | void): void {
+  test(nombre, async (t: TestContext) => {
     try {
       await cuerpo();
     } catch (error) {
@@ -87,14 +82,8 @@ function hallazgoAbierto(nombre: string, cuerpo: () => Promise<void> | void): vo
         t.skip(error.message);
         return;
       }
-      motivo = error instanceof Error ? error.message : String(error);
+      throw error;
     }
-    assert.ok(
-      motivo !== undefined,
-      `«${nombre}» YA NO FALLA: si el hallazgo está corregido, quita el trinquete ` +
-        "(`hallazgoAbierto` → `test`) y deja el cuerpo como gate permanente.",
-    );
-    t.diagnostic(`${nombre} sigue abierto — ${motivo}`);
   });
 }
 
@@ -108,6 +97,11 @@ function hallazgoAbierto(nombre: string, cuerpo: () => Promise<void> | void): vo
  * es `grade === "C" && hw_time_err_p95_min === null` — y ese `null` significa dos cosas distintas
  * en el QC de T-05: «hay observación pero no tiene pleamares identificables» (Mar Menor, Palma) y
  * «no hay observación con la que medir nada» (Cádiz). El aviso trata las dos igual.
+ *
+ * CORREGIDO: el aviso lo dispara la **carrera de marea medida** sobre los extremos del mes que la
+ * propia página publica (umbral en `datos/pagina-puerto.ts`), no el grade del QC; Cádiz (2,90 m de
+ * carrera) ya no lo lleva y estrena el suyo, que dice lo que de verdad le pasa: que su predicción
+ * no se ha podido comprobar contra un mareógrafo.
  *
  * Comportamiento correcto: un aviso que describe la carrera de marea del puerto solo aparece donde
  * la carrera de marea lo justifica.
@@ -145,6 +139,10 @@ async function elAvisoDeCentimetrosSoloSaleDondeLaCarreraEsDeCentimetros(): Prom
  * (`always-above` → «no se pone», `always-below` → «no sale») y no de la fila que la va a mostrar,
  * así que la fila «Sale» puede acabar anunciando un ocaso y viceversa.
  *
+ * CORREGIDO: `cielo.ts` traduce el orto y el ocaso **en par** (`efemeridesDeHorizonte`) y compone
+ * cada ausencia desde la fila que la va a mostrar, con la hora de la efeméride contraria como
+ * explicación de por qué falta.
+ *
  * Comportamiento correcto: la frase que ocupa el hueco de una efeméride habla de ESA efeméride.
  */
 const DIAS_SIN_EFEMERIDE_DE_LUNA = [
@@ -158,8 +156,8 @@ async function laFilaDeLaLunaHablaDeSuPropiaEfemeride(): Promise<void> {
   const confusiones: string[] = [];
   for (const { fecha, que } of DIAS_SIN_EFEMERIDE_DE_LUNA) {
     const astro = await getAstro(deps, { slug: "santander", date: fecha });
-    const busqueda = que === "rise" ? astro.moon.rise : astro.moon.set;
-    const efemeride = efemerideDeHorizonte(busqueda, astro.timezone, "moon");
+    const par = efemeridesDeHorizonte(astro.moon, astro.timezone, "moon");
+    const efemeride = que === "rise" ? par.sale : par.sePone;
     if (efemeride.ausencia === undefined) continue;
     const habla = efemeride.ausencia.includes("no sale") ? "rise" : "set";
     if (habla !== que) {
@@ -184,6 +182,10 @@ async function laFilaDeLaLunaHablaDeSuPropiaEfemeride(): Promise<void> {
  * por debajo del paralelo ~61°. La página la publica igual, y las dos filas siguientes del mismo
  * bloque la desmienten con la hora del ocaso y con un paso superior de +23,5°.
  *
+ * CORREGIDO: la afirmación circumpolar solo se hace cuando queda **demostrada** —cuando faltan las
+ * dos efemérides del día—; si falta una y la otra existe, la página dice lo que de verdad pasó
+ * («ya estaba en el cielo al empezar el día y se pone a las 08:57»).
+ *
  * Comportamiento correcto: si la página afirma que la Luna no cruzó el horizonte en todo el día, el
  * resto del bloque tiene que ser coherente con esa afirmación — o no se hace la afirmación.
  */
@@ -191,8 +193,8 @@ async function laLunaNoEstaBajoElHorizonteYSobreElAlaVez(): Promise<void> {
   const contradicciones: string[] = [];
   for (const { fecha, que } of DIAS_SIN_EFEMERIDE_DE_LUNA) {
     const astro = await getAstro(deps, { slug: "santander", date: fecha });
-    const busqueda = que === "rise" ? astro.moon.rise : astro.moon.set;
-    const efemeride = efemerideDeHorizonte(busqueda, astro.timezone, "moon");
+    const par = efemeridesDeHorizonte(astro.moon, astro.timezone, "moon");
+    const efemeride = que === "rise" ? par.sale : par.sePone;
     if (efemeride.ausencia === undefined) continue;
     const altura = astro.moon.upperTransit.altitude_deg;
 
@@ -227,6 +229,11 @@ async function laLunaNoEstaBajoElHorizonteYSobreElAlaVez(): Promise<void> {
  * observación** (`rmse_m: null`, `validated_against: "contraste cruzado entre fuentes (sin
  * observaciones)"`, `metrics.samples: 0`), así que la página afirma en una fila que hubo una
  * observación sin pleamares medibles y en la siguiente que no hubo observación ninguna.
+ *
+ * CORREGIDO: la sección separa los dos `null`. Sin RMSE (no hubo observación) las dos filas dicen
+ * «no hay observación de este puerto con la que medirlo» y el grade se explica como «predicción sin
+ * validar contra observación»; con RMSE y sin p95 se mantiene «sin pleamares medibles en la
+ * observación», que ahí es cierto.
  *
  * Comportamiento correcto: cuando no hay observación, la nota no habla de «la observación» — que es
  * exactamente lo que la propia sección promete («los `null` significan "no se pudo medir" y no "no
@@ -268,6 +275,9 @@ async function laNotaDeCalidadNoInventaUnaObservacion(): Promise<void> {
  * viejo compartido por WhatsApp y cualquier slug que cambie al ampliar el catálogo (T-13) cae en el
  * 404 crudo del servidor, sin cabecera, sin buscador y sin una sola vía de vuelta a Mareia.
  *
+ * CORREGIDO: `src/pages/404.astro` construye `dist/404.html` con la identidad del sitio, el aviso
+ * de navegación y las dos salidas que sirven —el índice de regiones y la lista de puertos—.
+ *
  * Comportamiento correcto: un sitio estático que quiere que la gente llegue a la página de su
  * puerto construye también la página de «no encontrado», que es la única que puede devolverlo.
  */
@@ -282,23 +292,23 @@ function elSitioConstruidoTienePaginaDeNoEncontrado(): void {
   assert.match(html, /href="\/(mareas\/)?"/, "la página de 404 no ofrece la vuelta al portal");
 }
 
-hallazgoAbierto(
+gatePermanente(
   "A-8 · el aviso «de centímetros» solo sale donde la carrera es de centímetros",
   elAvisoDeCentimetrosSoloSaleDondeLaCarreraEsDeCentimetros,
 );
-hallazgoAbierto(
+gatePermanente(
   "A-9 · la fila de la Luna habla de su propia efeméride",
   laFilaDeLaLunaHablaDeSuPropiaEfemeride,
 );
-hallazgoAbierto(
+gatePermanente(
   "A-10 · la Luna no está bajo el horizonte y sobre él a la vez",
   laLunaNoEstaBajoElHorizonteYSobreElAlaVez,
 );
-hallazgoAbierto(
+gatePermanente(
   "A-11 · la nota de calidad no inventa una observación",
   laNotaDeCalidadNoInventaUnaObservacion,
 );
-hallazgoAbierto(
+gatePermanente(
   "A-12 · el sitio construido tiene página de «no encontrado»",
   elSitioConstruidoTienePaginaDeNoEncontrado,
 );

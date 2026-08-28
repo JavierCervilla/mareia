@@ -138,12 +138,16 @@ test("la tabla mensual de Vigo trae todos los días del mes con su coeficiente",
 });
 
 /**
- * El aviso micromareal sale exactamente donde el QC dice que hace falta, ni uno más ni uno menos.
+ * Los dos avisos de la cabecera salen exactamente donde toca, ni uno más ni uno menos, y cada uno
+ * por su motivo: el micromareal donde la **carrera de marea medida** es de centímetros, y el de
+ * estación sin observación donde el QC no tuvo mareógrafo con el que validar.
  *
  * De más, sería ruido que resta credibilidad al aviso donde sí importa; de menos, sería publicar
- * una tabla con pinta de exacta en el único sitio donde no lo es.
+ * una tabla con pinta de exacta en el único sitio donde no lo es. Y confundirlos —que es lo que
+ * hacía el criterio viejo, `grade C` sin p95— le colgaba a Cádiz el cartel de «aquí la marea es de
+ * centímetros» encima de su tabla de 2,90 m (hallazgo A-8 del pase adversario de T-09).
  */
-test("el aviso micromareal aparece solo en los puertos que el QC marca así", async (t) => {
+test("cada aviso de la cabecera aparece solo en los puertos que le tocan", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
@@ -151,17 +155,29 @@ test("el aviso micromareal aparece solo en los puertos que el QC marca así", as
   const fechaIso = fechaDelBuild();
   const conAviso: string[] = [];
   const esperados: string[] = [];
+  const conAvisoSinObservacion: string[] = [];
+  const esperadosSinObservacion: string[] = [];
   for (const puerto of await cargarPuertos()) {
     const datos = await cargarDatosDePuerto(puerto.slug, fechaIso);
+    const html = paginaDe(rutaPuerto(puerto));
     if (datos.micromareal) esperados.push(puerto.slug);
-    if (paginaDe(rutaPuerto(puerto)).includes("aviso-micromareal")) conAviso.push(puerto.slug);
+    if (html.includes("aviso-micromareal")) conAviso.push(puerto.slug);
+    if (datos.sinObservacion) esperadosSinObservacion.push(puerto.slug);
+    if (html.includes("aviso-sin-observacion")) conAvisoSinObservacion.push(puerto.slug);
   }
 
   assert.deepEqual(conAviso.sort(), esperados.sort());
   assert.deepEqual(
     esperados.sort(),
-    ["cabo-de-palos", "cadiz", "la-manga-del-mar-menor", "palma-de-mallorca"],
-    "los puertos micromareales del dataset piloto han cambiado: revisa el QC de T-05",
+    ["cabo-de-palos", "la-manga-del-mar-menor", "palma-de-mallorca"],
+    "la carrera de marea del dataset piloto ha cambiado: revisa las constantes de T-04",
+  );
+
+  assert.deepEqual(conAvisoSinObservacion.sort(), esperadosSinObservacion.sort());
+  assert.deepEqual(
+    esperadosSinObservacion.sort(),
+    ["cadiz"],
+    "las estaciones sin observación del dataset piloto han cambiado: revisa el QC de T-05",
   );
 });
 

@@ -63,8 +63,9 @@
   color: var(--m-sub);
 }
 
-/* --- Aviso micromareal: la marea aquí no es lo que manda ----------------- */
-.aviso-micromareal {
+/* --- Avisos del puerto: la marea aquí no es lo que manda, o no está medida --- */
+.aviso-micromareal,
+.aviso-sin-observacion {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -73,7 +74,8 @@
   font-size: var(--m-text-body);
 }
 
-.aviso-micromareal__titulo {
+.aviso-micromareal__titulo,
+.aviso-sin-observacion__titulo {
   font-weight: 600;
   color: var(--m-terra);
 }

@@ -30,6 +30,19 @@ const PASO_CURVA_MIN = 10;
  */
 const PASO_MES_MIN = 60;
 
+/**
+ * Carrera de marea, en metros, por debajo de la cual «la marea es de centímetros» describe el
+ * puerto y no lo calumnia.
+ *
+ * Se mide sobre los extremos del **mes** que la página publica, que es el ciclo completo de vivas y
+ * muertas: la carrera de un día suelto depende de en qué punto del ciclo caiga. En el catálogo
+ * piloto separa con holgura los tres puertos micromareales de verdad (Cabo de Palos, La Manga y
+ * Palma: 0,19-0,26 m según el mes) del siguiente (Málaga, 0,62-0,66 m) y de los mareales
+ * atlánticos (2,2-4,3 m). Antes el aviso lo disparaba el grade del QC, y eso le colgó a Cádiz
+ * —2,90 m de carrera— el cartel de micromareal (hallazgo A-8 del pase adversario de T-09).
+ */
+export const CARRERA_MICROMAREAL_M = 0.4;
+
 /** Un día de la tabla mensual: sus extremos y sus coeficientes. */
 export interface DiaDelMes {
   readonly dateIso: string;
@@ -55,13 +68,24 @@ export interface DatosDePuerto {
   };
   readonly coeficiente: TidalCoefficientDay;
   readonly astro: GetAstroResult;
+  /** Carrera de marea del mes publicado: de la bajamar más baja a la pleamar más alta, en metros. */
+  readonly carreraMensualM: number;
   /**
-   * Puerto **micromareal**: grade C sin error de hora publicable (`hw_time_err_p95_min: null`). En
-   * el QC de T-05 eso significa que la observación no tiene pleamares identificables porque la
-   * marea astronómica es de centímetros y manda el residuo meteorológico. La página lo dice con un
-   * aviso destacado en vez de publicar una tabla con pinta de exacta.
+   * Puerto **micromareal**: la carrera del mes no llega a `CARRERA_MICROMAREAL_M`. Ahí el nivel del
+   * agua lo decide sobre todo el residuo meteorológico (presión y viento), y la página lo dice con
+   * un aviso destacado en vez de publicar una tabla con pinta de exacta.
+   *
+   * Se mide sobre la marea, no sobre el grade del QC: `grade C` significa muchas cosas y una de
+   * ellas —Cádiz, sin observación con la que validar— no tiene nada que ver con la carrera.
    */
   readonly micromareal: boolean;
+  /**
+   * Estación **sin observación**: el QC no tuvo mareógrafo con el que contrastar la predicción
+   * (`rmse_m: null`), así que no hay error medido que publicar. No es un defecto de la marea del
+   * puerto —Cádiz sube y baja casi tres metros—, es un hueco de nuestra validación, y la página lo
+   * dice con esas palabras en vez de confundirlo con el caso micromareal.
+   */
+  readonly sinObservacion: boolean;
 }
 
 /** Agrupa los extremos de un rango por día civil del puerto. */
@@ -80,6 +104,18 @@ function porDiaCivil(
     }
   }
   return dias;
+}
+
+/**
+ * Carrera de marea de una tanda de extremos: de la más baja a la más alta.
+ *
+ * Sin extremos no hay carrera que medir y devuelve 0, que es lo que la deja fuera del aviso: un
+ * aviso sobre una carrera desconocida sería exactamente el error que este cálculo viene a arreglar.
+ */
+function carreraDe(eventos: readonly TideEventDto[]): number {
+  if (eventos.length === 0) return 0;
+  const alturas = eventos.map((evento) => evento.height_m);
+  return Math.max(...alturas) - Math.min(...alturas);
 }
 
 /**
@@ -102,6 +138,7 @@ export async function cargarDatosDePuerto(
 
   const { port, station } = ficha;
   const coeficientes = await coeficientesDelMes(fechaIso, port.timezone);
+  const carreraMensualM = carreraDe(mes.events);
   const eventosPorDia = porDiaCivil(mes.events, port.timezone);
   const coeficientePorDia = new Map(coeficientes.map((dia) => [dia.dateIso, dia]));
   const delDia = coeficientePorDia.get(fechaIso);
@@ -130,6 +167,8 @@ export async function cargarDatosDePuerto(
     },
     coeficiente: delDia,
     astro,
-    micromareal: station.quality.grade === "C" && station.quality.hw_time_err_p95_min === null,
+    carreraMensualM,
+    micromareal: carreraMensualM > 0 && carreraMensualM < CARRERA_MICROMAREAL_M,
+    sinObservacion: station.quality.rmse_m === null,
   };
 }

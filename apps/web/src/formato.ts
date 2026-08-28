@@ -46,6 +46,16 @@ export function metros(valor: number, decimales = 2): string {
   return `${numero(valor, decimales)} m`;
 }
 
+/**
+ * Una altura pequeña en centímetros enteros: «24 cm».
+ *
+ * Los centímetros son la unidad en la que se lee una marea micromareal — «0,24 m» obliga a contar
+ * decimales para entender que ahí no sube nada.
+ */
+export function centimetros(valorEnMetros: number): string {
+  return `${Math.round(valorEnMetros * 100)} cm`;
+}
+
 /** Un ángulo en grados, redondeado al grado. */
 export function grados(valor: number): string {
   return `${Math.round(valor)}°`;

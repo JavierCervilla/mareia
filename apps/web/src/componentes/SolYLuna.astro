@@ -12,7 +12,7 @@
  */
 import type { GetAstroResult } from "@mareia/usecases";
 
-import { efemerideDeHorizonte, nombreDeFase, parDeCrepusculo } from "../cielo.ts";
+import { efemeridesDeHorizonte, nombreDeFase, parDeCrepusculo } from "../cielo.ts";
 import { hora, kilometros, numero, porcentaje } from "../formato.ts";
 
 interface Props {
@@ -25,9 +25,13 @@ const zona = astro.timezone;
 const sol = astro.sun;
 const luna = astro.moon;
 
+// El orto y el ocaso salen juntos: cuando a uno le falta el evento, la razón está en el otro.
+const horizonteDelSol = efemeridesDeHorizonte(sol, zona, "sun");
+const horizonteDeLaLuna = efemeridesDeHorizonte(luna, zona, "moon");
+
 const filasDelSol = [
-  { titulo: "Amanece", efemeride: efemerideDeHorizonte(sol.rise, zona, "sun") },
-  { titulo: "Anochece", efemeride: efemerideDeHorizonte(sol.set, zona, "sun") },
+  { titulo: "Amanece", efemeride: horizonteDelSol.sale },
+  { titulo: "Anochece", efemeride: horizonteDelSol.sePone },
   {
     titulo: "Mediodía solar",
     efemeride: {
@@ -42,8 +46,8 @@ const filasDelSol = [
 ];
 
 const filasDeLaLuna = [
-  { titulo: "Sale", efemeride: efemerideDeHorizonte(luna.rise, zona, "moon") },
-  { titulo: "Se pone", efemeride: efemerideDeHorizonte(luna.set, zona, "moon") },
+  { titulo: "Sale", efemeride: horizonteDeLaLuna.sale },
+  { titulo: "Se pone", efemeride: horizonteDeLaLuna.sePone },
   {
     titulo: "Paso superior",
     efemeride: {
