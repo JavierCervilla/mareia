@@ -14,7 +14,7 @@ import { WeatherSourceError } from "../errors.ts";
 import { fetchForecast, fetchMarine } from "../open-meteo.ts";
 import { FORECAST_FIXTURE, MARINE_FIXTURE, fetchSpy } from "./fakes.ts";
 
-const CELL = toCell(42.2406, -8.7207, Date.parse("2026-08-28T13:37:00Z"));
+const CELL = toCell(42.2406, -8.7207);
 
 test("pide el estado del mar por la celda, no por la coordenada exacta del puerto", async () => {
   const spy = fetchSpy(() => MARINE_FIXTURE);

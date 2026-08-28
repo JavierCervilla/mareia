@@ -160,7 +160,7 @@ test("GET /weather agrega mar y atmósfera con procedencia y edad", async () => 
 
     const body = await weatherBody(response);
     assert.deepEqual(body.port, VIGO);
-    assert.deepEqual(body.cell, { lat: 42.2, lon: -8.7, hourUtc: "2026-08-28T13:00:00Z" });
+    assert.deepEqual(body.cell, { lat: 42.2, lon: -8.7 });
     assert.equal(body.status, "ok");
     assertServed(body.marine);
     assertServed(body.forecast);
@@ -189,6 +189,48 @@ test("ORO por HTTP: dos peticiones seguidas del mismo puerto salen a la red una 
     assertServed(second.marine);
     assert.equal(second.marine.ageSeconds, 120);
     assert.equal(second.marine.stale, false);
+  });
+});
+
+test("un dato de un minuto cruzando la hora en punto se sirve aunque el upstream se caiga", async () => {
+  // Regresión del bug de la clave con la hora: si la clave rotara a las 14:00:00, este dato de 60
+  // segundos sería ilegible justo cuando hace falta y la respuesta sería 'unavailable' teniéndolo.
+  const caidas: string[] = [];
+  const spy = upstream(caidas);
+  const clock = fakeClock(Date.parse("2026-08-28T13:59:30Z"));
+  await withModule(moduleDeps(spy, clock), async (baseUrl) => {
+    await fetch(`${baseUrl}/weather?port=vigo`);
+    clock.advance(60_000);
+    caidas.push(MARINE_URL, FORECAST_URL);
+
+    const body = await weatherBody(await fetch(`${baseUrl}/weather?port=vigo`));
+    assert.equal(body.status, "ok");
+    assertServed(body.marine);
+    assertServed(body.forecast);
+    assert.equal(body.marine.ageSeconds, 60);
+    assert.equal(body.marine.stale, false, "60 s está dentro del TTL: el dato es fresco, no rancio");
+    assert.equal(spy.calls.length, 2, "la segunda petición salió a la red teniendo el dato cacheado");
+  });
+});
+
+test("pasado el TTL y con el upstream caído se sirve el dato dentro de la ventana de retención", async () => {
+  // Es el escalón 3 de la degradación, y es lo que defiende a RETAIN_FACTOR: a hora y media el dato
+  // está caducado para las dos fuentes (TTL 1 h y 30 min) pero sigue dentro de la retención (4×).
+  const caidas: string[] = [];
+  const spy = upstream(caidas);
+  const clock = fakeClock(T0);
+  await withModule(moduleDeps(spy, clock), async (baseUrl) => {
+    await fetch(`${baseUrl}/weather?port=vigo`);
+    clock.advance(90 * 60_000);
+    caidas.push(MARINE_URL, FORECAST_URL);
+
+    const body = await weatherBody(await fetch(`${baseUrl}/weather?port=vigo`));
+    assert.equal(body.status, "ok");
+    assertServed(body.marine);
+    assertServed(body.forecast);
+    assert.equal(body.marine.stale, true);
+    assert.equal(body.marine.ageSeconds, 5_400);
+    assert.equal(body.forecast.stale, true);
   });
 });
 

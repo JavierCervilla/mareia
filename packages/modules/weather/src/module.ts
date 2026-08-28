@@ -81,7 +81,12 @@ export interface WeatherModuleDeps {
 /** Respuesta de `GET .../weather?port=<slug>`. */
 export interface WeatherPayload {
   readonly port: PortLocation;
-  /** Celda y hora a las que corresponde el dato: dice a qué se le pidió, no solo qué se pidió. */
+  /**
+   * Celda de la malla a la que corresponde el dato: dice a qué punto se le pidió, no solo qué se
+   * pidió. **Cuándo** no va aquí sino en cada fuente (`fetchedAt`, `ageSeconds`, `stale` y el
+   * `observedAt` del dato): marine y forecast se refrescan por separado y pueden traer instantes
+   * distintos, así que un único instante en la raíz solo podría ser verdad para una de las dos.
+   */
   readonly cell: Cell;
   /** `partial` = una de las dos fuentes respondió; `unavailable` = ninguna. */
   readonly status: "ok" | "partial" | "unavailable";
@@ -240,7 +245,7 @@ function weatherHandler(deps: WeatherModuleDeps, health: HealthTracker): Request
       return resolved.failure;
     }
     const { port } = resolved;
-    const cell = toCell(port.lat, port.lon, deps.now());
+    const cell = toCell(port.lat, port.lon);
     const openMeteo = {
       fetch: deps.fetch,
       marineUrl: deps.urls?.marine,

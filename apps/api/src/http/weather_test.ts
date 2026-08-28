@@ -101,7 +101,7 @@ Deno.test("montado en el registry, GET /v1/modules/weather/weather responde por 
     const body = await response.json();
     assertEquals(body.status, "ok");
     assertEquals(body.port.slug, "vigo");
-    assertEquals(body.cell, { lat: 42.2, lon: -8.7, hourUtc: "2026-08-28T13:00:00Z" });
+    assertEquals(body.cell, { lat: 42.2, lon: -8.7 });
     assertEquals(body.marine.fetchedAt, "2026-08-28T13:37:00Z");
     assertEquals(body.marine.ageSeconds, 0);
     assertEquals(body.marine.data.waveHeightM, 1.74);
