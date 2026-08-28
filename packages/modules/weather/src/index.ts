@@ -29,3 +29,9 @@ export {
 
 export type { SourceReport, SourceRequest } from "./source.ts";
 export { resolveSource } from "./source.ts";
+
+export type { AemetDeps, CoastalBulletin } from "./aemet.ts";
+export { AEMET_ATTRIBUTION, AEMET_BASE_URL, fetchCoastalBulletin } from "./aemet.ts";
+
+export type { CoastalZone } from "./zones.ts";
+export { COASTAL_ZONES, zoneForPort } from "./zones.ts";

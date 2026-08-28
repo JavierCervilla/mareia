@@ -6,11 +6,20 @@
  * pelearse con un servidor de mentira.
  */
 
+/** Una petición vista por el doble de `fetch`. */
+export interface RecordedRequest {
+  readonly url: string;
+  /** Cabeceras enviadas, con el nombre en minúsculas. */
+  readonly headers: Readonly<Record<string, string>>;
+}
+
 /** Un `fetch` de mentira que además cuenta a quién se llamó: la afirmación de los tests de caché. */
 export interface FetchSpy {
   readonly fetch: typeof fetch;
   /** URLs pedidas, en orden. Su longitud es «cuántas veces se salió a la red». */
   readonly calls: string[];
+  /** Las mismas peticiones con sus cabeceras: donde se comprueba que la API key no viaja en la URL. */
+  readonly requests: RecordedRequest[];
 }
 
 /** Respuesta de mentira para una URL: un JSON, o un fallo si la ruta devuelve un `Error`. */
@@ -19,9 +28,15 @@ export type FetchRoute = (url: string) => unknown;
 /** `fetch` que resuelve cada URL con `route`. Si `route` lanza, se propaga como fallo de red. */
 export function fetchSpy(route: FetchRoute): FetchSpy {
   const calls: string[] = [];
-  const fake = (input: string | URL | Request): Promise<Response> => {
+  const requests: RecordedRequest[] = [];
+  const fake = (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+    const headers: Record<string, string> = {};
+    for (const [name, value] of Object.entries(init?.headers ?? {})) {
+      headers[name.toLowerCase()] = String(value);
+    }
     calls.push(url);
+    requests.push({ url, headers });
     const body = route(url);
     if (body instanceof Response) {
       return Promise.resolve(body);
@@ -33,7 +48,7 @@ export function fetchSpy(route: FetchRoute): FetchSpy {
       }),
     );
   };
-  return { fetch: fake as typeof fetch, calls };
+  return { fetch: fake as typeof fetch, calls, requests };
 }
 
 /** `fetch` que siempre falla, para los escenarios de degradación. */
