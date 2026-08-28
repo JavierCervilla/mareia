@@ -8,17 +8,45 @@ eso llegue a `main`.
 from __future__ import annotations
 
 import json
+import re
 
 import pytest
 
 from mareia_pipeline.engine_contract import ENGINE_CONSTITUENTS, truncate
-from mareia_pipeline.schema import station_files
+from mareia_pipeline.schema import REPO_ROOT, station_files
 from mareia_pipeline.tides.constituents import CATALOG, SOURCE_NAME_ALIASES, canonical_name
 from mareia_pipeline.tides.predict import Harmonic
+
+ENGINE_SOURCE = REPO_ROOT / "packages/domain-core/src/tides/constituents.ts"
 
 
 def test_engine_catalog_has_the_37_noaa_constituents() -> None:
     assert len(ENGINE_CONSTITUENTS) == 37
+
+
+def test_engine_catalog_matches_the_typescript_engine() -> None:
+    """El contrato vive en dos idiomas; este test impide que se separen.
+
+    `ENGINE_CONSTITUENTS` es una copia en Python de `SUPPORTED_CONSTITUENTS` de
+    `packages/domain-core`. Una copia sin vigilancia se desincroniza sola: alguien amplía el motor,
+    el pipeline sigue truncando de más y nadie se entera hasta que faltan centímetros en la
+    predicción. Si esto se rompe porque cambió el formato del fichero TypeScript, arréglalo
+    mirando: sale más barato que descubrir la deriva en producción.
+    """
+    declared = set(re.findall(r'define\("([A-Z0-9]+)"', ENGINE_SOURCE.read_text(encoding="utf-8")))
+    assert declared, "no se pudo leer la tabla de constituyentes del motor TypeScript"
+    assert declared == set(ENGINE_CONSTITUENTS)
+
+
+def test_source_aliases_match_the_typescript_engine() -> None:
+    """Las grafías alternativas también son contrato: `LAMBDA2`→`LAM2`, `RHO1`→`RHO`."""
+    block = re.search(
+        r"const ALIASES[^{]*\{(.*?)\}", ENGINE_SOURCE.read_text(encoding="utf-8"), re.DOTALL
+    )
+    assert block is not None
+    declared = dict(re.findall(r'([A-Z0-9]+):\s*"([A-Z0-9]+)"', block.group(1)))
+    for source_name, canonical in SOURCE_NAME_ALIASES.items():
+        assert declared.get(source_name) == canonical
 
 
 def test_every_engine_constituent_the_sources_publish_is_synthesizable() -> None:
