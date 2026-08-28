@@ -41,6 +41,16 @@ const resumen = curva.extremos
       `${metros(extremo.height_m)}`,
   )
   .join("; ");
+
+/**
+ * Las bandas también se cuentan: un lector de pantalla no ve un sombreado, así que las ventanas que
+ * aporten los módulos entran en el nombre accesible del gráfico con sus horas. Cada banda trae su
+ * etiqueta ya escrita por quien sabe lo que es (el gráfico no).
+ */
+const sombreado =
+  curva.bandas.length === 0
+    ? ""
+    : ` Franjas sombreadas: ${curva.bandas.map((banda) => banda.etiqueta).join("; ")}.`;
 ---
 
 <figure class="grafico">
@@ -48,8 +58,28 @@ const resumen = curva.extremos
     class="grafico__lienzo"
     viewBox={`0 0 ${curva.ancho} ${curva.alto}`}
     role="img"
-    aria-label={`Curva de altura de marea de las 24 horas: ${resumen}.`}
+    aria-label={`Curva de altura de marea de las 24 horas: ${resumen}.${sombreado}`}
   >
+    {/* Las bandas van PRIMERO: en SVG no hay `z-index` y pinta después quien viene después, así que
+        emitirlas aquí es lo que deja la curva por encima y legible. Son `aria-hidden` porque su
+        contenido ya está en el `aria-label` del gráfico y en la tabla de la sección que las aporta:
+        anunciarlas dos veces es ruido. El `data-ventana` es el identificador que le puso quien la
+        aportó: permite nombrar una banda —en un test, en un informe del pase adversario— sin contar
+        rectángulos de izquierda a derecha. */}
+    {
+      curva.bandas.map((banda) => (
+        <rect
+          class="grafico__banda"
+          data-ventana={banda.id}
+          data-enfasis={banda.enfasis}
+          x={banda.x}
+          y="0"
+          width={banda.ancho}
+          height={curva.alto}
+          aria-hidden="true"
+        />
+      ))
+    }
     <line
       class="grafico__nivel"
       x1="0"

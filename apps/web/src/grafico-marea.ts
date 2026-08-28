@@ -39,6 +39,36 @@ export interface MarcaDeHora extends Pick<PuntoCurva, "x"> {
   readonly timeUtcMs: number;
 }
 
+/** Cuánto pesa una ventana en el lienzo. Dos pesos y no una opacidad numérica: el CSS decide. */
+export type EnfasisDeVentana = "fuerte" | "suave";
+
+/**
+ * Un tramo del día que alguien quiere ver sombreado bajo la curva.
+ *
+ * El gráfico **no sabe de qué es la ventana**: los periodos solunares del módulo de pesca (T-10)
+ * entran por aquí, y lo que otro módulo quiera destacar mañana entrará igual. Lo único que exige es
+ * cuándo empieza, cuándo acaba, cuánto pesa y cómo se llama para quien no ve el SVG. Si este tipo
+ * nombrara la Luna, el core habría dejado de ser ciego a los módulos.
+ */
+export interface VentanaDestacada {
+  /** Único dentro del día: es la clave de render de la banda. */
+  readonly id: string;
+  readonly inicioUtcMs: number;
+  readonly finUtcMs: number;
+  readonly enfasis: EnfasisDeVentana;
+  /** Texto para el `aria-label` del gráfico: un lector de pantalla no ve una banda. */
+  readonly etiqueta: string;
+}
+
+/** Una ventana ya colocada en el lienzo y recortada al día. */
+export interface BandaGrafico {
+  readonly id: string;
+  readonly x: number;
+  readonly ancho: number;
+  readonly enfasis: EnfasisDeVentana;
+  readonly etiqueta: string;
+}
+
 export interface CurvaMarea {
   /** Dimensiones del `viewBox`; el SVG escala con `width: 100%`. */
   readonly ancho: number;
@@ -51,6 +81,11 @@ export interface CurvaMarea {
   readonly extremos: readonly MarcaExtremo[];
   /** Marcas del eje de horas, de la medianoche a la medianoche. */
   readonly horas: readonly MarcaDeHora[];
+  /**
+   * Ventanas destacadas ya recortadas al día, en el orden en que llegaron. Se pintan ANTES que el
+   * trazo: en SVG no hay `z-index`, manda el orden del documento.
+   */
+  readonly bandas: readonly BandaGrafico[];
   readonly minima_m: number;
   readonly maxima_m: number;
 }
@@ -63,6 +98,12 @@ export interface EntradaCurva {
   /** Límites UTC del día civil del puerto (23, 24 o 25 h: el del cambio de hora no dura 24). */
   readonly inicioUtcMs: number;
   readonly finUtcMs: number;
+  /**
+   * Tramos del día que se sombrean bajo la curva. Los aportan las secciones de los módulos activos
+   * (`src/modulos/ventanas.ts`); sin módulos con UI, la lista viene vacía y el gráfico es el de
+   * siempre.
+   */
+  readonly ventanas?: readonly VentanaDestacada[];
 }
 
 export interface OpcionesCurva {
@@ -142,10 +183,58 @@ export function alturaEn(muestras: readonly MuestraCurva[], timeUtcMs: number): 
 }
 
 /**
+ * Recorta las ventanas destacadas al día civil y las proyecta al lienzo.
+ *
+ * Tres reglas, y las tres están porque una banda mal recortada es un dibujo verosímil y falso:
+ *
+ * 1. **Se recorta, no se desplaza ni se dibuja fuera.** Una ventana puede empezar antes de la
+ *    medianoche o acabar después de la siguiente (su fenómeno cae en el día, su ventana no): la
+ *    parte que se sale se corta en el borde. Pintarla fuera del `viewBox` la haría desaparecer en
+ *    el mejor caso y desbordar la caja del SVG en el peor.
+ * 2. **La que no toca el día no se dibuja**, en vez de colapsar en una raya de ancho cero que
+ *    aparece en el DOM y no significa nada.
+ * 3. **Una ventana invertida rompe el build.** Es un dato imposible, y una banda de ancho negativo
+ *    la pinta el navegador como si nada.
+ *
+ * @throws {Error} si una ventana acaba antes de empezar.
+ */
+function bandasDeVentanas(
+  ventanas: readonly VentanaDestacada[],
+  dia: { readonly inicioUtcMs: number; readonly finUtcMs: number },
+  x: (timeUtcMs: number) => number,
+): readonly BandaGrafico[] {
+  const bandas: BandaGrafico[] = [];
+  for (const ventana of ventanas) {
+    if (!(ventana.finUtcMs > ventana.inicioUtcMs)) {
+      throw new Error(
+        `La ventana ${ventana.id} está invertida o es vacía: ` +
+          `${new Date(ventana.inicioUtcMs).toISOString()} → ` +
+          `${new Date(ventana.finUtcMs).toISOString()}.`,
+      );
+    }
+    const inicio = Math.max(ventana.inicioUtcMs, dia.inicioUtcMs);
+    const fin = Math.min(ventana.finUtcMs, dia.finUtcMs);
+    if (!(fin > inicio)) {
+      continue;
+    }
+    const izquierda = x(inicio);
+    bandas.push({
+      id: ventana.id,
+      x: izquierda,
+      ancho: redondear(x(fin) - izquierda),
+      enfasis: ventana.enfasis,
+      etiqueta: ventana.etiqueta,
+    });
+  }
+  return bandas;
+}
+
+/**
  * Traza la curva del día y devuelve la geometría lista para el `<svg>`.
  *
- * @throws {Error} si la ventana del día está invertida, si hay menos de dos muestras o si las
- * muestras o los extremos no vienen en orden temporal estricto. Falla ruidoso a propósito: una
+ * @throws {Error} si la ventana del día está invertida, si hay menos de dos muestras, si las
+ * muestras o los extremos no vienen en orden temporal estricto, o si una ventana destacada acaba
+ * antes de empezar. Falla ruidoso a propósito: una
  * curva trazada sobre puntos desordenados tiene aspecto normal y es falsa, y nada en la página lo
  * delataría.
  */
@@ -191,6 +280,7 @@ export function trazarCurvaMarea(
     ancho,
     alto,
     path: `M${serie.map((punto) => `${x(punto.timeUtcMs)},${y(punto.height_m)}`).join("L")}`,
+    bandas: bandasDeVentanas(entrada.ventanas ?? [], entrada, x),
     nivelMedioY: y((minima + maxima) / 2),
     extremos: entrada.extremos.map((extremo) => ({
       ...extremo,
