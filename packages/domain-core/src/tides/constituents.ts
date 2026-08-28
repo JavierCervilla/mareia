@@ -9,9 +9,10 @@
  * (Doodson 1921; P. Schureman, SP-98, Tabla 2). La velocidad angular sale de los mismos
  * coeficientes aplicados a las velocidades medias, sin tabla paralela que mantener.
  *
- * El juego soportado es el de 37 constituyentes que publica NOAA CO-OPS para sus estaciones, que
+ * El juego soportado es el de 37 constituyentes que publica NOAA CO-OPS para sus estaciones —que
  * contiene el conjunto estándar (M2, S2, N2, K2, K1, O1, P1, Q1, M4, MS4, Mm, Mf, Ssa, Sa) más los
- * armónicos y compuestos de orden superior.
+ * armónicos y compuestos de orden superior— y los 5 que TICON-4 publica para los puertos del golfo
+ * de Vizcaya y el mar Céltico (EP2, MA2, MB2, MKS2, 2MS6): 42 en total.
  */
 
 import type { AstronomicalArguments, MeanAngularSpeeds } from "./astronomy.ts";
@@ -100,6 +101,22 @@ const DEFINITIONS: readonly ConstituentDefinition[] = [
   define("K2", [2, 2, 0, 0, 0, 0, 0], nodal(["K2", 1])),
   define("M8", [8, 0, 0, 0, 0, 0, 0], nodal(["M2", 4])),
   define("MS4", [4, 2, -2, 0, 0, 0, 0], nodal(["M2", 1])),
+
+  // Fuera de la tabla de NOAA, pero publicados por TICON-4 para los puertos del catálogo. El QC de
+  // T-05 midió lo que costaba truncarlos: 2,2 cm RMS en Brest, con Vigo y Santander en el mismo
+  // orden, suficiente para no alcanzar el grado A. Números de Doodson en la convención de este
+  // módulo (τ, s, h, p, N′, p₁), equivalentes a los del catálogo del pipeline
+  // (`data/pipeline/mareia_pipeline/tides/constituents.py`), que los expresa sobre T = τ − s + h.
+  /** ε2 — semidiurno lunar elíptico de segundo orden. */
+  define("EP2", [2, -3, 2, 1, 0, 0, 0], nodal(["M2", 1])),
+  // MA2 y MB2 son la modulación anual (radiacional) de M2 —M2 ∓ h—: su origen es solar, así que no
+  // llevan corrección nodal lunar.
+  define("MA2", [2, 0, -1, 0, 0, 0, 0], nodal()),
+  define("MB2", [2, 0, 1, 0, 0, 0, 0], nodal()),
+  /** MKS2 = M2 + K2 − S2: compuesto de aguas someras, S2 no aporta corrección. */
+  define("MKS2", [2, 0, 2, 0, 0, 0, 0], nodal(["M2", 1], ["K2", 1])),
+  /** 2MS6 = 2·M2 + S2. */
+  define("2MS6", [6, 2, -2, 0, 0, 0, 0], nodal(["M2", 2])),
 ];
 
 /**

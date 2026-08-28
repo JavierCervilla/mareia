@@ -145,7 +145,7 @@ describe("propiedades · contrato", () => {
     for (const name of required) {
       assert.ok(isSupportedConstituent(name), `falta el constituyente ${name}`);
     }
-    assert.equal(SUPPORTED_CONSTITUENTS.length, 37);
+    assert.equal(SUPPORTED_CONSTITUENTS.length, 42);
     assert.ok(isSupportedConstituent("lambda2"), "los alias deben normalizarse");
   });
 

@@ -33,14 +33,16 @@ es como se cuelan errores de decímetros en una tabla de mareas.
 `findExtremes` localiza los cambios de signo de la derivada muestreando cada 6 minutos y refina
 cada uno por bisección hasta el segundo. La derivada es analítica (`heightRateAt`).
 
-## Constituyentes soportados (37)
+## Constituyentes soportados (42)
 
-El juego que publica NOAA CO-OPS para sus estaciones, que contiene el conjunto estándar completo:
+El juego que publica NOAA CO-OPS para sus estaciones —el conjunto estándar completo, 37— más los
+cinco que TICON-4 publica para los puertos del catálogo y que el QC de T-05 señaló como el techo de
+exactitud del dataset (marcados **†**):
 
-- **Semidiurnos**: M2, S2, N2, K2, 2N2, MU2, NU2, LAM2, L2, T2, R2, 2SM2
+- **Semidiurnos**: M2, S2, N2, K2, 2N2, MU2, NU2, LAM2, L2, T2, R2, 2SM2, EP2†, MA2†, MB2†, MKS2†
 - **Diurnos**: K1, O1, P1, Q1, 2Q1, J1, M1, S1, OO1, RHO
 - **Largo periodo**: SA, SSA, MM, MF, MSF
-- **Armónicos y compuestos**: M3, M4, M6, M8, S4, S6, MN4, MS4, MK3, 2MK3
+- **Armónicos y compuestos**: M3, M4, M6, M8, S4, S6, MN4, MS4, MK3, 2MK3, 2MS6†
 
 Los alias habituales se normalizan (`lambda2`→`LAM2`, `rho1`→`RHO`, mayúsculas/minúsculas
 indistintas). Las correcciones nodales se derivan de los diez fundamentales con fórmula propia en
