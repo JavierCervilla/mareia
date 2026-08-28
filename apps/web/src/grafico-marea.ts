@@ -1,23 +1,29 @@
 /**
- * Gráfico de altura de marea: de los extremos del día al `path` de un SVG.
+ * Gráfico de altura de marea: de la curva del día a la geometría de un SVG.
  *
- * Se genera **en build** (la página de puerto es estática y no carga JavaScript de cliente), así
- * que aquí no hay ni DOM ni estado: entra la lista de extremos del día y sale la geometría lista
- * para escupir dentro de un `<svg>`.
+ * Se genera **en build** (la página de puerto es HTML estático, sin JavaScript de cliente), así que
+ * aquí no hay ni DOM ni estado: entran los puntos que ya calculó el dominio y sale el `path`.
  *
- * Interpolación: media coseno entre cada par de extremos consecutivos, que es la aproximación
- * clásica de la curva de marea semidiurna (equivalente a la «regla de los doceavos», pero continua).
- * Pasa exactamente por cada extremo, es monótona entre ellos y nunca se sale de su rango — las tres
- * propiedades están cubiertas por `grafico-marea.test.ts`.
+ * La curva que se dibuja es **la curva predicha** (`sampleCurve` del motor armónico, vía el caso de
+ * uso `getTides`), no una interpolación de los extremos: hasta T-05/T-07 la página no tenía más que
+ * cuatro horas y cuatro alturas y había que reconstruir la forma con una media coseno; ahora hay
+ * 145 alturas reales del día y aproximar sería dibujar peor teniendo el dato mejor.
+ *
+ * Los **extremos se insertan** en la serie muestreada antes de trazar. Con paso de 10 min, el
+ * máximo de las muestras cae hasta 5 min antes o después de la pleamar y hasta un par de
+ * centímetros por debajo: si no se insertaran, el círculo de la pleamar quedaría fuera del trazo
+ * que marca (justo el fallo A-2 del pase adversario de la tranche 1, con otra causa).
  */
 
-const MINUTOS_DIA = 1440;
+/** Un punto de la curva tal y como lo publica el caso de uso. */
+export interface MuestraCurva {
+  readonly timeUtcMs: number;
+  readonly height_m: number;
+}
 
-export interface ExtremoAltura {
-  /** Hora local del extremo, `HH:MM` en 24 h. */
-  readonly hora: string;
-  /** Altura sobre el cero del puerto, en metros. */
-  readonly alturaM: number;
+/** Un extremo del día: la misma forma más su tipo. */
+export interface ExtremoCurva extends MuestraCurva {
+  readonly kind: "high" | "low";
 }
 
 export interface PuntoCurva {
@@ -25,16 +31,38 @@ export interface PuntoCurva {
   readonly y: number;
 }
 
+/** Un extremo ya colocado en el lienzo, con el dato que representa. */
+export interface MarcaExtremo extends PuntoCurva, ExtremoCurva {}
+
+/** Una marca del eje horizontal: su posición y el instante que representa (la hora la pone quien pinta). */
+export interface MarcaDeHora extends Pick<PuntoCurva, "x"> {
+  readonly timeUtcMs: number;
+}
+
 export interface CurvaMarea {
-  /** Dimensiones del `viewBox`; el SVG escala con `max-width: 100%`. */
+  /** Dimensiones del `viewBox`; el SVG escala con `width: 100%`. */
   readonly ancho: number;
   readonly alto: number;
   /** Atributo `d` del trazo de la marea. */
   readonly path: string;
-  /** Ordenada del nivel medio del día (la línea discontinua de referencia). */
+  /** Ordenada del punto medio entre la altura mínima y la máxima del día. */
   readonly nivelMedioY: number;
-  /** Un punto por extremo de entrada y en su mismo orden, para marcarlos con un círculo. */
-  readonly extremos: readonly PuntoCurva[];
+  /** Un punto por extremo, en orden cronológico. */
+  readonly extremos: readonly MarcaExtremo[];
+  /** Marcas del eje de horas, de la medianoche a la medianoche. */
+  readonly horas: readonly MarcaDeHora[];
+  readonly minima_m: number;
+  readonly maxima_m: number;
+}
+
+export interface EntradaCurva {
+  /** La curva muestreada del día, en orden cronológico estricto. */
+  readonly muestras: readonly MuestraCurva[];
+  /** Los extremos del día, en orden cronológico estricto. */
+  readonly extremos: readonly ExtremoCurva[];
+  /** Límites UTC del día civil del puerto (23, 24 o 25 h: el del cambio de hora no dura 24). */
+  readonly inicioUtcMs: number;
+  readonly finUtcMs: number;
 }
 
 export interface OpcionesCurva {
@@ -42,151 +70,138 @@ export interface OpcionesCurva {
   readonly alto?: number;
   /** Aire vertical entre el extremo más alto/bajo y el borde del lienzo. */
   readonly margenY?: number;
-  /** Resolución del muestreo. 10 min ≈ 145 puntos: curva suave sin inflar el HTML. */
-  readonly pasoMinutos?: number;
+  /** Cuántas marcas tiene el eje de horas, extremos incluidos. */
+  readonly marcasDeHora?: number;
 }
 
-interface Nodo {
-  readonly minutos: number;
-  readonly alturaM: number;
-}
+const ANCHO = 620;
+const ALTO = 220;
+const MARGEN_Y = 45;
+const MARCAS_DE_HORA = 5;
 
-/** Convierte una hora local `HH:MM` (24 h) en minutos transcurridos desde medianoche. */
-export function minutosDesdeHora(hora: string): number {
-  const partes = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(hora);
-  if (!partes) {
-    throw new Error(`Hora inválida: "${hora}". Se espera HH:MM en formato de 24 horas.`);
+/** Comprueba el orden estricto de una serie y falla nombrando el punto que lo rompe. */
+function exigirOrdenEstricto(puntos: readonly MuestraCurva[], que: string): void {
+  for (let indice = 1; indice < puntos.length; indice += 1) {
+    const anterior = puntos[indice - 1];
+    const actual = puntos[indice];
+    if (anterior === undefined || actual === undefined) continue;
+    if (actual.timeUtcMs <= anterior.timeUtcMs) {
+      throw new Error(
+        `${que}: los puntos deben venir en orden temporal estricto; ` +
+          `${new Date(actual.timeUtcMs).toISOString()} no va después de ` +
+          `${new Date(anterior.timeUtcMs).toISOString()}.`,
+      );
+    }
   }
-  const [, horas = "0", minutos = "0"] = partes;
-  return Number(horas) * 60 + Number(minutos);
 }
 
 /**
- * Añade extremos virtuales a cada lado para que la curva llegue a medianoche por los dos bordes:
- * la marea no empieza ni acaba en el primer y último extremo del día. Cada extremo virtual refleja
- * la separación y la altura de su vecino, de modo que la alternancia pleamar/bajamar y el periodo
- * del día (~6 h 12 min en un puerto semidiurno) continúan igual más allá del borde.
- *
- * El reflejo se repite hasta **rebasar** las 00:00 y las 24:00. Con un solo reflejo bastaba para
- * los días de cuatro extremos, pero se quedaba corto en los de TRES —~1 de cada 7— y la curva se
- * aplanaba hasta 295 min en el borde del día (A-1 del pase adversario).
+ * La serie que se dibuja: las muestras del día con los extremos insertados en su instante exacto.
+ * Si un extremo coincide con una muestra (paso divisor de la hora del extremo), gana el extremo.
  */
-function nodosDelDia(extremos: readonly ExtremoAltura[]): readonly Nodo[] {
-  const nodos: Nodo[] = [];
-  let horaPrevia = "";
-  for (const extremo of extremos) {
-    const minutos = minutosDesdeHora(extremo.hora);
-    const previo = nodos.at(-1);
-    // Sin orden estricto la interpolación devuelve una curva de aspecto normal que no pasa por sus
-    // propios extremos: mejor romper el build que dibujar una marea falsa (A-2).
-    if (previo && minutos <= previo.minutos) {
-      throw new Error(
-        `Los extremos del día deben venir en orden temporal estricto: "${extremo.hora}" no va ` +
-          `después de "${horaPrevia}". Ordénalos en el origen antes de trazar la curva.`,
-      );
-    }
-    nodos.push({ minutos, alturaM: extremo.alturaM });
-    horaPrevia = extremo.hora;
+function serieDeTrazado(entrada: EntradaCurva): readonly MuestraCurva[] {
+  const porInstante = new Map<number, MuestraCurva>();
+  for (const muestra of entrada.muestras) {
+    porInstante.set(muestra.timeUtcMs, muestra);
   }
-
-  const primero = nodos[0];
-  const segundo = nodos[1];
-  const ultimo = nodos.at(-1);
-  const penultimo = nodos.at(-2);
-  if (!primero || !segundo || !ultimo || !penultimo) {
-    throw new Error("La curva de marea necesita al menos dos extremos del día.");
+  for (const extremo of entrada.extremos) {
+    porInstante.set(extremo.timeUtcMs, { timeUtcMs: extremo.timeUtcMs, height_m: extremo.height_m });
   }
-
-  // Periodo con el que se extrapola cada borde: el intervalo del propio día en ese lado. Es > 0
-  // porque el orden es estricto, así que los dos recuentos de reflejos son finitos.
-  const periodoInicial = segundo.minutos - primero.minutos;
-  const periodoFinal = ultimo.minutos - penultimo.minutos;
-
-  const antes = Array.from(
-    { length: Math.ceil(primero.minutos / periodoInicial) },
-    (_, vuelta) => ({
-      minutos: primero.minutos - (vuelta + 1) * periodoInicial,
-      alturaM: vuelta % 2 === 0 ? segundo.alturaM : primero.alturaM,
-    }),
-  ).reverse();
-  const despues = Array.from(
-    { length: Math.ceil((MINUTOS_DIA - ultimo.minutos) / periodoFinal) },
-    (_, vuelta) => ({
-      minutos: ultimo.minutos + (vuelta + 1) * periodoFinal,
-      alturaM: vuelta % 2 === 0 ? penultimo.alturaM : ultimo.alturaM,
-    }),
-  );
-
-  return [...antes, ...nodos, ...despues];
-}
-
-/** Media coseno entre dos extremos consecutivos. `fraccion` recorre 0 → 1 de `desde` a `hasta`. */
-function interpolar(desde: number, hasta: number, fraccion: number): number {
-  return (desde + hasta) / 2 + ((desde - hasta) / 2) * Math.cos(Math.PI * fraccion);
-}
-
-/** Altura de la marea, en metros, en un minuto cualquiera del día. */
-export function alturaEnMinutos(extremos: readonly ExtremoAltura[], minutos: number): number {
-  const nodos = nodosDelDia(extremos);
-  const primero = nodos[0];
-  const ultimo = nodos.at(-1);
-  if (!primero || !ultimo) {
-    throw new Error("La curva de marea necesita al menos dos extremos del día.");
-  }
-  // Los extremos virtuales cubren siempre las 24 h completas, así que este recorte solo entra si
-  // alguien pregunta por un minuto fuera del día: se aplana en vez de dispararse.
-  const instante = Math.min(Math.max(minutos, primero.minutos), ultimo.minutos);
-
-  for (let indice = 1; indice < nodos.length; indice += 1) {
-    const anterior = nodos[indice - 1];
-    const siguiente = nodos[indice];
-    if (!anterior || !siguiente || instante > siguiente.minutos) continue;
-    const tramo = siguiente.minutos - anterior.minutos;
-    const fraccion = tramo === 0 ? 0 : (instante - anterior.minutos) / tramo;
-    return interpolar(anterior.alturaM, siguiente.alturaM, fraccion);
-  }
-  return ultimo.alturaM;
+  return [...porInstante.values()].sort((a, b) => a.timeUtcMs - b.timeUtcMs);
 }
 
 function redondear(valor: number): number {
   return Math.round(valor * 10) / 10;
 }
 
-/** Traza la curva de las 24 horas y devuelve la geometría lista para el `<svg>`. */
+/**
+ * Altura de la curva en un instante cualquiera, interpolando linealmente entre las dos muestras que
+ * lo rodean. Fuera del rango muestreado devuelve el extremo más cercano: se aplana en vez de
+ * dispararse, que es lo que hace un `Math.min`/`Math.max` honesto.
+ */
+export function alturaEn(muestras: readonly MuestraCurva[], timeUtcMs: number): number {
+  const primera = muestras[0];
+  const ultima = muestras.at(-1);
+  if (primera === undefined || ultima === undefined) {
+    throw new Error("La curva necesita al menos una muestra.");
+  }
+  if (timeUtcMs <= primera.timeUtcMs) return primera.height_m;
+  if (timeUtcMs >= ultima.timeUtcMs) return ultima.height_m;
+
+  for (let indice = 1; indice < muestras.length; indice += 1) {
+    const anterior = muestras[indice - 1];
+    const siguiente = muestras[indice];
+    if (anterior === undefined || siguiente === undefined || timeUtcMs > siguiente.timeUtcMs) {
+      continue;
+    }
+    const tramo = siguiente.timeUtcMs - anterior.timeUtcMs;
+    const fraccion = tramo === 0 ? 0 : (timeUtcMs - anterior.timeUtcMs) / tramo;
+    return anterior.height_m + fraccion * (siguiente.height_m - anterior.height_m);
+  }
+  return ultima.height_m;
+}
+
+/**
+ * Traza la curva del día y devuelve la geometría lista para el `<svg>`.
+ *
+ * @throws {Error} si la ventana del día está invertida, si hay menos de dos muestras o si las
+ * muestras o los extremos no vienen en orden temporal estricto. Falla ruidoso a propósito: una
+ * curva trazada sobre puntos desordenados tiene aspecto normal y es falsa, y nada en la página lo
+ * delataría.
+ */
 export function trazarCurvaMarea(
-  extremos: readonly ExtremoAltura[],
+  entrada: EntradaCurva,
   opciones: OpcionesCurva = {},
 ): CurvaMarea {
-  const { ancho = 620, alto = 220, margenY = 45, pasoMinutos = 10 } = opciones;
-  const nodos = nodosDelDia(extremos);
+  const {
+    ancho = ANCHO,
+    alto = ALTO,
+    margenY = MARGEN_Y,
+    marcasDeHora = MARCAS_DE_HORA,
+  } = opciones;
+  const { inicioUtcMs, finUtcMs } = entrada;
 
-  const alturas = nodos.map((nodo) => nodo.alturaM);
+  if (!(finUtcMs > inicioUtcMs)) {
+    throw new Error(
+      `La ventana del día está invertida o es vacía: ${new Date(inicioUtcMs).toISOString()} → ` +
+        `${new Date(finUtcMs).toISOString()}.`,
+    );
+  }
+  if (entrada.muestras.length < 2) {
+    throw new Error("La curva de marea necesita al menos dos muestras del día.");
+  }
+  exigirOrdenEstricto(entrada.muestras, "curva muestreada");
+  exigirOrdenEstricto(entrada.extremos, "extremos del día");
+
+  const serie = serieDeTrazado(entrada);
+  const alturas = serie.map((punto) => punto.height_m);
   const minima = Math.min(...alturas);
   const maxima = Math.max(...alturas);
   const recorrido = maxima - minima;
 
-  const x = (minutos: number): number => redondear((minutos / MINUTOS_DIA) * ancho);
+  const x = (timeUtcMs: number): number =>
+    redondear(((timeUtcMs - inicioUtcMs) / (finUtcMs - inicioUtcMs)) * ancho);
   const y = (altura: number): number => {
     const util = alto - 2 * margenY;
     const proporcion = recorrido === 0 ? 0.5 : (altura - minima) / recorrido;
     return redondear(alto - margenY - proporcion * util);
   };
 
-  const muestras: string[] = [];
-  for (let minuto = 0; minuto <= MINUTOS_DIA; minuto += pasoMinutos) {
-    muestras.push(`${x(minuto)},${y(alturaEnMinutos(extremos, minuto))}`);
-  }
-  const cierre = `${x(MINUTOS_DIA)},${y(alturaEnMinutos(extremos, MINUTOS_DIA))}`;
-  if (muestras.at(-1) !== cierre) muestras.push(cierre);
-
   return {
     ancho,
     alto,
-    path: `M${muestras.join("L")}`,
+    path: `M${serie.map((punto) => `${x(punto.timeUtcMs)},${y(punto.height_m)}`).join("L")}`,
     nivelMedioY: y((minima + maxima) / 2),
-    extremos: extremos.map((extremo) => ({
-      x: x(minutosDesdeHora(extremo.hora)),
-      y: y(extremo.alturaM),
+    extremos: entrada.extremos.map((extremo) => ({
+      ...extremo,
+      x: x(extremo.timeUtcMs),
+      y: y(extremo.height_m),
     })),
+    horas: Array.from({ length: marcasDeHora }, (_, indice) => {
+      const instante = inicioUtcMs + ((finUtcMs - inicioUtcMs) * indice) / (marcasDeHora - 1);
+      return { x: x(instante), timeUtcMs: instante };
+    }),
+    minima_m: minima,
+    maxima_m: maxima,
   };
 }

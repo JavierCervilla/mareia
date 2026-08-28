@@ -1,0 +1,70 @@
+---
+/**
+ * Índice de una región: `/mareas/<región>/`.
+ *
+ * Enseña las provincias **y sus puertos** en el mismo golpe de vista: en una región con dos o tres
+ * provincias, obligar a un toque más para ver cuatro puertos sería burocracia de navegación.
+ */
+import Indice from "../../../componentes/Indice.astro";
+import Migas from "../../../componentes/Migas.astro";
+import { cargarCatalogo, puertosDeRegion } from "../../../datos/catalogo.ts";
+import type { Region } from "../../../datos/catalogo.ts";
+import AlmanaqueLayout from "../../../layouts/AlmanaqueLayout.astro";
+import { migasDeRegion } from "../../../migas.ts";
+import { rutaProvincia, rutaPuerto, rutaRegion, urlAbsoluta } from "../../../rutas.ts";
+import { grafo, migasEstructuradas } from "../../../seo.ts";
+
+export async function getStaticPaths() {
+  const regiones = await cargarCatalogo();
+  return regiones.map((region) => ({ params: { region: region.slug }, props: { region } }));
+}
+
+interface Props {
+  region: Region;
+}
+
+const { region } = Astro.props;
+const puertos = puertosDeRegion(region);
+
+const titulo = `Mareas en ${region.nombre} · Mareia`;
+const descripcion =
+  `Puertos de ${region.nombre} con tabla de mareas, coeficiente y efemérides de sol y luna: ` +
+  `${puertos.map((puerto) => puerto.name).join(", ")}.`;
+
+const migas = migasDeRegion({ slug: region.slug, name: region.nombre });
+---
+
+<AlmanaqueLayout
+  titulo={titulo}
+  descripcion={descripcion}
+  canonica={urlAbsoluta(rutaRegion(region.slug), Astro.site)}
+  jsonLd={grafo([migasEstructuradas(migas, Astro.site)])}
+>
+  <Migas slot="migas" migas={migas} />
+
+  <header class="portada">
+    <h1 class="portada__titulo">Mareas en {region.nombre}</h1>
+    <p class="portada__entradilla">
+      {puertos.length === 1 ? "1 puerto" : `${puertos.length} puertos`} en {
+        region.provincias.length === 1 ? "1 provincia" : `${region.provincias.length} provincias`
+      }.
+    </p>
+  </header>
+
+  {
+    region.provincias.map((provincia) => (
+      <section class="grupo" aria-labelledby={`provincia-${provincia.slug}`}>
+        <h2 class="etiqueta" id={`provincia-${provincia.slug}`}>
+          <a href={rutaProvincia(region.slug, provincia.slug)}>{provincia.nombre}</a>
+        </h2>
+        <Indice
+          titulo={`Puertos de ${provincia.nombre}`}
+          entradas={provincia.puertos.map((puerto) => ({
+            nombre: puerto.name,
+            ruta: rutaPuerto(puerto),
+          }))}
+        />
+      </section>
+    ))
+  }
+</AlmanaqueLayout>

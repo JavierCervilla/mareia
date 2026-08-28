@@ -1,0 +1,66 @@
+/* =============================================================================
+ * Índices geográficos: portada, `/mareas/`, región y provincia.
+ *
+ * Son páginas de paso —su único trabajo es llevar al puerto en el menor número de
+ * toques posible—, así que se resuelven como el índice de un anuario: columnas de
+ * entradas con filete fino, sin tarjetas ni imágenes.
+ * ========================================================================== */
+
+.portada {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.portada__titulo {
+  font-family: var(--m-font-display);
+  font-size: var(--m-text-display);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.portada__entradilla {
+  max-width: 62ch;
+  font-size: var(--m-text-lead);
+}
+
+/* Columnas de entradas: en un móvil, una; a partir de ahí, tantas como quepan. */
+.indice {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 4px 32px;
+}
+
+.indice__entrada {
+  border-top: 1px solid var(--m-rule-soft);
+  padding: 9px 0;
+}
+
+.indice__enlace {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.indice__enlace:hover .indice__nombre {
+  text-decoration: underline;
+}
+
+.indice__nombre {
+  color: var(--m-ink);
+}
+
+.indice__meta {
+  font-size: var(--m-text-meta);
+  font-style: italic;
+  color: var(--m-sub);
+}
+
+/* Agrupación por provincia dentro de la página de una región. */
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

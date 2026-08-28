@@ -1,21 +1,35 @@
 ---
 /**
- * Layout base del almanaque: `<head>`, tipografía y estilos de base compartidos por todas las
- * páginas del portal.
+ * Layout base del almanaque: `<head>`, tipografía, cabecera de marca, el banner de aviso y el
+ * armazón que comparten todas las páginas del portal.
  *
- * No carga NADA de JavaScript de cliente: las páginas del portal son HTML estático (requisito de
- * T-09). El tema claro/noche lo resuelve el CSS de `@mareia/ui/tokens.css` con la preferencia del
- * sistema, sin script de detección.
+ * No carga NADA de JavaScript de cliente: las páginas del core son HTML estático (requisito de
+ * T-09). El único `<script>` que puede aparecer es el `application/ld+json` del SEO, que es datos
+ * declarativos y no código: no se ejecuta, no hidrata y no pesa en el hilo principal.
+ *
+ * El tema claro/noche/impresión lo resuelve el CSS de `@mareia/ui/tokens.css` con la preferencia
+ * del sistema, sin script de detección.
  */
 import "@mareia/ui/tokens.css";
+import "../estilos/almanaque.css";
+import "../estilos/indices.css";
+import "../estilos/pagina-puerto.css";
+
+import { FECHA_DE_BUILD } from "../datos/fecha-build.ts";
 import { escaparMarcado } from "../escapar-marcado.ts";
+import { fechaLarga } from "../formato.ts";
+import { serializarJsonLd } from "../json-ld.ts";
 
 interface Props {
   titulo: string;
   descripcion: string;
+  /** URL canónica absoluta de la página; `undefined` si no hay dominio configurado. */
+  canonica?: string | undefined;
+  /** Grafo JSON-LD de la página. Se serializa escapado (ver `json-ld.ts`). */
+  jsonLd?: unknown;
 }
 
-const { titulo, descripcion } = Astro.props;
+const { titulo, descripcion, canonica, jsonLd } = Astro.props;
 
 // Instrument Serif (display) + Newsreader (texto), las dos familias del design system.
 const FUENTES =
@@ -32,57 +46,41 @@ const FUENTES =
     <title>{titulo}</title>
     {/* `escaparMarcado`: Astro no escapa `<`/`>` en un valor de atributo — ver el módulo. */}
     <meta name="description" content={escaparMarcado(descripcion)} />
+    {canonica && <link rel="canonical" href={canonica} />}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href={FUENTES} />
+    {
+      jsonLd && (
+        // El JSON-LD es la única vía por la que entra `set:html` en todo el sitio: el contenido de
+        // un <script> no admite las expresiones escapadas de Astro (escaparían las comillas del
+        // JSON y lo romperían). El dato va serializado por `serializarJsonLd`, que convierte `<`,
+        // `>`, `&` y los separadores de línea en secuencias \uXXXX, así que no puede cerrar la
+        // etiqueta ni introducir marcado — ver `src/json-ld.ts`.
+        // eslint-disable-next-line astro/no-set-html-directive -- justificado arriba
+        <script type="application/ld+json" is:inline set:html={serializarJsonLd(jsonLd)} />
+      )
+    }
   </head>
   <body>
-    <slot />
+    <main class="pagina">
+      <header class="marca">
+        <a class="marca__nombre" href="/">Mareia</a>
+        <p class="marca__fecha">
+          Datos generados el <time datetime={FECHA_DE_BUILD}>{fechaLarga(FECHA_DE_BUILD)}</time>
+        </p>
+        <div class="filete-doble" aria-hidden="true"><span></span><span></span></div>
+      </header>
+
+      <slot name="migas" />
+
+      <p class="aviso-navegacion">
+        <strong>No apto para navegación.</strong> Predicción calculada con fuentes abiertas y
+        métodos publicados; para navegar, consulte las publicaciones oficiales de su autoridad
+        hidrográfica.
+      </p>
+
+      <slot />
+    </main>
   </body>
 </html>
-
-<style is:global>
-  /* `color-scheme` lo fija el tema en `@mareia/ui/tokens.css`, junto a la paleta: declararlo
-     también aquí dejaba el tema forzado por `data-theme` sin efecto sobre los widgets de UA (A-7). */
-
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
-
-  body {
-    margin: 0;
-    background: var(--m-bg);
-    color: var(--m-ink);
-    font-family: var(--m-font-text);
-    font-size: var(--m-text-body);
-    line-height: 1.45;
-  }
-
-  h1,
-  h2,
-  p,
-  figure {
-    margin: 0;
-  }
-
-  ul,
-  ol {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  a {
-    color: var(--m-navy);
-  }
-
-  a:hover {
-    opacity: 0.8;
-  }
-
-  svg {
-    display: block;
-  }
-</style>

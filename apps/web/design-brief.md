@@ -1,0 +1,162 @@
+# Design Brief — portal Mareia (página de puerto + índices geográficos)
+
+> Paso 1 del proceso *brief-first* de la skill `frontend-anti-slop`. **Ninguna línea de CSS de
+> presentación se escribe antes de este brief y de los tokens que se derivan de él** (`@mareia/ui`,
+> `src/tokens.css`). El orden es contrato, no sugerencia: el brief se commitea antes que la vista.
+>
+> Alcance: las superficies públicas del portal — la página de puerto (`/mareas/<región>/<provincia>/
+> <puerto>/`) y los índices geográficos que llevan a ella. Cuando lleguen la UI de módulos (T-10
+> pesca, T-11 meteo) o la PWA (T-12), **se amplía este brief**; no se abre otro.
+
+## 1. Contexto, industria y audiencia
+
+- **Producto / superficie**: portal público de datos costeros. Páginas estáticas (SSG, cero
+  JavaScript de cliente en el core) generadas en build con el mismo dominio que sirve el API.
+- **Industria / dominio**: efemérides marítimas — mareas astronómicas, coeficiente, sol y luna.
+  Sector con dos tradiciones visuales fuertes: el **anuario impreso** (tablas, filetes, versalitas) y
+  el **dashboard náutico comercial** (widgets, iconos de colores, publicidad). Mareia se coloca en la
+  primera y **rechaza** la segunda.
+- **Audiencia primaria**: quien va a estar en la orilla o va a salir a ella —marisqueo, pesca desde
+  costa, baño, fotografía, surf, paseo— y necesita **cuatro datos exactos** (a qué hora es la
+  pleamar, cuánto sube, cuándo amanece, si la marea es viva o muerta). No es un cliente: es alguien
+  consultando una herramienta.
+- **Entorno de uso real, y esto manda sobre todo lo demás**: teléfono, **a pleno sol en la playa**,
+  con brillo insuficiente, a veces con guantes o manos mojadas, a menudo con mala cobertura. De ahí
+  tres consecuencias no negociables: **mobile-first**, **alto contraste** (todos los pares de la
+  paleta ≥ 5,4:1, muy por encima del 4,5:1 de AA) y **página que se lee sin red y se imprime**.
+- **Densidad de información esperada**: **densa pero jerarquizada**, como un anuario. La página no
+  «respira» al modo marketing: quien la abre viene a leer una tabla. Lo que se controla no es la
+  cantidad de dato sino su **orden de lectura**.
+
+### Jerarquía de la información (qué se lee primero)
+
+Tres niveles, y cada elemento de la página pertenece a uno solo:
+
+| Nivel | Qué | Tratamiento |
+|---|---|---|
+| **Crítico** | Pleamares y bajamares del día: hora y altura. | Cifras grandes (`--m-text-hora`), tabla al principio, primer bloque en móvil. |
+| **Contextual** | Coeficiente del día, curva de 24 h, sol y luna, grade de la estación. | Tamaño de cuerpo, rótulos en versalita, agrupados debajo. |
+| **Consultable** | Tabla mensual, progresión mensual del coeficiente, atribuciones, metodología. | Cuerpo pequeño, al final, optimizado para **imprimir** y llevárselo. |
+
+El **aviso «No apto para navegación»** y el **aviso micromareal** (puertos donde la marea
+astronómica es de centímetros y manda el residuo meteorológico) están fuera de esa jerarquía: son
+**advertencias**, se ven siempre y no compiten con el dato — banner fijo el primero, bloque
+destacado en la cabecera del contenido el segundo.
+
+## 2. Tone & Direction (una, comprometida)
+
+- **Dirección elegida**: **«almanaque de puerto»** — la página como *página de un anuario de mareas
+  impreso*: papel cálido, tipografía con serifas, filete doble bajo la cabecera, rótulos en
+  versalita con interletraje amplio, tablas con reglas finas y cifras alineadas, y **una sola
+  mancha de color** (el terracota del coeficiente). Composición asimétrica en escritorio: la tabla
+  —lo crítico— ocupa la columna estrecha izquierda y la curva se estira en la ancha, en vez del
+  centrado-todo de plantilla.
+- **Justificación**: el anuario de mareas es *exactamente* este producto, resuelto durante dos
+  siglos con papel. Hereda de él lo que sigue siendo cierto: la tabla es el dato, la tipografía es
+  la interfaz, y el adorno estorba. Además resuelve tres requisitos del entorno de uso de una vez:
+  imprime bien porque nació impreso, es legible a pleno sol porque es tinta sobre papel de alto
+  contraste, y no necesita JavaScript porque no hay nada que animar. Y comunica lo que el proyecto
+  es —transparente, no comercial, auditable— sin decirlo: **no parece un producto que quiera
+  venderte algo, parece una fuente**.
+
+## 3. Anti-objetivos (lo que esta UI NO será)
+
+- **NO** un dashboard SaaS: nada de *cards* con sombra y esquinas redondeadas, sidebars, «hero + 3
+  cards», chips de colores ni KPIs con flechitas.
+- **NO** comercial: sin CTA, sin banners de suscripción, sin *upsell*, sin publicidad, sin
+  *cookie banner* (porque no hay analítica ni cookies), sin gamificación del dato.
+- **NO** genérico: nada de Inter/Roboto/Helvetica/system-ui como fuente de marca, nada de gradiente
+  morado→azul, nada de paleta tímida equidistante, nada de iconografía meteo tipo emoji.
+- **NO** decorativo con el dato: sin fotos de olas de stock, sin relleno de área bajo la curva con
+  gradientes, sin colores «alegres» sobre magnitudes que se leen en centímetros.
+- **NO** con JavaScript de cliente en el core: si una sección necesita hidratación, es una isla de
+  módulo (T-10/T-11) y entra por el contrato `AppModule`, no por aquí.
+- **NO** dato inventado: ningún hueco se rellena con un guion bonito; si un valor no existe (p95 de
+  una estación micromareal, orto de un día polar) **se dice por qué falta**.
+
+## 4. Paleta (roles → tokens OKLCH)
+
+Base neutra dominante (papel), tinta oscura, **una** dominante fría (azul marino, para lo que es
+navegación/agua/enlace) y **un** acento cálido nítido (terracota, reservado al coeficiente y a los
+avisos). Nada más: cinco colores, dos temas.
+
+| Rol | Token | Claro (OKLCH) | Noche (OKLCH) | Contraste sobre fondo |
+|---|---|---|---|---|
+| Base / papel | `--m-bg` | `oklch(95.8% 0.018 89.4)` | `oklch(20.2% 0.014 253.2)` | — |
+| Tinta / texto | `--m-ink` | `oklch(28.8% 0.028 248.8)` | `oklch(91.3% 0.025 89.2)` | 12,6 : 1 · 13,9 : 1 |
+| Tinta secundaria | `--m-sub` | `oklch(47.9% 0.014 169.8)` | `oklch(71.9% 0.030 124.9)` | 5,8 : 1 · 7,3 : 1 |
+| Dominante (agua, enlaces, pleamar) | `--m-navy` | `oklch(34.6% 0.074 256.0)` | `oklch(74.3% 0.055 245.2)` | 10,2 : 1 · 7,9 : 1 |
+| Acento (coeficiente, avisos) | `--m-terra` | `oklch(51.2% 0.141 32.0)` | `oklch(66.7% 0.116 39.9)` | 5,4 : 1 · 5,7 : 1 |
+
+- **Ningún literal de color vive fuera de `packages/ui/src/tokens.css`.** Las páginas consumen
+  custom properties; el linter anti-slop lo comprueba.
+- El peor par de la paleta da **5,4 : 1**: AA con margen para el sol de mediodía. El color **nunca**
+  es el único portador de significado (la pleamar se distingue por su rótulo, no por su tono).
+- Tema noche por `prefers-color-scheme` **y** por `data-theme` explícito, con `color-scheme`
+  declarado en el mismo bloque que la paleta.
+
+## 5. Tipografía
+
+- **Display — Instrument Serif**: serifa de anuario, contraste alto, cursiva viva; da el carácter de
+  portada impresa al nombre del puerto y a la cifra del coeficiente. No es una fuente «de sistema» y
+  no se parece a ningún SaaS: es la mitad de la personalidad del portal.
+- **Texto — Newsreader**: serifa de lectura diseñada para pantalla y para tamaños pequeños, con
+  cifras que se leen sin ambigüedad. Sostiene tablas densas a 15 px en un móvil al sol.
+- **Mono**: no se usa. Las horas y las alturas viven en tablas con columnas alineadas y tamaño
+  fijado por token; una mono aquí sería un guiño «técnico» sin función.
+- **Jerarquía por peso, tamaño y tracking, no por color**: rótulos en versalita con
+  `letter-spacing` amplio (`--m-track-label`), cifras críticas dos peldaños por encima del cuerpo.
+  La escala completa sube un peldaño en escritorio, desde los tokens (no desde la página).
+- **Carga**: las dos familias vienen de Google Fonts con `display=swap` y `preconnect`; la pila de
+  respaldo es Georgia, serifa presente en todos los sistemas, para que el salto de fuente no cambie
+  la métrica de la tabla.
+
+## 6. Movimiento
+
+- **Profundidad: sin motion.** Cero animaciones, cero transiciones, cero `@keyframes`. No es
+  minimalismo estético: la página no tiene estado que cambie —es HTML generado en build— y animar
+  algo que no cambia sería decoración pura. Además, cualquier movimiento cuesta batería y legibilidad
+  en el único entorno que nos importa (sol, playa, mano temblando).
+- **Único feedback**: el `:hover`/`:focus` de los enlaces, resuelto con opacidad y con el anillo de
+  foco nativo del navegador (no se suprime jamás).
+
+## 7. Referencias conceptuales
+
+1. **_Annuaire des marées_ del SHOM** (Francia) — de ahí vienen la tabla como protagonista, la
+   pareja de coeficientes por día y la idea de que el coeficiente es una **cifra grande y sola**.
+2. **_Almanaque Náutico_ del Real Instituto y Observatorio de la Armada** (San Fernando) — de ahí, el
+   tratamiento de las efemérides de sol y luna: columnas apretadas, rótulos en versalita, y la
+   costumbre de **publicar el método y sus límites junto al número** (nuestro badge de grade).
+3. **Tablas horarias ferroviarias suizas** — de ahí, la disciplina de retícula y de reglas finas:
+   densidad altísima con lectura inequívoca, sin una sola línea decorativa.
+
+## 8. Cómo se audita
+
+```bash
+# desde la raíz del repo
+bash .claude/skills/frontend-anti-slop/scripts/audit-anti-slop.sh apps/web/src
+bash .claude/skills/frontend-anti-slop/scripts/audit-anti-slop.sh packages/ui/src
+pnpm lint      # ESLint (preset anti-slop) — incluye .astro vía eslint-plugin-astro
+pnpm --filter web check   # astro check: tipos de las páginas y del layout
+```
+
+La medida de **Lighthouse** (SEO ≥ 95, el objetivo del ROADMAP) **no corre en CI**: necesita un
+navegador y aquí no hay ninguno instalado. El comando, para ejecutarlo a mano sobre el `dist/`
+servido —o en el despliegue de T-15, que es donde tiene sentido medirlo—:
+
+```bash
+pnpm --filter web build && pnpm --filter web preview   # sirve dist/ en :4321
+npx lighthouse http://localhost:4321/mareas/galicia/pontevedra/vigo/ \
+  --only-categories=seo,accessibility,performance --quiet --chrome-flags="--headless"
+```
+
+Los tres primeros son gates duros de los jobs `anti-slop` y `web` del CI. Toda excepción del linter va con
+`anti-slop-allow: <razón>` en la línea y traza a una decisión de este brief.
+
+**Regla de dónde vive el CSS**: el linter de la skill escanea `.ts`, `.css` y `.html`, pero **no**
+`.astro`. Un `<style>` dentro de una página quedaría fuera del gate, que es justo donde el slop se
+cuela sin que nadie lo vea. Por eso el CSS de presentación vive en **ficheros `.css`** bajo
+`apps/web/src/estilos/`, importados desde el layout, y las páginas no llevan bloque `<style>`. El
+precio es perder el *scoping* automático de Astro: se compensa con nombres BEM (`.bloque__elemento`)
+y con una hoja por bloque de la página. La ganancia colateral es real: una sola hoja compartida y
+cacheada por las 12+ páginas en vez de un `<style>` repetido en cada HTML.

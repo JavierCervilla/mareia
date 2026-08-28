@@ -17,6 +17,7 @@
   "devDependencies": {
     "@types/node": "^22.20.1",
     "eslint": "^9.39.5",
+    "eslint-plugin-astro": "^3.1.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-sonarjs": "^4.2.0",
     "typescript": "^5.9.3",

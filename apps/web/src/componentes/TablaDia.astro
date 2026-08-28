@@ -1,0 +1,51 @@
+---
+/**
+ * Tabla de pleamares y bajamares del día: el dato crítico de la página.
+ *
+ * Es lo primero del DOM y lo primero de la columna izquierda en escritorio, con las horas en la
+ * cifra más grande de la página (design-brief §1): quien abre esto en la playa viene a leer una
+ * hora, no a explorar.
+ *
+ * El marcado es una `<table>` de verdad —con `<th scope="row">` para el tipo de marea— y no una
+ * rejilla de `<div>`: un lector de pantalla anuncia «pleamar, 04:12, 4,82 metros» fila a fila.
+ */
+import type { TideEventDto } from "@mareia/usecases";
+
+import { hora, metros } from "../formato.ts";
+
+interface Props {
+  eventos: readonly TideEventDto[];
+  timezone: string;
+  /** Nombre del puerto, para el `<caption>` accesible. */
+  puerto: string;
+}
+
+const { eventos, timezone, puerto } = Astro.props;
+
+const NOMBRE = { high: "pleamar", low: "bajamar" } as const;
+---
+
+<table class="tabla-mareas">
+  {/* La tabla necesita nombre accesible propio; el visible es el <h2> de su sección. */}
+  <caption class="solo-lectores">Mareas de hoy en {puerto}</caption>
+  <tbody>
+    {
+      eventos.map((evento) => (
+        <tr data-tipo={NOMBRE[evento.kind]}>
+          <th scope="row">{NOMBRE[evento.kind]}</th>
+          <td class="tabla-mareas__hora">{hora(evento.timeUtcMs, timezone)}</td>
+          <td class="tabla-mareas__altura">{metros(evento.height_m)}</td>
+        </tr>
+      ))
+    }
+    {
+      eventos.length === 0 && (
+        <tr>
+          <td class="tabla-mareas__vacia" colspan="3">
+            Hoy no hay ningún extremo de marea dentro del día civil de este puerto.
+          </td>
+        </tr>
+      )
+    }
+  </tbody>
+</table>
