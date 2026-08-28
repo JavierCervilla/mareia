@@ -14,6 +14,11 @@ import "@mareia/ui/tokens.css";
 import "../estilos/almanaque.css";
 import "../estilos/indices.css";
 import "../estilos/pagina-puerto.css";
+// La hoja de la sección del módulo `fishing` (T-10). Se importa aquí y no desde su componente
+// porque Astro no la mete en el bundle cuando el componente llega por el mapa de renderizadores
+// (`secciones.ts`): la sección se publicaba sin estilos y con el build en verde. Un test del
+// `dist/` comprueba que las reglas siguen publicándose.
+import "../estilos/actividad-solunar.css";
 
 import { FECHA_DE_BUILD } from "../datos/fecha-build.ts";
 import { escaparMarcado } from "../escapar-marcado.ts";

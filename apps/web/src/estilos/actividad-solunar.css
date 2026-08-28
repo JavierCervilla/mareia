@@ -1,0 +1,131 @@
+/* =============================================================================
+ * Sección «Actividad solunar» — la UI del módulo `fishing` (T-10).
+ *
+ * La importa el layout, como las demás hojas del sitio (design-brief, «dónde
+ * vive el CSS»: `.css` de verdad y no un `<style>` en la plantilla, porque el
+ * gate anti-slop escanea `.css` y no `.astro`). Se intentó que viajara con el
+ * módulo —importada desde su componente— y **Astro no la incluye en el bundle**
+ * cuando el componente llega por el mapa de renderizadores: la sección se
+ * publicaba sin estilos y en verde. Así que viaja siempre; son 1,6 kB medidos de
+ * CSS que sobran si `fishing` se da de baja, y lo vigila un test del `dist/`.
+ *
+ * Ni un literal de color ni de fuente: todo sale de los tokens. La sección es
+ * información **contextual**, así que no compite con la tabla de mareas ni con
+ * el coeficiente — de ahí el cuerpo normal y la cifra un peldaño por debajo.
+ * ========================================================================== */
+
+.solunar__intro {
+  font-size: var(--m-text-body);
+}
+
+/* --- El marcador: cifra, escala y etiqueta -------------------------------- */
+/* Filetes arriba y abajo en vez de caja: la página es un anuario, no un dashboard
+   con tarjetas (design-brief §3). */
+.solunar__rating {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 18px;
+  border-top: 1px solid var(--m-rule-soft);
+  border-bottom: 1px solid var(--m-rule-soft);
+  padding: var(--m-gap-fila) 0;
+}
+
+.solunar__marcador {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+/* `--m-text-hora` y NO `--m-text-coef`, y sin terracota: el coeficiente es una
+   magnitud calculada sobre la marea y esto es una convención declarada. La
+   jerarquía tipográfica dice cuál manda sin tener que escribirlo. */
+.solunar__cifra {
+  font-family: var(--m-font-display);
+  font-size: var(--m-text-hora);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.solunar__escala {
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+}
+
+.solunar__veredicto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.solunar__valoracion {
+  font-size: var(--m-text-lead);
+}
+
+.solunar__convencion {
+  font-size: var(--m-text-body);
+}
+
+/* --- Tabla de periodos ---------------------------------------------------- */
+.tabla-solunar {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--m-text-body);
+  text-align: left;
+}
+
+.tabla-solunar th,
+.tabla-solunar td {
+  padding: var(--m-gap-fila) 10px var(--m-gap-fila) 0;
+  border-top: 1px solid var(--m-rule-soft);
+  vertical-align: baseline;
+}
+
+.tabla-solunar thead th {
+  font-size: var(--m-text-eyebrow);
+  font-weight: 400;
+  letter-spacing: var(--m-track-label);
+  text-transform: uppercase;
+  color: var(--m-sub);
+  border-top: 0;
+  border-bottom: 1px solid var(--m-rule);
+}
+
+.tabla-solunar tbody th {
+  font-size: var(--m-text-eyebrow);
+  font-weight: 400;
+  letter-spacing: var(--m-track-tide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tabla-solunar__franja {
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla-solunar__sol {
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+}
+
+/* --- Desglose del rating -------------------------------------------------- */
+.solunar__detalle {
+  display: block;
+  font-size: var(--m-text-meta);
+  font-style: italic;
+  color: var(--m-sub);
+}
+
+.solunar__total {
+  border-top-color: var(--m-rule);
+}
+
+/* --- El aviso ------------------------------------------------------------- */
+/* Filete lateral en el acento cálido (el brief lo reserva al coeficiente y a los
+   avisos, y esto es un aviso), pero con el texto en tinta: se ve sin gritar más
+   que el «No apto para navegación» del pie. */
+.solunar__aviso {
+  border-inline-start: 2px solid var(--m-terra);
+  padding-inline-start: 12px;
+  font-size: var(--m-text-body);
+}

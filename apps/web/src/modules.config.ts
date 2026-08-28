@@ -4,19 +4,21 @@ import {
   type PortRef,
   selectPageSections,
 } from "@mareia/module-contract";
+import { fishingModule } from "@mareia/module-fishing";
 
 /**
  * Registry de módulos activos en el portal. **Dar de alta o de baja un módulo es editar este array
  * y nada más**: sus `pageSections` aparecen (o desaparecen) de la página de puerto.
  *
- * Vacío a propósito: la web compila y se construye sin ningún módulo (test de arquitectura en
- * `modules.config.test.ts`). Los módulos reales llegan en T-10 (pesca) y T-11 (meteo).
+ * `fishing` (T-10) es el primer módulo con interfaz: aporta la sección de actividad solunar y las
+ * bandas del gráfico. **Darlo de baja es borrar su línea** y la página sigue en pie sin sección y
+ * sin bandas, con su test de arquitectura en `modules.config.test.ts`. Meteo llega en T-11.
  */
-export const activeModules: readonly AppModule[] = [];
+export const activeModules: readonly AppModule[] = [fishingModule];
 
 /**
- * Secciones que la página de un puerto debe renderizar, ordenadas por `order`. El layout que las
- * coloca en sus slots llega en T-09; aquí solo se expone la lógica de selección.
+ * Secciones que la página de un puerto debe renderizar, ordenadas por `order`. Quien las coloca es
+ * `componentes/SeccionesDeModulos.astro`; aquí solo se expone la lógica de selección.
  *
  * `modules` es inyectable para poder testear la selección con módulos dummy sin tocar el registry
  * de producción.
