@@ -25,3 +25,9 @@ Implementar los módulos reales fishing/weather (T-08/T-10/T-11), la página de 
 
 ## DoD extra (doctrina T-161)
 El PR marca su checkbox en `ROADMAP.md` y añade su entrada a `CHANGELOG.md`.
+
+## Nota de reconciliación (orquestador, post-implementación)
+Los módulos API se montan bajo `/v1/modules/<id>` (decisión de ejecución; `GET /v1/modules` lista
+activos con versión y atribuciones). El plan original decía `/v1/ports/:slug/<id>/…`: cuando T-07/T-08
+necesiten scoping por puerto, se decidirá allí si el módulo recibe el puerto por parámetro de ruta
+dentro de su router o si se re-monta con prefijo por puerto (una línea en `server.ts`).
