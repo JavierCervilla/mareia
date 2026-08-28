@@ -2,6 +2,51 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-28 — T-10 · el módulo pesca, el primero con interfaz
+
+- **Los periodos solunares se leen encima de la marea**. La página de puerto sombrea bajo la curva
+  de 24 h las ventanas que la teoría solunar asocia a la Luna: 2 h en cada tránsito (mayores) y
+  1 h 30 min en su salida y su puesta (menores). En el build de hoy son **4 bandas** en Vigo. Van
+  emitidas **antes** del trazo —en SVG no hay `z-index`: pinta después quien viene después—, en el
+  acento cálido que ya existía y sin borde ni texto dentro del lienzo, para que lo legible del
+  gráfico siga siendo la marea. **Cero JavaScript de cliente**: SVG estático, como el resto del core.
+- **Las bandas se recortan al día civil.** Un periodo pertenece al día en el que cae su fenómeno,
+  así que su ventana puede empezar antes de medianoche o acabar después: la parte que se sale se
+  corta en el borde del lienzo y la que no toca el día no se dibuja. La franja completa sí se
+  escribe entera en la tabla, con la coletilla («de 23:30 del día anterior a 01:00»): recortar el
+  dibujo es geometría, recortar el texto sería mentir.
+- **Sección «Actividad solunar» con el rating 0-100, su etiqueta y el desglose de por qué.** Qué
+  suma la fase lunar, qué suman las coincidencias con el orto y el ocaso del Sol, cuánto da la suma
+  **sin redondear** y qué número se publica («100,0 → 100 · Muy alta»). Enseñar solo el entero
+  obligaría a creerse la suma.
+- **El rating se publica como lo que es: una convención, no una medida**, con esas palabras, y la
+  sección declara que **la teoría solunar no tiene respaldo experimental sólido** con enlace a la
+  metodología (el README del módulo `solunar/`, que es código público: el portal no tiene página de
+  metodología y prometer una que no existe fue el hallazgo A-3 del pase adversario de T-09). No se
+  promete pesca en ningún texto: se publica un cálculo reproducible. **Un test comprueba que el
+  aviso está en las 12 páginas**, así que borrarlo pone el CI en rojo.
+- **La cifra del rating es un peldaño más pequeña que la del coeficiente de marea y no lleva la
+  mancha de terracota.** El coeficiente se calcula sobre la marea real y esto es una convención: la
+  jerarquía tipográfica dice cuál manda sin tener que escribirlo.
+- **Golden contra el dominio, no contra el HTML**: las horas de las bandas y de la tabla se comparan
+  con las que publica el caso de uso `getSolunar` para ese puerto y ese día, y el rating de las 12
+  páginas con el que calcula el dominio. Con dos propiedades que el pase adversario buscaría:
+  ninguna banda se sale del lienzo en ninguna página, y los estados terminales (100 y 0) solo salen
+  si la fórmula llega exactamente ahí, nunca redondeando.
+- **Dar de baja el módulo es borrar una línea** de `apps/web/src/modules.config.ts`. Verificado
+  construyendo sin él: **33 páginas**, sin sección y sin bandas. El core no nombra a `fishing` en
+  ninguna línea — el gráfico solo sabe de «ventanas destacadas» con un peso y una etiqueta, y quién
+  las llena es el registro de secciones de la superficie.
+- **Una avería silenciosa cazada por el camino**: importando la hoja de estilos desde el propio
+  componente, Astro **no la mete en el bundle** cuando el componente llega por el mapa de
+  renderizadores, y la sección se publicaba **sin estilos con todo el CI en verde**. La hoja pasa a
+  importarse desde el layout (que es la regla del brief) y **un test comprueba que las reglas
+  siguen en la hoja publicada**.
+- **Coste medido**: la página de puerto pasa de 21.343 a 26.226 bytes (+4,9 kB, +23 %) y la hoja
+  compartida de 10.121 a 11.759 (+1,6 kB). **25 tests nuevos** (9 del módulo, 5 del recorte de
+  bandas, 3 del registro de ventanas, 7 sobre el `dist/` construido y 1 del registry): la suite de
+  la web pasa de 41 a 57 y el repositorio queda en 344 en verde.
+
 ## 2026-08-28 — T-08 · el módulo weather, primer módulo real del registry
 
 - **`GET /v1/modules/weather/weather?port=<slug>`**: estado del mar (olas total/wind/swell con

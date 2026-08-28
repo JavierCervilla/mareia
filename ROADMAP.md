@@ -27,7 +27,9 @@
 - [x] T-09 · Página de puerto SSG (tabla + gráfico + coeficiente + sol/luna) + índices geográficos,
       con canónicas, sitemap y JSON-LD (la medida Lighthouse SEO ≥ 95 queda pendiente de T-15: no
       hay navegador en CI; el comando está documentado en `apps/web/design-brief.md` §8)
-- [ ] T-10 · Módulo pesca UI (overlay solunar + rating)
+- [x] T-10 · Módulo pesca UI (overlay solunar + rating), primer módulo que aporta interfaz por el
+      contrato `AppModule` (el rating se publica como convención declarada, con su desglose y el
+      aviso de que la teoría solunar no tiene respaldo experimental sólido)
 - [ ] T-11 · Módulo weather UI (isla meteo con estados ok/error/stale)
 - [ ] T-12 · PWA offline (almanaque de favoritos sin red)
 
