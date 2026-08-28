@@ -1,8 +1,11 @@
 import type { Attribution, CorePorts } from "@mareia/module-contract";
 // @ts-types="@types/express"
 import express, { type Express, type Request, type Response } from "express";
+import type { UseCaseDeps } from "@mareia/usecases";
 
+import { createCoreDeps } from "../core-deps.ts";
 import { activeModules, type ApiModule } from "../modules.config.ts";
+import { registerCoreRoutes } from "./core-routes.ts";
 
 /** Respuesta del endpoint de salud: contrato estable que consumen CI y el smoke de despliegue. */
 export interface HealthPayload {
@@ -34,10 +37,15 @@ function describe(module: ApiModule): ModuleDescriptor {
  * `/v1/modules/<id>` y los publica en `GET /v1/modules`. El registry y las dependencias del core
  * entran por inyección (por defecto, los de producción) para que los tests puedan levantar la API
  * con módulos dummy sin tocar `modules.config.ts`.
+ *
+ * Las rutas del **core** (`/v1/ports…`, T-07) se montan aquí mismo y no como módulo: el catálogo y
+ * la marea no se enchufan ni se desenchufan, son la razón de ser del servicio. `core` se inyecta
+ * por la misma razón que `modules`: para que un test pueda servir un dataset de prueba.
  */
 export function createServer(
   modules: readonly ApiModule[] = activeModules,
   deps: CorePorts = {},
+  core: UseCaseDeps = createCoreDeps(),
 ): Express {
   const app = express();
   app.disable("x-powered-by");
@@ -46,6 +54,8 @@ export function createServer(
     const payload: HealthPayload = { status: "ok", service: "mareia-api" };
     res.json(payload);
   });
+
+  registerCoreRoutes(app, core);
 
   app.get("/v1/modules", (_req: Request, res: Response) => {
     const payload: ModulesPayload = { modules: modules.map(describe) };
