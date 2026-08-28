@@ -2,6 +2,37 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-28 — T-07 · los endpoints core del API
+
+- **Seis rutas nuevas** sobre el dataset de T-05 y el dominio de T-02/T-03: `GET /v1/ports`,
+  `/v1/ports/:slug`, `/v1/ports/:slug/tides?from&to[&step]`, `/v1/ports/:slug/almanac/:year`,
+  `/v1/ports/:slug/astro?date` y `/v1/ports/:slug/solunar?date`. Son del **core**, no un módulo:
+  se montan junto a `/health`, que sigue igual que el registry de módulos de T-06.
+- **`data/geo/ports.json`** (schema `ports/v1`): los 12 puertos con slug, jerarquía
+  región/provincia —los tramos de la URL pública, `/galicia/pontevedra/vigo`—, coordenadas, zona
+  horaria y su estación. Un test impide que se desincronice del dataset: ni estaciones huérfanas ni
+  referencias muertas. Brest sigue fuera: es la referencia del coeficiente, no un puerto.
+- **Las fechas son días civiles del puerto**, no ventanas UTC: pedir un día en Vigo devuelve de
+  medianoche a medianoche locales, y el día del cambio de hora dura 23 o 25 horas. Cada instante
+  viaja dos veces, en epoch ms y en ISO 8601; horas locales, ninguna.
+- **La transparencia viaja por el API**: toda respuesta con alturas lleva la calidad de la estación
+  (grade, RMSE, error de hora p95) y sus atribuciones. En los puertos micromareales —Cabo de Palos,
+  La Manga, Cádiz, Palma— el error de hora no es medible y se publica como `null`: el cliente puede
+  decirlo en vez de fingir una precisión que no hay.
+- **Validación ruidosa con límites publicados**: `tides` ≤ 40 días, `step` de 1 a 60 min y ≤ 6.000
+  puntos de curva, `almanac` solo el año en curso ±1 (contado en la zona del puerto). Cada 400 dice
+  qué se esperaba y qué llegó; un slug desconocido es 404, no una lista vacía.
+- **Caché**: las respuestas son deterministas y salen con `Cache-Control: public, max-age=86400`.
+  Los errores, sin caché.
+- **Clean architecture de verdad**: `@mareia/usecases` (casos de uso puros, con repositorios,
+  efeméride y reloj inyectados) y `@mareia/adapters` (JSON de disco con caché y ruta inyectada). Los
+  límites viven en los casos de uso y no en las rutas, para que el build del sitio los reutilice sin
+  pasar por HTTP.
+- **Contract tests** en Deno contra el dataset real —status, esquema, cabeceras y los ocho errores—
+  y un golden fino: los extremos de Vigo que publica el API son los mismos que da el motor llamado a
+  mano sobre el mismo JSON de estación.
+- El endpoint de **coeficiente** queda pendiente de que merjee T-04, que va en paralelo.
+
 ## 2026-08-28 — T-05 · Cabo de Palos y La Manga, y arreglo de la detección de extremos
 
 - **Dos puertos nuevos** en el piloto: **Cabo de Palos** y **La Manga** (lado mediterráneo, no la
