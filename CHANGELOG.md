@@ -2,6 +2,24 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-28 — T-05 · Cabo de Palos y La Manga, y arreglo de la detección de extremos
+
+- **Dos puertos nuevos** en el piloto: **Cabo de Palos** y **La Manga** (lado mediterráneo, no la
+  laguna del Mar Menor, que no tiene marea astronómica utilizable). Ambos dependen del mareógrafo de
+  Cartagena, a 25 y 27 km, y están en zona micromareal (rango 0,23 m): salen **grade C**, con el
+  aviso correspondiente en el informe QC.
+- **La distancia al mareógrafo pasa a ser un umbral del grade** (A ≤ 5 km, B ≤ 30 km): un puerto que
+  toma prestadas las constantes de otro sitio ya no puede heredar el grade de quien se las presta.
+- **Corregida la detección de extremos**, que comparaba puntos vecinos y tomaba por pleamar
+  cualquier rizo del registro: en un mareógrafo que muestrea cada 6 s daba decenas de miles de
+  extremos donde había cuarenta, y con ellos el error de hora salía excelente y falso. Ahora se
+  exige prominencia y se fuerza la alternancia pleamar/bajamar. Consecuencia: varias p95 empeoran
+  respecto a la medición anterior porque aquélla estaba inflada, y **Huelva baja de A a B**
+  (17,9 → 22,9 min). El reparto final es 4 A, 5 B, 4 C.
+- Donde la observación no tiene pleamares identificables, el error de hora **ya no se publica** en
+  lugar de publicarse un número sin significado.
+- El agregador se cita por su nombre real, `openwatersio/tide-database`, en las atribuciones.
+
 ## 2026-08-28 — T-05 · dataset de los 10 puertos piloto
 
 - **Dataset `station/v1`** en `data/stations/` para Vigo, A Coruña, Santander, Bilbao, Cádiz,

@@ -120,7 +120,7 @@
         "phase_deg": 291.1902
       }
     ],
-    "derived_at": "2026-08-28T01:51:56Z",
+    "derived_at": "2026-08-28T02:15:20Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -130,7 +130,7 @@
         "role": "constantes armónicas"
       },
       {
-        "name": "neaps/tide-database",
+        "name": "openwatersio/tide-database",
         "url": "https://github.com/openwatersio/tide-database",
         "license": "MIT (código) · licencia de origen por estación (datos)",
         "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
@@ -312,7 +312,7 @@
   ],
   "quality": {
     "rmse_m": 0.0576,
-    "hw_time_err_p95_min": 11.51,
+    "hw_time_err_p95_min": 43.98,
     "grade": "B",
     "validated_against": "IOC mal3",
     "grade_reason": "no alcanza A: RMSE normalizado 0.089 > 0.05",
@@ -322,12 +322,14 @@
       "samples": 43136,
       "predicted_range_m": 0.6481,
       "rmse_m": 0.0576,
-      "nrmse": 0.08888,
-      "r2": 0.86197,
-      "hw_time_err_p95_min": 11.51,
-      "hw_height_err_p95_m": 0.0805,
-      "matched_extremes": 116,
+      "nrmse": 0.08894,
+      "r2": 0.86177,
+      "hw_time_err_p95_min": 43.98,
+      "hw_height_err_p95_m": 0.0806,
+      "matched_extremes": 115,
       "predicted_extremes": 116,
+      "observed_extremes": 177,
+      "extremes_usable": true,
       "cross_rmse_m": 0.0054,
       "cross_source": "malagatg-mal-esp-cmems",
       "cross_rmse_worst_m": 0.0054,

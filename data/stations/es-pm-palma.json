@@ -133,7 +133,7 @@
         "phase_deg": 149.9247
       }
     ],
-    "derived_at": "2026-08-28T01:51:56Z",
+    "derived_at": "2026-08-28T02:15:20Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -143,7 +143,7 @@
         "role": "constantes armónicas"
       },
       {
-        "name": "neaps/tide-database",
+        "name": "openwatersio/tide-database",
         "url": "https://github.com/openwatersio/tide-database",
         "license": "MIT (código) · licencia de origen por estación (datos)",
         "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
@@ -325,22 +325,24 @@
   ],
   "quality": {
     "rmse_m": 0.049,
-    "hw_time_err_p95_min": 31.08,
+    "hw_time_err_p95_min": null,
     "grade": "C",
     "validated_against": "IOC palm",
     "grade_reason": "no alcanza B: RMSE normalizado 0.243 > 0.15",
     "metrics": {
       "window_start": "2026-07-29T00:00:00Z",
       "window_days": 30.0,
-      "samples": 33656,
+      "samples": 33655,
       "predicted_range_m": 0.202,
       "rmse_m": 0.049,
-      "nrmse": 0.24257,
-      "r2": 0.43535,
-      "hw_time_err_p95_min": 31.08,
-      "hw_height_err_p95_m": 0.0847,
-      "matched_extremes": 81,
-      "predicted_extremes": 106,
+      "nrmse": 0.24272,
+      "r2": 0.43504,
+      "hw_time_err_p95_min": null,
+      "hw_height_err_p95_m": null,
+      "matched_extremes": 0,
+      "predicted_extremes": 86,
+      "observed_extremes": 887,
+      "extremes_usable": false,
       "cross_rmse_m": 0.0072,
       "cross_source": "palmademallorcatg-pal-esp-cmems",
       "cross_rmse_worst_m": 0.0072,

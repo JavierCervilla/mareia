@@ -6,6 +6,7 @@ import json
 
 import pytest
 
+from mareia_pipeline import grade as grading
 from mareia_pipeline.geo import haversine_km
 from mareia_pipeline.ports import PILOT_PORTS
 from mareia_pipeline.reconcile import select
@@ -113,4 +114,13 @@ def test_chosen_gauge_is_actually_near_the_port(path) -> None:
     primary = document["source"]["primary"]
     measured = haversine_km(document["lat"], document["lon"], primary["lat"], primary["lon"])
     assert measured == pytest.approx(primary["distance_km"], abs=0.01)
-    assert measured < 25.0
+    port = next(p for p in PILOT_PORTS if p.id == document["id"])
+    assert measured <= port.search_radius_km
+
+
+@pytest.mark.parametrize("path", station_files(), ids=lambda p: p.name)
+def test_a_borrowed_gauge_cannot_be_published_as_grade_a(path) -> None:
+    """Un puerto que toma prestadas las constantes de lejos no puede figurar como grade A."""
+    document = json.loads(path.read_text(encoding="utf-8"))
+    if document["source"]["primary"]["distance_km"] > grading.MAX_GAUGE_DISTANCE_KM["A"]:
+        assert document["quality"]["grade"] != "A"

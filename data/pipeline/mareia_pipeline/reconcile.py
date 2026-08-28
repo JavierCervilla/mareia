@@ -6,15 +6,22 @@ La política de selección es determinista y está ordenada así:
    existe: Puertos del Estado no publica constantes armónicas por una vía automatizable (ver el
    informe QC), así que en el piloto todos los puertos salen de TICON-4 y la rama REDMAR queda
    escrita pero sin candidatos.
-2. **Licencia** — ``cc-by-4.0`` por delante de ``cc-by-nc-4.0``. El dataset de Mareia se publica como
-   CC-BY 4.0; usar una estación *non-commercial* contamina esa promesa y hay que declararlo.
+2. **Licencia** — ``cc-by-4.0`` por delante de ``cc-by-nc-4.0``. La licencia del dataset es **la de
+   cada estación**, no una del repositorio: se hereda de la fuente y viaja dentro del propio JSON
+   (``source.primary.license`` y ``source.attribution[].license``). Preferir las permisivas es lo que
+   evita restringir la reutilización del conjunto más de lo necesario; donde no hay alternativa se
+   usa la restrictiva y se declara.
 3. **Longitud del registro analizado** — más años de mareógrafo, mejor separación de constituyentes.
 4. **Distancia al puerto** — como último desempate.
 
-La distancia manda poco a propósito: entre dos mareógrafos de la misma dársena separados cientos de
-metros las constantes son intercambiables, y lo que de verdad distingue a un candidato de otro es la
-licencia y la longitud de su registro. Las candidatas descartadas se emiten en ``source.fallback``,
-así que la decisión es auditable y reversible sin volver a ejecutar nada.
+La distancia manda poco *al elegir* y a propósito: entre dos mareógrafos de la misma dársena
+separados cientos de metros las constantes son intercambiables, y lo que de verdad distingue a un
+candidato de otro es la licencia y la longitud de su registro. Donde sí manda es *al calificar*: la
+distancia del mareógrafo elegido es uno de los umbrales del grade, así que un puerto que sólo tiene
+mareógrafo a decenas de kilómetros lo paga ahí y no en una selección peor.
+
+Las candidatas descartadas se emiten en ``source.fallback``, así que la decisión es auditable y
+reversible sin volver a ejecutar nada.
 """
 
 from __future__ import annotations
@@ -33,8 +40,8 @@ _DATASET_RANK = {"redmar": 0, "noaa": 1, "ticon": 2}
 #: Prioridad de licencia: menor es mejor. Una licencia desconocida se ordena la última.
 _LICENSE_RANK = {"cc-by-4.0": 0, "public-domain": 0, "cc-by-nc-4.0": 1}
 
-#: Radio de búsqueda de mareógrafos alrededor de la dársena.
-SEARCH_RADIUS_KM = 25.0
+#: Nombre del proyecto que agrega y normaliza las constantes, para la atribución.
+_AGGREGATOR_NAME = "openwatersio/tide-database"
 
 
 @dataclass(frozen=True)
@@ -58,10 +65,10 @@ def _sort_key(distance_km: float, gauge: GaugeRecord) -> tuple[int, int, float, 
 
 def select(port: Port, gauges: list[GaugeRecord]) -> Selection:
     """Aplica la política de selección al puerto dado."""
-    candidates = candidates_near(gauges, port.lat, port.lon, SEARCH_RADIUS_KM)
+    candidates = candidates_near(gauges, port.lat, port.lon, port.search_radius_km)
     if not candidates:
         raise LookupError(
-            f"sin mareógrafos a menos de {SEARCH_RADIUS_KM:g} km de {port.name} ({port.id})"
+            f"sin mareógrafos a menos de {port.search_radius_km:g} km de {port.name} ({port.id})"
         )
     ordered = sorted(candidates, key=lambda item: _sort_key(item[0], item[1]))
     best_distance, best = ordered[0]
@@ -91,7 +98,7 @@ def _attribution(gauge: GaugeRecord, tarball_sha256: str) -> list[dict[str, str]
             "role": "constantes armónicas",
         },
         {
-            "name": "neaps/tide-database",
+            "name": _AGGREGATOR_NAME,
             "url": REPOSITORY_URL,
             "license": "MIT (código) · licencia de origen por estación (datos)",
             "license_url": f"{REPOSITORY_URL}/blob/main/LICENSE",

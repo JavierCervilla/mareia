@@ -39,6 +39,13 @@ OBSERVATION_RADIUS_KM = 5.0
 CROSS_CHECK_RADIUS_KM = 5.0
 
 NOTES = [
+    "**Los extremos se detectan por prominencia, no comparando puntos vecinos.** Un extremo sólo "
+    "cuenta cuando la señal se aleja de él un 5 % del rango de marea en sentido contrario. Sin ese "
+    "filtro, un registro real de 6 segundos en puerto micromareal daba decenas de miles de "
+    "«pleamares» donde había cuarenta, y entonces cualquier predicción encontraba siempre una "
+    "observada al lado: el error de hora salía magnífico y era mentira. Al corregirlo, varias p95 "
+    "empeoraron respecto a la primera medición —Huelva pasó de 17,9 a 22,9 min y con ella de A a "
+    "B—, que es lo que había realmente.",
     "**El truncado a 37 constituyentes es hoy el techo del dataset**, no la calidad de las "
     "constantes ni la de la predicción. Es lo que impide llegar a grade A a Vigo, Santander y "
     "Brest, que contra observaciones reales van tan bien como los que sí lo alcanzan (R² > 0,99 y "
@@ -104,6 +111,17 @@ def _evaluate_port(
         max_km=OBSERVATION_RADIUS_KM,
         refresh=refresh,
     )
+    if observations is None:
+        # Sin mareógrafo del IOC en la dársena, se mide donde está el que presta las constantes.
+        # Eso valida **las constantes**, no el emplazamiento, y no infla el grade: la distancia al
+        # mareógrafo es un umbral aparte que ya penaliza al puerto que no tiene el suyo.
+        observations = ioc.fetch_observations(
+            selection.chosen.lat,
+            selection.chosen.lon,
+            days=VALIDATION_DAYS,
+            max_km=OBSERVATION_RADIUS_KM,
+            refresh=refresh,
+        )
     metrics = evaluate(
         _harmonics(selection.chosen),
         observations,
@@ -141,7 +159,9 @@ def command_build(args: argparse.Namespace) -> int:
 
     for port in PILOT_PORTS:
         selection, metrics = _evaluate_port(port, gauges, refresh=args.refresh)
-        result = grading.assign(metrics, selection.chosen.epoch_years)
+        result = grading.assign(
+            metrics, selection.chosen.epoch_years, selection.chosen_distance_km
+        )
         document = to_station_v1(
             selection,
             quality={

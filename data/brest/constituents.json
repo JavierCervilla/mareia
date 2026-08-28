@@ -172,7 +172,7 @@
         "phase_deg": 51.3608
       }
     ],
-    "derived_at": "2026-08-28T01:51:56Z",
+    "derived_at": "2026-08-28T02:15:20Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -182,7 +182,7 @@
         "role": "constantes armónicas"
       },
       {
-        "name": "neaps/tide-database",
+        "name": "openwatersio/tide-database",
         "url": "https://github.com/openwatersio/tide-database",
         "license": "MIT (código) · licencia de origen por estación (datos)",
         "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
@@ -363,23 +363,25 @@
     }
   ],
   "quality": {
-    "rmse_m": 0.0793,
-    "hw_time_err_p95_min": 14.07,
+    "rmse_m": 0.0794,
+    "hw_time_err_p95_min": 14.53,
     "grade": "B",
     "validated_against": "IOC bres",
     "grade_reason": "no alcanza A: coste de truncar al catálogo del motor 2.2 cm RMS > 1 cm",
     "metrics": {
       "window_start": "2026-07-29T00:00:00Z",
       "window_days": 30.0,
-      "samples": 42554,
+      "samples": 42558,
       "predicted_range_m": 6.6059,
-      "rmse_m": 0.0793,
-      "nrmse": 0.01201,
-      "r2": 0.99732,
-      "hw_time_err_p95_min": 14.07,
-      "hw_height_err_p95_m": 0.1466,
+      "rmse_m": 0.0794,
+      "nrmse": 0.01202,
+      "r2": 0.99731,
+      "hw_time_err_p95_min": 14.53,
+      "hw_height_err_p95_m": 0.1464,
       "matched_extremes": 116,
       "predicted_extremes": 116,
+      "observed_extremes": 117,
+      "extremes_usable": true,
       "cross_rmse_m": 0.0001,
       "cross_source": "bresttg_60minute-bre-fra-cmems",
       "cross_rmse_worst_m": 0.0022,

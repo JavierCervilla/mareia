@@ -21,6 +21,8 @@ _EXCELLENT = Metrics(
     hw_height_err_p95_m=0.09,
     matched_extremes=116,
     predicted_extremes=116,
+    observed_extremes=116,
+    extremes_usable=True,
     cross_rmse_m=0.004,
     cross_source="otro-mareógrafo",
     cross_rmse_worst_m=0.02,
@@ -69,6 +71,17 @@ def test_exactly_on_the_threshold_still_passes(field: str, value: float) -> None
 
 def test_a_short_record_cannot_reach_a() -> None:
     assert grading.assign(_EXCELLENT, epoch_years=3.0).grade == "B"
+
+
+def test_a_distant_gauge_cannot_reach_a() -> None:
+    """Un puerto sin mareógrafo propio no hereda el grade del que le presta las constantes."""
+    borrowed = grading.assign(_EXCELLENT, epoch_years=19.0, gauge_distance_km=25.0)
+    assert borrowed.grade == "B"
+    assert "km" in borrowed.reason
+
+
+def test_a_gauge_beyond_the_b_radius_is_grade_c() -> None:
+    assert grading.assign(_EXCELLENT, epoch_years=19.0, gauge_distance_km=40.0).grade == "C"
 
 
 def test_observations_alone_are_enough_for_a() -> None:

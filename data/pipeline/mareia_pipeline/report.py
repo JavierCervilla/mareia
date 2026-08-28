@@ -10,6 +10,10 @@ from mareia_pipeline.reconcile import Selection
 from mareia_pipeline.validate import Metrics
 
 
+#: Rango de marea por debajo del cual el residuo meteorológico domina sobre la marea astronómica.
+MICRO_TIDAL_RANGE_M = 0.50
+
+
 @dataclass(frozen=True)
 class PortOutcome:
     """Lo que salió para un puerto: qué estación se eligió, qué se midió y qué grade se concedió."""
@@ -29,6 +33,7 @@ def _thresholds_table() -> str:
         ("RMSE normalizado por el rango", "—", grading.MAX_NRMSE),
         ("RMSE cruzado entre fuentes", "m", grading.MAX_CROSS_RMSE_M),
         ("Coste del truncado al motor", "m RMS", grading.MAX_TRUNCATION_RMS_M),
+        ("Distancia al mareógrafo elegido", "km", grading.MAX_GAUGE_DISTANCE_KM),
     ]
     lines = ["| Umbral | Unidad | A ≤ | B ≤ |", "|---|---|---|---|"]
     for label, unit, table in rows:
@@ -66,9 +71,11 @@ def render(
         "",
         "## Umbrales de grade",
         "",
-        "Fijados **antes** de medir y comparados sobre los valores en crudo: un puerto que se quede "
-        "a un pelo del umbral **baja** de grade. Un puerto necesita cumplir *todos* los umbrales de "
-        "un nivel para alcanzarlo.",
+        "Fijados **antes** de medir, y un puerto necesita cumplir *todos* los de un nivel para "
+        "alcanzarlo. La comparación se hace sobre las métricas **tal como se publican aquí**, que "
+        "van redondeadas a 4-5 decimales: no hay un valor secreto distinto del de la tabla. Dentro "
+        "de esa última cifra el redondeo puede favorecer a un puerto por menos de una diezmilésima; "
+        "por encima de eso no hay margen de gracia y quien rebasa el umbral **baja** de grade.",
         "",
         _thresholds_table(),
         "",
@@ -102,6 +109,25 @@ def render(
             f"| **{outcome.grade.grade}** |"
         )
 
+    micro_tidal = [o for o in outcomes if o.metrics.predicted_range_m < MICRO_TIDAL_RANGE_M]
+    if micro_tidal:
+        named = ", ".join(f"**{o.selection.port.name}**" for o in micro_tidal)
+        lines += [
+            "",
+            "### Aviso: puertos micromareales",
+            "",
+            f"{named} tienen un rango de marea por debajo de {MICRO_TIDAL_RANGE_M:.2f} m. Ahí la "
+            "marea astronómica existe y se calcula igual de bien —las constantes son las mismas y "
+            "el motor no se equivoca más—, pero **el residuo meteorológico la domina**: un cambio "
+            "de presión o un par de días de viento mueven el nivel más que la propia marea, y eso "
+            "no lo predice ninguna suma armónica. Por eso su RMSE normalizado se dispara y su grade "
+            "baja, aunque el error absoluto en metros sea de los mejores del conjunto.",
+            "",
+            "Consecuencia de producto: en estos puertos la tabla de mareas es un dato menor y el "
+            "valor para el usuario está en el solunar y en la meteorología marina. La página debe "
+            "decirlo, no esconderlo detrás de una tabla de pleamares de precisión aparente.",
+        ]
+
     lines += ["", "### Por qué cada puerto tiene ese grade", ""]
     for outcome in outcomes:
         lines.append(
@@ -131,10 +157,17 @@ def render(
                 f"mejor corroboración `{metrics.cross_source}` ({metrics.cross_rmse_m:.3f} m), "
                 f"peor `{metrics.cross_source_worst}` ({metrics.cross_rmse_worst_m:.3f} m)"
             )
-        lines.append(
-            f"  ({metrics.samples} muestras, {metrics.matched_extremes}/{metrics.predicted_extremes} "
-            f"extremos emparejados); {corroboration}."
-        )
+        if metrics.samples and not metrics.extremes_usable:
+            extremes = (
+                f"**hora de extremo no medible**: {metrics.observed_extremes} extremos observados "
+                f"frente a {metrics.predicted_extremes} de marea, así que el registro no tiene "
+                "pleamares identificables y emparejarlos no mediría nada"
+            )
+        else:
+            extremes = (
+                f"{metrics.matched_extremes}/{metrics.predicted_extremes} extremos emparejados"
+            )
+        lines.append(f"  ({metrics.samples} muestras, {extremes}); {corroboration}.")
         if rejected:
             listed = ", ".join(
                 f"`{other.station_id}` ({distance:.2f} km, {other.license_type}, "

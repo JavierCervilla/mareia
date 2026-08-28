@@ -146,7 +146,7 @@
         "phase_deg": 212.87
       }
     ],
-    "derived_at": "2026-08-28T01:51:56Z",
+    "derived_at": "2026-08-28T02:15:20Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -156,7 +156,7 @@
         "role": "constantes armónicas"
       },
       {
-        "name": "neaps/tide-database",
+        "name": "openwatersio/tide-database",
         "url": "https://github.com/openwatersio/tide-database",
         "license": "MIT (código) · licencia de origen por estación (datos)",
         "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
@@ -337,23 +337,25 @@
     }
   ],
   "quality": {
-    "rmse_m": 0.0415,
-    "hw_time_err_p95_min": 13.14,
+    "rmse_m": 0.0416,
+    "hw_time_err_p95_min": 17.89,
     "grade": "A",
     "validated_against": "IOC tene",
     "grade_reason": "cumple todos los umbrales de grade A",
     "metrics": {
       "window_start": "2026-07-29T00:00:00Z",
       "window_days": 30.0,
-      "samples": 43156,
+      "samples": 43155,
       "predicted_range_m": 2.4411,
-      "rmse_m": 0.0415,
-      "nrmse": 0.01701,
-      "r2": 0.99388,
-      "hw_time_err_p95_min": 13.14,
-      "hw_height_err_p95_m": 0.0871,
-      "matched_extremes": 116,
+      "rmse_m": 0.0416,
+      "nrmse": 0.01703,
+      "r2": 0.99386,
+      "hw_time_err_p95_min": 17.89,
+      "hw_height_err_p95_m": 0.0832,
+      "matched_extremes": 115,
       "predicted_extremes": 116,
+      "observed_extremes": 117,
+      "extremes_usable": true,
       "cross_rmse_m": 0.0084,
       "cross_source": "tenerifetg-ten-esp-cmems",
       "cross_rmse_worst_m": 0.3487,

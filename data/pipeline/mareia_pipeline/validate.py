@@ -36,10 +36,25 @@ STEP_MINUTES = 1.0
 #: Semiventana para emparejar un extremo predicho con el observado correspondiente.
 MATCH_WINDOW_MINUTES = 180.0
 
-#: Semiancho de la media móvil que suaviza la observación antes de buscarle extremos. El registro
-#: crudo de 1 minuto tiene ruido de oleaje y de sensor que inventa extremos espurios; 15 minutos a
-#: cada lado no mueven la hora de una pleamar real (la señal es semidiurna) y sí matan ese ruido.
-SMOOTHING_HALF_WIDTH_SAMPLES = 15
+#: Semiancho de la media móvil que suaviza la observación antes de buscarle extremos, **en minutos**.
+#: El registro crudo trae ruido de oleaje y de sensor que inventa extremos espurios; un cuarto de
+#: hora a cada lado no mueve la hora de una pleamar real (la señal es semidiurna) y sí mata ese
+#: ruido. Va en minutos y no en muestras porque los mareógrafos del IOC no comparten cadencia —los
+#: hay de 1 minuto y los hay de 6 segundos— y un semiancho fijo en muestras suavizaría a estos
+#: últimos diez veces menos, llenándolos de extremos inventados.
+SMOOTHING_HALF_WIDTH_MINUTES = 15.0
+
+#: Prominencia mínima para aceptar un extremo, como fracción del rango de marea predicho. Se aplica
+#: **igual a la serie predicha y a la observada** para que las dos se midan con la misma vara.
+PROMINENCE_FRACTION_OF_RANGE = 0.05
+
+#: Cuántos extremos observados de más se toleran, en proporción a los predichos en la misma ventana,
+#: antes de declarar que el registro no tiene pleamares identificables. En un puerto micromareal el
+#: residuo meteorológico crea extremos **reales** que no son la marea, y multiplican por diez los que
+#: debería haber; emparejar contra ellos daría un error de hora ridículamente bueno y falso, porque
+#: siempre habría un extremo observado al lado de cualquier predicción. Cuando pasa, no se publica
+#: un número malo: no se publica ninguno.
+MAX_OBSERVED_EXTREMES_RATIO = 2.0
 
 
 @dataclass(frozen=True)
@@ -57,6 +72,10 @@ class Metrics:
     hw_height_err_p95_m: float | None
     matched_extremes: int
     predicted_extremes: int
+    observed_extremes: int
+    #: ``False`` cuando la observación tiene tantos extremos que no son la marea (residuo
+    #: meteorológico en puerto micromareal) que emparejarlos no mediría nada.
+    extremes_usable: bool
     #: Mejor acuerdo con un análisis independiente del mismo puerto: **corroboración**. Que una
     #: reanálisis antiguo y peor discrepe no invalida las constantes elegidas; que ninguno las
     #: corrobore, sí es una señal.
@@ -137,7 +156,8 @@ def evaluate(
     hours = time_grid(window_start, window_days, STEP_MINUTES)
     centre = window_start + dt.timedelta(days=window_days / 2)
     predicted = predict(harmonics, hours, centre)
-    predicted_extremes = find_extremes(hours, predicted, window_start, STEP_MINUTES)
+    prominence = PROMINENCE_FRACTION_OF_RANGE * float(predicted.max() - predicted.min())
+    predicted_extremes = find_extremes(hours, predicted, window_start, STEP_MINUTES, prominence)
 
     truncation_difference = predict(published, hours, centre) - predicted
     truncation_rms = float(np.sqrt(np.mean(truncation_difference**2)))
@@ -156,6 +176,8 @@ def evaluate(
     time_p95 = height_p95 = None
     matched = 0
     samples = 0
+    observed_count = 0
+    extremes_usable = False
     if observations is not None and len(observations.times) > 2:
         observed_hours = np.array([hours_since_epoch(t) for t in observations.times])
         observed_levels = np.array(observations.levels, dtype=float)
@@ -165,20 +187,28 @@ def evaluate(
         residual = residual - residual.mean()
         rmse = float(np.sqrt(np.mean(residual**2)))
         r2 = float(1.0 - residual.var() / observed_levels.var())
-        smoothed = _smooth(observed_levels - observed_levels.mean(), SMOOTHING_HALF_WIDTH_SAMPLES)
-        observed_step = (
-            (observations.times[1] - observations.times[0]).total_seconds() / 60.0
-        ) or 1.0
+        # Cadencia real del mareógrafo: la mediana de los intervalos, no el primero, porque las
+        # series del IOC tienen huecos y un primer salto anómalo desajustaría todo lo que sigue.
+        observed_step = float(np.median(np.diff(observed_hours)) * 60.0) or 1.0
+        half_width = max(1, int(round(SMOOTHING_HALF_WIDTH_MINUTES / observed_step)))
+        smoothed = _smooth(observed_levels - observed_levels.mean(), half_width)
         observed_extremes = find_extremes(
-            observed_hours, smoothed, observations.times[0], observed_step
+            observed_hours, smoothed, observations.times[0], observed_step, prominence
         )
         centred_predicted = [
-            Extreme(e.when, e.height_m - predicted.mean(), e.kind) for e in predicted_extremes
+            Extreme(e.when, e.height_m - predicted.mean(), e.kind)
+            for e in predicted_extremes
+            if observations.times[0] <= e.when <= observations.times[-1]
         ]
-        time_errors, height_errors = match_extremes(centred_predicted, observed_extremes)
-        matched = len(time_errors)
-        time_p95 = _percentile95(time_errors)
-        height_p95 = _percentile95(height_errors)
+        observed_count = len(observed_extremes)
+        extremes_usable = observed_count <= MAX_OBSERVED_EXTREMES_RATIO * max(
+            len(centred_predicted), 1
+        )
+        if extremes_usable:
+            time_errors, height_errors = match_extremes(centred_predicted, observed_extremes)
+            matched = len(time_errors)
+            time_p95 = _percentile95(time_errors)
+            height_p95 = _percentile95(height_errors)
 
     predicted_range = float(predicted.max() - predicted.min())
     return Metrics(
@@ -193,6 +223,8 @@ def evaluate(
         hw_height_err_p95_m=None if height_p95 is None else round(height_p95, 4),
         matched_extremes=matched,
         predicted_extremes=len(predicted_extremes),
+        observed_extremes=observed_count,
+        extremes_usable=extremes_usable,
         cross_rmse_m=None if best is None else round(best[0], 4),
         cross_source=None if best is None else best[1],
         cross_rmse_worst_m=None if worst is None else round(worst[0], 4),

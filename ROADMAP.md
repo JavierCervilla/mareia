@@ -14,7 +14,7 @@
 
 ## Hito 2 — Datos y API
 
-- [x] T-05 · Pipeline Python → JSON canónico (`station/v1`) para 10 puertos piloto con QC vs IOC
+- [x] T-05 · Pipeline Python → JSON canónico (`station/v1`) para 12 puertos piloto con QC vs IOC
       (Portus no publica constantes por vía automatizable; ver el informe QC)
 - [ ] T-07 · Endpoints core (`tides`, `astro`, `solunar`, `almanac`, `ports`) con contract tests
 - [ ] T-08 · Módulo weather backend (Open-Meteo + AEMET + caché Deno KV)

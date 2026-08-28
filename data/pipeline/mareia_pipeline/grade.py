@@ -38,6 +38,13 @@ MAX_CROSS_RMSE_M = {"A": 0.05, "B": 0.15}
 #: Años mínimos del registro mareográfico del que se analizaron las constantes.
 MIN_EPOCH_YEARS = {"A": 10.0, "B": 1.0}
 
+#: Distancia máxima del mareógrafo elegido a la dársena, en kilómetros. Dentro de unos pocos
+#: kilómetros de costa abierta la onda llega prácticamente igual y las constantes son
+#: intercambiables; a decenas de kilómetros ya no se describe el mismo sitio, por bueno que sea el
+#: análisis. Sin este umbral, un puerto sin mareógrafo propio heredaría el grade del mareógrafo
+#: ajeno que le presta las constantes, que es precisamente lo que no debe pasar.
+MAX_GAUGE_DISTANCE_KM = {"A": 5.0, "B": 30.0}
+
 #: Coste tolerado del truncado al catálogo del motor de producción, en metros RMS. El bar lo fija
 #: el contrato con T-02 ("una amplitud agregada descartada relevante son 1-2 cm"), no este módulo:
 #: por encima de 1 cm el dataset ya no es indistinguible del que publica la fuente.
@@ -52,8 +59,13 @@ class GradeResult:
     reason: str
 
 
-def _fails(level: str, metrics: Metrics, epoch_years: float) -> str | None:
+def _fails(level: str, metrics: Metrics, epoch_years: float, gauge_distance_km: float) -> str | None:
     """Primer umbral de ``level`` que el puerto incumple, o ``None`` si los cumple todos."""
+    if gauge_distance_km > MAX_GAUGE_DISTANCE_KM[level]:
+        return (
+            f"el mareógrafo más cercano está a {gauge_distance_km:.1f} km > "
+            f"{MAX_GAUGE_DISTANCE_KM[level]:.0f} km"
+        )
     if metrics.truncation_rms_m > MAX_TRUNCATION_RMS_M[level]:
         return (
             f"coste de truncar al catálogo del motor {metrics.truncation_rms_m * 100:.1f} cm RMS > "
@@ -69,9 +81,16 @@ def _fails(level: str, metrics: Metrics, epoch_years: float) -> str | None:
         )
     if metrics.nrmse is None or metrics.hw_time_err_p95_min is None:
         if level == "A":
+            if metrics.nrmse is not None and not metrics.extremes_usable:
+                return (
+                    "la observación no tiene pleamares identificables (el residuo meteorológico "
+                    "genera más extremos que la marea), así que no se puede medir su hora"
+                )
             return "sin observaciones con las que medir la predicción"
-        if metrics.cross_rmse_m is None:
+        if metrics.cross_rmse_m is None and metrics.nrmse is None:
             return "sin observaciones ni segunda fuente: no hay con qué validar"
+        if metrics.nrmse is not None and metrics.nrmse > MAX_NRMSE[level]:
+            return f"RMSE normalizado {metrics.nrmse:.3f} > {MAX_NRMSE[level]:.2f}"
         return None
     if metrics.nrmse > MAX_NRMSE[level]:
         return f"RMSE normalizado {metrics.nrmse:.3f} > {MAX_NRMSE[level]:.2f}"
@@ -83,12 +102,12 @@ def _fails(level: str, metrics: Metrics, epoch_years: float) -> str | None:
     return None
 
 
-def assign(metrics: Metrics, epoch_years: float) -> GradeResult:
+def assign(metrics: Metrics, epoch_years: float, gauge_distance_km: float = 0.0) -> GradeResult:
     """Concede el grade más alto cuyos umbrales se cumplen todos."""
-    blocked_from_a = _fails("A", metrics, epoch_years)
+    blocked_from_a = _fails("A", metrics, epoch_years, gauge_distance_km)
     if blocked_from_a is None:
         return GradeResult("A", "cumple todos los umbrales de grade A")
-    blocked_from_b = _fails("B", metrics, epoch_years)
+    blocked_from_b = _fails("B", metrics, epoch_years, gauge_distance_km)
     if blocked_from_b is None:
         return GradeResult("B", f"no alcanza A: {blocked_from_a}")
     return GradeResult("C", f"no alcanza B: {blocked_from_b}")

@@ -106,7 +106,7 @@
         "phase_deg": 185.707
       }
     ],
-    "derived_at": "2026-08-28T01:51:56Z",
+    "derived_at": "2026-08-28T02:15:20Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -117,7 +117,7 @@
         "notes": "Upstream GESLA data provider restricts commercial use. See https://gesla787883612.wordpress.com/license/"
       },
       {
-        "name": "neaps/tide-database",
+        "name": "openwatersio/tide-database",
         "url": "https://github.com/openwatersio/tide-database",
         "license": "MIT (código) · licencia de origen por estación (datos)",
         "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
@@ -299,22 +299,24 @@
   ],
   "quality": {
     "rmse_m": 0.0393,
-    "hw_time_err_p95_min": 17.86,
-    "grade": "A",
+    "hw_time_err_p95_min": 22.91,
+    "grade": "B",
     "validated_against": "IOC huel",
-    "grade_reason": "cumple todos los umbrales de grade A",
+    "grade_reason": "no alcanza A: error de hora de extremo p95 23 min > 20 min",
     "metrics": {
       "window_start": "2026-07-29T00:00:00Z",
       "window_days": 30.0,
       "samples": 42985,
       "predicted_range_m": 3.4232,
       "rmse_m": 0.0393,
-      "nrmse": 0.01147,
-      "r2": 0.99748,
-      "hw_time_err_p95_min": 17.86,
-      "hw_height_err_p95_m": 0.0639,
-      "matched_extremes": 116,
+      "nrmse": 0.01149,
+      "r2": 0.99747,
+      "hw_time_err_p95_min": 22.91,
+      "hw_height_err_p95_m": 0.064,
+      "matched_extremes": 115,
       "predicted_extremes": 116,
+      "observed_extremes": 117,
+      "extremes_usable": true,
       "cross_rmse_m": null,
       "cross_source": null,
       "cross_rmse_worst_m": null,

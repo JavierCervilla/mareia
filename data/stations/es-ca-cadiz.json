@@ -106,7 +106,7 @@
         "phase_deg": 45.5514
       }
     ],
-    "derived_at": "2026-08-28T01:51:56Z",
+    "derived_at": "2026-08-28T02:15:20Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -116,7 +116,7 @@
         "role": "constantes armónicas"
       },
       {
-        "name": "neaps/tide-database",
+        "name": "openwatersio/tide-database",
         "url": "https://github.com/openwatersio/tide-database",
         "license": "MIT (código) · licencia de origen por estación (datos)",
         "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
@@ -314,6 +314,8 @@
       "hw_height_err_p95_m": null,
       "matched_extremes": 0,
       "predicted_extremes": 116,
+      "observed_extremes": 0,
+      "extremes_usable": false,
       "cross_rmse_m": null,
       "cross_source": null,
       "cross_rmse_worst_m": null,

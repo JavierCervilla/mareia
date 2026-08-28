@@ -97,20 +97,51 @@ def find_extremes(
     heights: np.ndarray,
     start: dt.datetime,
     step_minutes: float,
+    min_prominence_m: float,
 ) -> list[Extreme]:
-    """Localiza pleamares y bajamares refinando cada extremo con una parábola por tres puntos.
+    """Localiza pleamares y bajamares alternadas, refinando cada una con una parábola.
 
-    La interpolación parabólica sitúa el vértice con precisión muy superior al paso de la rejilla,
-    que es lo que permite comparar horas de extremo entre series de distinta resolución.
+    Un extremo sólo se acepta cuando la señal se ha alejado de él al menos ``min_prominence_m`` en
+    sentido contrario. Comparar tres puntos vecinos, que es lo obvio, no vale: sobre un registro
+    real cualquier rizo de una décima de milímetro cuenta como pleamar, y en un puerto micromareal
+    muestreado cada seis segundos eso son **decenas de miles** de extremos inventados donde debería
+    haber cuarenta. Con extremos así de espesos, cualquier predicción encuentra siempre uno
+    observado al lado y el error de hora sale ridículamente bueno: la métrica se mide a sí misma.
+
+    La histéresis además fuerza la alternancia pleamar/bajamar, que es como se comporta una marea.
+    La interpolación parabólica sitúa después el vértice con precisión muy superior al paso de la
+    rejilla, que es lo que permite comparar horas entre series de distinta cadencia.
     """
     if heights.size < 3:
         return []
-    interior = heights[1:-1]
-    is_high = (interior > heights[:-2]) & (interior >= heights[2:])
-    is_low = (interior < heights[:-2]) & (interior <= heights[2:])
+
+    accepted: list[tuple[int, str]] = []
+    highest_index = lowest_index = 0
+    allowed = "any"
+    for index in range(heights.size):
+        if heights[index] > heights[highest_index]:
+            highest_index = index
+        if heights[index] < heights[lowest_index]:
+            lowest_index = index
+        if (
+            allowed in ("any", "high")
+            and heights[highest_index] - heights[index] >= min_prominence_m
+        ):
+            accepted.append((highest_index, "high"))
+            allowed = "low"
+            lowest_index = index
+        elif (
+            allowed in ("any", "low")
+            and heights[index] - heights[lowest_index] >= min_prominence_m
+        ):
+            accepted.append((lowest_index, "low"))
+            allowed = "high"
+            highest_index = index
+
     extremes: list[Extreme] = []
-    for index in np.flatnonzero(is_high | is_low):
-        centre_index = index + 1
+    for centre_index, kind in accepted:
+        if centre_index == 0 or centre_index >= heights.size - 1:
+            continue
         before, here, after = heights[centre_index - 1 : centre_index + 2]
         denominator = before - 2.0 * here + after
         shift = 0.0 if denominator == 0.0 else 0.5 * (before - after) / denominator
@@ -121,7 +152,7 @@ def find_extremes(
             Extreme(
                 when=start + dt.timedelta(hours=offset_hours),
                 height_m=float(height),
-                kind="high" if is_high[index] else "low",
+                kind=kind,
             )
         )
     return extremes

@@ -1,7 +1,7 @@
 # data/pipeline — constantes armónicas → dataset canónico
 
 Pipeline Python offline que convierte constantes armónicas públicas en el dataset canónico de
-Mareia: `data/stations/<id>.json` (schema `station/v1`) para los diez puertos piloto, más
+Mareia: `data/stations/<id>.json` (schema `station/v1`) para los doce puertos piloto, más
 `data/brest/constituents.json`, que es la referencia del coeficiente de mareas (T-04).
 
 Genera además el informe QC de `reports/`, que es donde vive la parte incómoda: qué mareógrafo se
@@ -102,13 +102,32 @@ grade**: en Brest son 2,2 cm RMS, suficiente para que no llegue a A.
 
 ### El grade
 
-Los umbrales están en `grade.py`, fijados antes de medir y comparados sobre valores en crudo: un
-puerto que se quede a un pelo del umbral **baja**. La jerarquía de la evidencia es que las
-observaciones mandan, y el contraste entre fuentes es un **veto** (sirve para desmentir), no un
-requisito: un puerto con un solo mareógrafo no es peor por tenerlo.
+Los umbrales están en `grade.py` y se fijaron antes de medir. La comparación se hace sobre las
+métricas **tal como se publican** en el informe, redondeadas a 4-5 decimales: no hay un valor
+secreto distinto del de la tabla, y salvo dentro de esa última cifra no hay margen de gracia — quien
+rebasa el umbral **baja**.
+
+La jerarquía de la evidencia: las observaciones mandan; el contraste entre fuentes es un **veto**
+(sirve para desmentir, no para acreditar), así que un puerto con un solo mareógrafo no es peor por
+tenerlo; y la **distancia al mareógrafo elegido** es un umbral por sí sola, para que un puerto que
+toma prestadas las constantes de 25 km más allá no herede el grade de quien se las presta.
+
+Dos cosas que el grade **no** puede medir y por eso las declara en vez de inventarlas:
+
+- En puertos **micromareales** (rango < 0,5 m) el residuo meteorológico domina la señal. La marea se
+  calcula igual de bien, pero el RMSE normalizado se dispara y el grade baja. Ahí el valor para el
+  usuario está en el solunar y la meteorología, no en la tabla de pleamares.
+- Cuando la observación tiene muchos más extremos que la marea —justo el caso anterior—, el error de
+  hora de pleamar **no se publica**. Emparejar contra un registro así siempre encuentra un extremo
+  al lado y devuelve un número excelente y falso.
 
 ## Añadir un puerto
 
 Añádelo a `PILOT_PORTS` en `ports.py` con su `id` canónico, sus coordenadas de dársena y su zona
 horaria, y ejecuta `make build`. Si no hay mareógrafo a menos de 25 km, el pipeline falla en voz
 alta en vez de emitir un JSON inventado.
+
+Si el puerto de verdad no tiene mareógrafo cerca, se le puede ampliar el radio con
+`search_radius_km=` —así entran Cabo de Palos y La Manga, que dependen del de Cartagena a 25 y
+27 km—, pero eso no es gratis: la distancia es un umbral del grade y ninguno de los dos puede pasar
+de B por ese solo hecho.

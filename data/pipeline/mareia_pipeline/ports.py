@@ -9,6 +9,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 
+#: Radio por defecto en el que se busca mareógrafo para un puerto: lo que recorre una onda de marea
+#: en costa abierta sin cambiar apreciablemente de forma.
+DEFAULT_SEARCH_RADIUS_KM = 25.0
+
+
 @dataclass(frozen=True)
 class Port:
     """Un puerto del catálogo de Mareia, con las coordenadas de su dársena."""
@@ -20,9 +25,12 @@ class Port:
     timezone: str
     #: Fichero de salida relativo a la raíz del repositorio.
     output: str
+    #: Radio de búsqueda de mareógrafo. Ampliarlo es reconocer que el puerto no tiene uno propio, y
+    #: se paga en el grade: la distancia al mareógrafo elegido es uno de los umbrales.
+    search_radius_km: float = DEFAULT_SEARCH_RADIUS_KM
 
 
-#: Los diez puertos españoles del piloto (T-05) más Brest, que es la referencia del coeficiente de
+#: Los doce puertos españoles del piloto (T-05) más Brest, que es la referencia del coeficiente de
 #: mareas francés que usa T-04. Coordenadas de la dársena/mareógrafo, no del centro urbano.
 PILOT_PORTS: tuple[Port, ...] = (
     Port("es-po-vigo", "Vigo", 42.2406, -8.7207, "Europe/Madrid", "data/stations/es-po-vigo.json"),
@@ -57,6 +65,29 @@ PILOT_PORTS: tuple[Port, ...] = (
         2.6300,
         "Europe/Madrid",
         "data/stations/es-pm-palma.json",
+    ),
+    # Costa de Murcia: el mareógrafo más cercano es el de Cartagena, a 25-27 km, así que ambos
+    # ensanchan el radio de búsqueda a 30 km. Es zona micromareal (rango < 0,3 m): la marea
+    # astronómica existe pero el residuo meteorológico la domina, y el grade lo refleja.
+    Port(
+        "es-mu-cabo-de-palos",
+        "Cabo de Palos",
+        37.6338,
+        -0.6960,
+        "Europe/Madrid",
+        "data/stations/es-mu-cabo-de-palos.json",
+        search_radius_km=30.0,
+    ),
+    # Lado mediterráneo de La Manga, NO la laguna interior del Mar Menor: el Mar Menor está casi
+    # cerrado y no tiene marea astronómica utilizable.
+    Port(
+        "es-mu-la-manga",
+        "La Manga del Mar Menor",
+        37.7333,
+        -0.7167,
+        "Europe/Madrid",
+        "data/stations/es-mu-la-manga.json",
+        search_radius_km=30.0,
     ),
     Port(
         "es-gc-las-palmas",
