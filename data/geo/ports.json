@@ -1,0 +1,197 @@
+{
+  "schema": "ports/v1",
+  "ports": [
+    {
+      "slug": "cadiz",
+      "name": "Cádiz",
+      "province": {
+        "slug": "cadiz",
+        "name": "Cádiz"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.534,
+      "lon": -6.28,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ca-cadiz.json"
+    },
+    {
+      "slug": "huelva",
+      "name": "Huelva",
+      "province": {
+        "slug": "huelva",
+        "name": "Huelva"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 37.13,
+      "lon": -6.834,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-h-huelva.json"
+    },
+    {
+      "slug": "malaga",
+      "name": "Málaga",
+      "province": {
+        "slug": "malaga",
+        "name": "Málaga"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.713,
+      "lon": -4.416,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ma-malaga.json"
+    },
+    {
+      "slug": "las-palmas-de-gran-canaria",
+      "name": "Las Palmas de Gran Canaria",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.142,
+      "lon": -15.413,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-las-palmas.json"
+    },
+    {
+      "slug": "santa-cruz-de-tenerife",
+      "name": "Santa Cruz de Tenerife",
+      "province": {
+        "slug": "santa-cruz-de-tenerife",
+        "name": "Santa Cruz de Tenerife"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.478,
+      "lon": -16.234,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-tf-santa-cruz-de-tenerife.json"
+    },
+    {
+      "slug": "santander",
+      "name": "Santander",
+      "province": {
+        "slug": "cantabria",
+        "name": "Cantabria"
+      },
+      "region": {
+        "slug": "cantabria",
+        "name": "Cantabria"
+      },
+      "lat": 43.4623,
+      "lon": -3.79,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-s-santander.json"
+    },
+    {
+      "slug": "a-coruna",
+      "name": "A Coruña",
+      "province": {
+        "slug": "a-coruna",
+        "name": "A Coruña"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 43.3623,
+      "lon": -8.3927,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-c-a-coruna.json"
+    },
+    {
+      "slug": "vigo",
+      "name": "Vigo",
+      "province": {
+        "slug": "pontevedra",
+        "name": "Pontevedra"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.2406,
+      "lon": -8.7207,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-po-vigo.json"
+    },
+    {
+      "slug": "palma-de-mallorca",
+      "name": "Palma de Mallorca",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 39.556,
+      "lon": 2.63,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-palma.json"
+    },
+    {
+      "slug": "bilbao",
+      "name": "Bilbao",
+      "province": {
+        "slug": "bizkaia",
+        "name": "Bizkaia"
+      },
+      "region": {
+        "slug": "pais-vasco",
+        "name": "País Vasco"
+      },
+      "lat": 43.355,
+      "lon": -3.045,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-bi-bilbao.json"
+    },
+    {
+      "slug": "cabo-de-palos",
+      "name": "Cabo de Palos",
+      "province": {
+        "slug": "murcia",
+        "name": "Murcia"
+      },
+      "region": {
+        "slug": "region-de-murcia",
+        "name": "Región de Murcia"
+      },
+      "lat": 37.6338,
+      "lon": -0.696,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-mu-cabo-de-palos.json"
+    },
+    {
+      "slug": "la-manga-del-mar-menor",
+      "name": "La Manga del Mar Menor",
+      "province": {
+        "slug": "murcia",
+        "name": "Murcia"
+      },
+      "region": {
+        "slug": "region-de-murcia",
+        "name": "Región de Murcia"
+      },
+      "lat": 37.7333,
+      "lon": -0.7167,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-mu-la-manga.json"
+    }
+  ]
+}

@@ -16,7 +16,8 @@
 
 - [x] T-05 · Pipeline Python → JSON canónico (`station/v1`) para 12 puertos piloto con QC vs IOC
       (Portus no publica constantes por vía automatizable; ver el informe QC)
-- [ ] T-07 · Endpoints core (`tides`, `astro`, `solunar`, `almanac`, `ports`) con contract tests
+- [x] T-07 · Endpoints core (`tides`, `astro`, `solunar`, `almanac`, `ports`) con contract tests
+      (el de coeficiente se añade cuando merjee T-04)
 - [ ] T-08 · Módulo weather backend (Open-Meteo + AEMET + caché Deno KV)
 
 ## Hito 3 — Portal (10 puertos piloto)
