@@ -1,0 +1,87 @@
+---
+/**
+ * Layout base del almanaque: `<head>`, tipografía y estilos de base compartidos por todas las
+ * páginas del portal.
+ *
+ * No carga NADA de JavaScript de cliente: las páginas del portal son HTML estático (requisito de
+ * T-09). El tema claro/noche lo resuelve el CSS de `@mareia/ui/tokens.css` con la preferencia del
+ * sistema, sin script de detección.
+ */
+import "@mareia/ui/tokens.css";
+
+interface Props {
+  titulo: string;
+  descripcion: string;
+}
+
+const { titulo, descripcion } = Astro.props;
+
+// Instrument Serif (display) + Newsreader (texto), las dos familias del design system.
+const FUENTES =
+  "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1" +
+  "&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400" +
+  "&display=swap";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titulo}</title>
+    <meta name="description" content={descripcion} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href={FUENTES} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: light dark;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--m-bg);
+    color: var(--m-ink);
+    font-family: var(--m-font-text);
+    font-size: var(--m-text-body);
+    line-height: 1.45;
+  }
+
+  h1,
+  h2,
+  p,
+  figure {
+    margin: 0;
+  }
+
+  ul,
+  ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    color: var(--m-navy);
+  }
+
+  a:hover {
+    opacity: 0.8;
+  }
+
+  svg {
+    display: block;
+  }
+</style>
