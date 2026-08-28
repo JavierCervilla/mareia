@@ -10,3 +10,8 @@ Aquí se versionan los **informes del pase adversario** (skill `qa-adversarial`)
 
 Las reproducciones de los hallazgos van en `tests/e2e/journeys/adversarial/`, con `test.fail()`
 mientras el bug está abierto.
+
+## Registro de escapes
+
+- **T-01** (`[skip-adv]`): el único "UI" del PR de scaffold es la página hello — no hay promesa de
+  feature que atacar. El primer pase adversario real llega con las páginas de puerto (T-09+).
