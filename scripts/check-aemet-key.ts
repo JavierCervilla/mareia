@@ -11,7 +11,8 @@
  *
  * Salida: 0 = nada que hacer · 1 = hace falta que un humano renueve la clave.
  *
- * Imprime tres líneas maquinales que el workflow lee (y filtra antes de enseñarle nada al humano):
+ * Imprime tres líneas maquinales; el workflow **lee dos** (`estado` y `aviso_id`) y filtra las tres
+ * del texto que acaba viendo un humano. `escalon` se queda para quien lea el log del job:
  *
  * - `estado=` el `KeyStatus`, que es lo que decide si un aviso abierto puede darse por cerrado.
  * - `escalon=` el escalón alcanzado, solo informativo.
