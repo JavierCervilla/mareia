@@ -10,6 +10,10 @@
  * Uso: `deno run --allow-env scripts/check-aemet-key.ts`
  *
  * Salida: 0 = nada que hacer · 1 = hace falta que un humano renueve la clave.
+ *
+ * Además imprime `escalon=<n>` para el workflow: **21, 7, 1 o 0** (caducada). Ese número es lo que
+ * permite avisar una vez por escalón en vez de todos los días desde D-21, que es como se consigue
+ * que un aviso deje de leerse.
  */
 
 import { inspectAemetKey, needsHumanAction } from "../packages/modules/weather/src/aemet-key.ts";
@@ -23,6 +27,9 @@ const RENEWAL_STEPS = [
 ].join("\n");
 
 console.log(`[aemet-key] ${state.status}: ${state.message}`);
+// Marca legible por el workflow. `unreadable` no tiene escalón de días: es su propio caso urgente.
+const escalon = state.thresholdDays ?? (state.status === "unreadable" ? "ilegible" : "");
+console.log(`escalon=${escalon}`);
 
 if (state.status === "missing") {
   // Sin clave la instancia ya degrada de forma explícita y el healthcheck lo dice. No es un fallo

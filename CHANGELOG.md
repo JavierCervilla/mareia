@@ -29,10 +29,21 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
 - Solo se deja cachear fuera (`Cache-Control`) lo que salió entero; una respuesta degradada va con
   `no-store` para no congelar la avería en un CDN.
 - **Cero red en CI**: el `fetch` entra inyectado en los dos adaptadores y los fixtures son capturas
-  reales de las APIs. 47 tests del módulo y 5 de integración en la API, incluido el de oro (segunda
+  reales de las APIs. 57 tests del módulo y 5 de integración en la API, incluido el de oro (segunda
   llamada a la misma celda → 0 peticiones), el de degradación sin clave y los dos que defienden la
   ventana de retención: un dato de un minuto cruzando la hora en punto se sirve con el upstream
   caído, y pasado el TTL se sirve marcado `stale` mientras dure la retención.
+- **La caducidad de la clave de AEMET se lee y se avisa antes de que muerda**. AEMET emite claves
+  con tres meses de vida, y las emitidas sin fecha dejan de valer el **15-10-2026**; el alta lleva
+  reCAPTCHA y dos correos, así que renovarla es un trámite humano y lo único que puede hacer el
+  software es que la fecha no llegue por sorpresa. `inspectAemetKey` lee el `exp` del propio JWT
+  **sin gastar una petición**; una clave sin `exp` no se da por eterna, hereda la fecha anunciada, y
+  una que no se deja leer se declara ilegible en vez de inventarle un plazo. El estado viaja en
+  `/bulletin` y entra en el healthcheck —una clave que caduca en tres días es un problema hoy, no el
+  día del 401— y un workflow diario abre el aviso en el repositorio con los pasos exactos de
+  renovación. Los avisos van **por escalones (21, 7 y 1 días, y caducada)**, uno por escalón y no uno
+  al día: un aviso que aparece cada mañana durante tres semanas se deja de leer, que es justo lo
+  contrario de lo que se busca.
 - Arrastrados de T-07: el **año del almanaque se valida sobre el crudo** (`/^\d{4}$/`, así que
   `/almanac/0x7ea` ya no sirve el de 2026), **`listPorts` ordena de verdad** por región, provincia y
   puerto con `Intl.Collator("es")` —el orden pasa a ser contrato verificado— y el **`--allow-read`

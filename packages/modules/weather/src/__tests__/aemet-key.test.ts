@@ -46,6 +46,26 @@ test("con `exp` lejano la clave es válida y dice cuántos días le quedan", () 
   assert.equal(needsHumanAction(state), false);
 });
 
+test("el escalón alcanzado es el más urgente cruzado, no el primero de la lista", () => {
+  // Este es el test que faltaba cuando el escalonado era una lista decorativa: a 5 días el aviso
+  // que toca es el de 7, no el de 21, y a 21 justos es el de 21.
+  assert.equal(inspectAemetKey(fakeJwt({ exp: (NOW + 21 * day) / 1000 }), NOW).thresholdDays, 21);
+  assert.equal(inspectAemetKey(fakeJwt({ exp: (NOW + 8 * day) / 1000 }), NOW).thresholdDays, 21);
+  assert.equal(inspectAemetKey(fakeJwt({ exp: (NOW + 7 * day) / 1000 }), NOW).thresholdDays, 7);
+  assert.equal(inspectAemetKey(fakeJwt({ exp: (NOW + 5 * day) / 1000 }), NOW).thresholdDays, 7);
+  assert.equal(inspectAemetKey(fakeJwt({ exp: (NOW + 1 * day) / 1000 }), NOW).thresholdDays, 1);
+  // Caducada es su propio escalón: el único que sí insiste cada día.
+  assert.equal(inspectAemetKey(fakeJwt({ exp: (NOW - 2 * day) / 1000 }), NOW).thresholdDays, 0);
+  // Sin cruzar ningún escalón no hay escalón que contar.
+  assert.equal(inspectAemetKey(fakeJwt({ exp: (NOW + 30 * day) / 1000 }), NOW).thresholdDays, undefined);
+});
+
+test("un `exp` que no es un número deja la clave ilegible, no la trata como antigua", () => {
+  const state = inspectAemetKey(fakeJwt({ exp: "1790000000" }), NOW);
+  assert.equal(state.status, "unreadable", "una fecha inventada con aire de buena es peor que no saber");
+  assert.equal(state.expiresAtMs, undefined);
+});
+
 test("a 21 días o menos empieza a pedir acción humana", () => {
   const veintiuno = inspectAemetKey(fakeJwt({ exp: (NOW + 21 * day) / 1000 }), NOW);
   assert.equal(veintiuno.status, "expiring");

@@ -38,6 +38,9 @@ jobs:
             echo "FIN"
           } >> "$GITHUB_OUTPUT"
           echo "hay_que_actuar=$codigo" >> "$GITHUB_OUTPUT"
+          # El escalón (21/7/1/0/ilegible) es lo que decide si esto es noticia nueva o el mismo
+          # aviso de ayer: sin él, un cron diario convierte tres avisos en veintidós.
+          echo "escalon=$(printf '%s' "$salida" | sed -n 's/^escalon=//p' | tail -1)" >> "$GITHUB_OUTPUT"
           exit 0
 
       - name: Abrir o actualizar el aviso
@@ -45,9 +48,13 @@ jobs:
         uses: actions/github-script@v7
         env:
           RESUMEN: ${{ steps.check.outputs.resumen }}
+          ESCALON: ${{ steps.check.outputs.escalon }}
         with:
           script: |
             const titulo = 'Renovar la API key de AEMET';
+            // Una marca por escalón. Mientras el escalón no cambie no hay nada nuevo que contar,
+            // así que el issue se queda como está y nadie recibe otra notificación.
+            const marca = `<!-- aemet-escalon:${process.env.ESCALON} -->`;
             const cuerpo = [
               'La credencial de AEMET necesita una renovación manual (su alta tiene reCAPTCHA).',
               '',
@@ -64,13 +71,23 @@ jobs:
               state: 'open', labels: 'aemet-key',
             });
             if (abiertos.data.length > 0) {
+              const numero = abiertos.data[0].number;
+              const previos = await github.rest.issues.listComments({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: numero,
+              });
+              const yaContado = previos.data.some((c) => (c.body ?? '').includes(marca))
+                || (abiertos.data[0].body ?? '').includes(marca);
+              if (yaContado) {
+                core.info(`El escalón ${process.env.ESCALON} ya está avisado en el issue #${numero}: no se repite.`);
+                return;
+              }
               await github.rest.issues.createComment({
                 owner: context.repo.owner, repo: context.repo.repo,
-                issue_number: abiertos.data[0].number, body: cuerpo,
+                issue_number: numero, body: `${cuerpo}\n\n${marca}`,
               });
             } else {
               await github.rest.issues.create({
                 owner: context.repo.owner, repo: context.repo.repo,
-                title: titulo, body: cuerpo, labels: ['aemet-key'],
+                title: titulo, body: `${cuerpo}\n\n${marca}`, labels: ['aemet-key'],
               });
             }

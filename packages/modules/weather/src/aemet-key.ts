@@ -21,8 +21,18 @@
 /** Fecha en que AEMET invalida las claves sin `exp`. Anunciada el 20/07/2026. */
 export const LEGACY_KEYS_DIE_AT_MS = Date.UTC(2026, 9, 15, 0, 0, 0);
 
-/** Días restantes a los que se avisa. El primero da tres semanas para un trámite de diez minutos. */
+/**
+ * Escalones de aviso, del más holgado al más urgente. El primero da tres semanas para un trámite
+ * de diez minutos; el último es el último aviso antes de que el boletín empiece a fallar.
+ *
+ * El escalón **se publica** en el estado (`thresholdDays`) porque quien avisa necesita saber si
+ * este cruce es nuevo: avisar a diario desde D-21 no es avisar tres veces, es ruido, y el canal
+ * que existe para que algo se note es el primero que se deja de mirar cuando repite.
+ */
 export const WARNING_THRESHOLDS_DAYS = [21, 7, 1] as const;
+
+/** Escalón alcanzado. `0` = ya caducada, que es su propio escalón (y el único que insiste). */
+export type WarningThreshold = (typeof WARNING_THRESHOLDS_DAYS)[number] | 0;
 
 const MS_PER_DAY = 86_400_000;
 
@@ -44,6 +54,11 @@ export interface AemetKeyState {
   /** Días completos que faltan. Negativo si ya caducó. */
   readonly daysLeft?: number;
   readonly source?: ExpirySource;
+  /**
+   * Escalón de aviso alcanzado, si alguno. Es el número con el que quien avisa decide si este
+   * cruce ya lo contó: mientras el escalón no cambie, no hay noticia nueva que dar.
+   */
+  readonly thresholdDays?: WarningThreshold;
   /** Frase lista para un humano: la que va al aviso, al log y a la respuesta. */
   readonly message: string;
 }
@@ -92,6 +107,16 @@ export function inspectAemetKey(rawKey: string | undefined, nowMs: number): Aeme
   }
 
   const exp = payload["exp"];
+  if (exp !== undefined && (typeof exp !== "number" || !Number.isFinite(exp))) {
+    // Un `exp` presente pero con otra forma (una cadena, un null, un NaN) no es una clave sin
+    // caducidad: es una clave que no entendemos. Inventarle la fecha de las antiguas sería
+    // publicar un dato falso con aire de dato bueno.
+    return {
+      status: "unreadable",
+      message:
+        "La AEMET_API_KEY declara un `exp` que no es un número: no se puede saber cuándo caduca. Compruébala en opendata.aemet.es",
+    };
+  }
   const hasExp = typeof exp === "number" && Number.isFinite(exp);
   const expiresAtMs = hasExp ? exp * 1000 : LEGACY_KEYS_DIE_AT_MS;
   const source: ExpirySource = hasExp ? "jwt-exp" : "aemet-legacy-deadline";
@@ -108,11 +133,16 @@ export function inspectAemetKey(rawKey: string | undefined, nowMs: number): Aeme
       expiresAt,
       daysLeft,
       source,
+      thresholdDays: 0,
       message: `La AEMET_API_KEY caducó hace ${Math.abs(daysLeft)} día(s) (${expiresAt}, ${origin}). Renuévala en opendata.aemet.es/centrodedescargas/altaUsuario y actualiza el secreto.`,
     };
   }
 
-  const threshold = WARNING_THRESHOLDS_DAYS.find((limit) => daysLeft <= limit);
+  // El escalón alcanzado es el MÁS URGENTE de los que ya se han cruzado: a 5 días el aviso es el
+  // de 7, no el de 21. Ordenados de mayor a menor, el último que cumple es ese.
+  const threshold = [...WARNING_THRESHOLDS_DAYS]
+    .filter((limit) => daysLeft <= limit)
+    .sort((a, b) => a - b)[0];
   if (threshold !== undefined) {
     return {
       status: "expiring",
@@ -120,6 +150,7 @@ export function inspectAemetKey(rawKey: string | undefined, nowMs: number): Aeme
       expiresAt,
       daysLeft,
       source,
+      thresholdDays: threshold,
       message: `La AEMET_API_KEY caduca en ${daysLeft} día(s) (${expiresAt}, ${origin}). Pide una nueva en opendata.aemet.es/centrodedescargas/altaUsuario y actualiza el secreto antes de esa fecha.`,
     };
   }
