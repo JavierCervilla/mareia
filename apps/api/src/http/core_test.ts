@@ -79,6 +79,22 @@ Deno.test("GET /v1/ports sirve el catálogo cacheable, sin filtrar dónde vive e
 
     const ports = body["ports"] as readonly Record<string, unknown>[];
     assertEquals(ports.length, 12);
+    // El orden es parte del contrato: región, provincia y puerto, alfabético en español. Quien
+    // pinte el catálogo (la web, un cliente) no tiene que volver a ordenarlo ni ponerse de acuerdo.
+    assertEquals(ports.map((port) => port["slug"]), [
+      "cadiz",
+      "huelva",
+      "malaga",
+      "las-palmas-de-gran-canaria",
+      "santa-cruz-de-tenerife",
+      "santander",
+      "a-coruna",
+      "vigo",
+      "palma-de-mallorca",
+      "bilbao",
+      "cabo-de-palos",
+      "la-manga-del-mar-menor",
+    ]);
     const vigo = ports.find((port) => port["slug"] === "vigo");
     assertEquals(vigo?.["name"], "Vigo");
     assertEquals(vigo?.["timezone"], "Europe/Madrid");
