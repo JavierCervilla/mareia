@@ -1,87 +1,158 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { alturaEnMinutos, minutosDesdeHora, trazarCurvaMarea } from "./grafico-marea.ts";
+import { alturaEn, trazarCurvaMarea } from "./grafico-marea.ts";
+import type { EntradaCurva, ExtremoCurva, MuestraCurva } from "./grafico-marea.ts";
 
-/** Los cuatro extremos del día de muestra (Santander, 28-08-2026). */
-const EXTREMOS = [
-  { hora: "04:12", alturaM: 4.82 },
-  { hora: "10:26", alturaM: 0.93 },
-  { hora: "16:38", alturaM: 4.95 },
-  { hora: "22:51", alturaM: 0.81 },
-] as const;
+const MINUTO = 60_000;
+const DIA = 1_440 * MINUTO;
+/** Medianoche del 28-08-2026 en hora peninsular (UTC+2), el día que usan los ejemplos. */
+const INICIO = Date.parse("2026-08-27T22:00:00Z");
 
-test("minutosDesdeHora convierte HH:MM a minutos del día", () => {
-  assert.equal(minutosDesdeHora("00:00"), 0);
-  assert.equal(minutosDesdeHora("04:12"), 252);
-  assert.equal(minutosDesdeHora("23:59"), 1439);
-});
+/**
+ * Un día de marea semidiurna sintético: dos ciclos de coseno muestreados cada 10 min, con sus
+ * extremos exactos. Es la forma del dato que entrega `getTides` —muestras + extremos por separado—
+ * y no una curva ya resuelta: es justo la costura que este módulo tiene que coser.
+ */
+function diaSintetico(pasoMinutos = 10): EntradaCurva {
+  const periodo = 12.42 * 60 * MINUTO;
+  const media = 2.5;
+  const amplitud = 2;
+  const desfase = 3 * 60 * MINUTO;
+  const altura = (t: number): number =>
+    media + amplitud * Math.cos((2 * Math.PI * (t - INICIO - desfase)) / periodo);
 
-test("minutosDesdeHora rechaza lo que no es una hora de 24 h", () => {
-  for (const malo of ["24:00", "4:12", "10:60", "", "ahora"]) {
-    assert.throws(() => minutosDesdeHora(malo), /Hora inválida/);
+  const muestras: MuestraCurva[] = [];
+  for (let t = INICIO; t <= INICIO + DIA; t += pasoMinutos * MINUTO) {
+    muestras.push({ timeUtcMs: t, height_m: altura(t) });
   }
-});
+
+  const extremos: ExtremoCurva[] = [];
+  for (let vuelta = 0; ; vuelta += 1) {
+    const t = INICIO + desfase + (vuelta * periodo) / 2;
+    if (t > INICIO + DIA) break;
+    extremos.push({
+      timeUtcMs: t,
+      height_m: altura(t),
+      kind: vuelta % 2 === 0 ? "high" : "low",
+    });
+  }
+
+  return { muestras, extremos, inicioUtcMs: INICIO, finUtcMs: INICIO + DIA };
+}
+
+interface Punto {
+  readonly x: number;
+  readonly y: number;
+}
+
+function puntosDelPath(path: string): readonly Punto[] {
+  return path
+    .replace(/^M/, "")
+    .split("L")
+    .map((par) => {
+      const [x, y] = par.split(",");
+      return { x: Number(x), y: Number(y) };
+    });
+}
 
 test("la curva cubre el día completo de borde a borde", () => {
-  const curva = trazarCurvaMarea(EXTREMOS);
+  const curva = trazarCurvaMarea(diaSintetico());
+  const puntos = puntosDelPath(curva.path);
 
-  assert.match(curva.path, /^M0,/);
-  const ultimoPunto = curva.path.split("L").at(-1) ?? "";
-  assert.equal(Number(ultimoPunto.split(",")[0]), curva.ancho);
+  assert.equal(puntos[0]?.x, 0);
+  assert.equal(puntos.at(-1)?.x, curva.ancho);
+});
+
+test("el trazo tiene un punto por muestra y uno por extremo, sin duplicar instantes", () => {
+  const dia = diaSintetico();
+  const curva = trazarCurvaMarea(dia);
+  const instantes = new Set([
+    ...dia.muestras.map((muestra) => muestra.timeUtcMs),
+    ...dia.extremos.map((extremo) => extremo.timeUtcMs),
+  ]);
+
+  assert.equal(puntosDelPath(curva.path).length, instantes.size);
 });
 
 test("cada extremo cae dentro del lienzo y respeta el orden vertical del dato", () => {
-  const curva = trazarCurvaMarea(EXTREMOS);
+  const dia = diaSintetico();
+  const curva = trazarCurvaMarea(dia);
 
-  assert.equal(curva.extremos.length, EXTREMOS.length);
-  for (const punto of curva.extremos) {
-    assert.ok(punto.x >= 0 && punto.x <= curva.ancho, `x fuera del lienzo: ${punto.x}`);
-    assert.ok(punto.y >= 0 && punto.y <= curva.alto, `y fuera del lienzo: ${punto.y}`);
+  assert.equal(curva.extremos.length, dia.extremos.length);
+  for (const marca of curva.extremos) {
+    assert.ok(marca.x >= 0 && marca.x <= curva.ancho, `x fuera del lienzo: ${marca.x}`);
+    assert.ok(marca.y >= 0 && marca.y <= curva.alto, `y fuera del lienzo: ${marca.y}`);
+    // El eje SVG crece hacia abajo: la pleamar queda por encima del nivel medio y la bajamar debajo.
+    const encima = marca.y < curva.nivelMedioY;
+    assert.equal(encima, marca.kind === "high", `el extremo ${marca.kind} está del lado erróneo`);
   }
-
-  const [pleamar1, bajamar1, pleamar2, bajamar2] = curva.extremos;
-  assert.ok(pleamar1 && bajamar1 && pleamar2 && bajamar2);
-  // 4,95 m es la pleamar más alta → la y más pequeña (el eje SVG crece hacia abajo).
-  assert.ok(pleamar2.y < pleamar1.y);
-  // 0,81 m es la bajamar más baja → la y más grande.
-  assert.ok(bajamar2.y > bajamar1.y);
-  // Toda pleamar queda por encima del nivel medio y toda bajamar por debajo.
-  assert.ok(pleamar1.y < curva.nivelMedioY && bajamar1.y > curva.nivelMedioY);
 });
 
-test("la interpolación pasa exactamente por cada extremo", () => {
-  for (const extremo of EXTREMOS) {
-    assert.equal(
-      Math.round(alturaEnMinutos(EXTREMOS, minutosDesdeHora(extremo.hora)) * 100) / 100,
-      extremo.alturaM,
+test("el círculo de cada extremo cae sobre el trazo que dibuja el SVG", () => {
+  const curva = trazarCurvaMarea(diaSintetico());
+  const trazo = puntosDelPath(curva.path);
+
+  for (const marca of curva.extremos) {
+    const encima = trazo.some(
+      (punto) => Math.abs(punto.x - marca.x) < 0.05 && Math.abs(punto.y - marca.y) < 0.05,
     );
+    assert.ok(encima, `el extremo en x=${marca.x} no es un punto del trazo`);
   }
 });
 
-test("entre dos extremos la marea es monótona (baja de pleamar a bajamar)", () => {
-  const inicio = minutosDesdeHora("04:12");
-  const fin = minutosDesdeHora("10:26");
+test("las marcas del eje van del principio al final del día", () => {
+  const curva = trazarCurvaMarea(diaSintetico());
 
-  let anterior = Number.POSITIVE_INFINITY;
-  for (let minuto = inicio; minuto <= fin; minuto += 10) {
-    const altura = alturaEnMinutos(EXTREMOS, minuto);
-    assert.ok(altura < anterior, `no decrece en el minuto ${minuto}`);
-    anterior = altura;
-  }
+  assert.equal(curva.horas[0]?.timeUtcMs, INICIO);
+  assert.equal(curva.horas.at(-1)?.timeUtcMs, INICIO + DIA);
+  assert.equal(curva.horas[0]?.x, 0);
+  assert.equal(curva.horas.at(-1)?.x, curva.ancho);
 });
 
-test("la altura nunca se sale del rango de los extremos del día", () => {
-  const alturas = EXTREMOS.map((extremo) => extremo.alturaM);
+test("alturaEn interpola entre muestras y se aplana fuera del rango", () => {
+  const dia = diaSintetico();
+  const primera = dia.muestras[0];
+  const segunda = dia.muestras[1];
+  assert.ok(primera && segunda);
+
+  const medio = (primera.timeUtcMs + segunda.timeUtcMs) / 2;
+  assert.ok(
+    Math.abs(alturaEn(dia.muestras, medio) - (primera.height_m + segunda.height_m) / 2) < 1e-9,
+  );
+  assert.equal(alturaEn(dia.muestras, INICIO - DIA), primera.height_m);
+  assert.equal(alturaEn(dia.muestras, INICIO + 2 * DIA), dia.muestras.at(-1)?.height_m);
+});
+
+test("la altura nunca se sale del rango de la curva del día", () => {
+  const dia = diaSintetico();
+  const alturas = dia.muestras.map((muestra) => muestra.height_m);
   const minimo = Math.min(...alturas);
   const maximo = Math.max(...alturas);
 
-  for (let minuto = 0; minuto <= 1440; minuto += 5) {
-    const altura = alturaEnMinutos(EXTREMOS, minuto);
-    assert.ok(altura >= minimo - 1e-9 && altura <= maximo + 1e-9, `fuera de rango en ${minuto}`);
+  for (let t = INICIO; t <= INICIO + DIA; t += 5 * MINUTO) {
+    const altura = alturaEn(dia.muestras, t);
+    assert.ok(altura >= minimo - 1e-9 && altura <= maximo + 1e-9, `fuera de rango en ${t}`);
   }
 });
 
-test("con menos de dos extremos no hay curva que trazar", () => {
-  assert.throws(() => trazarCurvaMarea([{ hora: "04:12", alturaM: 4.82 }]), /al menos dos extremos/);
+test("una curva sin puntos suficientes o desordenada rompe el build en vez de mentir", () => {
+  const dia = diaSintetico();
+  const primera = dia.muestras[0];
+  const segunda = dia.muestras[1];
+  assert.ok(primera && segunda);
+
+  assert.throws(() => trazarCurvaMarea({ ...dia, muestras: [primera] }), /al menos dos muestras/);
+  assert.throws(
+    () => trazarCurvaMarea({ ...dia, muestras: [segunda, primera, ...dia.muestras.slice(2)] }),
+    /orden temporal estricto/,
+  );
+  assert.throws(
+    () => trazarCurvaMarea({ ...dia, extremos: [...dia.extremos].reverse() }),
+    /orden temporal estricto/,
+  );
+  assert.throws(
+    () => trazarCurvaMarea({ ...dia, finUtcMs: dia.inicioUtcMs }),
+    /invertida o es vacía/,
+  );
 });

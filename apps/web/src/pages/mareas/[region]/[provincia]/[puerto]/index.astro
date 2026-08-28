@@ -1,0 +1,121 @@
+---
+/**
+ * Página de puerto: `/mareas/<región>/<provincia>/<puerto>/`.
+ *
+ * El corazón del portal. Se genera **en build**, una por puerto del catálogo, llamando a los mismos
+ * casos de uso que sirve el API (`getTides`, `getAstro`, `getPort`): la web no tiene su propia
+ * versión de la marea. Cero JavaScript de cliente: todo lo que se ve aquí es HTML y CSS.
+ *
+ * El orden de los bloques es el de la jerarquía del brief (crítico → contextual → consultable):
+ * aviso si el puerto es micromareal, tabla del día, curva, sol y luna, tabla del mes y, al final,
+ * la calidad del dato y sus fuentes.
+ */
+import AvisoMicromareal from "../../../../../componentes/AvisoMicromareal.astro";
+import Coeficiente from "../../../../../componentes/Coeficiente.astro";
+import GraficoMarea from "../../../../../componentes/GraficoMarea.astro";
+import Migas from "../../../../../componentes/Migas.astro";
+import PieAtribuciones from "../../../../../componentes/PieAtribuciones.astro";
+import SeccionesDeModulos from "../../../../../componentes/SeccionesDeModulos.astro";
+import SolYLuna from "../../../../../componentes/SolYLuna.astro";
+import TablaDia from "../../../../../componentes/TablaDia.astro";
+import TablaMes from "../../../../../componentes/TablaMes.astro";
+import Transparencia from "../../../../../componentes/Transparencia.astro";
+import { cargarPuertos } from "../../../../../datos/catalogo.ts";
+import { FECHA_DE_BUILD } from "../../../../../datos/fecha-build.ts";
+import { cargarDatosDePuerto } from "../../../../../datos/pagina-puerto.ts";
+import { coordenadas, fechaLarga, mesYAno } from "../../../../../formato.ts";
+import { trazarCurvaMarea } from "../../../../../grafico-marea.ts";
+import AlmanaqueLayout from "../../../../../layouts/AlmanaqueLayout.astro";
+import { migasDePuerto } from "../../../../../migas.ts";
+import { sectionsForPort } from "../../../../../modules.config.ts";
+
+export async function getStaticPaths() {
+  const puertos = await cargarPuertos();
+  return puertos.map((puerto) => ({
+    params: {
+      region: puerto.region.slug,
+      provincia: puerto.province.slug,
+      puerto: puerto.slug,
+    },
+    props: { slug: puerto.slug },
+  }));
+}
+
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+const datos = await cargarDatosDePuerto(slug, FECHA_DE_BUILD);
+const { port, station, dia, mes, astro } = datos;
+
+const curva = trazarCurvaMarea({
+  muestras: dia.muestras.map((muestra) => ({
+    timeUtcMs: muestra.timeUtcMs,
+    height_m: muestra.height_m,
+  })),
+  extremos: dia.eventos.map((evento) => ({
+    timeUtcMs: evento.timeUtcMs,
+    height_m: evento.height_m,
+    kind: evento.kind,
+  })),
+  inicioUtcMs: dia.inicioUtcMs,
+  finUtcMs: dia.finUtcMs,
+});
+
+const titulo = `Mareas en ${port.name} · ${fechaLarga(datos.fechaIso)} · Mareia`;
+const descripcion =
+  `Pleamares y bajamares de hoy en ${port.name} (${port.province.name}): tabla del día y del mes, ` +
+  `curva de 24 horas, coeficiente de marea y horas de sol y luna. Cálculo propio con fuentes ` +
+  `abiertas, sin publicidad.`;
+---
+
+<AlmanaqueLayout titulo={titulo} descripcion={descripcion}>
+  <Migas slot="migas" migas={migasDePuerto(port.region, port.province, port.name)} />
+
+  <header class="identidad">
+    <div>
+      <h1 class="identidad__nombre">{port.name}</h1>
+      <p class="identidad__meta">
+        {port.province.name} · {port.region.name} · {coordenadas(port.lat, port.lon)} · horas en
+        hora local ({port.timezone})
+      </p>
+    </div>
+    <section id="coeficiente" aria-label="Coeficiente de marea del día">
+      <Coeficiente coeficiente={datos.coeficiente} />
+    </section>
+  </header>
+
+  {datos.micromareal && <AvisoMicromareal puerto={port.name} />}
+
+  <div class="cuerpo">
+    <section class="bloque cuerpo__mareas" id="tabla-de-mareas" aria-labelledby="titulo-hoy">
+      <h2 class="etiqueta" id="titulo-hoy">Mareas de hoy · {fechaLarga(datos.fechaIso)}</h2>
+      <TablaDia eventos={dia.eventos} timezone={port.timezone} puerto={port.name} />
+    </section>
+
+    <section class="bloque cuerpo__grafico" id="curva-de-marea" aria-labelledby="titulo-curva">
+      <h2 class="etiqueta" id="titulo-curva">Altura de marea · 24 horas</h2>
+      <GraficoMarea curva={curva} timezone={port.timezone} />
+    </section>
+
+    <div class="cuerpo__astros" id="sol-y-luna">
+      <SolYLuna astro={astro} />
+    </div>
+  </div>
+
+  <SeccionesDeModulos secciones={sectionsForPort({ slug: port.slug })} />
+
+  <section class="bloque" id="tabla-mensual" aria-labelledby="titulo-mes">
+    <h2 class="bloque__titulo" id="titulo-mes">Mareas de {mesYAno(datos.fechaIso)}</h2>
+    <TablaMes
+      dias={mes.dias}
+      timezone={port.timezone}
+      fechaIso={datos.fechaIso}
+      puerto={port.name}
+    />
+  </section>
+
+  <Transparencia station={station} />
+  <PieAtribuciones atribuciones={station.attributions} />
+</AlmanaqueLayout>

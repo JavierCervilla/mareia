@@ -1,0 +1,34 @@
+---
+/**
+ * Aviso de puerto **micromareal**: aquí la marea astronómica no es lo que manda.
+ *
+ * Es una decisión de producto del QC de T-05, no un adorno. En estos puertos —Mediterráneo y
+ * Baleares— la carrera de marea es de centímetros: la observación no tiene pleamares
+ * identificables, así que el pipeline no publica error de hora (`hw_time_err_p95_min: null`) y el
+ * grade se queda en C. Lo que de verdad mueve el nivel del agua esos días es el **residuo
+ * meteorológico** (presión, viento), que esta página **no** calcula todavía.
+ *
+ * Publicar la tabla sin decirlo sería publicar una precisión que no existe. Va arriba, antes que la
+ * tabla, porque un aviso que se lee después del dato llega tarde.
+ */
+interface Props {
+  puerto: string;
+}
+
+const { puerto } = Astro.props;
+---
+
+<aside class="aviso-micromareal">
+  <p class="aviso-micromareal__titulo">En {puerto} la marea astronómica es de centímetros</p>
+  <p>
+    La carrera de marea de este puerto es tan pequeña que el nivel del agua lo decide sobre todo
+    el <strong>residuo meteorológico</strong>: la presión atmosférica y el viento mueven aquí más
+    que la Luna. Las horas y alturas de abajo son la predicción astronómica y son correctas como
+    tal, pero un día de borrasca el nivel real puede alejarse de ellas más de lo que suben o bajan.
+  </p>
+  <p>
+    Para planificar en este puerto, mira el <a href="#coeficiente">coeficiente</a> como referencia
+    del ciclo lunar y, sobre todo, la previsión meteorológica. La validación de esta estación está
+    en la <a href="#transparencia">nota de calidad del dato</a>.
+  </p>
+</aside>

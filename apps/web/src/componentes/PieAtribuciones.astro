@@ -1,0 +1,57 @@
+---
+/**
+ * Pie de la página de puerto: quién publica cada dato y bajo qué licencia.
+ *
+ * Las atribuciones de marea vienen del dataset por estación (`station.attributions`) porque la
+ * licencia de origen **cambia de un puerto a otro** —hay estaciones CC-BY y estaciones CC-BY-NC—, y
+ * una atribución fija en la plantilla sería falsa en la mitad de las páginas. La de astronomía es
+ * de la librería de cálculo y sí es la misma en todas: se declara aquí, junto al dato que produce.
+ */
+import type { SourceAttribution } from "@mareia/usecases";
+
+interface Props {
+  atribuciones: readonly SourceAttribution[];
+}
+
+const { atribuciones } = Astro.props;
+
+/**
+ * Astronomy Engine calcula el Sol y la Luna de esta página (T-03). No está en el dataset porque no
+ * es una fuente de datos: es el método.
+ */
+const ASTRONOMIA = {
+  name: "Astronomy Engine",
+  url: "https://github.com/cosinekitty/astronomy",
+  license: "MIT",
+  role: "efemérides de Sol y Luna",
+};
+---
+
+<footer class="pie">
+  <div class="pie__fuentes">
+    <p class="etiqueta">Fuentes</p>
+    {
+      atribuciones.map((fuente) => (
+        <p>
+          Mareas · <a href={fuente.url}>{fuente.name}</a>
+          {fuente.role && <> ({fuente.role})</>} ·{" "}
+          {fuente.license_url === null ? (
+            fuente.license
+          ) : (
+            <a href={fuente.license_url}>{fuente.license}</a>
+          )}
+        </p>
+      ))
+    }
+    <p>
+      Astronomía · <a href={ASTRONOMIA.url}>{ASTRONOMIA.name}</a> ({ASTRONOMIA.role}) ·{" "}
+      {ASTRONOMIA.license}
+    </p>
+    <p>
+      Coeficiente · escala francesa sobre la predicción propia de Brest (unidad de altura 3,05 m).
+    </p>
+  </div>
+  <p>
+    <strong>No apto para navegación.</strong> Mareia es un proyecto abierto y no comercial (AGPL-3.0).
+  </p>
+</footer>

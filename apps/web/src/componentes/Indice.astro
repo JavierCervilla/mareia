@@ -1,0 +1,37 @@
+---
+/**
+ * Índice de entradas: la columna de enlaces con filete fino que resuelve todas las páginas de paso
+ * del portal (regiones, provincias, puertos).
+ *
+ * Cada entrada lleva su meta a la derecha —«3 puertos», «Pontevedra»— porque un índice de anuario
+ * dice cuánto hay detrás de cada entrada antes de que tengas que entrar.
+ */
+
+interface Entrada {
+  readonly nombre: string;
+  readonly ruta: string;
+  readonly meta?: string | undefined;
+}
+
+interface Props {
+  entradas: readonly Entrada[];
+  /** Nombre accesible de la lista (qué se está indexando). */
+  titulo: string;
+}
+
+const { entradas, titulo } = Astro.props;
+---
+
+{/* `role="list"`: WebKit retira la semántica de lista cuando la viñeta es `none`. */}
+<ul class="indice" role="list" aria-label={titulo}>
+  {
+    entradas.map((entrada) => (
+      <li class="indice__entrada">
+        <a class="indice__enlace" href={entrada.ruta}>
+          <span class="indice__nombre">{entrada.nombre}</span>
+          {entrada.meta && <span class="indice__meta">{entrada.meta}</span>}
+        </a>
+      </li>
+    ))
+  }
+</ul>

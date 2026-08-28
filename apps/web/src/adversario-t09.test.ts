@@ -1,26 +1,27 @@
 /**
- * PASE ADVERSARIO · T-09 tranche 1 (rol `qa-adversario`, skill `qa-adversarial`).
+ * PASE ADVERSARIO · T-09 (rol `qa-adversario`, skill `qa-adversarial`).
  *
  * Función objetivo INVERTIDA: estos tests NO confirman que la página funciona — el `verificador` y
- * el rol `qa` ya lo hicieron. Aquí se ataca la PROMESA de la tranche:
+ * el rol `qa` ya lo hicieron. Aquí se ataca la PROMESA de la trayectoria:
  *
- *   1. `/puerto/santander` renderiza los datos del fixture (horas, alturas, coeficiente, sol/luna,
- *      solunar) en HTML estático.
+ *   1. La página de un puerto renderiza en HTML estático los datos que calculan los casos de uso.
  *   2. Cero JavaScript de cliente en el HTML construido.
- *   3. La curva SVG pasa por los extremos del día, cubre 0–24 h, es monótona entre extremos y está
- *      acotada — para CUALQUIER fixture válido, no solo el de Santander.
+ *   3. La curva SVG pasa por los extremos del día, cubre el día entero y está acotada — para
+ *      CUALQUIER puerto del catálogo, no solo para el que se miró al desarrollar.
  *   4. El tema noche funciona vía `prefers-color-scheme` y `data-theme` sin romper contraste.
- *   5. La página es accesible en lo que promete (tabla real, aria-labels del rating).
+ *   5. La página es accesible en lo que promete (tabla real, landmarks, listas con rol).
  *
- * Informe del pase (hallazgos A-1…A-7, clases atacadas y no reproducidos):
+ * Informe del pase de la tranche 1 (hallazgos A-1…A-7, clases atacadas y no reproducidos):
  * `docs/qa/informe-adversario-t09-tranche1.md`.
  *
- * TRINQUETE — los siete hallazgos (A-1…A-7) nacieron envueltos en el helper `hallazgoAbierto()`, el
- * equivalente en `node:test` del `test.fail()` de Playwright: el cuerpo afirmaba el comportamiento
- * CORRECTO y CI quedaba verde mientras el bug estaba abierto, para ponerse en rojo el día que
- * alguien lo arreglase. Ese día llegó: los siete están corregidos, así que el envoltorio se ha
- * retirado y **los mismos cuerpos, sin tocar una línea de sus asserts**, se quedan aquí como gate
- * permanente. Un recorrido adversario arreglado no se borra: se queda vigilando.
+ * TRINQUETE — los siete hallazgos (A-1…A-7) están corregidos y sus recorridos **se quedan como gate
+ * permanente**: un recorrido adversario arreglado no se borra, se queda vigilando. Lo que sí ha
+ * cambiado con esta trayectoria es el sujeto: la página de fixture (`/puerto/santander`) ya no
+ * existe, y en su lugar hay 12 páginas reales bajo `/mareas/<región>/<provincia>/<puerto>/`
+ * calculadas con los casos de uso. Cada gate se ha **re-apuntado**, no relajado; donde el
+ * mecanismo del fallo desapareció con el fixture (la interpolación coseno de A-1, el orden de los
+ * extremos de A-2) el gate ataca el mecanismo NUEVO que ocupa su sitio, y donde no cambió nada
+ * (A-4…A-7) el cuerpo del test es el mismo.
  *
  * Los tests contra `dist/` exigen haber construido antes (`pnpm --filter web build`, que es
  * justo lo que hace CI antes de `pnpm test`); sin build se saltan en vez de dar un rojo falso.
@@ -29,21 +30,33 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { cargarPuertos } from "./datos/catalogo.ts";
+import { cargarDatosDePuerto } from "./datos/pagina-puerto.ts";
 import { escaparMarcado } from "./escapar-marcado.ts";
-import { SANTANDER } from "./fixtures/santander.ts";
-import { alturaEnMinutos, minutosDesdeHora, trazarCurvaMarea } from "./grafico-marea.ts";
-import type { ExtremoAltura } from "./grafico-marea.ts";
+import { alturaEn, trazarCurvaMarea } from "./grafico-marea.ts";
+import type { EntradaCurva } from "./grafico-marea.ts";
 
 const DIST = join(dirname(fileURLToPath(import.meta.url)), "..", "dist");
-const PAGINA_PUERTO = join(DIST, "puerto", "santander", "index.html");
+const PAGINA_PUERTO = join(DIST, "mareas", "cantabria", "cantabria", "santander", "index.html");
 const HAY_BUILD = existsSync(PAGINA_PUERTO);
 const SIN_BUILD = "no hay apps/web/dist: corre antes `pnpm --filter web build`";
 
+const MINUTO = 60_000;
+
 function leerPagina(): string {
   return readFileSync(PAGINA_PUERTO, "utf8");
+}
+
+/** Todas las páginas construidas del sitio. */
+function paginasConstruidas(directorio: string = DIST): readonly string[] {
+  return readdirSync(directorio, { withFileTypes: true }).flatMap((entrada) => {
+    const ruta = join(directorio, entrada.name);
+    if (entrada.isDirectory()) return paginasConstruidas(ruta);
+    return entrada.name.endsWith(".html") ? [ruta] : [];
+  });
 }
 
 function leerCssConstruido(): string {
@@ -53,83 +66,35 @@ function leerCssConstruido(): string {
   return readFileSync(join(carpeta, hoja), "utf8");
 }
 
-// --- Días de marea válidos con los que se ataca el generador de curva -----------------------------
-// Formas de día REALES de un puerto semidiurno/mixto, no basura sintética.
-
-/** El día del fixture: cuatro extremos. Es el único que ha visto nadie hasta ahora. */
-const CUATRO_EXTREMOS: readonly ExtremoAltura[] = [
-  { hora: "04:12", alturaM: 4.82 },
-  { hora: "10:26", alturaM: 0.93 },
-  { hora: "16:38", alturaM: 4.95 },
-  { hora: "22:51", alturaM: 0.81 },
-];
-
-/** Día de TRES extremos con la primera pleamar recién pasada la medianoche (~1 día de cada 7). */
-const TRES_EXTREMOS_PRONTO: readonly ExtremoAltura[] = [
-  { hora: "00:20", alturaM: 4.6 },
-  { hora: "06:35", alturaM: 0.8 },
-  { hora: "12:50", alturaM: 4.7 },
-];
-
-/** El mismo caso por el otro borde: el primer extremo del día cae ya por la mañana. */
-const TRES_EXTREMOS_TARDE: readonly ExtremoAltura[] = [
-  { hora: "11:00", alturaM: 4.4 },
-  { hora: "17:10", alturaM: 0.9 },
-  { hora: "23:20", alturaM: 4.5 },
-];
-
-/** Marea diurna (un solo ciclo al día): dos extremos. */
-const DOS_EXTREMOS: readonly ExtremoAltura[] = [
-  { hora: "09:00", alturaM: 1.2 },
-  { hora: "21:00", alturaM: 0.1 },
-];
-
-/** Bajamares por debajo del cero del puerto: alturas negativas, perfectamente normales. */
-const ALTURAS_NEGATIVAS: readonly ExtremoAltura[] = [
-  { hora: "04:12", alturaM: 3.2 },
-  { hora: "10:26", alturaM: -0.4 },
-  { hora: "16:38", alturaM: 3.4 },
-  { hora: "22:51", alturaM: -0.6 },
-];
-
-/** Extremos en los bordes exactos del día. */
-const BORDES_DEL_DIA: readonly ExtremoAltura[] = [
-  { hora: "00:00", alturaM: 4.5 },
-  { hora: "06:10", alturaM: 0.6 },
-  { hora: "12:20", alturaM: 4.6 },
-  { hora: "18:30", alturaM: 0.5 },
-];
-
-const DIAS_VALIDOS: readonly (readonly [string, readonly ExtremoAltura[]])[] = [
-  ["cuatro extremos (fixture)", CUATRO_EXTREMOS],
-  ["tres extremos, el primero de madrugada", TRES_EXTREMOS_PRONTO],
-  ["tres extremos, el primero por la mañana", TRES_EXTREMOS_TARDE],
-  ["dos extremos (marea diurna)", DOS_EXTREMOS],
-  ["alturas bajo el cero del puerto", ALTURAS_NEGATIVAS],
-  ["extremos en los bordes del día", BORDES_DEL_DIA],
-];
-
-/** Duración, en minutos, del tramo más largo del día en el que la marea no se mueve nada. */
-function tramoPlanoMasLargo(extremos: readonly ExtremoAltura[]): { minutos: number; desde: number } {
-  let mejor = 0;
-  let mejorDesde = 0;
-  let inicio = 0;
-  for (let minuto = 1; minuto <= 1440; minuto += 1) {
-    const anterior = alturaEnMinutos(extremos, minuto - 1);
-    if (Math.abs(alturaEnMinutos(extremos, minuto) - anterior) > 1e-9) {
-      inicio = minuto;
-      continue;
-    }
-    if (minuto - inicio > mejor) {
-      mejor = minuto - inicio;
-      mejorDesde = inicio;
-    }
-  }
-  return { minutos: mejor, desde: mejorDesde };
+/**
+ * El día que publica el `dist/`, leído del propio HTML.
+ *
+ * No se recalcula con `FECHA_DE_BUILD`: sin `BUILD_DATE` el build usa el día UTC del reloj, y un
+ * build a las 23:59 con los tests a las 00:01 compararía dos días distintos. La página dice qué día
+ * publica; se le cree a ella.
+ */
+function fechaDelBuild(): string {
+  const fecha = /<time datetime="(\d{4}-\d{2}-\d{2})"/.exec(leerPagina())?.[1];
+  assert.ok(fecha, "la página construida no declara la fecha de sus datos");
+  return fecha;
 }
 
-function comoHora(minutos: number): string {
-  return `${String(Math.floor(minutos / 60)).padStart(2, "0")}:${String(minutos % 60).padStart(2, "0")}`;
+/** La curva y los extremos de un puerto, tal y como los pinta la página. */
+async function curvaDe(slug: string, fechaIso: string): Promise<EntradaCurva> {
+  const { dia } = await cargarDatosDePuerto(slug, fechaIso);
+  return {
+    muestras: dia.muestras.map((muestra) => ({
+      timeUtcMs: muestra.timeUtcMs,
+      height_m: muestra.height_m,
+    })),
+    extremos: dia.eventos.map((evento) => ({
+      timeUtcMs: evento.timeUtcMs,
+      height_m: evento.height_m,
+      kind: evento.kind,
+    })),
+    inicioUtcMs: dia.inicioUtcMs,
+    finUtcMs: dia.finUtcMs,
+  };
 }
 
 interface Punto {
@@ -162,6 +127,25 @@ function distanciaAlTrazo(punto: Punto, trazo: readonly Punto[]): number {
   return mejor;
 }
 
+/** Duración, en minutos, del tramo más largo del día en el que la marea no se mueve nada. */
+function tramoPlanoMasLargo(dia: EntradaCurva): { minutos: number; desdeUtcMs: number } {
+  let mejor = 0;
+  let mejorDesde = dia.inicioUtcMs;
+  let inicio = dia.inicioUtcMs;
+  for (let instante = dia.inicioUtcMs + MINUTO; instante <= dia.finUtcMs; instante += MINUTO) {
+    const anterior = alturaEn(dia.muestras, instante - MINUTO);
+    if (Math.abs(alturaEn(dia.muestras, instante) - anterior) > 1e-9) {
+      inicio = instante;
+      continue;
+    }
+    if (instante - inicio > mejor * MINUTO) {
+      mejor = (instante - inicio) / MINUTO;
+      mejorDesde = inicio;
+    }
+  }
+  return { minutos: mejor, desdeUtcMs: mejorDesde };
+}
+
 // =================================================================================================
 // HALLAZGOS REPRODUCIDOS Y CORREGIDOS · sin trinquete, en verde, como gate permanente
 // =================================================================================================
@@ -169,30 +153,26 @@ function distanciaAlTrazo(punto: Punto, trazo: readonly Punto[]): number {
 /**
  * A-1 · clase A5 (límites 0/1/N) — En un día de TRES extremos la curva se congelaba hasta ~5 h.
  *
- * `nodosDelDia` añadía UN extremo virtual a cada lado reflejando la separación del vecino y
- * `alturaEnMinutos` recorta (`Math.min`/`Math.max`) fuera de ese tramo. Con cuatro extremos el
- * reflejo siempre rebasa los bordes del día y no se notaba; con TRES —que es ~1 día de cada 7 en un
- * puerto semidiurno, no un caso raro— el tramo reflejado se quedaba corto y el gráfico dibujaba una
- * recta horizontal de hasta 295 min (20 % del ancho): una pleamar que dura cinco horas. El dato no
- * era «menos preciso», era falso, y nada en la página avisaba.
+ * La causa original era la reconstrucción: con solo cuatro horas y cuatro alturas, la curva se
+ * interpolaba con una media coseno y unos extremos virtuales reflejados que en los días de tres
+ * extremos —~1 de cada 7— se quedaban cortos y dibujaban una pleamar de cinco horas. El dato no era
+ * «menos preciso», era falso, y nada en la página avisaba.
  *
- * CORREGIDO: `nodosDelDia` repite el reflejo hasta rebasar las 00:00 y las 24:00, así que el
- * periodo del día continúa por los dos bordes y el recorte ya solo entra fuera del día.
+ * CORREGIDO Y SUPERADO: la página ya no reconstruye nada. Dibuja la curva **predicha** por el motor
+ * armónico (`sampleCurve`, 145 puntos del día) con los extremos insertados. El gate se re-apunta al
+ * mecanismo nuevo y se amplía a los DOCE puertos, incluidos los micromareales, donde la marea es de
+ * centímetros y aplanarse sería aún más fácil de no notar.
  *
- * Comportamiento correcto: la marea nunca se para. Ninguna ventana de una hora del día puede tener
- * altura constante.
+ * Comportamiento correcto: la marea nunca se para. Ninguna ventana de una hora puede ser constante.
  */
-test("A-1 · la curva no se congela en un día de tres extremos", () => {
-  const dias: readonly (readonly [string, readonly ExtremoAltura[]])[] = [
-    ["tres extremos, el primero de madrugada", TRES_EXTREMOS_PRONTO],
-    ["tres extremos, el primero por la mañana", TRES_EXTREMOS_TARDE],
-  ];
-  for (const [nombre, dia] of dias) {
-    const plano = tramoPlanoMasLargo(dia);
+test("A-1 · la curva no se congela en ningún puerto del catálogo", async () => {
+  const fechaIso = HAY_BUILD ? fechaDelBuild() : new Date().toISOString().slice(0, 10);
+  for (const puerto of await cargarPuertos()) {
+    const plano = tramoPlanoMasLargo(await curvaDe(puerto.slug, fechaIso));
     assert.ok(
       plano.minutos < 60,
-      `${nombre}: la marea se queda quieta ${plano.minutos} min desde las ${comoHora(plano.desde)} ` +
-        `(${((plano.minutos / 1440) * 100).toFixed(1)} % del día)`,
+      `${puerto.name}: la marea se queda quieta ${plano.minutos} min desde ` +
+        `${new Date(plano.desdeUtcMs).toISOString()}`,
     );
   }
 });
@@ -200,29 +180,24 @@ test("A-1 · la curva no se congela en un día de tres extremos", () => {
 /**
  * A-2 · clase A6 (input hostil) — Extremos desordenados: la curva miente en silencio.
  *
- * `trazarCurvaMarea` validaba el NÚMERO de extremos (lanza con menos de dos) pero no su ORDEN. Con
- * los mismos cuatro extremos del fixture permutados devolvía una curva de aspecto normal y plantaba
- * los círculos de pleamar/bajamar hasta a 128 px del trazo, además de dar la misma altura (0,87 m)
- * para los cuatro. El fixture de hoy está ordenado a mano, pero su propia cabecera dice que T-05 lo
- * sustituye por la salida del motor armónico.
+ * `trazarCurvaMarea` validaba el NÚMERO de extremos pero no su ORDEN: con los mismos extremos
+ * permutados devolvía una curva de aspecto normal y plantaba los círculos hasta a 128 px del trazo.
  *
- * CORREGIDO: `nodosDelDia` exige orden temporal estricto y lanza nombrando las dos horas en
- * conflicto — el mismo contrato falla ruidoso por el número de extremos y por su orden.
+ * CORREGIDO: el contrato falla ruidoso por el orden igual que por el número, y ahora comprueba las
+ * DOS series que recibe (la curva muestreada y los extremos), que son dos oportunidades de llegar
+ * desordenado en vez de una.
  *
- * Comportamiento correcto: o rechaza la entrada como hace con «menos de dos extremos», o dibuja
- * algo coherente. La tercera opción —fallar callando— es la que no vale.
+ * Comportamiento correcto: o rechaza la entrada, o dibuja algo coherente. La tercera opción
+ * —fallar callando— es la que no vale.
  */
-test("A-2 · unos extremos desordenados no producen una curva falsa en silencio", () => {
-  const desordenados: readonly ExtremoAltura[] = [
-    { hora: "16:38", alturaM: 4.95 },
-    { hora: "04:12", alturaM: 4.82 },
-    { hora: "10:26", alturaM: 0.93 },
-    { hora: "22:51", alturaM: 0.81 },
-  ];
+test("A-2 · una curva desordenada no se dibuja en silencio", async () => {
+  const fechaIso = HAY_BUILD ? fechaDelBuild() : new Date().toISOString().slice(0, 10);
+  const dia = await curvaDe("santander", fechaIso);
+  const desordenada: EntradaCurva = { ...dia, extremos: [...dia.extremos].reverse() };
 
   const curva = ((): ReturnType<typeof trazarCurvaMarea> | undefined => {
     try {
-      return trazarCurvaMarea(desordenados);
+      return trazarCurvaMarea(desordenada);
     } catch {
       return undefined; // Falla ruidosamente: es una salida aceptable.
     }
@@ -230,19 +205,9 @@ test("A-2 · unos extremos desordenados no producen una curva falsa en silencio"
   if (!curva) return;
 
   const trazo = puntosDelPath(curva.path);
-  for (const [indice, marca] of curva.extremos.entries()) {
-    const extremo = desordenados[indice];
-    assert.ok(extremo);
+  for (const marca of curva.extremos) {
     const desviacion = distanciaAlTrazo(marca, trazo);
-    assert.ok(
-      desviacion < 1,
-      `el círculo del extremo de las ${extremo.hora} está a ${desviacion.toFixed(1)} px del trazo`,
-    );
-    assert.equal(
-      Math.round(alturaEnMinutos(desordenados, minutosDesdeHora(extremo.hora)) * 100) / 100,
-      extremo.alturaM,
-      `la curva no pasa por el extremo de las ${extremo.hora}`,
-    );
+    assert.ok(desviacion < 1, `un círculo de extremo está a ${desviacion.toFixed(1)} px del trazo`);
   }
 });
 
@@ -252,8 +217,9 @@ test("A-2 · unos extremos desordenados no producen una curva falsa en silencio"
  * Era el único enlace que la página ofrecía para explicar de dónde sale el número, justo al lado
  * del «No apto para navegación», y llevaba a un 404 en todas las páginas de puerto.
  *
- * CORREGIDO: el pie ya no enlaza a una página que no existe. La de metodología es otra tranche;
- * cuando llegue, este mismo gate la exigirá construida antes de dejar volver el enlace.
+ * CORREGIDO: el pie ya no enlaza a una página que no existe. Y el gate crece con el sitio: ahora
+ * recorre **todas** las páginas construidas (32: portada, índices y puertos), que es donde vive el
+ * riesgo real de esta trayectoria — una jerarquía de URL en la que un tramo no exista.
  *
  * Comportamiento correcto: todo enlace interno del sitio construido resuelve a algo construido.
  */
@@ -263,16 +229,18 @@ test("A-3 · ningún enlace interno del sitio construido lleva a un 404", (t) =>
     return;
   }
   const rotos: string[] = [];
-  for (const pagina of [PAGINA_PUERTO, join(DIST, "index.html")]) {
-    for (const encontrado of readFileSync(pagina, "utf8").matchAll(/href="(\/[^"]*)"/g)) {
+  for (const pagina of paginasConstruidas()) {
+    for (const encontrado of readFileSync(pagina, "utf8").matchAll(/href="(\/[^"#]*)/g)) {
       const destino = encontrado[1];
-      if (destino === undefined) continue;
+      if (destino === undefined || destino === "") continue;
       const candidatos = [
         join(DIST, destino),
         join(DIST, `${destino}.html`),
         join(DIST, destino, "index.html"),
       ];
-      if (!candidatos.some((ruta) => existsSync(ruta) && ruta !== DIST)) rotos.push(destino);
+      if (!candidatos.some((ruta) => existsSync(ruta) && ruta !== DIST)) {
+        rotos.push(`${relative(DIST, pagina)} → ${destino}`);
+      }
     }
   }
   assert.deepEqual(rotos, [], `enlaces internos rotos en el sitio construido: ${rotos.join(", ")}`);
@@ -283,18 +251,15 @@ test("A-3 · ningún enlace interno del sitio construido lleva a un 404", (t) =>
  *
  * Astro escapa `"` y `&` en los valores de atributo, pero no `<` ni `>`. La `<meta
  * name="description">` de la página compone el nombre del puerto, así que un nombre con
- * `<script>…</script>` salía sin escapar dentro del atributo (comprobado construyendo el sitio con
- * un fixture hostil: el `dist/` resultante contenía dos `<script>` literales; ver el informe).
+ * `<script>…</script>` salía sin escapar dentro del atributo.
  *
  * NO era XSS —el tokenizador de HTML no abandona el estado de valor entrecomillado al ver un `<`—
- * pero falsificaba la promesa 2 tal y como se verifica (el HTML construido pasaba a contener
- * literales `<script>`) y dejaba de ser inocuo en cuanto ese mismo string cayese en un `set:html`,
- * un JSON-LD o un `og:description` que consuma otro parser. Escalado al rol `seguridad` como
- * defensa en profundidad, no como vulnerabilidad explotable hoy.
+ * pero falsificaba la promesa 2 tal y como se verifica y dejaba de ser inocuo en cuanto ese mismo
+ * string cayese en un `set:html`, un JSON-LD o un `og:description` que consuma otro parser.
  *
  * CORREGIDO: `escaparMarcado` neutraliza `<`/`>` y `AlmanaqueLayout` lo aplica al único atributo
- * que compone datos, la `<meta name="description">`. El gate ataca el mismo mecanismo que produjo
- * el artefacto (el `addAttribute` del runtime de Astro), ahora con el dato ya escapado.
+ * que compone datos. El gate ataca el mismo mecanismo que produjo el artefacto (el `addAttribute`
+ * del runtime de Astro), ahora con el dato ya escapado.
  *
  * Comportamiento correcto: nada que venga del dato puede introducir marcado en el HTML construido.
  */
@@ -314,34 +279,36 @@ test("A-4 · un dato con marcado no viaja crudo a un atributo del HTML", async (
 /**
  * A-5 · accesibilidad (promesa 5) — La página de puerto no tenía landmark principal.
  *
- * Todo el contenido colgaba de un `<div class="pagina">`: sin `<main>` no hay «saltar al contenido»
- * ni navegación por landmarks. La home del mismo sitio SÍ lo tiene
- * (`apps/web/src/pages/index.astro:16`), así que no era un criterio importado de fuera: era una
- * inconsistencia interna del propio sitio.
+ * Todo el contenido colgaba de un `<div>`: sin `<main>` no hay «saltar al contenido» ni navegación
+ * por landmarks.
  *
- * CORREGIDO: el contenedor de la página es un `<main class="pagina">`.
+ * CORREGIDO: el contenedor lo pone el layout, así que lo tienen TODAS las páginas del sitio y no
+ * solo la que se miró. El gate lo comprueba en todas.
  */
-test("A-5 · la página de puerto expone un landmark principal", (t) => {
+test("A-5 · todas las páginas construidas exponen un landmark principal", (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
   }
-  assert.ok(
-    /<main[\s>]|role="main"/.test(leerPagina()),
-    "el contenido de la página de puerto no está dentro de ningún landmark principal",
+  const sinMain = paginasConstruidas().filter(
+    (pagina) => !/<main[\s>]|role="main"/.test(readFileSync(pagina, "utf8")),
+  );
+  assert.deepEqual(
+    sinMain.map((pagina) => relative(DIST, pagina)),
+    [],
+    "hay páginas cuyo contenido no está dentro de ningún landmark principal",
   );
 });
 
 /**
  * A-6 · accesibilidad (promesa 5) — `list-style: none` global quita la semántica de lista.
  *
- * `AlmanaqueLayout` declara `ul, ol { list-style: none }` en global. WebKit retira el rol de lista
- * cuando el estilo de viñeta es `none`, así que en Safari/VoiceOver la lista solunar y el eje de
- * horas dejaban de anunciarse como listas (se perdía el «lista de 3 elementos» y el recuento). El
- * antídoto estándar es `role="list"` explícito en cada lista.
+ * WebKit retira el rol de lista cuando el estilo de viñeta es `none`, así que en Safari/VoiceOver
+ * las listas dejaban de anunciarse como listas (se perdía el «lista de 3 elementos»). El antídoto
+ * estándar es `role="list"` explícito en cada lista.
  *
- * CORREGIDO: la lista solunar y el eje de horas llevan `role="list"`. El gate cubre TODAS las
- * listas de la página, así que la siguiente que se añada sin rol lo pone en rojo.
+ * CORREGIDO: todas las listas lo llevan. El gate cubre TODAS las listas de TODAS las páginas, así
+ * que la siguiente que se añada sin rol lo pone en rojo.
  */
 test("A-6 · las listas sin viñeta conservan el rol de lista", (t) => {
   if (!HAY_BUILD) {
@@ -349,8 +316,14 @@ test("A-6 · las listas sin viñeta conservan el rol de lista", (t) => {
     return;
   }
   if (!/ul,\s*ol\s*\{[^}]*list-style:\s*none/.test(leerCssConstruido())) return; // ya no se quita
-  const listas = [...leerPagina().matchAll(/<(ul|ol)\b[^>]*>/g)].map((etiqueta) => etiqueta[0]);
-  const sinRol = listas.filter((etiqueta) => !etiqueta.includes('role="list"'));
+  const sinRol: string[] = [];
+  for (const pagina of paginasConstruidas()) {
+    for (const etiqueta of readFileSync(pagina, "utf8").matchAll(/<(ul|ol)\b[^>]*>/g)) {
+      if (!etiqueta[0].includes('role="list"')) {
+        sinRol.push(`${relative(DIST, pagina)}: ${etiqueta[0]}`);
+      }
+    }
+  }
   assert.deepEqual(sinRol, [], `listas sin role="list" con list-style:none: ${sinRol.join(" ")}`);
 });
 
@@ -358,12 +331,11 @@ test("A-6 · las listas sin viñeta conservan el rol de lista", (t) => {
  * A-7 · tema (promesa 4) — `data-theme` cambiaba la paleta pero no el `color-scheme`.
  *
  * `:root { color-scheme: light dark }` dejaba la decisión al SO, así que con `data-theme="noche"`
- * en un sistema en claro —el único caso para el que existe ese atributo— los widgets de UA (barras
- * de scroll, gutter de overscroll, controles de formulario) seguían en claro sobre una página
- * oscura, y al revés con `data-theme="claro"` sobre un sistema en oscuro.
+ * en un sistema en claro —el único caso para el que existe ese atributo— los widgets de UA seguían
+ * en claro sobre una página oscura, y al revés con `data-theme="claro"` sobre un sistema oscuro.
  *
- * CORREGIDO: `color-scheme` se declara ahora en `packages/ui/src/tokens.css` y SOLO ahí —una por
- * bloque de tema, junto a la paleta que acompaña—, así que el atributo manda en los dos sentidos.
+ * CORREGIDO: `color-scheme` se declara en `packages/ui/src/tokens.css` y SOLO ahí, una vez por
+ * bloque de tema, junto a la paleta que acompaña.
  */
 test("A-7 · el tema forzado por data-theme ajusta también el color-scheme", (t) => {
   if (!HAY_BUILD) {
@@ -382,119 +354,132 @@ test("A-7 · el tema forzado por data-theme ajusta también el color-scheme", (t
 // LO QUE AGUANTÓ · sin trinquete, en verde, como gate permanente
 // =================================================================================================
 
+/**
+ * Promesa 2 · cero JavaScript de cliente.
+ *
+ * El único `<script>` admitido es el `application/ld+json` del SEO: son datos declarativos que el
+ * navegador no ejecuta ni descarga aparte. Cualquier otro —con `src`, con módulo o con código
+ * dentro— rompe la promesa, y con ella el argumento de que la página se abre sin cobertura.
+ */
 test("promesa 2 · el HTML construido no trae JavaScript de cliente", (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
   }
-  const html = leerPagina();
-  assert.equal(html.match(/<script[\s>]/g), null, "hay <script> en la página construida");
-  assert.deepEqual([...html.matchAll(/\son[a-z]+="/g)].map((atributo) => atributo[0]), []);
-  assert.ok(!html.includes("astro-island"), "hay una isla hidratada en la página");
+  for (const pagina of paginasConstruidas()) {
+    const html = readFileSync(pagina, "utf8");
+    const nombre = relative(DIST, pagina);
+    const scripts = [...html.matchAll(/<script[^>]*>/g)].map((etiqueta) => etiqueta[0]);
+    const ejecutables = scripts.filter(
+      (etiqueta) => !etiqueta.includes('type="application/ld+json"'),
+    );
+    assert.deepEqual(ejecutables, [], `${nombre}: hay <script> ejecutable en la página construida`);
+    assert.deepEqual([...html.matchAll(/\son[a-z]+="/g)].map((atributo) => atributo[0]), [], nombre);
+    assert.ok(!html.includes("astro-island"), `${nombre}: hay una isla hidratada en la página`);
+  }
 });
 
-test("promesa 3 · las invariantes de la curva aguantan en toda forma de día válida", () => {
-  for (const [nombre, dia] of DIAS_VALIDOS) {
+test("promesa 3 · las invariantes de la curva aguantan en los doce puertos", async () => {
+  const fechaIso = HAY_BUILD ? fechaDelBuild() : new Date().toISOString().slice(0, 10);
+  for (const puerto of await cargarPuertos()) {
+    const dia = await curvaDe(puerto.slug, fechaIso);
     const curva = trazarCurvaMarea(dia);
-    const alturas = dia.map((extremo) => extremo.alturaM);
+    const alturas = dia.muestras.map((muestra) => muestra.height_m);
     const minimo = Math.min(...alturas);
     const maximo = Math.max(...alturas);
-
-    for (const extremo of dia) {
-      assert.equal(
-        Math.round(alturaEnMinutos(dia, minutosDesdeHora(extremo.hora)) * 100) / 100,
-        extremo.alturaM,
-        `${nombre}: la curva no pasa por el extremo de las ${extremo.hora}`,
-      );
-    }
 
     const trazo = puntosDelPath(curva.path);
     const primero = trazo[0];
     const ultimo = trazo.at(-1);
-    assert.ok(primero && ultimo, `${nombre}: el path está vacío`);
-    assert.equal(primero.x, 0, `${nombre}: la curva no arranca a las 00:00`);
-    assert.equal(ultimo.x, curva.ancho, `${nombre}: la curva no llega a las 24:00`);
+    assert.ok(primero && ultimo, `${puerto.name}: el path está vacío`);
+    assert.equal(primero.x, 0, `${puerto.name}: la curva no arranca al principio del día`);
+    assert.equal(ultimo.x, curva.ancho, `${puerto.name}: la curva no llega al final del día`);
     for (const punto of trazo) {
       assert.ok(
         Number.isFinite(punto.x) && Number.isFinite(punto.y),
-        `${nombre}: coordenada no finita en el path`,
+        `${puerto.name}: coordenada no finita en el path`,
       );
       assert.ok(
         punto.y >= 0 && punto.y <= curva.alto && punto.x >= 0 && punto.x <= curva.ancho,
-        `${nombre}: el trazo se sale del lienzo en ${punto.x},${punto.y}`,
+        `${puerto.name}: el trazo se sale del lienzo en ${punto.x},${punto.y}`,
       );
     }
 
-    for (let minuto = 0; minuto <= 1440; minuto += 1) {
-      const altura = alturaEnMinutos(dia, minuto);
+    // Cada extremo del día es un punto del trazo, no una marca flotando cerca.
+    for (const marca of curva.extremos) {
+      assert.ok(
+        distanciaAlTrazo(marca, trazo) < 0.2,
+        `${puerto.name}: el círculo del extremo en x=${marca.x} no cae sobre el trazo`,
+      );
+    }
+
+    for (let instante = dia.inicioUtcMs; instante <= dia.finUtcMs; instante += 5 * MINUTO) {
+      const altura = alturaEn(dia.muestras, instante);
       assert.ok(
         altura >= minimo - 1e-9 && altura <= maximo + 1e-9,
-        `${nombre}: altura fuera del rango del día en el minuto ${minuto}`,
+        `${puerto.name}: altura fuera del rango del día`,
       );
-    }
-
-    for (let indice = 0; indice + 1 < dia.length; indice += 1) {
-      const desde = dia[indice];
-      const hasta = dia[indice + 1];
-      assert.ok(desde && hasta);
-      const sube = hasta.alturaM > desde.alturaM;
-      const fin = minutosDesdeHora(hasta.hora);
-      let previa = alturaEnMinutos(dia, minutosDesdeHora(desde.hora));
-      for (let minuto = minutosDesdeHora(desde.hora); minuto <= fin; minuto += 1) {
-        const altura = alturaEnMinutos(dia, minuto);
-        assert.ok(
-          sube ? altura >= previa - 1e-12 : altura <= previa + 1e-12,
-          `${nombre}: la marea no es monótona entre ${desde.hora} y ${hasta.hora}`,
-        );
-        previa = altura;
-      }
     }
   }
 });
 
-test("promesa 1 · la tabla del HTML construido dice lo mismo que el fixture", (t) => {
+/**
+ * Promesa 1 · lo que se lee en el HTML es lo que calcularon los casos de uso.
+ *
+ * En la tranche 1 esta promesa se comprobaba contra un fixture escrito a mano; ahora se comprueba
+ * contra el dominio, que es lo que la trayectoria prometía. Si alguien cambia el formato de la
+ * tabla, el redondeo o la zona horaria, esto se pone rojo.
+ */
+test("promesa 1 · la tabla del HTML construido dice lo que dicen los casos de uso", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
   }
+  const datos = await cargarDatosDePuerto("santander", fechaDelBuild());
   const filas = [...leerPagina().matchAll(/<tr[^>]*data-tipo="([^"]+)"[^>]*>(.*?)<\/tr>/g)].map(
     (fila) =>
       [...(fila[2] ?? "").matchAll(/<t[hd][^>]*>([^<]*)<\/t[hd]>/g)]
         .map((celda) => celda[1] ?? "")
         .join(" "),
   );
-  assert.deepEqual(
-    filas,
-    [
-      "pleamar 04:12 4,82 m",
-      "bajamar 10:26 0,93 m",
-      "pleamar 16:38 4,95 m",
-      "bajamar 22:51 0,81 m",
-    ],
-    "la tabla de mareas no coincide con el fixture",
-  );
+  const esperadas = datos.dia.eventos.map((evento) => {
+    const hora = new Intl.DateTimeFormat("es-ES", {
+      timeZone: datos.port.timezone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).format(new Date(evento.timeUtcMs));
+    const nombre = evento.kind === "high" ? "pleamar" : "bajamar";
+    return `${nombre} ${hora} ${evento.height_m.toFixed(2).replace(".", ",")} m`;
+  });
+
+  assert.deepEqual(filas, esperadas, "la tabla de mareas no coincide con los casos de uso");
 });
 
 // =================================================================================================
-// JUICIO A12 ADOPTADO COMO SPEC · sin test cuando se escribió el informe, con gate desde este PR
+// JUICIO A12 ADOPTADO COMO SPEC · sin test cuando se escribió el informe, con gate desde entonces
 // =================================================================================================
 
 /**
  * J-2 · El pie atribuía «Constituyentes REDMAR · calidad A · método Foreman (1977)» a unas cifras
- * que la cabecera del propio fixture describe como escritas a mano. La página se presentaba como
- * más fiable de lo que es y quien viera una captura no tenía forma de saberlo.
+ * que la cabecera del propio fixture describía como escritas a mano. La página se presentaba como
+ * más fiable de lo que era y quien viera una captura no tenía forma de saberlo.
  *
- * CORREGIDO: la procedencia la declara el dato (`procedencia.fuente`) y la página se limita a
- * pintarla. Cuando T-05 sustituya el fixture por el motor armónico, el pie dirá la verdad sin tocar
- * la página — y este gate exige que siga saliendo de ahí y no de un literal de la plantilla.
+ * CORREGIDO: la procedencia la declara el dato y la página se limita a pintarla. Ahora que el
+ * fixture es el dataset real, el gate exige que las atribuciones del HTML sean **las de la estación
+ * de ese puerto** —que cambian de licencia entre puertos (CC-BY vs CC-BY-NC)— y no un literal de la
+ * plantilla que sería falso en la mitad de las páginas.
  */
-test("J-2 · el pie declara la procedencia que trae el dato, no una atribución fija", (t) => {
+test("J-2 · el pie declara las atribuciones que trae el dataset de ese puerto", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
   }
-  assert.ok(
-    leerPagina().includes(SANTANDER.procedencia.fuente),
-    `el pie no pinta la procedencia del dato ("${SANTANDER.procedencia.fuente}")`,
-  );
+  const html = leerPagina();
+  const { station } = await cargarDatosDePuerto("santander", fechaDelBuild());
+  assert.ok(station.attributions.length > 0, "la estación no declara atribuciones");
+  for (const fuente of station.attributions) {
+    assert.ok(html.includes(fuente.name), `el pie no pinta la fuente "${fuente.name}"`);
+    assert.ok(html.includes(fuente.license), `el pie no pinta la licencia "${fuente.license}"`);
+  }
 });

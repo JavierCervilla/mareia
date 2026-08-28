@@ -1,0 +1,45 @@
+---
+/**
+ * Índice de regiones: `/mareas/`.
+ *
+ * La raíz de la jerarquía. Con 12 puertos podría enseñarlos todos de golpe —y la portada lo
+ * hace—, pero esta página existe porque la jerarquía tiene que ser navegable en los dos sentidos:
+ * quien recorta la URL de un puerto hasta `/mareas/` tiene que llegar a algo, y con 200-300 puertos
+ * (T-13) esta será la única vista que no se hace ilegible.
+ */
+import Indice from "../../componentes/Indice.astro";
+import Migas from "../../componentes/Migas.astro";
+import { cargarCatalogo, puertosDeRegion } from "../../datos/catalogo.ts";
+import AlmanaqueLayout from "../../layouts/AlmanaqueLayout.astro";
+import { migasDeMareas } from "../../migas.ts";
+import { rutaRegion } from "../../rutas.ts";
+
+const regiones = await cargarCatalogo();
+const entradas = regiones.map((region) => {
+  const puertos = puertosDeRegion(region).length;
+  return {
+    nombre: region.nombre,
+    ruta: rutaRegion(region.slug),
+    meta: puertos === 1 ? "1 puerto" : `${puertos} puertos`,
+  };
+});
+
+const titulo = "Mareas por región · Mareia";
+const descripcion =
+  "Tablas de mareas, coeficiente y efemérides de sol y luna de los puertos de España, " +
+  "organizados por comunidad autónoma y provincia.";
+---
+
+<AlmanaqueLayout titulo={titulo} descripcion={descripcion}>
+  <Migas slot="migas" migas={migasDeMareas()} />
+
+  <header class="portada">
+    <h1 class="portada__titulo">Mareas por región</h1>
+    <p class="portada__entradilla">
+      Elige la comunidad autónoma y luego la provincia para llegar al puerto. Cada página trae la
+      tabla del día y del mes, la curva de 24 horas, el coeficiente y las horas de sol y luna.
+    </p>
+  </header>
+
+  <Indice entradas={entradas} titulo="Comunidades autónomas con puertos" />
+</AlmanaqueLayout>

@@ -1,0 +1,73 @@
+---
+/**
+ * Curva de altura de marea de las 24 h, en SVG estático.
+ *
+ * El trazo es la curva **predicha** (`sampleCurve` del motor armónico) con los extremos insertados,
+ * no una interpolación bonita: ver `src/grafico-marea.ts`. Sin JavaScript, sin librería de gráficas
+ * y sin ejes de colores — el gráfico es contextual, no crítico (design-brief §1): dice de un
+ * vistazo si la marea sube o baja ahora mismo, y el dato exacto lo da la tabla de al lado.
+ *
+ * Accesibilidad: el `<svg>` es `role="img"` con un `aria-label` que enumera los extremos del día.
+ * Un lector de pantalla no puede leer un `path`, así que se le da la misma información en texto.
+ */
+import type { CurvaMarea } from "../grafico-marea.ts";
+import { hora, metros } from "../formato.ts";
+
+interface Props {
+  curva: CurvaMarea;
+  timezone: string;
+}
+
+const { curva, timezone } = Astro.props;
+
+const NOMBRE = { high: "pleamar", low: "bajamar" } as const;
+
+/**
+ * Etiquetas del eje. La última marca es la medianoche del día siguiente y se formatea «00:00», que
+ * al final de un eje que empieza en «00:00» se lee como si la escala volviera atrás: se escribe
+ * «24:00», que es como cierra el eje un almanaque impreso. En los días de cambio de hora la marca
+ * no cae en punto (el día dura 23 o 25 h) y entonces se escribe la hora real, sin retocar.
+ */
+const horasDelEje = curva.horas.map((marca, indice) => {
+  const etiqueta = hora(marca.timeUtcMs, timezone);
+  const ultima = indice === curva.horas.length - 1;
+  return ultima && etiqueta === "00:00" ? "24:00" : etiqueta;
+});
+
+const resumen = curva.extremos
+  .map(
+    (extremo) =>
+      `${NOMBRE[extremo.kind]} a las ${hora(extremo.timeUtcMs, timezone)}, ` +
+      `${metros(extremo.height_m)}`,
+  )
+  .join("; ");
+---
+
+<figure class="grafico">
+  <svg
+    class="grafico__lienzo"
+    viewBox={`0 0 ${curva.ancho} ${curva.alto}`}
+    role="img"
+    aria-label={`Curva de altura de marea de las 24 horas: ${resumen}.`}
+  >
+    <line
+      class="grafico__nivel"
+      x1="0"
+      y1={curva.nivelMedioY}
+      x2={curva.ancho}
+      y2={curva.nivelMedioY}></line>
+    <path class="grafico__trazo" d={curva.path}></path>
+    {
+      curva.extremos.map((extremo) => (
+        <circle class="grafico__extremo" cx={extremo.x} cy={extremo.y} r="4" />
+      ))
+    }
+  </svg>
+  {/* `role="list"`: WebKit retira la semántica de lista cuando la viñeta es `none`. */}
+  <ol class="grafico__horas" role="list" aria-hidden="true">
+    {horasDelEje.map((etiqueta) => <li>{etiqueta}</li>)}
+  </ol>
+  <figcaption class="datos__nota">
+    Entre {metros(curva.minima_m)} y {metros(curva.maxima_m)} sobre el cero del puerto.
+  </figcaption>
+</figure>

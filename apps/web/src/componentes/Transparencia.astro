@@ -1,0 +1,79 @@
+---
+/**
+ * Calidad y procedencia del dato: el grade de la estación, lo que significa y de dónde salen las
+ * constantes armónicas.
+ *
+ * «Transparencia como feature» (README) se cumple aquí o no se cumple: el grade, el RMSE y el error
+ * de hora los publica el QC del pipeline (T-05) en el propio dataset, y esta sección los pinta tal
+ * cual —incluidos los `null`, que significan «no se pudo medir» y no «no pasa nada»—. Ni un
+ * literal de atribución vive en esta plantilla: todo sale de `station.attributions`, que es lo que
+ * exigen las licencias de las fuentes y lo que dejó escrito el pase adversario de la tranche 1
+ * (J-2: la página se presentaba como más fiable de lo que era).
+ */
+import type { StationDto } from "@mareia/usecases";
+
+import { metros, numero } from "../formato.ts";
+
+interface Props {
+  station: StationDto;
+}
+
+const { station } = Astro.props;
+const calidad = station.quality;
+
+/** Qué significa cada grade del QC, en una frase. */
+const SIGNIFICADO: Readonly<Record<string, string>> = {
+  A: "predicción validada contra observación con error muy bajo",
+  B: "predicción validada contra observación con error bajo",
+  C: "predicción validada con reservas: el error relativo es alto o no hay pleamares medibles",
+};
+---
+
+<section class="transparencia" id="transparencia" aria-labelledby="titulo-transparencia">
+  <h2 class="etiqueta" id="titulo-transparencia">Calidad y procedencia del dato</h2>
+
+  <div class="grade">
+    <span class="grade__letra" data-grade={calidad.grade} aria-hidden="true">{calidad.grade}</span>
+    <p class="grade__texto">
+      Estación <strong>{station.name}</strong> ({station.id}), grade {calidad.grade}: {
+        SIGNIFICADO[calidad.grade] ?? "calidad declarada por el control de calidad del dataset"
+      }.
+      {calidad.grade_reason && <> {calidad.grade_reason}.</>}
+    </p>
+  </div>
+
+  <div class="datos">
+    <p class="datos__fila">
+      <span>Error cuadrático medio frente a la observación</span>
+      <span class="datos__valor">
+        {calidad.rmse_m === null ? "no medido" : metros(calidad.rmse_m, 3)}
+      </span>
+    </p>
+    <p class="datos__fila">
+      <span>Error de hora de la pleamar (p95)</span>
+      <span class="datos__valor">
+        {
+          calidad.hw_time_err_p95_min === null ? (
+            <>sin pleamares medibles en la observación</>
+          ) : (
+            <>{numero(calidad.hw_time_err_p95_min, 1)} min</>
+          )
+        }
+      </span>
+    </p>
+    <p class="datos__fila">
+      <span>Validado contra</span>
+      <span class="datos__valor">{calidad.validated_against ?? "sin observación de contraste"}</span>
+    </p>
+    <p class="datos__fila">
+      <span>Constituyentes armónicos usados</span>
+      <span class="datos__valor">{station.constituents}</span>
+    </p>
+    <p class="datos__fila">
+      <span>Cero hidrográfico</span>
+      <span class="datos__valor">
+        {station.datum.reference} · nivel medio {metros(station.datum.msl_offset_m, 3)}
+      </span>
+    </p>
+  </div>
+</section>

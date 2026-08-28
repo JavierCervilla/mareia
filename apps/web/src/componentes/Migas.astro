@@ -1,0 +1,38 @@
+---
+/**
+ * Migas de pan: dónde estoy y cómo subo un nivel.
+ *
+ * La jerarquía de la URL (`/mareas/<región>/<provincia>/<puerto>/`) es navegable de verdad —cada
+ * tramo existe—, así que las migas no son decoración SEO: son el único ascensor de la página, que
+ * no tiene menú. El mismo array (`src/migas.ts`) alimenta el `BreadcrumbList` del JSON-LD.
+ */
+import type { Miga } from "../migas.ts";
+
+interface Props {
+  migas: readonly Miga[];
+}
+
+const { migas } = Astro.props;
+---
+
+<nav aria-label="Ruta de navegación">
+  {/* `role="list"`: WebKit retira la semántica de lista cuando la viñeta es `none`. */}
+  <ol class="migas" role="list">
+    {
+      migas.map((miga, indice) => (
+        <li>
+          {indice > 0 && (
+            <span class="migas__separador" aria-hidden="true">
+              ›
+            </span>
+          )}
+          {miga.ruta === undefined ? (
+            <span aria-current="page">{miga.nombre}</span>
+          ) : (
+            <a href={miga.ruta}>{miga.nombre}</a>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>

@@ -1,0 +1,65 @@
+---
+/**
+ * Índice de una provincia: `/mareas/<región>/<provincia>/`.
+ *
+ * El último escalón antes del puerto. Cada entrada lleva la zona horaria como meta porque en
+ * Canarias es la primera pregunta que se hace quien mira una hora de pleamar desde la Península.
+ */
+import Indice from "../../../../componentes/Indice.astro";
+import Migas from "../../../../componentes/Migas.astro";
+import { cargarCatalogo } from "../../../../datos/catalogo.ts";
+import type { Provincia, Region } from "../../../../datos/catalogo.ts";
+import AlmanaqueLayout from "../../../../layouts/AlmanaqueLayout.astro";
+import { migasDeProvincia } from "../../../../migas.ts";
+import { rutaPuerto } from "../../../../rutas.ts";
+
+export async function getStaticPaths() {
+  const regiones = await cargarCatalogo();
+  return regiones.flatMap((region) =>
+    region.provincias.map((provincia) => ({
+      params: { region: region.slug, provincia: provincia.slug },
+      props: { region, provincia },
+    })),
+  );
+}
+
+interface Props {
+  region: Region;
+  provincia: Provincia;
+}
+
+const { region, provincia } = Astro.props;
+
+const titulo = `Mareas en ${provincia.nombre} · Mareia`;
+const descripcion =
+  `Tabla de mareas, coeficiente y horas de sol y luna de los puertos de ${provincia.nombre} ` +
+  `(${region.nombre}): ${provincia.puertos.map((puerto) => puerto.name).join(", ")}.`;
+---
+
+<AlmanaqueLayout titulo={titulo} descripcion={descripcion}>
+  <Migas
+    slot="migas"
+    migas={migasDeProvincia(
+      { slug: region.slug, name: region.nombre },
+      { slug: provincia.slug, name: provincia.nombre },
+    )}
+  />
+
+  <header class="portada">
+    <h1 class="portada__titulo">Mareas en {provincia.nombre}</h1>
+    <p class="portada__entradilla">
+      {provincia.puertos.length === 1 ? "1 puerto" : `${provincia.puertos.length} puertos`} en {
+        region.nombre
+      }.
+    </p>
+  </header>
+
+  <Indice
+    titulo={`Puertos de ${provincia.nombre}`}
+    entradas={provincia.puertos.map((puerto) => ({
+      nombre: puerto.name,
+      ruta: rutaPuerto(puerto),
+      meta: puerto.timezone,
+    }))}
+  />
+</AlmanaqueLayout>
