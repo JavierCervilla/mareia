@@ -7,10 +7,10 @@
 ## Hito 1 — Cimientos (scaffold + dominio)
 
 - [x] T-01 · Monorepo (Astro web + API Deno/Express + packages) con los 4 gates en CI
-- [ ] T-02 · Motor de mareas TS (suma armónica + correcciones nodales) con golden tests
+- [x] T-02 · Motor de mareas TS (suma armónica + correcciones nodales) con golden tests
 - [ ] T-03 · Astronomía + solunar (Astronomy Engine, periodos 2+2 y rating)
 - [ ] T-04 · Coeficiente de mareas (Brest, U = 3,05 m)
-- [ ] T-06 · Contrato de módulo `AppModule` + registries + test de capas
+- [x] T-06 · Contrato de módulo `AppModule` + registries + test de capas
 
 ## Hito 2 — Datos y API
 

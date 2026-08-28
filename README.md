@@ -34,7 +34,7 @@ fuente, su licencia y el código que lo calcula.
 | `packages/modules/*` | Módulos: `fishing` (solunar), `weather` (meteo marina) |
 | `packages/adapters` | Adapters: stations JSON, caché KV, Open-Meteo, AEMET |
 | `data/pipeline` | Pipeline Python offline: armónicos → JSON canónico por puerto |
-| `data/stations` | Dataset canónico de constituyentes por puerto (CC-BY 4.0) |
+| `data/stations` | Dataset canónico de constituyentes por puerto (licencia por estación) |
 
 ## Atribuciones de datos
 
@@ -47,4 +47,8 @@ fuente, su licencia y el código que lo calcula.
 
 ## Licencia
 
-Código: [AGPL-3.0](LICENSE) · Dataset derivado (`data/stations`): CC-BY 4.0.
+Código: [AGPL-3.0](LICENSE) · Dataset derivado (`data/stations`): licencia **declarada por
+estación** en cada JSON — CC-BY 4.0 en su mayoría; algunas estaciones (p. ej. Bilbao y Huelva)
+llevan **CC-BY-NC 4.0** heredada de su fuente (GESLA). Mareia es un proyecto no comercial, por lo
+que el uso es conforme en todos los casos; los reutilizadores del dataset deben respetar la licencia
+de cada estación (ver `data/stations/README.md`).
