@@ -63,6 +63,18 @@ export const RUTA_SW = "/sw.js";
 /** URL del manifiesto de instalación (`display`, iconos, nombre). */
 export const RUTA_MANIFEST = "/manifest.webmanifest";
 
+/**
+ * Clave con la que el worker guarda **su registro de favoritos** dentro de la caché de páginas: qué
+ * puertos hay guardados y qué URL necesita cada uno.
+ *
+ * Existe porque la Cache API es un saco de respuestas sin dueño: sin este registro, el worker no
+ * puede saber si el `/_astro/hoja.<hash>.css` que está a punto de tirar lo sigue necesitando la
+ * página guardada de otro puerto — y con el rebuild diario de T-15, dos favoritos guardados en dos
+ * días distintos apuntan a assets distintos. Es una clave sintética, no una ruta del sitio: bajo
+ * `/__mareia/` no se publica nada y el worker no la enruta.
+ */
+export const CLAVE_REGISTRO = "/__mareia/favoritos";
+
 /** Dónde vive el fichero con las constantes armónicas de un puerto, listo para el navegador. */
 export function rutaEstacionOffline(slug: string): string {
   return `/offline/estaciones/${slug}.json`;
@@ -79,13 +91,14 @@ export const MENSAJE_OLVIDAR = "mareia:olvidar-puerto";
 export interface PeticionGuardar {
   readonly tipo: typeof MENSAJE_GUARDAR;
   readonly slug: string;
-  /** Página, constantes armónicas y assets con hash. Todas del mismo origen. */
-  readonly urls: readonly string[];
   /**
-   * Assets con hash que la página está usando AHORA. Sirven para podar de la caché los de builds
-   * anteriores, que ya no los referencia ningún HTML y solo ocupan sitio.
+   * Página, constantes armónicas y assets con hash. Todas del mismo origen.
+   *
+   * Es **la lista completa de lo que este favorito necesita**, y el worker la guarda tal cual en su
+   * registro: es lo que le permite saber, al podar, qué assets siguen haciendo falta para OTROS
+   * favoritos. Ver `pwa/sw.ts`.
    */
-  readonly assetsVigentes: readonly string[];
+  readonly urls: readonly string[];
 }
 
 /** Petición de olvidar un puerto: se borran su página y sus constantes, no los assets compartidos. */
@@ -115,6 +128,7 @@ export interface Protocolo {
   readonly cabeceraGuardado: string;
   readonly mensajeGuardar: string;
   readonly mensajeOlvidar: string;
+  readonly claveRegistro: string;
 }
 
 /** El protocolo de ESTE build, tal y como viaja al worker. */
@@ -126,4 +140,5 @@ export const PROTOCOLO: Protocolo = {
   cabeceraGuardado: CABECERA_GUARDADO,
   mensajeGuardar: MENSAJE_GUARDAR,
   mensajeOlvidar: MENSAJE_OLVIDAR,
+  claveRegistro: CLAVE_REGISTRO,
 };

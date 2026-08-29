@@ -165,8 +165,11 @@ function respuestaPara(peticion: Request): Promise<Response> | undefined {
   if (peticion.mode === "navigate") {
     return laPaginaDeLaRedODeLaCopia(peticion);
   }
-  if (url.pathname.startsWith(PREFIJO_ASSETS) || url.pathname.startsWith(PREFIJO_OFFLINE)) {
+  if (url.pathname.startsWith(PREFIJO_ASSETS)) {
     return deLaCopiaODeLaRed(peticion);
+  }
+  if (url.pathname.startsWith(PREFIJO_OFFLINE)) {
+    return deLaCopiaYDeCaminoRefrescar(peticion);
   }
   return undefined;
 }
@@ -211,8 +214,8 @@ async function laPaginaDeLaRedODeLaCopia(peticion: Request): Promise<Response> {
 }
 
 /**
- * Assets con hash y constantes armónicas: la copia primero, que es instantánea y no puede estar
- * desfasada (la URL lleva el hash del contenido).
+ * Assets con hash: la copia primero, que es instantánea y **no puede estar desfasada**, porque la
+ * URL lleva el hash del contenido y cambia con él.
  *
  * Si no hay copia se va a la red y **no se guarda el resultado**: entrar en una página que no es
  * favorita no puede llenar el teléfono de ficheros que nadie pidió.
@@ -221,6 +224,33 @@ async function deLaCopiaODeLaRed(peticion: Request): Promise<Response> {
   const cache = await caches.open(PROTOCOLO.cachePaginas);
   const guardada = await cache.match(peticion);
   return guardada ?? fetch(peticion);
+}
+
+/**
+ * Constantes armónicas (`/offline/estaciones/<slug>.json`): la copia se sirve al instante **y de
+ * camino se comprueba si ha cambiado**.
+ *
+ * No es `cache-first` como los assets, y la diferencia importa: esa URL **no lleva hash**. El
+ * pipeline de datos corrige constantes —para eso existe—, así que un `cache-first` puro dejaría al
+ * teléfono calculando con las viejas para siempre bajo el rótulo «las mismas que usa el servidor»,
+ * que es una frase que entonces sería falsa. Con `stale-while-revalidate` la respuesta sigue siendo
+ * instantánea y sin red, y la copia se pone al día sola en cuanto haya cobertura.
+ *
+ * Solo se refresca lo que YA estaba guardado: si esta URL no es de un favorito, aquí no se guarda
+ * nada.
+ */
+async function deLaCopiaYDeCaminoRefrescar(peticion: Request): Promise<Response> {
+  const cache = await caches.open(PROTOCOLO.cachePaginas);
+  const guardada = await cache.match(peticion);
+  if (guardada === undefined) {
+    return fetch(peticion);
+  }
+  // La revalidación va suelta y sin `await`: la página no espera por ella, y si no hay red, falla
+  // en silencio y la copia sigue sirviendo (que es justo para lo que está).
+  void fetch(peticion)
+    .then(async (fresca) => (fresca.ok ? cache.put(peticion, fresca) : undefined))
+    .catch(() => undefined);
+  return guardada;
 }
 
 /**
@@ -275,7 +305,6 @@ interface MensajeCrudo {
   readonly tipo?: unknown;
   readonly slug?: unknown;
   readonly urls?: unknown;
-  readonly assetsVigentes?: unknown;
 }
 
 function listaDeCadenas(valor: unknown): readonly string[] {
@@ -298,12 +327,16 @@ ambito.addEventListener("message", (evento) => {
 async function atender(datos: unknown): Promise<{ ok: boolean; motivo?: string; urls: number }> {
   const mensaje: MensajeCrudo = typeof datos === "object" && datos !== null ? datos : {};
   const urls = listaDeCadenas(mensaje.urls);
+  const slug = typeof mensaje.slug === "string" ? mensaje.slug : "";
+  if (slug === "") {
+    return { ok: false, motivo: "El service worker no sabe de qué puerto le hablan.", urls: 0 };
+  }
   try {
     if (mensaje.tipo === PROTOCOLO.mensajeGuardar) {
-      return await guardar(urls, listaDeCadenas(mensaje.assetsVigentes));
+      return await guardar(slug, urls);
     }
     if (mensaje.tipo === PROTOCOLO.mensajeOlvidar) {
-      return await olvidar(urls);
+      return await olvidar(slug, urls);
     }
     return { ok: false, motivo: "El service worker no conoce esa petición.", urls: 0 };
   } catch {
@@ -315,42 +348,96 @@ async function atender(datos: unknown): Promise<{ ok: boolean; motivo?: string; 
   }
 }
 
+// =================================================================================================
+// El registro de favoritos
+//
+// La Cache API es un saco de respuestas sin dueño: sabe que tiene guardado
+// `/_astro/hoja.<hash>.css`, no para quién. Sin saberlo, podar es adivinar — y la primera versión
+// de esto adivinaba mal: tiraba todo asset que no usara **la página que se estaba guardando**,
+// dando por hecho que «lo demás ya no lo referencia ningún HTML guardado». Es falso en cuanto hay
+// dos favoritos guardados en dos builds distintos, y con el rebuild diario de T-15 eso es el caso
+// normal, no el raro: guardar el segundo puerto dejaba al primero con su página y **cero assets**,
+// o sea abriéndose sin estilos, sin la isla meteo y sin el trozo de la calculadora — la promesa
+// entera de T-12 rota, sin un solo error por ninguna parte.
+//
+// Con el registro, podar deja de adivinar: se conserva lo que necesita ALGÚN favorito.
+// =================================================================================================
+
+/** Qué URL necesita cada puerto guardado, por slug. */
+type Registro = Record<string, readonly string[]>;
+
+/** El registro guardado, o vacío si no hay o no se entiende. */
+async function leerRegistro(cache: Cache): Promise<Registro> {
+  const guardado = await cache.match(PROTOCOLO.claveRegistro);
+  if (guardado === undefined) {
+    return {};
+  }
+  try {
+    const leido: unknown = await guardado.json();
+    if (typeof leido !== "object" || leido === null) {
+      return {};
+    }
+    const registro: Registro = {};
+    for (const [slug, urls] of Object.entries(leido as Record<string, unknown>)) {
+      registro[slug] = listaDeCadenas(urls);
+    }
+    return registro;
+  } catch {
+    return {};
+  }
+}
+
+async function escribirRegistro(cache: Cache, registro: Registro): Promise<void> {
+  await cache.put(
+    PROTOCOLO.claveRegistro,
+    new Response(JSON.stringify(registro), {
+      headers: { "content-type": "application/json; charset=utf-8" },
+    }),
+  );
+}
+
 /**
  * Guarda las URL de un favorito. `addAll` es **todo o nada**: si una sola falla no se guarda
  * ninguna, porque media página guardada es peor que ninguna — se abriría sin estilos, o con la
  * tabla y sin las constantes para calcular otro día, y quien la abriese en la playa no tendría
  * forma de saber qué le falta.
+ *
+ * El orden también es todo o nada: primero se baja, después se anota en el registro. Anotar antes
+ * dejaría en el registro un favorito que no está guardado, y ese favorito fantasma protegería de la
+ * poda unos assets que no existen.
  */
-async function guardar(urls: readonly string[], assetsVigentes: readonly string[]): Promise<{
-  ok: boolean;
-  urls: number;
-}> {
+async function guardar(slug: string, urls: readonly string[]): Promise<{ ok: boolean; urls: number }> {
   const cache = await caches.open(PROTOCOLO.cachePaginas);
   await cache.addAll([...urls]);
-  await podarAssetsDeOtroBuild(cache, assetsVigentes);
+  const registro = await leerRegistro(cache);
+  registro[slug] = urls;
+  await escribirRegistro(cache, registro);
+  await podarAssetsHuerfanos(cache, registro);
   return { ok: true, urls: urls.length };
 }
 
-/** Borra la página y las constantes de un puerto. Los assets se quedan: los comparten los demás. */
-async function olvidar(urls: readonly string[]): Promise<{ ok: boolean; urls: number }> {
+/** Borra la página y las constantes de un puerto, y con ellas sus assets si no los usa nadie más. */
+async function olvidar(slug: string, urls: readonly string[]): Promise<{ ok: boolean; urls: number }> {
   const cache = await caches.open(PROTOCOLO.cachePaginas);
   const borradas = await Promise.all(urls.map((url) => cache.delete(url)));
+  const registro = await leerRegistro(cache);
+  delete registro[slug];
+  await escribirRegistro(cache, registro);
+  await podarAssetsHuerfanos(cache, registro);
   return { ok: true, urls: borradas.filter(Boolean).length };
 }
 
 /**
- * Tira los assets con hash de builds anteriores.
+ * Tira los assets con hash que **ya no necesita ningún favorito**.
  *
- * Un asset con hash nunca se pisa —cambia de nombre—, así que sin poda la caché crecería un CSS y
- * dos bundles por despliegue hasta que el navegador desalojara el origen entero, favoritos
- * incluidos. La página que acaba de guardarse dice cuáles usa; lo demás bajo `/_astro/` ya no lo
- * referencia ningún HTML guardado del build de hoy.
+ * Sin poda la caché crecería una hoja de estilos y tres bundles por despliegue —un asset con hash
+ * nunca se pisa, cambia de nombre— hasta que el navegador desalojara el origen entero, favoritos
+ * incluidos. Con poda, y con el registro delante, se conserva exactamente la unión de lo que piden
+ * los favoritos que hay: los assets del build de ayer se van cuando se va el último favorito que
+ * los usaba, y ni un minuto antes.
  */
-async function podarAssetsDeOtroBuild(cache: Cache, vigentes: readonly string[]): Promise<void> {
-  if (vigentes.length === 0) {
-    return; // Sin lista de vigentes no se poda nada: mejor de más que borrar lo que hace falta.
-  }
-  const conservar = new Set(vigentes);
+async function podarAssetsHuerfanos(cache: Cache, registro: Registro): Promise<void> {
+  const conservar = new Set(Object.values(registro).flat());
   const claves = await cache.keys();
   await Promise.all(
     claves

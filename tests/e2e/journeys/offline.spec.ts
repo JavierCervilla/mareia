@@ -38,6 +38,8 @@ const FIXTURES = join(RAIZ, "apps", "web", "src", "modulos", "meteo", "fixtures"
 const CAPTURAS = join(RAIZ, "qa-shots", "t12-offline");
 
 const PAGINA = "/mareas/galicia/pontevedra/vigo/";
+/** Un segundo puerto, para los recorridos en los que hay más de un favorito guardado. */
+const PAGINA_SEGUNDA = "/mareas/cantabria/cantabria/santander/";
 const SECCION_SIN_RED = "#sin-cobertura";
 const SECCION_OTRO_DIA = "#otro-dia";
 const SECCION_METEO = "#meteo";
@@ -56,9 +58,18 @@ function fixture(nombre: string): string {
 interface Arnes {
   /** Corta la red para la página **y** para el service worker. */
   cortar: () => Promise<void>;
+  /**
+   * Simula el **rebuild diario** (T-15) para una ruta: su HTML se sirve apuntando a assets con otro
+   * hash, y esos assets se sirven con el contenido de los originales. Es la situación en la que dos
+   * favoritos guardados en dos días distintos necesitan ficheros distintos.
+   */
+  otroBuildEn: (ruta: string) => void;
   /** Orígenes externos que la página llegó a pedir (siempre abortados). */
   readonly escapes: readonly string[];
 }
+
+/** Prefijo con el que se sirven los assets del «build de mañana» en el recorrido de dos favoritos. */
+const PREFIJO_OTRO_BUILD = "/_astro/otro-build--";
 
 /**
  * Sirve los dos endpoints del módulo meteo desde fixtures y cierra la salida a internet.
@@ -72,6 +83,7 @@ async function montarArnes(
 ): Promise<Arnes> {
   const escapes: string[] = [];
   let hayRed = true;
+  const rutasDeOtroBuild = new Set<string>();
 
   await context.route("**/*", async (route) => {
     const url = new URL(route.request().url());
@@ -82,6 +94,19 @@ async function montarArnes(
     if (url.hostname !== "127.0.0.1" && url.hostname !== "localhost") {
       escapes.push(url.href);
       await route.abort();
+      return;
+    }
+    // Un asset del «build de mañana»: mismo contenido, otro nombre. Es lo que hace un rebuild.
+    if (url.pathname.startsWith(PREFIJO_OTRO_BUILD)) {
+      const original = `/_astro/${url.pathname.slice(PREFIJO_OTRO_BUILD.length)}`;
+      const respuesta = await route.fetch({ url: `${url.origin}${original}` });
+      await route.fulfill({ response: respuesta });
+      return;
+    }
+    if (rutasDeOtroBuild.has(url.pathname)) {
+      const respuesta = await route.fetch();
+      const html = (await respuesta.text()).replaceAll("/_astro/", PREFIJO_OTRO_BUILD);
+      await route.fulfill({ status: 200, contentType: "text/html; charset=utf-8", body: html });
       return;
     }
     const endpoint = /\/v1\/modules\/weather\/(weather|bulletin)$/u.exec(url.pathname)?.[1];
@@ -99,6 +124,9 @@ async function montarArnes(
 
   return {
     escapes,
+    otroBuildEn: (ruta: string) => {
+      rutasDeOtroBuild.add(ruta);
+    },
     cortar: async () => {
       hayRed = false;
       await context.setOffline(true);
@@ -298,6 +326,76 @@ test("si la cobertura se cae con la página abierta y sin guardar, se dice CUÁL
   );
 
   await capturar(page, "5-sin-red-sin-guardar");
+});
+
+// =================================================================================================
+// 3 bis · Dos favoritos guardados en dos builds distintos
+//
+// Es el caso que rompía y que ningún recorrido cubría, porque todos usaban **un** favorito. El
+// worker podaba de la caché todo asset que no usara la página que se estaba guardando, dando por
+// hecho que «lo demás ya no lo referencia ningún HTML guardado» — falso en cuanto hay dos favoritos
+// de dos builds, que con el rebuild diario de T-15 es el caso normal. El primero se quedaba con su
+// página y CERO assets: se abría sin estilos, sin la isla meteo y **sin el trozo de la calculadora**,
+// que es la promesa entera de T-12, y sin un solo error por ninguna parte.
+// =================================================================================================
+
+test("guardar un segundo puerto tras un despliegue nuevo no deja al primero sin sus ficheros", async ({
+  page,
+  context,
+}) => {
+  const arnes = await montarArnes(context, { meteo: "weather-ok", boletin: "bulletin-ok" });
+
+  // Favorito 1: Vigo, con el build de hoy.
+  await page.goto(PAGINA);
+  await guardarPuerto(page);
+
+  // Llega el rebuild diario: la página de Santander se sirve con assets de otro hash.
+  arnes.otroBuildEn(PAGINA_SEGUNDA);
+  await page.goto(PAGINA_SEGUNDA);
+  await guardarPuerto(page);
+
+  // Sin red, el PRIMER favorito tiene que seguir entero.
+  await arnes.cortar();
+  await page.goto(PAGINA);
+
+  await expect(page.locator("h1")).toHaveText("Vigo");
+  // Su hoja de estilos sigue guardada: sin ella el nombre del puerto no sale en la serifa de marca.
+  await expect(page.locator("h1.identidad__nombre")).toHaveCSS(
+    "font-family",
+    /Instrument Serif|Georgia/u,
+  );
+  // Y su JavaScript también: si el bundle no está, el formulario nunca se enseña.
+  await expect(page.locator("[data-otro-dia-form]")).toBeVisible();
+
+  // Y el trozo de la calculadora, que es el que no referencia ningún HTML y el que más fácil se
+  // quedaba fuera: pedir un día futuro sin red tiene que seguir dando su tabla.
+  await pedirDia(page, DIA_FUTURO);
+  await expect(page.locator("[data-otro-dia-resultado] h3")).toContainText("14 de marzo de 2027");
+
+  await capturar(page, "8-dos-favoritos-dos-builds");
+});
+
+test("olvidar un puerto no le quita los ficheros al otro, y el último se lleva los suyos", async ({
+  page,
+  context,
+}) => {
+  const arnes = await montarArnes(context, { meteo: "weather-ok", boletin: "bulletin-ok" });
+  await page.goto(PAGINA);
+  await guardarPuerto(page);
+  await page.goto(PAGINA_SEGUNDA);
+  await guardarPuerto(page);
+
+  // Se olvida el segundo, con red.
+  await page.locator(`${SECCION_SIN_RED} [data-sin-red-accion]`).click();
+  await expect(page.locator(`${SECCION_SIN_RED} .sin-red__sello`)).toContainText(
+    "no está guardado en este dispositivo",
+  );
+
+  // El primero sigue completo sin red.
+  await arnes.cortar();
+  await page.goto(PAGINA);
+  await expect(page.locator("h1")).toHaveText("Vigo");
+  await expect(page.locator("[data-otro-dia-form]")).toBeVisible();
 });
 
 // =================================================================================================

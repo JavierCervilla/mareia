@@ -9,7 +9,8 @@
  * Como en la isla de T-11, **todo el texto se escribe con `textContent`**: nada de `innerHTML`.
  */
 
-import { ventanaDeAnos } from "../estacion-offline.ts";
+import { ventanaVigente } from "../estacion-offline.ts";
+import type { EstacionOffline } from "../estacion-offline.ts";
 import { urlsDeFavorito, urlsDeOlvido } from "../precacheo.ts";
 import { MENSAJE_GUARDAR, MENSAJE_OLVIDAR } from "../protocolo.ts";
 import { vistaSinRed } from "../vista-sin-red.ts";
@@ -136,7 +137,13 @@ function esAsset(url: string): boolean {
 /** Monta la sección: pinta el estado actual y deja el botón y los avisos de red escuchando. */
 export function montarSinRed(anclaje: AnclajeSinRed): void {
   const repintar = (): void => {
-    void pintarEstado(anclaje);
+    void (async () => {
+      await pintarEstado(anclaje);
+      const favorito = await leerFavorito(anclaje.slug);
+      if (favorito !== undefined) {
+        await refrescarCopia(anclaje, favorito);
+      }
+    })();
   };
   anclaje.boton.addEventListener("click", () => {
     void alPulsar(anclaje);
@@ -153,6 +160,40 @@ async function pintarEstado(anclaje: AnclajeSinRed, nota?: string): Promise<void
   pintar(anclaje, vistaDe(anclaje, favorito), nota);
 }
 
+/**
+ * Con red y con el puerto guardado, comprueba si las constantes han cambiado y actualiza la copia.
+ *
+ * Hace falta porque el dataset **no es inmutable**: el pipeline corrige constantes —para eso
+ * existe— y esa URL no lleva hash, así que sin esto un teléfono podría calcular durante meses con
+ * las de antes bajo el rótulo «las mismas que usa el servidor». Va en segundo plano y en silencio:
+ * si no hay red, o si lo que llega es igual, no pasa nada y no se toca la pantalla.
+ */
+async function refrescarCopia(anclaje: AnclajeSinRed, favorito: Favorito): Promise<void> {
+  if (navigator.onLine === false) {
+    return;
+  }
+  const fresca = await bajarEstacion(anclaje.slug);
+  if (fresca === undefined || mismasConstantes(fresca.payload, favorito.estacion)) {
+    return;
+  }
+  const guardado = await guardarFavorito({
+    slug: anclaje.slug,
+    // La copia es nueva, así que su edad vuelve a cero: decir «guardado hace tres semanas» sobre
+    // unas constantes que se acaban de bajar sería el mismo defecto que el sello existe para evitar.
+    guardadoEnMs: Date.now(),
+    bytes: fresca.bytes,
+    estacion: fresca.payload,
+  });
+  if (guardado) {
+    await pintarEstado(anclaje);
+  }
+}
+
+/** Si dos payloads dicen lo mismo. Se compara el dato, no el `generadoEn`, que cambia cada día. */
+function mismasConstantes(uno: EstacionOffline, otro: EstacionOffline): boolean {
+  return JSON.stringify(uno.estacion) === JSON.stringify(otro.estacion);
+}
+
 function vistaDe(anclaje: AnclajeSinRed, favorito: Favorito | undefined): VistaSinRed {
   return vistaSinRed({
     copia:
@@ -164,7 +205,10 @@ function vistaDe(anclaje: AnclajeSinRed, favorito: Favorito | undefined): VistaS
     ahoraMs: Date.now(),
     nombre: anclaje.nombre,
     fechaDeBuild: anclaje.fechaDeBuild,
-    ventana: ventanaDeAnos(anclaje.fechaDeBuild),
+    // La ventana la manda **la copia guardada** cuando la hay, y la regla vive en un solo sitio
+    // (`ventanaVigente`) porque derivarla por separado aquí y en la calculadora es cómo se acabaron
+    // publicando dos frases que se contradecían en la misma pantalla.
+    ventana: ventanaVigente(favorito?.estacion.generadoEn, anclaje.fechaDeBuild),
   });
 }
 
@@ -250,12 +294,14 @@ async function guardar(anclaje: AnclajeSinRed): Promise<string | undefined> {
   if (!guardado) {
     return "Este navegador no ha dejado guardar el puerto en su almacenamiento local.";
   }
-  const assets = assetsDeLaPagina(document);
   const respuesta = await pedirAlWorker({
     tipo: MENSAJE_GUARDAR,
     slug: anclaje.slug,
-    urls: urlsDeFavorito({ slug: anclaje.slug, ruta: anclaje.ruta }, assets, anclaje.assetsDeModulos),
-    assetsVigentes: assets,
+    urls: urlsDeFavorito(
+      { slug: anclaje.slug, ruta: anclaje.ruta },
+      assetsDeLaPagina(document),
+      anclaje.assetsDeModulos,
+    ),
   });
   return respuesta.ok
     ? undefined
