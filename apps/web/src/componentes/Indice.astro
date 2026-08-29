@@ -5,12 +5,24 @@
  *
  * Cada entrada lleva su meta a la derecha —«3 puertos», «Pontevedra»— porque un índice de anuario
  * dice cuánto hay detrás de cada entrada antes de que tengas que entrar.
+ *
+ * Desde T-14B, una entrada que es un **puerto** puede decir además si su marea está medida ahí o es
+ * una estimación. Va en el HTML construido, sin una línea de JavaScript: es lo que decide cuál
+ * abres, y una señal que solo existe si corre el JS es una señal que a veces no está. El dato es el
+ * mismo `quality.estimated` que publican la ficha del puerto y `/v1/ports`; aquí solo se le pone
+ * palabra. El `data-estimado` de la entrada no es decoración: es el asidero del filtro por calidad
+ * de la portada, que es CSS puro (ver `estilos/indices.css`).
  */
 
 interface Entrada {
   readonly nombre: string;
   readonly ruta: string;
   readonly meta?: string | undefined;
+  /**
+   * Si la marea de este puerto es una estimación. `undefined` en los índices cuyas entradas no son
+   * puertos (regiones, provincias): ahí la pregunta no tiene respuesta, y no se inventa una.
+   */
+  readonly estimada?: boolean | undefined;
 }
 
 interface Props {
@@ -26,10 +38,23 @@ const { entradas, titulo } = Astro.props;
 <ul class="indice" role="list" aria-label={titulo}>
   {
     entradas.map((entrada) => (
-      <li class="indice__entrada">
+      <li
+        class="indice__entrada"
+        data-estimado={entrada.estimada === undefined ? undefined : String(entrada.estimada)}
+      >
         <a class="indice__enlace" href={entrada.ruta}>
           <span class="indice__nombre">{entrada.nombre}</span>
-          {entrada.meta && <span class="indice__meta">{entrada.meta}</span>}
+          {(entrada.meta !== undefined || entrada.estimada !== undefined) && (
+            <span class="indice__meta">
+              {entrada.meta}
+              {entrada.estimada !== undefined && (
+                <>
+                  {entrada.meta !== undefined && " · "}
+                  <span class="indice__calidad">{entrada.estimada ? "estimada" : "medida"}</span>
+                </>
+              )}
+            </span>
+          )}
         </a>
       </li>
     ))

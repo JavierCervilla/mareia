@@ -98,6 +98,21 @@
       ya no puede colarse. Dos gates lo sostienen: uno **recomputa** cifra y conjunto desde los JSON
       y exige igualdad exacta (sobrar y faltar dan mensajes distintos), y otro **inyecta** una
       fuente impublicable con rango 0 y exige que pierda — los cuatro comprobados en rojo
+- [x] T-14B · **La calidad deja de ser un dato que hay que ir a buscar.** El grade y el flag
+      «estimado» se publicaban bien en la ficha y no estaban en los dos sitios donde se **elige**
+      puerto, así que los 153 se presentaban como si valieran lo mismo —y **120 son estimados**.
+      Ahora `GET /v1/ports` lleva `quality` (`grade`, `estimated`, `rmse_m`, `hw_time_err_p95_min`,
+      con los `null` intactos): filtrar el catálogo pasa de **153 peticiones a una**. Y la portada lo
+      dice en cada entrada («Almería · estimada»), **horneado en el HTML**, con filtro por calidad de
+      **cero bytes de JavaScript** —tres radios y reglas de hermano en CSS, no una isla: la portada
+      conserva su cero scripts—. No se inventa escala, no se reordena la lista (la geografía sigue
+      mandando) y los umbrales de cada grade se publican con su cifra en `apps/api/README.md`. Tres
+      gates que recomputan desde el catálogo y **nombran el puerto** que falta, comprobados en rojo,
+      uno de ellos en un navegador con el JavaScript apagado. **Cerrado tras el pase adversario**:
+      la señal alcanza también las **12** páginas de región y las **24** de provincia —eran 306
+      entradas mudas y el último clic antes de la ficha se daba a ciegas—, y el contrato del API
+      explica los dos `null` de `hw_time_err_p95_min` con su motivo y su cifra (118 sin observación,
+      13 micromareales medidos), con gates que atan el **significado** y no la presencia
 - [ ] T-14 · Metodología pública + QC navegable + dataset con su licencia por puerto declarada
       (el reparto real ya publicado en T-14A) + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario

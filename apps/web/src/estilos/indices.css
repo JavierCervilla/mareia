@@ -58,6 +58,113 @@
   color: var(--m-sub);
 }
 
+/* -----------------------------------------------------------------------------
+ * La calidad del dato en la entrada del índice (T-14B).
+ *
+ * La señal es una palabra dentro de la meta —«Pontevedra · estimada»—, no una pastilla de color:
+ * el anti-objetivo del brief (§3) veta los chips, y una palabra se lee igual impresa, dictada por
+ * un lector de pantalla o en escala de grises. El color solo refuerza, y solo en el caso que
+ * cambia la lectura de lo que hay debajo.
+ * -------------------------------------------------------------------------- */
+.indice__calidad {
+  color: var(--m-sub);
+}
+
+/* Terracota, el mismo tono con el que la página del puerto marca sus avisos. */
+.indice__entrada[data-estimado="true"] .indice__calidad {
+  color: var(--m-terra);
+}
+
+/* -----------------------------------------------------------------------------
+ * Filtro por calidad de la portada: CSS puro, cero JavaScript.
+ *
+ * Tres radios hermanos de las secciones de región y, por tanto, alcanzables con `~`. El
+ * `display: none` de las entradas que no cumplen es todo el mecanismo: no hay estado que guardar,
+ * no hay hidratación y la portada conserva su cero scripts (`scripts-de-core.ts`). Las reglas
+ * llevan `#id` porque el estado vive en el radio y no hay otra forma de leerlo sin JS; son las
+ * únicas de la hoja, y solo aplican en la portada, que es la única página que los pinta.
+ * -------------------------------------------------------------------------- */
+.catalogo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--m-gap-bloque);
+}
+
+/* Los radios van ocultos con `.solo-lectores` (almanaque.css), que es la misma técnica que ya usa
+   el resto del portal: fuera de la vista pero dentro del orden de tabulación y del árbol de
+   accesibilidad. Con `display: none` el filtro dejaría de existir para el teclado. */
+
+.filtro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--m-gap-fila);
+  border-top: 1px solid var(--m-rule-soft);
+  border-bottom: 1px solid var(--m-rule-soft);
+  padding: 12px 0 0;
+}
+
+.filtro__nota {
+  max-width: 62ch;
+  font-size: var(--m-text-small);
+  color: var(--m-sub);
+}
+
+.filtro__opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 28px;
+}
+
+/* Compuesto como los controles de T-12: tipografía del almanaque y un filete debajo, sin relleno
+   ni esquinas redondeadas. Los 44 px de alto los pide el entorno de uso del brief (§1): un dedo
+   con guantes en la playa. */
+.filtro__opcion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  border-bottom: 2px solid transparent;
+  color: var(--m-navy);
+  cursor: pointer;
+}
+
+.filtro__cuenta {
+  font-size: var(--m-text-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--m-sub);
+}
+
+/* La opción activa se marca con su filete, y se sigue distinguiendo en papel y sin color. */
+#calidad-todos:checked ~ .filtro .filtro__opcion[for="calidad-todos"],
+#calidad-medidos:checked ~ .filtro .filtro__opcion[for="calidad-medidos"],
+#calidad-estimados:checked ~ .filtro .filtro__opcion[for="calidad-estimados"] {
+  border-bottom-color: var(--m-rule);
+  color: var(--m-ink);
+}
+
+/* El anillo de foco no se suprime nunca (brief §6): como el radio que lo recibe es de 1 px, se
+   proyecta sobre la etiqueta, que es lo que el usuario ve. Una regla por opción porque el
+   selector tiene que nombrar a la suya; son tres y no cambian. */
+#calidad-todos:focus-visible ~ .filtro .filtro__opcion[for="calidad-todos"],
+#calidad-medidos:focus-visible ~ .filtro .filtro__opcion[for="calidad-medidos"],
+#calidad-estimados:focus-visible ~ .filtro .filtro__opcion[for="calidad-estimados"] {
+  outline: 2px solid var(--m-navy);
+  outline-offset: 4px;
+}
+
+/* Lo que hace el filtro: esconder lo que no se ha pedido… */
+#calidad-medidos:checked ~ .grupo .indice__entrada[data-estimado="true"],
+#calidad-estimados:checked ~ .grupo .indice__entrada[data-estimado="false"] {
+  display: none;
+}
+
+/* …y con ello la región que se queda sin puertos, para no dejar un rótulo sobre una lista vacía.
+   Las cuentas las hornea la portada desde el catálogo. */
+#calidad-medidos:checked ~ .grupo[data-medidos="0"],
+#calidad-estimados:checked ~ .grupo[data-estimados="0"] {
+  display: none;
+}
+
 /* Agrupación por provincia dentro de la página de una región. */
 .grupo {
   display: flex;

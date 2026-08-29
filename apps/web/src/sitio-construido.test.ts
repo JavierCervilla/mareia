@@ -38,6 +38,23 @@ function paginaDe(ruta: string): string {
   return readFileSync(join(DIST, ruta, "index.html"), "utf8");
 }
 
+/**
+ * La entrada de un puerto en un índice construido, tal cual salió al HTML: del `<li>` que abre
+ * hasta el `</li>` que cierra. Se localiza por su enlace, que es único en la página.
+ *
+ * Sirve para las tres listas de puertos del portal —portada, región y provincia—, que desde el
+ * arreglo de T-14B publican la misma señal con el mismo componente.
+ */
+function entradaDelIndice(html: string, ruta: string): string | undefined {
+  const enlace = html.indexOf(`href="${ruta}"`);
+  if (enlace === -1) {
+    return undefined;
+  }
+  const inicio = html.lastIndexOf("<li", enlace);
+  const fin = html.indexOf("</li>", enlace);
+  return inicio === -1 || fin === -1 ? undefined : html.slice(inicio, fin);
+}
+
 function fechaDelBuild(): string {
   const fecha = /<time datetime="(\d{4}-\d{2}-\d{2})"/.exec(readFileSync(PORTADA, "utf8"))?.[1];
   assert.ok(fecha, "la portada construida no declara la fecha de sus datos");
@@ -530,4 +547,141 @@ test("cada JavaScript de una página de puerto tiene dueño declarado; los índi
   // Los índices geográficos no tienen módulos ni PWA: siguen con cero JavaScript.
   assert.equal([...paginaDe(RUTA_MAREAS).matchAll(/<script[^>]*src=/gu)].length, 0);
   assert.equal(scriptsDeCoreEn(false), 0, "un script de core en los índices rompería su cero-JS");
+});
+
+/**
+ * **El gate de T-14B por el lado de la portada.**
+ *
+ * La forma de fallar de esto no es «no aparece la calidad»: es que aparezca en 148 de los 153 y
+ * nadie lo note. Por eso la lista se **recalcula desde el catálogo** en cada corrida —nada de una
+ * constante que haya que acordarse de subir cuando entre un puerto nuevo— y el rojo **nombra el
+ * puerto**: «esperaba 153, había 148» obliga a investigar; «la-manga-del-mar-menor: la entrada no
+ * dice “estimada”» ya ha hecho el trabajo.
+ *
+ * Y mira el HTML de `dist/`, que es el artefacto que se sirve, no la función que lo genera: entre
+ * una y otro está el renderizado, que es donde una condición mal escrita deja la señal fuera de
+ * unas cuantas entradas sin que ningún test de componente se entere.
+ */
+test("la portada dice de TODOS los puertos si su marea está medida o estimada", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  const html = readFileSync(PORTADA, "utf8");
+  const fallos: string[] = [];
+  for (const puerto of await cargarPuertos()) {
+    const entrada = entradaDelIndice(html, rutaPuerto(puerto));
+    if (entrada === undefined) {
+      fallos.push(`${puerto.slug}: no tiene entrada en la portada`);
+      continue;
+    }
+    const palabra = puerto.quality.estimated ? "estimada" : "medida";
+    if (!entrada.includes(`<span class="indice__calidad">${palabra}</span>`)) {
+      fallos.push(`${puerto.slug}: su entrada de la portada no dice «${palabra}»`);
+    }
+    // Sin el `data-estimado` la señal se lee pero el filtro no alcanza a la entrada: quedaría
+    // visible en «Solo los medidos» siendo estimada, que es peor que no filtrar.
+    if (!entrada.includes(`data-estimado="${String(puerto.quality.estimated)}"`)) {
+      fallos.push(`${puerto.slug}: su entrada no lleva data-estimado, el filtro no la alcanza`);
+    }
+  }
+  assert.deepEqual(fallos, [], "puertos sin la calidad publicada en la portada");
+});
+
+/**
+ * **El gate del arreglo de H-1: las otras dos listas de puertos del portal.**
+ *
+ * El pase adversario de T-14B midió que la señal existía en **una sola página del sitio**: la
+ * portada. Las otras dos familias de listas —las 12 de región y las 24 de provincia, que son la
+ * ruta que la propia portada llama canónica— presentaban los 153 puertos planos, así que el último
+ * clic antes de la ficha se daba a ciegas (en Pontevedra, Vigo y Baiona idénticos).
+ *
+ * Se comprueba puerto a puerto y en las **dos** páginas donde aparece cada uno, con el rojo
+ * nombrando el puerto y la página: la forma de fallar de esto no es que la señal desaparezca, es
+ * que se quede fuera de una familia de páginas —o de una provincia— y nadie lo note.
+ *
+ * No se exige aquí el `data-estimado`: en estas páginas no hay filtro al que sirva de asidero (ver
+ * `design-brief.md` §7 quater), y gatear un atributo que no gobierna nada sería gatear la forma en
+ * vez de la promesa. Lo que se exige es la **palabra**, que es lo que se lee al elegir.
+ */
+test("los índices de región y de provincia dicen de TODOS los puertos si su marea está medida", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  const fallos: string[] = [];
+  for (const region of await cargarCatalogo()) {
+    const paginas = new Map([[rutaRegion(region.slug), paginaDe(rutaRegion(region.slug))]]);
+    for (const provincia of region.provincias) {
+      const ruta = rutaProvincia(region.slug, provincia.slug);
+      paginas.set(ruta, paginaDe(ruta));
+    }
+    for (const provincia of region.provincias) {
+      for (const puerto of provincia.puertos) {
+        const palabra = puerto.quality.estimated ? "estimada" : "medida";
+        for (const ruta of [rutaRegion(region.slug), rutaProvincia(region.slug, provincia.slug)]) {
+          const entrada = entradaDelIndice(paginas.get(ruta) ?? "", rutaPuerto(puerto));
+          if (entrada === undefined) {
+            fallos.push(`${puerto.slug}: no tiene entrada en ${ruta}`);
+          } else if (!entrada.includes(`<span class="indice__calidad">${palabra}</span>`)) {
+            fallos.push(`${puerto.slug}: su entrada de ${ruta} no dice «${palabra}»`);
+          }
+        }
+      }
+    }
+  }
+  assert.deepEqual(fallos, [], "puertos que se siguen eligiendo a ciegas en los índices geográficos");
+});
+
+/**
+ * Las cuentas del filtro y las de cada región salen del catálogo, no de la memoria de nadie.
+ *
+ * Son las dos cifras que se pueden quedar viejas sin que se rompa nada visible: la del filtro
+ * («Solo los medidos 33») porque es texto, y las de la región (`data-medidos`, `data-estimados`)
+ * porque solo se notan cuando valen cero — es lo que hace desaparecer el rótulo de una región que
+ * se ha quedado sin puertos al filtrar. Un cero de menos deja un encabezado sobre una lista vacía;
+ * un cero de más esconde una región entera.
+ */
+test("las cuentas del filtro de calidad de la portada las manda el catálogo", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  const html = readFileSync(PORTADA, "utf8");
+  const regiones = await cargarCatalogo();
+  const puertos = regiones.flatMap(puertosDeRegion);
+  const estimados = puertos.filter((puerto) => puerto.quality.estimated).length;
+
+  const cuentas = [...html.matchAll(/<span class="filtro__cuenta">(\d+)<\/span>/gu)].map(
+    (encontrado) => Number(encontrado[1]),
+  );
+  assert.deepEqual(
+    cuentas,
+    [puertos.length, puertos.length - estimados, estimados],
+    "las opciones del filtro (todos · medidos · estimados) no cuentan lo que hay en el catálogo",
+  );
+
+  const desajustes: string[] = [];
+  for (const region of regiones) {
+    const suyos = puertosDeRegion(region);
+    const suyosEstimados = suyos.filter((puerto) => puerto.quality.estimated).length;
+    const seccion = new RegExp(
+      `<section class="grupo" aria-labelledby="region-${region.slug}" ` +
+        `data-estimados="(\\d+)" data-medidos="(\\d+)"`,
+      "u",
+    ).exec(html);
+    if (seccion === null) {
+      desajustes.push(`${region.slug}: su bloque no publica las cuentas de calidad`);
+      continue;
+    }
+    if (Number(seccion[1]) !== suyosEstimados) {
+      desajustes.push(`${region.slug}: dice ${seccion[1]} estimados y tiene ${suyosEstimados}`);
+    }
+    if (Number(seccion[2]) !== suyos.length - suyosEstimados) {
+      desajustes.push(
+        `${region.slug}: dice ${seccion[2]} medidos y tiene ${suyos.length - suyosEstimados}`,
+      );
+    }
+  }
+  assert.deepEqual(desajustes, [], "las cuentas por región no cuadran con el catálogo");
 });

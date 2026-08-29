@@ -156,6 +156,92 @@ cabecera.
   instala esto sigue queriendo ver la URL —para compartirla y para recortarla, que es una promesa de
   la jerarquía de URL de T-09— y sigue queriendo recargar. Parecer una app nativa no es un objetivo.
 
+## 7 ter. Ampliación T-14B — la calidad en la lista, y su filtro sin JavaScript
+
+Esta sección **amplía el brief** (no abre otro), como anuncia la cabecera: la portada deja de
+presentar los 153 puertos como si valieran lo mismo.
+
+- **El problema es de jerarquía, no de dato.** La calidad ya se publica —entera— en la página del
+  puerto (§1, nivel *contextual*: «grade de la estación»). Lo que faltaba es que llegara al sitio
+  donde se **elige**: una lista plana invita a leerla como plana, y 120 de los 153 puertos publican
+  una marea **estimada**. En la lista, esa marca sube a **crítica**: cambia qué puerto abres.
+- **La señal es una palabra, no un chip.** «medida» / «estimada» junto a la provincia, en la misma
+  cursiva de la meta del índice (`--m-text-meta`, `--m-sub`), separada por un punto medio. Nada de
+  pastilla de color, que es el anti-objetivo §3 («chips de colores») y además obligaría al color a
+  portar significado. Lo único que hace el color es **reforzar**: la palabra «estimada» va en
+  terracota (`--m-terra`), el mismo tono con el que la página del puerto ya marca sus avisos, y se
+  distingue igual leída en gris, impresa o dictada por un lector de pantalla.
+- **La señal se hornea en el HTML.** Va en el índice construido, sin una línea de JavaScript: una
+  señal que solo existe si corre el JS es una señal que a veces no está (lección de T-11). La
+  portada **conserva su cero scripts** (`scripts-de-core.ts`), y por tanto no toca el presupuesto de
+  bytes de T-12.
+- **El grade no sube a la lista.** Viaja en `/v1/ports` para quien afine, y se lee entero —con su
+  motivo— en la ficha. En la lista, una letra sin su umbral al lado es un adorno técnico: lo que
+  decide al elegir es si la marea está medida aquí o prestada de otro sitio.
+- **El filtro es CSS, no una isla.** Tres radios visualmente ocultos (pero enfocables) y reglas de
+  hermano: `#calidad-medidos:checked ~ .grupo .indice__entrada[data-estimado="true"]`. Cero bytes de
+  JavaScript, cero hidratación, funciona en cualquier navegador con radios y sin depender de `:has()`.
+  Se compone como los controles de §7 bis —tipografía del almanaque, filete bajo la opción activa,
+  sin relleno ni esquinas redondeadas, 44 px de zona pulsable—, como el pie de un índice impreso que
+  dice qué se está listando.
+- **Las cuentas van en la propia opción** («Todos 153 · Medidos 33 · Estimados 120»), horneadas del
+  catálogo. Sin JavaScript no hay contador vivo, y no hace falta: la cuenta de cada opción **es** el
+  resultado, y de paso dice el dato incómodo —cuántos hay de cada— antes de que nadie filtre.
+- **Una región que se queda sin puertos desaparece con ellos.** Cada bloque de región lleva
+  horneadas sus dos cuentas (`data-medidos`, `data-estimados`) y el CSS oculta el bloque cuyo
+  contador es `0`: un rótulo de región sobre una lista vacía es peor que no filtrar.
+- **En papel se imprime lo que se ve**, con la opción activa marcada por su filete. No se esconde el
+  control al imprimir: un papel que lista 33 puertos sin decir que están filtrados miente sobre el
+  catálogo, y ese es justo el pecado que esta trayectoria vino a corregir.
+- **Quedaba fuera** —y duró lo que tardó el pase adversario en medirlo—: los índices de región y
+  provincia se dejaron sin la marca porque T-14B corregía «los dos sitios donde el proyecto declaró
+  que se elige puerto». Resultaron ser cuatro superficies, y la §7 quater cuenta el arreglo.
+
+## 7 quater. Arreglo de T-14B — la señal en las tres listas de puertos, y por qué el filtro no
+
+El pase adversario midió lo que costaba dejarlo fuera: la clase `indice__calidad` aparecía en **una
+sola página del sitio**, y las otras dos familias de listas —12 de región y 24 de provincia, que
+son la ruta que la propia portada llama canónica («Ver todas las regiones»)— presentaban los 153
+puertos planos. **306 entradas mudas**, y el último clic antes de la ficha dado a ciegas: en
+`/mareas/galicia/pontevedra/`, Vigo (medida) y Baiona (estimada) idénticos.
+
+- **La misma señal, el mismo componente, la misma palabra.** Las dos páginas pasan `estimada` al
+  `Indice.astro` que ya existía; ni una regla de CSS nueva, ni un segundo vocabulario. Decir «sin
+  contrastar» aquí y «estimada» allí serían dos cosas distintas para quien lee, aunque sean el
+  mismo `quality.estimated`.
+- **En provincia la señal comparte meta con la zona horaria** («Europe/Madrid · estimada»), con el
+  mismo punto medio que la portada usa para la provincia. La jerarquía de §1 no cambia: la meta
+  sigue siendo *contextual* y la marca es lo último que se lee de la entrada.
+- **El filtro NO baja a estas 36 páginas** (decisión, no olvido), por tres razones medidas:
+  1. **Lo que habría que descartar no lo pide.** El filtro es un mando para una lista que no cabe
+     de un vistazo: en la portada descarta 120 de 153. La región mediana tiene **12** puertos (la
+     mayor, Andalucía, 32; dos tienen **1**) y la provincia mediana **5,5** (la mayor, 17). El mando
+     cuesta tres radios, sus tres cuentas y una nota que explica qué significa «medida»: en una
+     provincia de 5 puertos, el control pesa más que la lista que filtra.
+
+     (Las medianas se recontaron del catálogo al cerrar la trayectoria: las 12 regiones miden
+     `1,1,2,4,5,7,17,17,19,22,26,32` y las 24 provincias `1,1,1,2,2,2,2,3,4,5,5,5,6,7,7,8,8,9,10,
+     11,11,12,14,17`. Antes decía 17 y 5, que son los centrales de arriba y de abajo y no las
+     medianas; y daba una nota «de 63 palabras» que ninguna forma de contarlas reproduce. Con las
+     cifras buenas el argumento es **más** fuerte, no menos.)
+  2. **En 7 de las 24 provincias «Solo los medidos» dejaría la página vacía** (Alicante 11/0,
+     Barcelona 9/0, Castellón 3/0, Lugo 2/0, Gipuzkoa 2/0, Sevilla 1/0, Ceuta 1/0). Un mando cuyo
+     resultado más probable en un tercio de las páginas es «no hay nada» no es un filtro: es un
+     callejón sin salida con etiqueta (§A9 del pase adversario).
+  3. **Quien quiere filtrar quiere el catálogo entero**, y ése está en la portada, a un toque desde
+     la cabecera de cualquier página. Un filtro por página parcela el descarte y multiplica por 37
+     la superficie de un mando que, además, tiene **una pregunta de producto abierta**: ordena por
+     procedencia y no por error (H-3 del informe adversario, sin resolver). Replicarlo antes de esa
+     decisión sería 36 copias de algo que puede cambiar.
+- **La señal, en cambio, no está en revisión: es la promesa.** Por eso va donde haya una lista de
+  puertos, y el gate lo comprueba **puerto a puerto y página a página**
+  (`sitio-construido.test.ts`, y los dos recorridos adversarios convertidos en gate permanente).
+- **Lo que pesa, medido.** Las 12 páginas de región pasan de 58.545 a 73.812 B de HTML (+26 %) y
+  las 24 de provincia de 93.717 a 104.394 B (+11 %); comprimidas, la mayor (Andalucía) pasa de
+  1.965 a 2.078 B (+5,7 %) y Pontevedra de 1.351 a 1.402 B (+3,8 %). La señal es texto que se
+  repite, que es lo que gzip hace mejor. Ni un byte de JavaScript: estas páginas conservan su
+  cero-JS.
+
 ## 8. Cómo se audita
 
 ```bash

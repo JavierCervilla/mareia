@@ -2,6 +2,118 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-29 — T-14B (arreglo del pase adversario) · la señal llega a las tres listas, y el `null` se explica por su motivo
+
+El pase adversario de T-14B reprodujo en rojo dos cosas que la trayectoria había dejado a medias.
+Ninguna era un fallo de lo implementado —lo implementado funcionaba—: eran una superficie que se
+quedó fuera y una frase que explicaba un dato con el motivo de otro.
+
+- **La calidad se dice en las tres listas de puertos, no en una.** El portal tiene tres —la portada,
+  las **12** páginas de región y las **24** de provincia— y las dos últimas son la ruta que la propia
+  portada llama canónica («Ver todas las regiones»). La señal aparecía en **una sola página del
+  sitio**: medido, **306 entradas mudas**, con el resultado de que el último clic antes de la ficha
+  se daba a ciegas —en `/mareas/galicia/pontevedra/`, Vigo (medida) y Baiona (estimada) se
+  presentaban idénticos—. Ahora las dos familias pasan `estimada` al mismo componente
+  (`Indice.astro`) con **la misma palabra** que la portada: «medida» / «estimada», en la meta de la
+  entrada («Europe/Madrid · estimada» en provincia). Ni una regla de CSS nueva, ni un segundo
+  vocabulario, ni un byte de JavaScript: estas páginas conservan su cero-JS.
+- **Lo que pesa, medido.** Las 12 páginas de región pasan de **58.545 a 73.812 B** de HTML
+  (**+26,1 %**) y las 24 de provincia de **93.717 a 104.394 B** (**+11,4 %**). Por página, la mayor
+  (Andalucía, 32 puertos) 8.936 → 12.129 B y Pontevedra 4.570 → 5.266 B; **comprimidas**, que es
+  como viajan, 1.965 → 2.078 B (**+5,7 %**) y 1.351 → 1.402 B (**+3,8 %**): la señal es texto que se
+  repite, y eso es lo que gzip hace mejor.
+- **El filtro no baja con la señal, y se dice por qué.** Es un mando para descartar en una lista que
+  no cabe de un vistazo —en la portada quita 120 de 153—, y aquí la región mediana tiene **12**
+  puertos y la provincia mediana **5,5**: el control, sus tres cuentas y su nota explicativa
+  pesarían más que la lista que filtran. Además, en **7 de las 24 provincias** «Solo los medidos» dejaría la página
+  vacía (Alicante 11/0, Barcelona 9/0, Castellón 3/0, Lugo 2/0, Gipuzkoa 2/0, Sevilla 1/0, Ceuta
+  1/0). Quien quiera filtrar tiene el catálogo entero en la portada, a un toque. El razonamiento
+  completo, en `apps/web/design-brief.md` §7 quater.
+- **El `null` del error de hora se documenta por su motivo real, con las dos cifras.** El contrato
+  estrenado por T-14B explicaba los `null` de `hw_time_err_p95_min` con un solo motivo —«la
+  observación existe pero no tiene pleamares identificables»— y eso es cierto en **13** puertos y
+  falso en **118**: en esos 118 no hay observación ninguna (`rmse_m: null`), y su propia ficha lo
+  venía diciendo con otras palabras desde T-09. Dos superficies publicadas del mismo portal
+  afirmando hechos contrarios sobre el mismo `null`. `apps/api/README.md` publica ahora los tres
+  casos en una tabla, cada uno con la frase con la que la ficha lo cuenta y con su cifra contada del
+  dataset: **118 de 153** sin observación, **13 de 153** micromareales medidos y **22 de 153**
+  medidos con pleamares (131 `null` en total). Y se dice que **no hay un cuarto caso**: un error de
+  hora medido contra una observación que no existe es imposible por construcción.
+- **Los gates atan el significado, no la presencia** — que es exactamente por lo que esto reapareció:
+  T-09 ya había arreglado la misma confusión en la ficha, y volvió cuando el dato estrenó una
+  superficie nueva porque lo único gateado era que el campo **estuviera**. Ahora: `/v1/ports`
+  clasifica cada puerto en su caso y lo compara con `metrics.samples` y `matched_extremes`, dos
+  contadores del QC que **no viajan por el API** y que nadie puede ajustar «para que pase»; y el
+  recorrido adversario recalcula las cifras de la tabla del contrato desde el dataset y clasifica las
+  **153 fichas construidas** por lo que dicen sus filas, exigiendo el mismo reparto puerto a puerto.
+- **Comprobados mordiendo, los cuatro.** Poner un error de hora a un puerto sin observación
+  (Alicante) deja **verdes los dos gates de presencia de T-14B** y pone rojo el nuevo: «alicante:
+  /v1/ports lo publica como «imposible» (rmse_m null, hw_time_err_p95_min 12.3) y el QC del dataset
+  dice «sin observación» (0 muestras de observación, 0 pleamares casadas)». Bajar la cifra del
+  contrato de 118 a 117 da «las cifras de la tabla del contrato no son las del dataset». Reescribir
+  el motivo con la frase vieja da «el contrato explica el null «sin observación» con otras palabras
+  que la ficha del puerto». Y quitarle la señal a **un solo puerto** —la forma real de romperse
+  esto— da «vigo: su entrada de /mareas/galicia/ no dice «medida»» y «vigo: su entrada de
+  /mareas/galicia/pontevedra/ no dice «medida»», con los dos recorridos adversarios en rojo
+  nombrándolo también.
+- **Los tres recorridos adversarios se quedan como gate permanente**: se les ha quitado el
+  `test.fail()` con el que afirmaban el defecto y ahora vigilan el arreglo. Suite: `pnpm test`
+  519/0, Playwright 48/48, Deno 23/0 y 7/0, `pnpm lint` y el anti-slop de UI **LIMPIO**.
+- **Sigue abierto, a propósito**: H-3 (el filtro ordena por procedencia y no por error: Puerto del
+  Rosario, «medida», RMSE 1,3424 m, sobrevive al filtro; San Sebastián de la Gomera, «estimada»,
+  grade B, 0,0364 m, se esconde) es una decisión de producto y la toma el humano, no este PR.
+
+## 2026-08-29 — T-14B · la calidad deja de ser un dato que hay que ir a buscar
+
+El proyecto sabía de cada puerto si su predicción está medida y con cuánto error, y lo decía bien
+**en la ficha**. En los dos sitios donde alguien **elige** puerto —la portada y `GET /v1/ports`— esa
+información no estaba, así que los 153 se presentaban como si valieran lo mismo. Y **120 de ellos
+(78 %) publican una marea estimada**: constantes prestadas del mareógrafo más cercano. No era una
+mentira, era una **omisión en el punto de decisión**, que en un portal cuya regla es «un puerto no
+publica una precisión que no tiene» acaba teniendo el mismo efecto.
+
+- **`GET /v1/ports` publica la calidad de cada puerto.** Cada entrada del catálogo lleva `quality`
+  con `grade`, `estimated`, `rmse_m` y `hw_time_err_p95_min`. Antes, saber cuáles están medidos
+  costaba **153 peticiones** a `/v1/ports/:slug`; ahora, una. Los `null` viajan **como `null`** y no
+  se omiten del objeto: «no se pudo medir» es dato, y un campo ausente se rellena con un cero. Las
+  frases que explican el porqué (`grade_reason`, `estimated_reason`) se quedan en la ficha: son un
+  párrafo por puerto y una lista no es donde se lee un párrafo. Medido contra el servidor,
+  no contra la función: el cuerpo pasa de 30.956 a 43.628 B (**+41 %**; gzip 4.175 → 4.660,
+  **+11,6 %**) y la primera petición tarda 87 ms leyendo las
+  153 estaciones — las siguientes, 2,2 ms, porque el repositorio cachea por fichero.
+- **La portada lo dice en cada entrada, y se lee sin JavaScript.** «Almería · estimada», «Almería ·
+  medida», en la misma cursiva de la meta del índice: una palabra, no un chip de color (el color
+  solo refuerza). Va **horneada en el HTML**, porque una señal que solo existe si corre el JS es una
+  señal que a veces no está (lección de T-11). Medido: 35.710 → 47.997 B de HTML (**+34,4 %**; gzip
+  4.013 → 4.770, **+18,9 %**), de los que 10.557 son la señal de las 153 entradas.
+- **Y se puede filtrar por ella, con cero bytes de JavaScript.** Tres radios ocultos a la vista —no
+  al teclado ni al lector de pantalla— y reglas de hermano en CSS: «Todos los puertos 153 · Solo los
+  medidos 33 · Solo los estimados 120», con las cuentas horneadas del catálogo. **No es una isla**:
+  la portada conserva su cero scripts (`scripts-de-core.ts`) y el presupuesto de bytes de T-12 no se
+  toca. Cuesta 1.044 B de HTML y 1.515 B de CSS minificado en la hoja que ya comparten todas las
+  páginas (15.869 → 17.384 B). Una región que se queda sin puertos al filtrar **desaparece con ellos** (sus cuentas van
+  horneadas en el bloque), para no dejar un rótulo sobre una lista vacía. El recorrido Playwright que
+  lo comprueba corre con `javaScriptEnabled: false`: 153 → 33 → 120 → 153, y de 12 regiones visibles
+  a 11.
+- **El orden no cambia y la escala no se inventa.** Sigue mandando la geografía —ordenar por calidad
+  escondería puertos legítimos al final de la lista— y `grade`/`estimated` son los que ya calculaba
+  el QC del pipeline: aquí sólo se **enseñan donde se decide**.
+- **La documentación publica el umbral, no el adjetivo.** `apps/api/README.md` describe los cuatro
+  campos y qué significa cada `grade` con la cifra que lo decide, leída de `grade.py`: A/B piden
+  mareógrafo a ≤ 5 / ≤ 30 km de la dársena, registro de ≥ 10 / ≥ 1 años, coste de truncado ≤ 1 / ≤ 3
+  cm RMS, RMSE normalizado ≤ 0,05 / ≤ 0,15 y error de hora p95 ≤ 20 / ≤ 45 min. Y que `estimated`
+  **no** se deduce del grade: hace falta mareógrafo a ≤ 5 km **y** observación propia.
+- **Tres gates, comprobados mordiendo.** Su forma de fallar no es «no aparece», es «aparece en 148 de
+  153 y nadie lo nota», así que los tres **recomputan la lista desde el catálogo** —no desde una
+  constante que haya que acordarse de subir— y **fallan nombrando el puerto**: quitarle la calidad a
+  La Manga da «la-manga-del-mar-menor: sin quality»; borrar `rmse_m` del objeto (hueco en vez de
+  `null`) da «cabo-de-palos: no publica rmse_m»; quitarle la señal a Adra da «adra: su entrada de la
+  portada no dice «estimada»» y «adra: su entrada no lleva data-estimado, el filtro no la alcanza»,
+  y el mismo defecto en el navegador sin JS da «entradas de la portada sin decir su calidad:
+  AdraAlmería»; falsear la cuenta de una región da «canarias: dice 0 medidos y tiene 4». Los dos
+  primeros miran el **cuerpo HTTP servido** y los otros el **HTML de `dist/`**, no la función que los
+  genera.
+
 ## 2026-08-29 — T-14A · la licencia del dataset dice la verdad
 
 El portal promete que cada dato trae «su fuente, su licencia y el código que lo calcula». La carta

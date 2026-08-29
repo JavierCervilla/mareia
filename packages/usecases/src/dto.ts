@@ -62,6 +62,42 @@ export interface PortDto {
 }
 
 /**
+ * La calidad de un puerto **en el catálogo**: el subconjunto de `StationQuality` que decide cuál
+ * eliges, no el que explica por qué.
+ *
+ * Existe porque hasta T-14B la calidad solo viajaba en `/v1/ports/:slug`, así que saber cuáles de
+ * los 153 puertos publican una marea medida costaba 153 peticiones. Un dato que exige recorrer el
+ * catálogo entero para poder filtrarlo no está publicado: está disponible.
+ *
+ * Son cuatro campos y no los siete de `StationQuality` porque los dos `*_reason` son **frases** —un
+ * párrafo por puerto— y una lista no es donde se lee un párrafo: siguen en la ficha, que es donde
+ * alguien pregunta el porqué. Lo que sí viaja entero es el `null`: `rmse_m: null` significa «no hay
+ * observación con la que medirlo» y tiene que llegar al cliente como `null`, no ausentarse del
+ * objeto — un hueco lo rellena cualquiera con un cero.
+ */
+export interface PortQualityDto {
+  /** Grade del QC (`A`/`B`/`C`), con sus umbrales publicados en `apps/api/README.md`. */
+  readonly grade: string;
+  /** La marea del puerto es una estimación: constantes prestadas, o predicción sin contrastar aquí. */
+  readonly estimated: boolean;
+  /** RMSE frente a la observación, en metros. `null` si no hubo observación con la que comparar. */
+  readonly rmse_m: number | null;
+  /** Error de hora de la pleamar (p95), en minutos. `null` si no hay pleamares medibles. */
+  readonly hw_time_err_p95_min: number | null;
+}
+
+/**
+ * Una entrada del catálogo: la ficha pública del puerto **más su calidad**.
+ *
+ * Es un tipo aparte y no un `PortDto` con un campo más porque `PortDto` viaja también dentro de las
+ * respuestas de marea, almanaque y efemérides, que ya llevan `station.quality` completa: añadirle
+ * la calidad ahí sería publicar dos veces el mismo dato en la misma respuesta.
+ */
+export interface PortSummaryDto extends PortDto {
+  readonly quality: PortQualityDto;
+}
+
+/**
  * Procedencia y calidad del dato de marea. Viaja en **toda** respuesta que contenga alturas: un
  * grade C con `hw_time_err_p95_min: null` tiene que llegar al cliente para que pueda decirlo.
  */
@@ -153,6 +189,20 @@ export function toPortDto(port: Port): PortDto {
     lat: port.lat,
     lon: port.lon,
     timezone: port.timezone,
+  };
+}
+
+/** Entrada del catálogo: la geografía del puerto y la calidad medida de su estación. */
+export function toPortSummaryDto(port: Port, station: StationRecord): PortSummaryDto {
+  const quality = station.quality;
+  return {
+    ...toPortDto(port),
+    quality: {
+      grade: quality.grade,
+      estimated: quality.estimated,
+      rmse_m: quality.rmse_m,
+      hw_time_err_p95_min: quality.hw_time_err_p95_min,
+    },
   };
 }
 

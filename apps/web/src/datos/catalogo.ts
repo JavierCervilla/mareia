@@ -8,14 +8,14 @@
  */
 
 import { listPorts } from "@mareia/usecases";
-import type { PortDto } from "@mareia/usecases";
+import type { PortSummaryDto } from "@mareia/usecases";
 
 import { deps } from "./deps.ts";
 
 export interface Provincia {
   readonly slug: string;
   readonly nombre: string;
-  readonly puertos: readonly PortDto[];
+  readonly puertos: readonly PortSummaryDto[];
 }
 
 export interface Region {
@@ -26,14 +26,17 @@ export interface Region {
 
 const enEspanol = (a: string, b: string): number => a.localeCompare(b, "es");
 
-/** El catálogo completo, tal y como lo publica el caso de uso. */
-export async function cargarPuertos(): Promise<readonly PortDto[]> {
+/**
+ * El catálogo completo, tal y como lo publica el caso de uso: cada puerto con su calidad (T-14B),
+ * que es lo que la portada necesita para decir de cuáles está medida la marea y para filtrarlos.
+ */
+export async function cargarPuertos(): Promise<readonly PortSummaryDto[]> {
   const { ports } = await listPorts(deps);
   return [...ports].sort((a, b) => enEspanol(a.name, b.name));
 }
 
-function agruparPorProvincia(puertos: readonly PortDto[]): readonly Provincia[] {
-  const provincias = new Map<string, PortDto[]>();
+function agruparPorProvincia(puertos: readonly PortSummaryDto[]): readonly Provincia[] {
+  const provincias = new Map<string, PortSummaryDto[]>();
   for (const puerto of puertos) {
     const grupo = provincias.get(puerto.province.slug);
     if (grupo === undefined) {
@@ -54,7 +57,7 @@ function agruparPorProvincia(puertos: readonly PortDto[]): readonly Provincia[] 
 /** Regiones con sus provincias y sus puertos, todo ordenado alfabéticamente en español. */
 export async function cargarCatalogo(): Promise<readonly Region[]> {
   const puertos = await cargarPuertos();
-  const regiones = new Map<string, PortDto[]>();
+  const regiones = new Map<string, PortSummaryDto[]>();
   for (const puerto of puertos) {
     const grupo = regiones.get(puerto.region.slug);
     if (grupo === undefined) {
@@ -73,6 +76,6 @@ export async function cargarCatalogo(): Promise<readonly Region[]> {
 }
 
 /** Cuántos puertos cuelgan de una región (para no repetir el `flatMap` en cada índice). */
-export function puertosDeRegion(region: Region): readonly PortDto[] {
+export function puertosDeRegion(region: Region): readonly PortSummaryDto[] {
   return region.provincias.flatMap((provincia) => provincia.puertos);
 }
