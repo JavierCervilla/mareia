@@ -62,14 +62,16 @@ const descripcion =
 
   {/*
     El filtro por calidad, sin JavaScript: tres radios ocultos a la vista (no al teclado ni al
-    lector de pantalla) y reglas de hermano en `estilos/indices.css`. Por eso los `<input>` son
-    hermanos de las secciones de región y van los primeros: el combinador `~` solo mira hacia
-    adelante. La cuenta de cada opción es el resultado de aplicarla, horneada del catálogo.
+    lector de pantalla, de ahí `solo-lectores` y no `display: none`) y reglas de hermano en
+    `estilos/indices.css`. Por eso los `<input>` son hermanos de las secciones de región y van los
+    primeros: el combinador `~` solo mira hacia adelante. Quien los mueve son las etiquetas de
+    abajo, que es lo que se ve. La cuenta de cada opción es el resultado de aplicarla, horneada del
+    catálogo.
   */}
   <div class="catalogo">
-    <input class="filtro__radio" type="radio" name="calidad" id="calidad-todos" checked />
-    <input class="filtro__radio" type="radio" name="calidad" id="calidad-medidos" />
-    <input class="filtro__radio" type="radio" name="calidad" id="calidad-estimados" />
+    <input class="solo-lectores" type="radio" name="calidad" id="calidad-todos" checked />
+    <input class="solo-lectores" type="radio" name="calidad" id="calidad-medidos" />
+    <input class="solo-lectores" type="radio" name="calidad" id="calidad-estimados" />
 
     <div class="filtro">
       <p class="filtro__nota">

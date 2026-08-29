@@ -22,14 +22,14 @@ publica una precisión que no tiene» acaba teniendo el mismo efecto.
 - **La portada lo dice en cada entrada, y se lee sin JavaScript.** «Almería · estimada», «Almería ·
   medida», en la misma cursiva de la meta del índice: una palabra, no un chip de color (el color
   solo refuerza). Va **horneada en el HTML**, porque una señal que solo existe si corre el JS es una
-  señal que a veces no está (lección de T-11). Medido: 35.710 → 47.996 B de HTML (**+34,4 %**; gzip
-  4.013 → 4.766, **+18,8 %**), de los que 10.557 son la señal de las 153 entradas.
+  señal que a veces no está (lección de T-11). Medido: 35.710 → 47.997 B de HTML (**+34,4 %**; gzip
+  4.013 → 4.770, **+18,9 %**), de los que 10.557 son la señal de las 153 entradas.
 - **Y se puede filtrar por ella, con cero bytes de JavaScript.** Tres radios ocultos a la vista —no
   al teclado ni al lector de pantalla— y reglas de hermano en CSS: «Todos los puertos 153 · Solo los
   medidos 33 · Solo los estimados 120», con las cuentas horneadas del catálogo. **No es una isla**:
   la portada conserva su cero scripts (`scripts-de-core.ts`) y el presupuesto de bytes de T-12 no se
-  toca. Cuesta 1.044 B de HTML y 1.625 B de CSS minificado en la hoja que ya comparten todas las
-  páginas. Una región que se queda sin puertos al filtrar **desaparece con ellos** (sus cuentas van
+  toca. Cuesta 1.044 B de HTML y 1.515 B de CSS minificado en la hoja que ya comparten todas las
+  páginas (15.869 → 17.384 B). Una región que se queda sin puertos al filtrar **desaparece con ellos** (sus cuentas van
   horneadas en el bloque), para no dejar un rótulo sobre una lista vacía. El recorrido Playwright que
   lo comprueba corre con `javaScriptEnabled: false`: 153 → 33 → 120 → 153, y de 12 regiones visibles
   a 11.

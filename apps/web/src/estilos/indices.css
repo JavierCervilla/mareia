@@ -90,16 +90,9 @@
   gap: var(--m-gap-bloque);
 }
 
-/* Fuera de la vista, dentro del foco: `display: none` sacaría los radios del orden de tabulación
-   y del árbol de accesibilidad, y el filtro dejaría de existir para el teclado. */
-.filtro__radio {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
+/* Los radios van ocultos con `.solo-lectores` (almanaque.css), que es la misma técnica que ya usa
+   el resto del portal: fuera de la vista pero dentro del orden de tabulación y del árbol de
+   accesibilidad. Con `display: none` el filtro dejaría de existir para el teclado. */
 
 .filtro {
   display: flex;
