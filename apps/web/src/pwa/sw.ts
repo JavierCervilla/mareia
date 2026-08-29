@@ -366,16 +366,26 @@ async function atender(datos: unknown): Promise<{ ok: boolean; motivo?: string; 
 /** Qué URL necesita cada puerto guardado, por slug. */
 type Registro = Record<string, readonly string[]>;
 
-/** El registro guardado, o vacío si no hay o no se entiende. */
-async function leerRegistro(cache: Cache): Promise<Registro> {
+/**
+ * El registro guardado, o **`undefined` si no hay o no se entiende**.
+ *
+ * La distinción entre «no sé qué hay guardado» y «no hay nada guardado» es la que sostiene todo lo
+ * de abajo, y colapsarlas en un `{}` es cómo se convierte un fail-safe en una trituradora: un
+ * registro ausente o ilegible daría un conjunto de conservados vacío, y podar con eso borra **todo**
+ * lo que hay bajo `/_astro/` — o sea, exactamente el fallo que este registro vino a arreglar
+ * (favoritos que se abren sin estilos, sin isla y sin calculadora, y sin un error por ninguna
+ * parte). Un `{}` de verdad sí es una respuesta: significa que no queda ningún favorito, y entonces
+ * borrar sus assets es lo correcto.
+ */
+async function leerRegistro(cache: Cache): Promise<Registro | undefined> {
   const guardado = await cache.match(PROTOCOLO.claveRegistro);
   if (guardado === undefined) {
-    return {};
+    return undefined;
   }
   try {
     const leido: unknown = await guardado.json();
-    if (typeof leido !== "object" || leido === null) {
-      return {};
+    if (typeof leido !== "object" || leido === null || Array.isArray(leido)) {
+      return undefined;
     }
     const registro: Registro = {};
     for (const [slug, urls] of Object.entries(leido as Record<string, unknown>)) {
@@ -383,7 +393,7 @@ async function leerRegistro(cache: Cache): Promise<Registro> {
     }
     return registro;
   } catch {
-    return {};
+    return undefined;
   }
 }
 
@@ -409,10 +419,15 @@ async function escribirRegistro(cache: Cache, registro: Registro): Promise<void>
 async function guardar(slug: string, urls: readonly string[]): Promise<{ ok: boolean; urls: number }> {
   const cache = await caches.open(PROTOCOLO.cachePaginas);
   await cache.addAll([...urls]);
+  // Si el registro no se puede leer, este puerto se guarda igual —lo que se acaba de bajar está
+  // bien— pero NO se poda: no se sabe qué necesitan los demás favoritos y la única respuesta
+  // honesta a esa pregunta es no tocar nada. Lo peor que pasa es que sobre algún asset viejo.
   const registro = await leerRegistro(cache);
-  registro[slug] = urls;
-  await escribirRegistro(cache, registro);
-  await podarAssetsHuerfanos(cache, registro);
+  const actualizado = { ...(registro ?? {}), [slug]: urls };
+  await escribirRegistro(cache, actualizado);
+  if (registro !== undefined) {
+    await podarAssetsHuerfanos(cache, actualizado);
+  }
   return { ok: true, urls: urls.length };
 }
 
@@ -421,9 +436,14 @@ async function olvidar(slug: string, urls: readonly string[]): Promise<{ ok: boo
   const cache = await caches.open(PROTOCOLO.cachePaginas);
   const borradas = await Promise.all(urls.map((url) => cache.delete(url)));
   const registro = await leerRegistro(cache);
-  delete registro[slug];
-  await escribirRegistro(cache, registro);
-  await podarAssetsHuerfanos(cache, registro);
+  // Sin registro legible se borra lo de este puerto y se para ahí: ni se poda ni se escribe un
+  // registro inventado, que dejaría fuera a los favoritos que sí están guardados.
+  if (registro !== undefined) {
+    const { [slug]: borrado, ...resto } = registro;
+    void borrado;
+    await escribirRegistro(cache, resto);
+    await podarAssetsHuerfanos(cache, resto);
+  }
   return { ok: true, urls: borradas.filter(Boolean).length };
 }
 
@@ -435,6 +455,10 @@ async function olvidar(slug: string, urls: readonly string[]): Promise<{ ok: boo
  * incluidos. Con poda, y con el registro delante, se conserva exactamente la unión de lo que piden
  * los favoritos que hay: los assets del build de ayer se van cuando se va el último favorito que
  * los usaba, y ni un minuto antes.
+ *
+ * **Solo se llama con un registro que se ha podido leer.** No lleva guardia propia a propósito: la
+ * decisión de podar o no es de quien sabe si el registro es de fiar, y repartirla entre dos sitios
+ * es cómo una de las dos mitades se queda sin ella en el siguiente refactor.
  */
 async function podarAssetsHuerfanos(cache: Cache, registro: Registro): Promise<void> {
   const conservar = new Set(Object.values(registro).flat());

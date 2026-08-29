@@ -178,6 +178,26 @@ const QUITAR_TOPE_DE_FECHA = `(() => {
   document.querySelector("[data-otro-dia-fecha]").max = "";
 })()`;
 
+/** Los caminos que hay ahora mismo en la caché de páginas del worker. */
+const CLAVES_GUARDADAS = `(async () => {
+  const nombre = (await caches.keys()).find((clave) => clave.startsWith("mareia-paginas-"));
+  if (nombre === undefined) return [];
+  const cache = await caches.open(nombre);
+  return (await cache.keys()).map((peticion) => new URL(peticion.url).pathname);
+})()`;
+
+/**
+ * Deja el registro de favoritos del worker ilegible, sin tocar nada más de la caché.
+ *
+ * Es la avería que hay que provocar para comprobar el fail-safe: la caché sigue teniendo los
+ * ficheros del favorito, pero el worker ya no sabe de quién son.
+ */
+const CORROMPER_REGISTRO = `(async () => {
+  const nombre = (await caches.keys()).find((clave) => clave.startsWith("mareia-paginas-"));
+  const cache = await caches.open(nombre);
+  await cache.put("/__mareia/favoritos", new Response("esto no es JSON"));
+})()`;
+
 /** Bytes transferidos por la navegación: una respuesta servida de caché no transfiere ninguno. */
 const BYTES_DE_LA_NAVEGACION = `(() =>
   performance.getEntriesByType("navigation").map((entrada) => entrada.transferSize))()`;
@@ -348,11 +368,21 @@ test("guardar un segundo puerto tras un despliegue nuevo no deja al primero sin 
   // Favorito 1: Vigo, con el build de hoy.
   await page.goto(PAGINA);
   await guardarPuerto(page);
+  const assetsDeVigo = (await page.evaluate<readonly string[]>(CLAVES_GUARDADAS)).filter((camino) =>
+    camino.startsWith("/_astro/"),
+  );
+  expect(assetsDeVigo.length, "Vigo tiene que haber guardado sus ficheros").toBeGreaterThan(3);
 
   // Llega el rebuild diario: la página de Santander se sirve con assets de otro hash.
   arnes.otroBuildEn(PAGINA_SEGUNDA);
   await page.goto(PAGINA_SEGUNDA);
   await guardarPuerto(page);
+
+  // La comprobación que no depende de cómo pinte el navegador: los ficheros de Vigo siguen ahí.
+  const guardadas = await page.evaluate<readonly string[]>(CLAVES_GUARDADAS);
+  for (const necesaria of assetsDeVigo) {
+    expect(guardadas, `el favorito de Vigo se ha quedado sin ${necesaria}`).toContain(necesaria);
+  }
 
   // Sin red, el PRIMER favorito tiene que seguir entero.
   await arnes.cortar();
@@ -373,6 +403,49 @@ test("guardar un segundo puerto tras un despliegue nuevo no deja al primero sin 
   await expect(page.locator("[data-otro-dia-resultado] h3")).toContainText("14 de marzo de 2027");
 
   await capturar(page, "8-dos-favoritos-dos-builds");
+});
+
+/**
+ * El fail-safe de la poda, que es lo que impide que el arreglo de R-3 se convierta en el bug de R-3.
+ *
+ * `podarAssetsHuerfanos` deriva lo que conserva **solo** del registro. Si el registro no se puede
+ * leer y eso se colapsa en «no hay favoritos», el conjunto de conservados sale vacío y la poda borra
+ * TODO lo que hay bajo `/_astro/`: el favorito se queda con su página y cero ficheros, o sea
+ * abriéndose sin estilos, sin isla y sin calculadora — exactamente el fallo que el registro vino a
+ * arreglar, y sin un error por ninguna parte.
+ */
+test("con el registro corrompido no se poda nada: no saber qué sobra no es que sobre todo", async ({
+  page,
+  context,
+}) => {
+  const arnes = await montarArnes(context, { meteo: "weather-ok", boletin: "bulletin-ok" });
+  await page.goto(PAGINA);
+  await guardarPuerto(page);
+  const assetsDeVigo = (await page.evaluate<readonly string[]>(CLAVES_GUARDADAS)).filter((camino) =>
+    camino.startsWith("/_astro/"),
+  );
+  expect(assetsDeVigo.length).toBeGreaterThan(3);
+
+  // Alguien —o algo— deja el registro ilegible. Es lo que pasa cuando una escritura se queda a
+  // medias por cuota, o cuando lo escribió una versión anterior del worker.
+  await page.evaluate<void>(CORROMPER_REGISTRO);
+
+  // Y ahora se guarda un segundo puerto, que es cuando se poda.
+  arnes.otroBuildEn(PAGINA_SEGUNDA);
+  await page.goto(PAGINA_SEGUNDA);
+  await guardarPuerto(page);
+
+  const guardadas = await page.evaluate<readonly string[]>(CLAVES_GUARDADAS);
+  for (const necesaria of assetsDeVigo) {
+    expect(guardadas, `se ha podado ${necesaria} sin saber si hacía falta`).toContain(necesaria);
+  }
+
+  await arnes.cortar();
+  await page.goto(PAGINA);
+  await expect(page.locator("h1")).toHaveText("Vigo");
+  await expect(page.locator("[data-otro-dia-form]")).toBeVisible();
+  await pedirDia(page, DIA_FUTURO);
+  await expect(page.locator("[data-otro-dia-resultado] h3")).toContainText("14 de marzo de 2027");
 });
 
 test("olvidar un puerto no le quita los ficheros al otro, y el último se lleva los suyos", async ({

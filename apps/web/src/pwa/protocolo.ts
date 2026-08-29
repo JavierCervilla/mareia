@@ -22,8 +22,16 @@ export const PREFIJO_CACHE = "mareia";
  * HTML se pide siempre a la red antes que a la caché (ADR-02). Versionar la caché por build
  * obligaría a re-descargarlo todo cada día y dejaría sin copia offline a quien actualizara el SW
  * justo cuando se quedó sin cobertura, que es exactamente el momento en que la copia hace falta.
+ *
+ * **v2 (T-12)**: la caché de páginas pasa a llevar una entrada obligatoria más, el registro de
+ * favoritos (`CLAVE_REGISTRO`). Eso es un cambio de forma, así que toca subir. Y no es ceremonia:
+ * una caché de la v1 tiene favoritos y **no** tiene registro, y ese estado a medias es indistinguible
+ * de un registro corrupto — el worker no podría saber si «no hay registro» significa «esta caché es
+ * vieja» o «alguien la ha roto». Subiendo el esquema, `activate` la barre entera y quien tuviera un
+ * puerto guardado lo vuelve a guardar con un clic. El precio se paga una vez y solo dentro de este
+ * PR, que no está desplegado.
  */
-export const ESQUEMA_CACHE = 1;
+export const ESQUEMA_CACHE = 2;
 
 /** Páginas guardadas a petición del usuario, con el CSS y el JS que necesitan para pintarse. */
 export const CACHE_PAGINAS = `${PREFIJO_CACHE}-paginas-v${ESQUEMA_CACHE}`;
@@ -79,6 +87,16 @@ export const CLAVE_REGISTRO = "/__mareia/favoritos";
 export function rutaEstacionOffline(slug: string): string {
   return `/offline/estaciones/${slug}.json`;
 }
+
+/**
+ * Evento que la sección «sin cobertura» dispara en el documento cuando **ha cambiado la copia
+ * guardada** de un puerto (se guardó, se olvidó o se revalidó con constantes nuevas).
+ *
+ * Existe para que la calculadora no se quede con la ventana de años de hace un rato: es un dato
+ * derivado del payload guardado, y quien lo cambia es la otra sección. Es un evento y no una llamada
+ * directa para que las dos secciones sigan sin conocerse — cada una monta y funciona sola.
+ */
+export const EVENTO_COPIA_CAMBIADA = "mareia:copia-cambiada";
 
 /**
  * Lo que la página le pide al worker. **Solo hay dos verbos**, y los dos los dispara una acción
