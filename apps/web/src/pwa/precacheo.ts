@@ -20,7 +20,7 @@
 
 import type { AppModule, PrecachePolicy } from "@mareia/module-contract";
 
-import { rutaEstacionOffline } from "./protocolo.ts";
+import { RUTA_PORTADA, rutaEstacionOffline } from "./protocolo.ts";
 
 /**
  * Una política ya resuelta, en la forma en que la consume el worker: identidad del módulo (para
@@ -61,10 +61,22 @@ export function politicasDeModulos(modulos: readonly AppModule[]): readonly Poli
   );
 }
 
-/** Un puerto, visto por la PWA: lo mínimo para poder guardarlo y volver a él sin red. */
+/** Un puerto, visto por la PWA: lo mínimo para poder guardarlo y **volver a él** sin red. */
 export interface PuertoGuardable {
   readonly slug: string;
   readonly ruta: string;
+  /**
+   * Las páginas que hay que atravesar para llegar a este puerto desde la portada: `/`, `/mareas/`,
+   * su región y su provincia.
+   *
+   * No es adorno de navegación: la portada es el `start_url` del manifiesto, o sea **la única puerta
+   * de entrada de la app instalada**, y sin ella el icono de la pantalla de inicio abre el error de
+   * red del navegador con el almanaque intacto al lado (hallazgo adversario H-3). Guardar solo la
+   * portada tampoco bastaba: desde ahí no se llega al puerto, porque la portada indexa regiones y no
+   * puertos. Lo que se guarda es **el camino**, que es lo que de verdad se pidió al guardar el
+   * puerto. Son cuatro HTML pequeños y se miden en el CHANGELOG.
+   */
+  readonly camino: readonly string[];
 }
 
 /**
@@ -95,9 +107,18 @@ export function urlsDeFavorito(
   return unicas([
     puerto.ruta,
     rutaEstacionOffline(puerto.slug),
+    ...caminoHastaElPuerto(puerto),
     ...assetsDeLaPagina,
     ...assetsDeModulos,
   ]);
+}
+
+/**
+ * El camino desde la puerta de la app instalada hasta el puerto, sin repetir y empezando por la
+ * portada aunque nadie la declare: si `start_url` no se guarda, la app instalada no abre.
+ */
+function caminoHastaElPuerto(puerto: PuertoGuardable): readonly string[] {
+  return unicas([RUTA_PORTADA, ...puerto.camino]);
 }
 
 /** Los assets propios que declaran los módulos activos en su `PrecachePolicy`. */
@@ -105,7 +126,13 @@ export function assetsDeModulos(politicas: readonly PoliticaResuelta[]): readonl
   return unicas(politicas.flatMap((politica) => politica.assets));
 }
 
-/** Lo que se borra al olvidar un puerto: lo suyo y solo lo suyo. */
+/**
+ * Lo que se borra al olvidar un puerto: lo suyo y solo lo suyo.
+ *
+ * **El camino no se borra**, y es deliberado: la portada y los índices los comparten todos los
+ * favoritos, y borrarlos al olvidar uno dejaría a los demás sin puerta de entrada. Si no queda
+ * ninguno, se van con la poda como cualquier otro fichero huérfano.
+ */
 export function urlsDeOlvido(puerto: PuertoGuardable): readonly string[] {
   return [puerto.ruta, rutaEstacionOffline(puerto.slug)];
 }

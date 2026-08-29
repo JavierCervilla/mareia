@@ -20,7 +20,11 @@ import {
   urlsDeOlvido,
 } from "./precacheo.ts";
 
-const VIGO = { slug: "vigo", ruta: "/mareas/galicia/pontevedra/vigo/" };
+const VIGO = {
+  slug: "vigo",
+  ruta: "/mareas/galicia/pontevedra/vigo/",
+  camino: ["/", "/mareas/", "/mareas/galicia/", "/mareas/galicia/pontevedra/"],
+};
 
 function moduloDummy(cambios: Partial<AppModule> = {}): AppModule {
   return {
@@ -75,15 +79,37 @@ test("el registry real declara la política de meteo, que es el único dato que 
   );
 });
 
-test("un favorito guarda su página, sus constantes y los assets de SU página; nada más", () => {
+test("un favorito guarda su página, sus constantes, el camino hasta ella y sus assets; nada más", () => {
   const urls = urlsDeFavorito(VIGO, ["/_astro/hoja.abc.css", "/_astro/isla.def.js"]);
 
   assert.deepEqual(urls, [
     "/mareas/galicia/pontevedra/vigo/",
     "/offline/estaciones/vigo.json",
+    "/",
+    "/mareas/",
+    "/mareas/galicia/",
+    "/mareas/galicia/pontevedra/",
     "/_astro/hoja.abc.css",
     "/_astro/isla.def.js",
   ]);
+});
+
+/**
+ * La portada es el `start_url` del manifiesto: **la única puerta de entrada de la app instalada**,
+ * porque quien la instala se queda sin barra de direcciones y sin historial a mano. Sin ella
+ * guardada, el icono de la pantalla de inicio abre el error de red del navegador con el almanaque
+ * intacto a un toque (hallazgo adversario H-3).
+ */
+test("la puerta de entrada de la app instalada se guarda siempre, la declare quien la declare", () => {
+  const sinPortada = { ...VIGO, camino: ["/mareas/"] };
+  assert.ok(urlsDeFavorito(sinPortada, []).includes("/"), "sin la portada la app instalada no abre");
+});
+
+test("olvidar un puerto NO borra el camino: lo comparten todos los favoritos", () => {
+  const borradas = urlsDeOlvido(VIGO);
+  for (const compartida of VIGO.camino) {
+    assert.ok(!borradas.includes(compartida), `${compartida} lo necesitan los demás favoritos`);
+  }
 });
 
 test("los assets que declare un módulo entran en el favorito sin tocar la PWA", () => {
@@ -106,8 +132,9 @@ test("no se guarda dos veces el mismo asset aunque lo pidan dos sitios", () => {
   const urls = urlsDeFavorito(VIGO, ["/_astro/hoja.abc.css", "/_astro/hoja.abc.css"], [
     "/_astro/hoja.abc.css",
   ]);
-  assert.equal(new Set(urls).size, urls.length);
-  assert.equal(urls.length, 3);
+  assert.equal(new Set(urls).size, urls.length, "no puede haber repetidos");
+  // Página, constantes, las cuatro del camino y el asset compartido una sola vez.
+  assert.equal(urls.length, 2 + VIGO.camino.length + 1);
 });
 
 test("olvidar un puerto borra lo suyo y no los assets, que los comparten los demás favoritos", () => {

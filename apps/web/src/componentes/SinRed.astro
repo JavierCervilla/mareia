@@ -24,9 +24,18 @@ interface Props {
   nombre: string;
   /** Ruta canónica de esta página, que es lo que se guarda. */
   ruta: string;
+  /**
+   * Portada e índices que hay que atravesar para llegar a esta página desde la app instalada.
+   *
+   * La portada es el `start_url` del manifiesto, o sea la única puerta de entrada de quien instaló
+   * Mareia: sin guardarla, el icono de la pantalla de inicio abre el error de red del navegador con
+   * el almanaque intacto al lado (hallazgo adversario H-3). Y sin los índices no se llega desde la
+   * portada hasta el puerto, porque la portada indexa regiones y no puertos.
+   */
+  camino: readonly string[];
 }
 
-const { slug, nombre, ruta } = Astro.props;
+const { slug, nombre, ruta, camino } = Astro.props;
 
 /**
  * Los assets propios que declaran los módulos activos en su `PrecachePolicy` (contrato T-06).
@@ -50,6 +59,7 @@ const assetsDeLosModulos = assetsDeModulos(politicasDeModulos(activeModules));
   data-sin-red-ruta={ruta}
   data-sin-red-fecha={FECHA_DE_BUILD}
   data-sin-red-assets-modulos={JSON.stringify(assetsDeLosModulos)}
+  data-sin-red-camino={JSON.stringify(camino)}
 >
   <h2 class="etiqueta" id="titulo-sin-cobertura">Sin cobertura</h2>
 

@@ -28,9 +28,9 @@ import { generarServiceWorker, soloCodigo } from "./pwa/generar-sw.ts";
 import { esEstacionOffline } from "./pwa/estacion-offline.ts";
 import { diaOffline } from "./pwa/dia-offline.ts";
 import { iconoSvg, MANIFIESTO } from "./pwa/marca.ts";
-import { politicasDeModulos } from "./pwa/precacheo.ts";
+import { politicasDeModulos, urlsDeFavorito } from "./pwa/precacheo.ts";
 import { PROTOCOLO, RUTA_MANIFEST, rutaEstacionOffline } from "./pwa/protocolo.ts";
-import { rutaPuerto } from "./rutas.ts";
+import { RUTA_MAREAS, rutaProvincia, rutaPuerto, rutaRegion } from "./rutas.ts";
 
 const RAIZ = dirname(fileURLToPath(import.meta.url));
 const DIST = join(RAIZ, "..", "dist");
@@ -231,6 +231,42 @@ test("la sección de guardar lleva los datos que necesita el cliente, y ninguno 
   assert.ok(html.includes(`data-otro-dia-slug="${puerto.slug}"`));
 });
 
+/**
+ * H-3 del pase adversario, atado al artefacto y no a una constante.
+ *
+ * El `start_url` del manifiesto publicado es la **única puerta de entrada de la app instalada**:
+ * quien instala Mareia se queda sin barra de direcciones y sin historial a mano. Si esa URL no está
+ * entre las que guarda un favorito, el icono de la pantalla de inicio abre el error de red del
+ * navegador con el almanaque intacto a un toque. Se lee del `dist/`, así que cambiar el `start_url`
+ * sin cambiar lo que se guarda pone esto en rojo.
+ */
+test("la puerta de entrada de la app instalada está entre lo que guarda un favorito, y existe", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  const manifiesto = JSON.parse(fichero("manifest.webmanifest")) as { start_url: string };
+  const puerto = (await cargarPuertos())[0]!;
+  const guardadas = urlsDeFavorito(
+    {
+      slug: puerto.slug,
+      ruta: rutaPuerto(puerto),
+      camino: ["/", RUTA_MAREAS, rutaRegion(puerto.region.slug), rutaProvincia(puerto.region.slug, puerto.province.slug)],
+    },
+    ["/_astro/cualquiera.css"],
+  );
+
+  assert.ok(
+    guardadas.includes(manifiesto.start_url),
+    `el start_url (${manifiesto.start_url}) no está entre lo que se guarda: la app instalada no abriría`,
+  );
+  // Y todo el camino guardado existe de verdad en el sitio construido: guardar un 404 no guarda nada.
+  for (const ruta of guardadas.filter((url) => !url.startsWith("/_astro/"))) {
+    const destino = ruta.endsWith("/") ? join(ruta, "index.html") : ruta;
+    assert.ok(existsSync(join(DIST, destino)), `se guardaría ${ruta}, que no está construida`);
+  }
+});
+
 // =================================================================================================
 // PRESUPUESTOS DE PESO · cifras medidas, no estimadas. Las mismas que van al CHANGELOG.
 // =================================================================================================
@@ -261,7 +297,7 @@ const TOPES = {
   /** Constantes armónicas de UN puerto: lo que se baja al marcar un favorito. */
   estacionBytes: 4_000,
   /** El bundle que baja CUALQUIERA que abra un puerto, use la PWA o no. */
-  pwaBaseBytes: 20_000,
+  pwaBaseBytes: 22_000,
   /** El motor, que solo baja quien pide otro día (o quien guarda el puerto). */
   motorBytes: 80_000,
 } as const;
