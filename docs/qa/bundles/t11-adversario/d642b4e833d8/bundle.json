@@ -1,0 +1,60 @@
+{
+  "snapshotId": "d642b4e833d8",
+  "runId": "t11-adversario",
+  "test": {
+    "title": "adversarial/a3-respuesta-hostil.spec.ts > A3 · un 200 con una magnitud que llega como cadena y no como número no puede dejar la sección pidiendo para siempre",
+    "file": "/home/user/mareia-t11/tests/e2e/journeys/adversarial/a3-respuesta-hostil.spec.ts",
+    "line": 51,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 10256,
+  "urlAtFailure": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/",
+  "error": {
+    "message": "Error: expect(locator).toContainText(expected) failed\n\nLocator: locator('#meteo-mar')\nExpected substring: \"No se ha podido traer\"\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" with timeout 10000ms\n  - waiting for locator('#meteo-mar')\n",
+    "stack": "Error: expect(locator).toContainText(expected) failed\n\nLocator: locator('#meteo-mar')\nExpected substring: \"No se ha podido traer\"\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toContainText\" with timeout 10000ms\n  - waiting for locator('#meteo-mar')\n\n    at /home/user/mareia-t11/tests/e2e/journeys/adversarial/a3-respuesta-hostil.spec.ts:65:46"
+  },
+  "events": [
+    {
+      "at": 5,
+      "kind": "step",
+      "text": "servir 200 con una magnitud que llega como cadena y no como número"
+    },
+    {
+      "at": 54,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"
+    },
+    {
+      "at": 74,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 74,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "at": 153,
+      "kind": "step",
+      "text": "esperar a que la sección resuelva a alguno de sus cuatro estados"
+    },
+    {
+      "at": 185,
+      "kind": "pageerror",
+      "text": "e.toFixed is not a function",
+      "detail": "TypeError: e.toFixed is not a function\n    at i (http://127.0.0.1:4321/_astro/Meteo.astro_astro_type_script_index_0_lang.BDu69t5Y.js:1:266)\n    at A (http://127.0.0.1:4321/_astro/Meteo.astro_astro_type_script_index_0_lang.BDu69t5Y.js:1:3364)\n    at j (http://127.0.0.1:4321/_astro/Meteo.astro_astro_type_script_index_0_lang.BDu69t5Y.js:1:3558)\n    at H (http://127.0.0.1:4321/_astro/Meteo.astro_astro_type_script_index_0_lang.BDu69t5Y.js:1:5935)\n    at ee (http://127.0.0.1:4321/_astro/Meteo.astro_astro_type_script_index_0_lang.BDu69t5Y.js:1:9028)"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

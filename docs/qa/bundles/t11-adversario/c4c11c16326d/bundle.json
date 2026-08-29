@@ -1,0 +1,64 @@
+{
+  "snapshotId": "c4c11c16326d",
+  "runId": "t11-adversario",
+  "test": {
+    "title": "adversarial/a2-sello-congelado.spec.ts > A2 · el sello no envejece con la página abierta tres horas",
+    "file": "/home/user/mareia-t11/tests/e2e/journeys/adversarial/a2-sello-congelado.spec.ts",
+    "line": 24,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 5375,
+  "urlAtFailure": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/",
+  "error": {
+    "message": "Error: expect(locator).toHaveText(expected) failed\n\nLocator: locator('#meteo-mar .meteo__sello-titular')\nExpected pattern: /hace (2 h 5\\d min|3 h)/u\nReceived string:  \"Consultado hace menos de un minuto\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toHaveText\" with timeout 5000ms\n  - waiting for locator('#meteo-mar .meteo__sello-titular')\n    14 × locator resolved to <strong class=\"meteo__sello-titular\">Consultado hace menos de un minuto</strong>\n       - unexpected value \"Consultado hace menos de un minuto\"\n",
+    "stack": "Error: expect(locator).toHaveText(expected) failed\n\nLocator: locator('#meteo-mar .meteo__sello-titular')\nExpected pattern: /hace (2 h 5\\d min|3 h)/u\nReceived string:  \"Consultado hace menos de un minuto\"\nTimeout: 5000ms\n\nCall log:\n  - Expect \"toHaveText\" with timeout 5000ms\n  - waiting for locator('#meteo-mar .meteo__sello-titular')\n    14 × locator resolved to <strong class=\"meteo__sello-titular\">Consultado hace menos de un minuto</strong>\n       - unexpected value \"Consultado hace menos de un minuto\"\n\n    at /home/user/mareia-t11/tests/e2e/journeys/adversarial/a2-sello-congelado.spec.ts:48:23"
+  },
+  "events": [
+    {
+      "at": 4,
+      "kind": "step",
+      "text": "congelar el reloj de la página antes de cargarla (así el adelanto es medible)"
+    },
+    {
+      "at": 29,
+      "kind": "step",
+      "text": "servir un dato fresco: ageSeconds 0, stale false"
+    },
+    {
+      "at": 79,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"
+    },
+    {
+      "at": 109,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 109,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "at": 290,
+      "kind": "step",
+      "text": "el usuario deja la pestaña abierta tres horas (bolsillo, playa, sobremesa)"
+    },
+    {
+      "at": 298,
+      "kind": "step",
+      "text": "comprobar que el sello ya no vende como recién consultado un dato de hace 3 h"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

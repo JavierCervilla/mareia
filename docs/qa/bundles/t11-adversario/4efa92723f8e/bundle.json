@@ -1,0 +1,59 @@
+{
+  "snapshotId": "4efa92723f8e",
+  "runId": "t11-adversario",
+  "test": {
+    "title": "adversarial/a5-boletin-desborda.spec.ts > A5 · un enlace en el boletín no puede desbordar la página a 360 px",
+    "file": "/home/user/mareia-t11/tests/e2e/journeys/adversarial/a5-boletin-desborda.spec.ts",
+    "line": 27,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 317,
+  "urlAtFailure": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/",
+  "error": {
+    "message": "Error: la sección desborda 130 px · DIV.meteo, DIV.meteo__bloques, ARTICLE.meteo__bloque, BLOCKQUOTE.meteo__cita, P.\n\nexpect(received).toBeLessThanOrEqual(expected)\n\nExpected: <= 361\nReceived:    490",
+    "stack": "Error: la sección desborda 130 px · DIV.meteo, DIV.meteo__bloques, ARTICLE.meteo__bloque, BLOCKQUOTE.meteo__cita, P.\n\nexpect(received).toBeLessThanOrEqual(expected)\n\nExpected: <= 361\nReceived:    490\n    at /home/user/mareia-t11/tests/e2e/journeys/adversarial/a5-boletin-desborda.spec.ts:58:7"
+  },
+  "events": [
+    {
+      "at": 4,
+      "kind": "step",
+      "text": "ventana de 360 px (el ancho de un móvil pequeño y el de uno normal)"
+    },
+    {
+      "at": 16,
+      "kind": "step",
+      "text": "AEMET emite un aviso con el enlace a su boletín completo"
+    },
+    {
+      "at": 57,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"
+    },
+    {
+      "at": 79,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 79,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "at": 220,
+      "kind": "step",
+      "text": "medir si la página se desplaza en horizontal"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

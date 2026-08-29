@@ -1,0 +1,6 @@
+{"at":4,"kind":"step","text":"ventana de 320 px (el ancho de un móvil pequeño y el de uno normal)"}
+{"at":20,"kind":"step","text":"AEMET emite un aviso con el enlace a su boletín completo"}
+{"at":71,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":93,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":94,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":233,"kind":"step","text":"medir si la página se desplaza en horizontal"}

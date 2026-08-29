@@ -1,0 +1,7 @@
+{"at":4,"kind":"step","text":"congelar el reloj de la página antes de cargarla (así el adelanto es medible)"}
+{"at":29,"kind":"step","text":"servir un dato fresco: ageSeconds 0, stale false"}
+{"at":79,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":109,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":109,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":290,"kind":"step","text":"el usuario deja la pestaña abierta tres horas (bolsillo, playa, sobremesa)"}
+{"at":298,"kind":"step","text":"comprobar que el sello ya no vende como recién consultado un dato de hace 3 h"}

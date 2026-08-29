@@ -1,0 +1,54 @@
+{
+  "snapshotId": "72a13d0b64fc",
+  "runId": "t11-adversario",
+  "test": {
+    "title": "adversarial/a9-sin-anuncio-a-lector.spec.ts > A9 · el cambio de estado de la sección se anuncia a un lector de pantalla",
+    "file": "/home/user/mareia-t11/tests/e2e/journeys/adversarial/a9-sin-anuncio-a-lector.spec.ts",
+    "line": 22,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 317,
+  "urlAtFailure": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/",
+  "error": {
+    "message": "Error: nada en la sección meteo es región viva: el contenido se sustituye en silencio\n\nexpect(received).not.toEqual(expected) // deep equality\n\nExpected: not []\n",
+    "stack": "Error: nada en la sección meteo es región viva: el contenido se sustituye en silencio\n\nexpect(received).not.toEqual(expected) // deep equality\n\nExpected: not []\n\n    at /home/user/mareia-t11/tests/e2e/journeys/adversarial/a9-sin-anuncio-a-lector.spec.ts:49:9"
+  },
+  "events": [
+    {
+      "at": 4,
+      "kind": "step",
+      "text": "cargar la página con el API sirviendo un dato normal"
+    },
+    {
+      "at": 49,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"
+    },
+    {
+      "at": 79,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 79,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "at": 220,
+      "kind": "step",
+      "text": "mirar si algo de la sección declara región viva"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

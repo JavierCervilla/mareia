@@ -1,0 +1,3 @@
+{"at":10,"kind":"step","text":"inyectar la carga en el dist/: comentario HTML (donde un framework deja su carga de hidratación)"}
+{"at":10,"kind":"step","text":"comprobar que la carga está DE VERDAD en el HTML publicado, dentro de #meteo"}
+{"at":12,"kind":"step","text":"correr el gate de ADR-01 tal cual lo corre CI"}
