@@ -24,7 +24,7 @@ import { cargarPuertos } from "./datos/catalogo.ts";
 import { deps } from "./datos/deps.ts";
 import { FECHA_DE_BUILD } from "./datos/fecha-build.ts";
 import { activeModules } from "./modules.config.ts";
-import { generarServiceWorker } from "./pwa/generar-sw.ts";
+import { generarServiceWorker, soloCodigo } from "./pwa/generar-sw.ts";
 import { esEstacionOffline } from "./pwa/estacion-offline.ts";
 import { diaOffline } from "./pwa/dia-offline.ts";
 import { iconoSvg, MANIFIESTO } from "./pwa/marca.ts";
@@ -242,15 +242,22 @@ test("la sección de guardar lleva los datos que necesita el cliente, y ninguno 
  */
 const TOPES = {
   /**
-   * El worker entero, con sus comentarios (que son su documentación y su auditoría).
+   * El worker, medido **sin su prosa**.
    *
-   * Se sube de 24.000 a 28.000 B tras el registro de favoritos y el fail-safe de la poda: el worker
-   * creció un cuarto en un delta y con el tope anterior el siguiente párrafo de TSDoc habría puesto
-   * el gate en rojo por escribir documentación, que no es lo que este tope vigila. Lo que vigila es
-   * un descuido que multiplique el peso; la cifra que manda es **la medida que se publica en el
-   * CHANGELOG**, no este número.
+   * Este tope llegó a ser 24.000 y luego 28.000 sobre el fichero entero, y las dos veces se ensanchó
+   * por el mismo motivo: la documentación empujaba. Medido, el `/sw.js` publicado son 22.395 B de
+   * los que **14.062 (63 %) son comentarios**. Con el tope sobre el fichero entero se puede **doblar
+   * la lógica** —8.333 → 16.666 B— y seguir en verde, mientras que cuatro párrafos de TSDoc lo ponen
+   * en rojo: mide justo al revés de lo que dice vigilar, y por eso presiona a ensancharse.
+   *
+   * Así que cambia el **instrumento**, no la constante: se mide con `soloCodigo` —el mismo escáner
+   * que ya usa el guardián de imports— colapsando además los espacios, porque `soloCodigo` **blanquea**
+   * los comentarios en vez de quitarlos (preserva los offsets, que es para lo que se escribió) y sin
+   * ese paso la longitud no cambiaría ni un byte. Medido así: **6.200 B de código, el 28 %** del
+   * fichero. Tope 9.000: hay sitio para crecer casi la mitad y ninguno para crecer al doble, y
+   * escribir documentación ya no cuesta nada.
    */
-  swBytes: 28_000,
+  swCodigoBytes: 9_000,
   /** Constantes armónicas de UN puerto: lo que se baja al marcar un favorito. */
   estacionBytes: 4_000,
   /** El bundle que baja CUALQUIERA que abra un puerto, use la PWA o no. */
@@ -264,8 +271,14 @@ test("el service worker cabe en su presupuesto", (t) => {
     t.skip(SIN_BUILD);
     return;
   }
-  const medido = bytes("sw.js");
-  assert.ok(medido <= TOPES.swBytes, `sw.js pesa ${medido} B y el tope es ${TOPES.swBytes} B`);
+  const publicado = readFileSync(join(DIST, "sw.js"), "utf8");
+  const medido = soloCodigo(publicado)
+    .replaceAll(/\s+/gu, " ")
+    .trim().length;
+  assert.ok(
+    medido <= TOPES.swCodigoBytes,
+    `sw.js tiene ${medido} B de código (el fichero pesa ${bytes("sw.js")} B) y el tope es ${TOPES.swCodigoBytes} B`,
+  );
 });
 
 test("las constantes de cada puerto caben en su presupuesto, y los doce juntos siguen siendo poco", async (t) => {
