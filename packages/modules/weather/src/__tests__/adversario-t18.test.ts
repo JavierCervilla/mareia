@@ -267,47 +267,153 @@ gatePermanente(
  * Comportamiento correcto: el `reason` que sale por HTTP no lleva las señas del canal del operador,
  * las haya escrito quien las haya escrito.
  *
- * **CERRADO** en `errors.ts` (`reasonFrom`), que es **el borde**: la única puerta por la que se
- * llena el `reason` público. Ahí se recortan las señas antes de publicar, así que la propiedad deja
- * de depender de que cada quien redacte con cuidado y pasa a cubrir todos los caminos hacia el
- * `reason`, incluidos los que todavía no existen. Es lista negra y se dice en el propio comentario
- * de la función.
+ * **CERRADO** en `errors.ts` (`reasonFrom`), que es **el borde**: la puerta por la que se llena
+ * el `reason` público. Ahí se recortan las señas antes de publicar, así que la propiedad deja de
+ * depender de que cada quien redacte con cuidado. Es lista negra y se dice en el propio comentario
+ * de la función, que ahora enumera **qué casa y qué no**.
  *
  * Lo que este gate mide desde ahora: con un `descripcion` de AEMET que **sí** lleva las señas —el
- * de T-18 estaba elegido para no morder— ninguna de las cinco sale por el cuerpo HTTP.
+ * de T-18 estaba elegido para no morder— ninguna de las cinco sale por el cuerpo HTTP. Y no una
+ * sola forma de escribirlas: el filtro se estrenó casando texto crudo, así que la misma seña en
+ * `NFD` («Renuévala» con `e` + U+0301, indistinguible en pantalla), con guion en vez de guion bajo,
+ * partida por un carácter de ancho cero o con el dominio partido por un salto de línea salía
+ * **entera** por el borde mientras el comentario prometía recortarla «la haya escrito quien la haya
+ * escrito». Las cinco variantes viajan aquí como casos porque el gate escribía las señas a mano y
+ * sólo en `NFC`: vigilaba una forma de cinco.
  */
+
+/**
+ * Los dos caracteres del ataque, escritos por su punto de código y no literales: uno no se ve y
+ * el otro se pega a la letra anterior, así que en el fuente serían invisibles para quien revise.
+ */
+const ACENTO_COMBINANTE = "\u0301";
+const ANCHO_CERO = "\u200B";
+
+/**
+ * Las formas de escribir la misma seña que un texto ajeno puede traer. Las cuatro primeras no son
+ * rebuscadas: `NFD` es lo que produce un teclado de macOS y cualquier sistema de ficheros de Apple,
+ * el guion es cómo se escribe una cabecera a mano, y el dominio partido es una URL que pasó por un
+ * reflow de línea. La de ancho cero sí es deliberada, y por eso está.
+ */
+const VARIANTES_DE_LA_SENA: readonly {
+  readonly nombre: string;
+  readonly descripcion: string;
+  /** Lo que no puede salir por el cuerpo: la variante tal cual **y** la forma canónica. */
+  readonly prohibido: readonly string[];
+}[] = [
+  {
+    nombre: "NFC (la forma canónica, la única que el gate escribía a mano)",
+    descripcion: "API key expirada. Renuévala en el portal",
+    prohibido: ["Renuévala"],
+  },
+  {
+    nombre: "NFD (la misma palabra, `e` + acento combinante)",
+    descripcion: `API key expirada. Renue${ACENTO_COMBINANTE}vala en el portal`,
+    prohibido: [`Renue${ACENTO_COMBINANTE}vala`, "Renuévala"],
+  },
+  {
+    nombre: "guion en vez de guion bajo (una cabecera escrita a mano)",
+    descripcion: "Cabecera AEMET-API-KEY invalida",
+    prohibido: ["AEMET-API-KEY", "AEMET_API_KEY"],
+  },
+  {
+    nombre: "carácter de ancho cero dentro del nombre de la variable",
+    descripcion: `AEMET${ANCHO_CERO}_API_KEY no configurada`,
+    prohibido: [`AEMET${ANCHO_CERO}_API_KEY`, "AEMET_API_KEY"],
+  },
+  {
+    nombre: "dominio partido por un salto de línea",
+    descripcion: "Su clave ha expirado. Solicite una nueva en opendata. aemet.es/altaUsuario",
+    prohibido: ["opendata. aemet.es", "opendata.aemet.es"],
+  },
+];
+
+/** Doble de AEMET que rechaza con el `descripcion` que se le pase: el canal de paso, tal cual. */
+function aemetQueRechazaCon(descripcion: string): FetchSpy {
+  return fetchSpy((url) => {
+    if (url.startsWith(`${AEMET_URL}/prediccion`)) {
+      return { estado: 401, descripcion };
+    }
+    throw new Error(`URL inesperada: ${url}`);
+  });
+}
+
 gatePermanente(
   "A-18 · el `reason` público republica el manual de renovación que escribe el upstream",
   async () => {
-    const clock = fakeClock(T0);
-    // Un 401 de AEMET redactado como se redacta un error de credencial: diciendo dónde se arregla.
-    const upstream = fetchSpy((url) => {
-      if (url.startsWith(`${AEMET_URL}/prediccion`)) {
-        return {
-          estado: 401,
-          descripcion:
-            "API key expirada. Solicite una nueva en https://opendata.aemet.es/centrodedescargas/altaUsuario",
-        };
-      }
-      throw new Error(`URL inesperada: ${url}`);
-    });
-    const instancia = await montar(
-      deps({ fetch: upstream.fetch, now: clock.now, aemetApiKey: jwt(T0 + 90 * DAY) }),
-    );
-    try {
-      const { texto } = await instancia.get(VIGO);
-      for (const sena of SENAS_DEL_OPERADOR) {
+    for (const { nombre, descripcion, prohibido } of VARIANTES_DE_LA_SENA) {
+      const clock = fakeClock(T0);
+      const instancia = await montar(
+        deps({
+          fetch: aemetQueRechazaCon(descripcion).fetch,
+          now: clock.now,
+          aemetApiKey: jwt(T0 + 90 * DAY),
+        }),
+      );
+      try {
+        const { texto } = await instancia.get(VIGO);
+        for (const sena of [...SENAS_DEL_OPERADOR, ...prohibido]) {
+          assert.ok(
+            !texto.includes(sena),
+            `[${nombre}] el borde público republica la seña «${sena}» del canal del operador ` +
+              `porque la escribió AEMET y nadie la mira: ${texto}`,
+          );
+        }
+        // Y que el recorte haya ocurrido de verdad: un cuerpo sin la seña porque el `reason` se
+        // quedó vacío o porque la petición no llegó a AEMET pasaría las afirmaciones de arriba
+        // sin haber filtrado nada.
         assert.ok(
-          !texto.includes(sena),
-          `el borde público republica la seña «${sena}» del canal del operador porque la escribió ` +
-            `AEMET y nadie la mira: ${texto}`,
+          texto.includes("[recortado]"),
+          `[${nombre}] la seña no sale, pero tampoco hay marca de recorte: el gate estaría ` +
+            `midiendo otra cosa: ${texto}`,
         );
+      } finally {
+        instancia.cerrar();
       }
-    } finally {
-      instancia.cerrar();
     }
   },
 );
+
+/**
+ * LÍMITE DECLARADO · el filtro casa variantes de **escritura**, no **codificaciones**.
+ *
+ * Un `descripcion` con el dominio escrito en entidades HTML —`opendata&#46;aemet&#46;es`— sale
+ * entero por el borde. Está decidido así y dicho en `errors.ts`: descodificar sería publicar un
+ * texto que el upstream no escribió, y el espacio de escapes no tiene fondo (`&#x2E;`, `&period;`,
+ * doble codificación, porcentaje…), de modo que perseguirlo dejaría la misma lista negra con una
+ * promesa mayor y ninguna garantía nueva. Sigue siendo un agujero de la lista negra, igual que la
+ * prosa ajena sin señas: la diferencia es que está contado.
+ *
+ * Este recorrido existe para que el límite no se pueda mover en silencio en ninguna de las dos
+ * direcciones. **Si se pone rojo es porque alguien amplió el filtro**: bien — amplía con él la
+ * frase de `errors.ts` y la del CHANGELOG, que es la parte que en esta trayectoria se quedó atrás.
+ */
+test("LÍMITE · el filtro no descodifica: una seña en entidades HTML sale entera, y está dicho", async () => {
+  const clock = fakeClock(T0);
+  // Sólo el dominio: el otro trozo de la URL de alta (`centrodedescargas`) es una seña por sí
+  // misma y viaja sin codificar, así que ése sí se recorta. Lo que este recorrido aísla es lo
+  // que la codificación esconde, no la URL entera.
+  const dominioEnEntidades = "opendata&#46;aemet&#46;es&#47;altaUsuario";
+  const instancia = await montar(
+    deps({
+      fetch: aemetQueRechazaCon(`Solicite una nueva en ${dominioEnEntidades}`).fetch,
+      now: clock.now,
+      aemetApiKey: jwt(T0 + 90 * DAY),
+    }),
+  );
+  try {
+    const { texto } = await instancia.get(VIGO);
+    assert.ok(
+      texto.includes(dominioEnEntidades),
+      `el filtro descodifica entidades HTML: eso es MÁS de lo que prometen \`errors.ts\` y el ` +
+        `CHANGELOG, así que actualiza las dos frases antes de tocar este recorrido: ${texto}`,
+    );
+    // Y la forma legible sigue sin aparecer: lo que pasa es la codificación, no el dominio.
+    assert.ok(!texto.includes("opendata.aemet.es"), texto);
+  } finally {
+    instancia.cerrar();
+  }
+});
 
 // =================================================================================================
 // A-19 · clase A5 (límites) · una clave que no entendemos rompe el endpoint en vez de degradarlo
@@ -584,6 +690,54 @@ gatePermanente("GATE · la credencial publicada usa el reloj inyectado, no el de
     const { credential } = JSON.parse(texto) as { credential: { daysLeft: number } };
     assert.equal(credential.daysLeft, 10, `el cuerpo no usó el reloj inyectado: ${texto}`);
     assert.equal(inspectAemetKey(jwt(T0 + 10 * DAY), T0).daysLeft, 10);
+  } finally {
+    instancia.cerrar();
+  }
+});
+
+/**
+ * GATE · **el otro** sitio que llena el `reason` público también pasa por el borde.
+ *
+ * A-18 se cerró diciendo que `reasonFrom` era «la única puerta por la que se llena el `reason`
+ * público». No lo era: la rama sin zona marítima de `module.ts` lo componía a mano. No era una fuga
+ * —esa frase la escribimos nosotros y está limpia—, era una **afirmación por costumbre**, justo la
+ * clase de frase que este pase existe para desmontar; y la costumbre es lo que deja de valer en
+ * cuanto alguien interpola ahí algo que no ha mirado.
+ *
+ * Ahora esa rama también pasa por `reasonFrom`, y esto lo mide **por HTTP**: si alguien vuelve a
+ * llenar ese `reason` a mano, se pone rojo. El `slug` con una seña dentro no es una predicción de
+ * cómo se llamarán los puertos: es la única palanca que hace observable por dónde pasa la frase.
+ */
+gatePermanente("GATE · la rama sin zona marítima llena su `reason` por el borde, no a mano", async () => {
+  const clock = fakeClock(T0);
+  const SLUG_HOSTIL = "AEMET_API_KEY";
+  const instancia = await montar(
+    deps({
+      fetch: aemetQueSirve().fetch,
+      now: clock.now,
+      aemetApiKey: jwt(T0 + 90 * DAY),
+      ports: {
+        findBySlug: (slug) =>
+          Promise.resolve(slug === SLUG_HOSTIL ? { slug, lat: 43.39, lon: -8.4 } : undefined),
+      },
+    }),
+  );
+  try {
+    const { status, texto } = await instancia.get(`/bulletin?port=${encodeURIComponent(SLUG_HOSTIL)}`);
+    assert.equal(status, 200, texto);
+    const cuerpo = JSON.parse(texto) as { zone: unknown; reason: string };
+    assert.equal(cuerpo.zone, null, `este gate mide la rama sin zona marítima y no entró en ella: ${texto}`);
+    // Se afirma sobre el `reason` y no sobre el cuerpo entero: el `slug` viaja **además** en
+    // `port.slug`, que es el eco de lo que se pidió y no una frase — medido aquí, no supuesto. El
+    // campo con la promesa de pasar por el borde es el `reason`, y es el que se mira.
+    assert.ok(
+      !cuerpo.reason.includes(SLUG_HOSTIL),
+      `la rama sin zona compone su \`reason\` a mano: la seña sale entera por el borde público ` +
+        `sin pasar por \`reasonFrom\`, y con ella la frase de \`errors.ts\` que dice que no puede: ${texto}`,
+    );
+    assert.ok(cuerpo.reason.includes("[recortado]"), `no hay marca de recorte: ${texto}`);
+    // Y la frase sigue diciendo lo que pasa: recortar el canal no puede acabar en no explicar nada.
+    assert.ok(cuerpo.reason.includes("no tiene zona marítima de AEMET asignada"), texto);
   } finally {
     instancia.cerrar();
   }

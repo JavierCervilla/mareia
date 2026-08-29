@@ -58,6 +58,18 @@ const SENAS_DEL_OPERADOR = [
   "actualiza el secreto",
 ] as const;
 
+/**
+ * Las mismas señas en **las dos formas Unicode que se leen igual**. Este gate las escribía sólo en
+ * `NFC`, y por eso nunca vio que el filtro del borde casaba texto crudo: «Renuévala» con `e` +
+ * acento combinante (U+0301) es la misma palabra en pantalla y otra cadena distinta para
+ * `includes`, así que salía entera por el `reason` con el gate en verde (rechazo del verificador
+ * sobre T-18/A-18). Vigilar las dos formas cuesta una línea y quita de en medio una clase entera de
+ * «esto no se pondrá rojo nunca».
+ */
+const SENAS_VIGILADAS: readonly string[] = [
+  ...new Set(SENAS_DEL_OPERADOR.flatMap((sena) => [sena.normalize("NFC"), sena.normalize("NFD")])),
+];
+
 /** JWT sintético con la caducidad pedida. Firma de relleno: aquí solo se lee el `exp`. */
 function jwt(expiresAtMs: number): string {
   const b64 = (value: unknown): string =>
@@ -156,7 +168,7 @@ for (const escenario of ESCENARIOS) {
 
     const cuerpos = await cuerposPublicos(moduleDeps(upstream(escenario.aemetRechaza), escenario.clave));
     for (const [endpoint, cuerpo] of cuerpos) {
-      for (const sena of SENAS_DEL_OPERADOR) {
+      for (const sena of SENAS_VIGILADAS) {
         assert.ok(
           !cuerpo.includes(sena),
           `${endpoint} publica la seña «${sena}» con la credencial '${escenario.estado}': ${cuerpo}`,

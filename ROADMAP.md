@@ -26,11 +26,18 @@
       con una frase neutra, y la instrucción completa se queda en el canal de quien puede renovarla
       (`aemet-key.yml`). Con gate que mira la **respuesta entera serializada** en los cinco estados
       de la credencial, no un campo, porque el defecto se mueve de campo
-      (pase adversario cerrado: los 4 hallazgos arreglados y sus 8 ataques como gate permanente — la
-      frase pública dice el estado de la credencial y no una consecuencia que la caché desmiente, el
-      texto que escribe AEMET se filtra en el borde antes de llegar al JSON y a la pantalla, un `exp`
-      que no es una fecha degrada a `unreadable` en vez de devolver un 500, y `daysLeft` cuadra con
-      el `expiresAt` que viaja a su lado; ver `docs/qa/informe-adversario-t18.md`)
+      (pase adversario cerrado: los 4 hallazgos arreglados y sus 7 ataques como gate permanente
+      —5 sobre el cuerpo HTTP y 2 sobre la pantalla— más 7 recorridos que no vienen de un hallazgo
+      (6 `GATE ·` del punto ciego, los fixtures y el borde; 1 `LÍMITE ·`): la frase pública dice el
+      estado de la credencial y no una consecuencia que la caché desmiente, el texto que escribe
+      AEMET se filtra en el borde antes de llegar al JSON y a la pantalla, un `exp` que no es una
+      fecha degrada a `unreadable` en vez de devolver un 500, y `daysLeft` cuadra con el `expiresAt`
+      que viaja a su lado; ver `docs/qa/informe-adversario-t18.md`)
+      (rechazo del verificador atendido: el filtro del borde casaba texto crudo y fallaba contra sus
+      propias señas —`NFD`, guion, ancho cero, dominio partido—, y «la única puerta hacia el
+      `reason`» no era una sino dos. Ahora el texto se sanea antes de casar, la rama sin zona
+      marítima también pasa por `reasonFrom`, las cinco variantes son casos del gate y lo que la
+      lista negra NO cubre —las codificaciones— está dicho y tiene recorrido propio)
       (residuo R-1 cerrado: `scripts/check-aemet-key.ts` —lo que el operador lee dentro del issue—
       ya tiene siete recorridos que lo **ejecutan**, y un job de CI que los corre)
 

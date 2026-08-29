@@ -58,7 +58,7 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   cuenta un día entero de más desde el primer milisegundo y no cuadra con el `expiresAt` que viaja a
   su lado (ya visible en un fixture commiteado: `-40` con 39 días transcurridos).
   Informe: `docs/qa/informe-adversario-t18.md`; bundle: `docs/qa/bundles/t18-adversario/FAILURE.md`.
-- **Pase adversario cerrado: los 4 hallazgos arreglados y sus 8 ataques como gate permanente.** El
+- **Pase adversario cerrado: los 4 hallazgos arreglados y sus 7 ataques como gate permanente.** El
   envoltorio `hallazgoAbierto()` hizo su trabajo —los cinco cuerpos del módulo gritaron «YA NO
   FALLA» a la vez— y se retiró; los cuerpos se quedan tal cual, midiendo lo mismo que medían cuando
   reproducían el fallo, sólo que ahora tienen que pasar.
@@ -68,8 +68,8 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
     desmentía a sí mismo. Quién publica y quién no ya lo dicen el `status` y la presencia del
     `document`; hacer que la frase dependa de si hay caché la acoplaría al estado de otra cosa.
   - **(b) El filtro de la tercera copia va en el borde, no en el adaptador.** `reasonFrom()`
-    —**la única** puerta por la que se llena el `reason` público— recorta las cinco señas del canal
-    del operador, las haya escrito quien las haya escrito. Es lista negra y se dice en el propio
+    —el borde por el que se llena el `reason` público— recorta las cinco señas del canal del
+    operador, las haya escrito quien las haya escrito. Es lista negra y se dice en el propio
     comentario: conserva el diagnóstico del upstream a cambio de no prometer nada sobre prosa ajena
     que no lleve esas señas. Ahora el gate ataca con un `descripcion` de AEMET que **sí** muerde —el
     de T-18 estaba elegido para no morder— y el recorrido de la web compone su `reason` llamando al
@@ -109,6 +109,58 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   segunda llamada sin envolver y el sobre que apunta a otro origen: cero señas. Quedan cuatro gates
   nuevos vigilando, uno de ellos para que nadie vuelva a inyectar `urls.aemet` y lo apague en
   silencio.
+- **Rechazo del verificador (1/2): la lista negra fallaba contra sus propias señas.** El comentario
+  de `reasonFrom` prometía recortar las cinco «las haya escrito quien las haya escrito» y el filtro
+  casaba sobre texto **crudo**. Medido por el camino real (`aemet.ts` → `WeatherSourceError` →
+  `reasonFrom`), cuatro variantes de las propias señas salían **enteras** por el `reason` público:
+  «Renuévala» en `NFD` (`e` + U+0301 — la misma palabra en pantalla, otra cadena para `includes`),
+  `AEMET-API-KEY` con guion, `AEMET<U+200B>_API_KEY` con un carácter de ancho cero dentro y
+  `opendata. aemet.es` partido por un salto de línea. Agravante: el gate escribía las señas a mano y
+  **sólo en `NFC`**, así que vigilaba una forma de cinco y no se habría puesto rojo nunca. Ahora el
+  texto se **sanea antes de casar y se publica saneado** —fuera los invisibles, `NFC`, espacio
+  aplastado; casar sobre una forma y publicar otra dejaría el recorte aplicado a un texto distinto
+  del que sale por el cable— y el patrón tolera `-`, `_`, espacio o nada como separador de
+  `AEMET_API_KEY` y el espacio alrededor de los puntos del dominio. Las cinco variantes son casos
+  del gate, y el de la respuesta entera vigila cada seña en **las dos formas Unicode**. Comprobado
+  mordiendo, mutación a mutación: sin el saneado salen el `NFD` y el ancho cero; sin la tolerancia
+  del separador sale `AEMET-API-KEY`; sin la del dominio sale `opendata. aemet.es`; y una frase
+  pública con «Renuévala» en `NFD` deja el gate viejo en **7/0 verde** y el nuevo en rojo.
+- **Y lo que la lista negra NO cubre, contado en vez de callado.** No casa **codificaciones**:
+  `opendata&#46;aemet&#46;es` (entidades HTML) sale entero, igual que la prosa ajena sin señas («Su
+  clave ha expirado. Solicite una nueva y configúrela en el servidor»). Es decisión y no olvido —
+  descodificar es publicar un texto que el upstream no escribió, y el espacio de escapes no tiene
+  fondo (`&#x2E;`, `&period;`, doble codificación, porcentaje): perseguirlo dejaría la misma lista
+  negra con la promesa más grande y ninguna garantía nueva. El límite tiene **recorrido propio**
+  (`LÍMITE ·`) que se pone rojo si alguien amplía el filtro sin ampliar la frase —comprobado
+  mordiendo: descodificando `&#46;` en el saneado, rojo— porque lo que no puede pasar es que el
+  comentario y este changelog prometan una cosa y el código haga otra.
+- **Rechazo del verificador (2/2): «la única puerta» era falso, y ahora es verdad.** Había **dos**
+  sitios llenando el `reason` público y sólo uno pasaba por `reasonFrom`: la rama sin zona marítima
+  de `module.ts` lo componía a mano. No era una fuga —esa frase la escribimos nosotros y está
+  limpia—, era una **afirmación por costumbre**, la misma clase de frase que A-18 desmontó. Se
+  enruta esa rama por el borde, con lo que la frase pasa a ser cierta, y un gate lo mide **por
+  HTTP** (comprobado mordiendo: al volver a componer el `reason` a mano, rojo citando el cuerpo).
+  El comentario de `errors.ts` dice ahora **dos, con nombre y contados**, y añade que un tercer
+  camino no lo garantiza la función sino que quien lo escriba la llame — por eso los recorridos
+  atacan por HTTP y no llamando a `reasonFrom`.
+- **Cifra descuadrada, corregida (doctrina T-161).** Donde se decía «los 4 hallazgos y sus **8**
+  ataques» eran **7**: cinco recorridos sobre el cuerpo HTTP y dos sobre la pantalla. El 8 contaba
+  los `gatePermanente(` de un solo fichero —tres de ellos del punto ciego, que nunca fueron
+  hallazgo— y dejaba fuera los dos de la web. Contado hoy sobre los dos ficheros del pase: **7 con
+  letra de hallazgo + 7 sin ella** (6 `GATE ·` y 1 `LÍMITE ·`) = 14 recorridos.
+- **`scripts/deno.json`**: la tarea `test` llevaba `--allow-read ..`, y ese `..` no era el valor del
+  permiso sino un **path posicional** — o sea, «descubre tests desde la raíz del repo». Hoy no
+  encuentra ninguno más porque el resto son de Node, pero el día que Deno cambie cómo acota el
+  descubrimiento esa tarea intentaría correr los ~500 recorridos de Node bajo Deno. Ahora el permiso
+  va explícito y acotado (`--allow-read=.,../.github`: este directorio y el workflow que se lee) y
+  el path de descubrimiento es `.`. Sigue en 7/0.
+- **Las tres funciones «que no las usa la sección» viven donde dice su intención.**
+  `inspectAemetKey`, `publicCredentialView` y `reasonFrom` se exportaban desde `ui.ts` con un
+  comentario explicando que no eran para la sección sino para los gates de la web (no pueden salir
+  por `index.ts`, que arrastra Express). Un comentario no impide que mañana alguien las use: se van
+  a un subpath propio, `@mareia/module-weather/testing`, y `ui.ts` vuelve a ser sólo lo que la
+  página pinta.
+
 
 ## 2026-08-29 — T-12 · el almanaque funciona sin cobertura, y lo dice
 

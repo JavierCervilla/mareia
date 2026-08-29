@@ -11,9 +11,12 @@
  * «(el servidor informa: `${reason}`)» con el `reason` tal cual, que es la puerta por la que entra
  * lo mismo que se quiso dejar fuera, escrito por AEMET en vez de por nosotros (hallazgo **A-18**).
  *
- * **ESTADO: A-18 cerrado.** El filtro se puso en el borde —`reasonFrom`, la única puerta por la que
- * se llena el `reason` público—, así que la pantalla queda limpia por construcción y no porque la
- * vista se acuerde de mirar. El envoltorio `hallazgoAbierto()` gritó «YA NO FALLA» y se retiró: el
+ * **ESTADO: A-18 cerrado.** El filtro se puso en el borde —`reasonFrom`—, así que la pantalla queda
+ * limpia por construcción y no porque la vista se acuerde de mirar. Aquí se dijo «la única puerta
+ * por la que se llena el `reason` público» y era **falso mientras se escribía**: la rama sin zona
+ * marítima de `module.ts` lo componía a mano. Se enrutó también por el borde y hay un gate que lo
+ * mide por HTTP, así que hoy son **dos** sitios y los dos pasan por ahí; lo que no se afirma es
+ * nada sobre un tercero que se escriba mañana (ver `errors.ts`). El envoltorio `hallazgoAbierto()` gritó «YA NO FALLA» y se retiró: el
  * cuerpo se queda igual, como gate permanente.
  *
  * Informe: `docs/qa/informe-adversario-t18.md`.
@@ -23,7 +26,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import type { BulletinPayload, WeatherPayload } from "@mareia/module-weather/ui";
-import { inspectAemetKey, publicCredentialView, reasonFrom } from "@mareia/module-weather/ui";
+import { inspectAemetKey, publicCredentialView, reasonFrom } from "@mareia/module-weather/testing";
 
 import type { BloqueMeteo, RespuestaMeteo, VistaMeteo } from "./vista.ts";
 import { vistaMeteo } from "./vista.ts";

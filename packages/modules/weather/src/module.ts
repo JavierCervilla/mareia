@@ -21,6 +21,7 @@ import type { AemetKeyState } from "./aemet-key.ts";
 import { inspectAemetKey, needsHumanAction, publicCredentialView } from "./aemet-key.ts";
 import type { WeatherCache } from "./cache.ts";
 import { cellKey, toCell } from "./cell.ts";
+import { reasonFrom } from "./errors.ts";
 import { BULLETIN_TTL_SECONDS, FORECAST_TTL_SECONDS, MARINE_TTL_SECONDS } from "./frescura.ts";
 import { WEATHER_ATTRIBUTIONS, WEATHER_MODULE_VERSION } from "./meta.ts";
 import { fetchForecast, fetchMarine } from "./open-meteo.ts";
@@ -241,7 +242,13 @@ function bulletinHandler(deps: WeatherModuleDeps, health: HealthTracker): Reques
           port,
           zone: null,
           status: "unavailable",
-          reason: `El puerto '${port.slug}' no tiene zona marítima de AEMET asignada`,
+          // Por el borde, como el otro `reason` público (`source.ts`). La frase es nuestra y hoy
+          // está limpia, así que esto no tapa ninguna fuga: lo que hace es que «los dos sitios que
+          // llenan el `reason` pasan por `reasonFrom`» sea un hecho comprobable y no una costumbre
+          // — que es justo lo que A-18 demostró que no se puede dar por supuesto. El `slug` que se
+          // interpola viene del repositorio de puertos, no de la query, pero llega hasta aquí sin
+          // que nadie mire lo que dice.
+          reason: reasonFrom(`El puerto '${port.slug}' no tiene zona marítima de AEMET asignada`),
           attributions: [AEMET_ATTRIBUTION],
           credential: publicCredentialView(inspectAemetKey(deps.aemetApiKey, deps.now())),
         } satisfies BulletinPayload,
