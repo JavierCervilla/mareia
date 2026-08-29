@@ -2,7 +2,7 @@
   "license": "AGPL-3.0-or-later",
   "//unstable": "Deno KV (la caché del módulo meteo) sigue siendo API inestable: se habilita aquí, para todas las tareas y para 'deno check', en vez de repetir --unstable-kv en cada una.",
   "unstable": ["kv"],
-  "//permisos": "--allow-read va acotado al dataset: es lo ÚNICO que este proceso lee del disco (data/geo/ports.json y data/stations/*.json, vía core-deps.ts). El código fuente, los paquetes npm y el almacén de Deno KV los abre el runtime, no nuestro código, y no pasan por este permiso. La ruta es relativa porque `deno task` corre siempre con el cwd de este deno.json.",
+  "//permisos": "--allow-read va acotado al dataset: es lo ÚNICO que este proceso lee del disco (data/geo/ports.json y data/stations/*.json, vía core-deps.ts). El código fuente y los paquetes npm los abre el runtime, no nuestro código, y no pasan por este permiso. El almacén de Deno KV tampoco, MIENTRAS no se le dé ruta: estas tareas no fijan MAREIA_KV_PATH y usan el almacén por defecto del proceso. Con ruta explícita (la imagen de producción, ver apps/api/Dockerfile) Deno.openKv() sí exige --allow-read y --allow-write sobre ella. La ruta es relativa porque `deno task` corre siempre con el cwd de este deno.json.",
   "tasks": {
     "dev": "deno run --allow-net --allow-env --allow-read=../../data --watch src/main.ts",
     "start": "deno run --allow-net --allow-env --allow-read=../../data src/main.ts",

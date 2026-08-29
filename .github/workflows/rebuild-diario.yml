@@ -1,0 +1,125 @@
+name: Rebuild diario de la web
+
+# El sitio es SSG: se construye una vez y publica **el día en que se construyó**, horneado en el
+# HTML de las 192 páginas. Sin este workflow, `mareia.cervilla.es` se queda congelado en el día del
+# último despliegue y va envejeciendo sin decirlo, que es exactamente el dato caducado con pinta de
+# fresco que el proyecto existe para no publicar.
+#
+# **De qué depende esto, y qué depende de esto**:
+#
+# - depende del `ARG BUILD_DATE` de `apps/web/Dockerfile` (T-17) y de que se le pase **explícito**.
+#   No basta con redesplegar: el `RUN` que escribe la fecha es una capa de Docker y, con el mismo
+#   commit y sin build arg, se reutiliza de caché — el sitio volvería a publicar el día de ayer con
+#   un despliegue nuevo y verde. Por eso este workflow escribe `BUILD_DATE` antes de desplegar.
+# - de esto depende la **normativa fechada de T-19** (vedas y tallas mínimas), que está pensada para
+#   **degradar cuando envejece**. Un dato que degrada con el tiempo sobre un sitio que no se
+#   reconstruye nunca degrada: se queda para siempre en el día en que se construyó, diciendo que
+#   está fresco. Si este workflow se apaga, T-19 deja de cumplir su promesa **en silencio**.
+
+on:
+  schedule:
+    # 04:20 UTC: bien entrado el día UTC (el `BUILD_DATE` es UTC) y en un minuto no redondo, para
+    # no caer en el pico de la hora en punto de los runners.
+    - cron: "20 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rebuild-diario
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    name: Reconstruir y redesplegar la web con la fecha de hoy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DOKPLOY_API_URL: ${{ secrets.DOKPLOY_API_URL }}
+      DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+      DOKPLOY_WEB_APP_ID: ${{ secrets.DOKPLOY_WEB_APP_ID }}
+      SITIO: https://mareia.cervilla.es
+      # Una página de puerto, no la portada: lleva `data-otro-dia-build`, que es una marca puesta
+      # a propósito para ser leída por una máquina, no un texto de la interfaz que cambia de forma
+      # el día que alguien rediseñe la portada.
+      PAGINA_TESTIGO: /mareas/galicia/pontevedra/vigo/
+    steps:
+      - name: Comprobar que el workflow está configurado
+        # Sin las credenciales esto NO puede pasar en verde y callado: un rebuild que no corre es
+        # invisible —el sitio sigue en pie, solo que con la fecha de otro día—, así que la única
+        # señal posible es este job en rojo. Misma doctrina que el comprobador de la clave de AEMET.
+        run: |
+          faltan=""
+          for s in DOKPLOY_API_URL DOKPLOY_API_KEY DOKPLOY_WEB_APP_ID; do
+            eval "valor=\${$s}"
+            [ -n "$valor" ] || faltan="$faltan $s"
+          done
+          if [ -n "$faltan" ]; then
+            echo "::error::Faltan secretos del repositorio:$faltan — mientras falten, el sitio publica la fecha del último despliegue manual y la normativa fechada de T-19 no puede degradar."
+            exit 1
+          fi
+
+      - name: La fecha de hoy, en UTC
+        id: fecha
+        run: echo "hoy=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+
+      - name: Escribir BUILD_DATE en los build args de la aplicación
+        env:
+          HOY: ${{ steps.fecha.outputs.hoy }}
+        run: |
+          set -eu
+          # Se leen los build args que ya hay y se sustituye SOLO la línea de BUILD_DATE: mandar el
+          # campo entero a ciegas borraría `SITE_URL` o cualquier otro que alguien haya puesto en el
+          # panel, y el estropicio no se notaría hasta el siguiente despliegue.
+          actuales="$(curl -sSf -H "x-api-key: $DOKPLOY_API_KEY" \
+            "$DOKPLOY_API_URL/api/application.byId?applicationId=$DOKPLOY_WEB_APP_ID" \
+            | jq -r '.buildArgs // ""')"
+          nuevos="$(printf '%s\n' "$actuales" | grep -v '^BUILD_DATE=' || true)"
+          nuevos="$(printf '%s\nBUILD_DATE=%s\n' "$nuevos" "$HOY" | sed '/^$/d')"
+          jq -n --arg id "$DOKPLOY_WEB_APP_ID" --arg args "$nuevos" \
+            '{applicationId: $id, buildArgs: $args}' > /tmp/patch.json
+          curl -sSf -X PATCH -H "x-api-key: $DOKPLOY_API_KEY" -H 'Content-Type: application/json' \
+            --data @/tmp/patch.json "$DOKPLOY_API_URL/api/application.update" > /dev/null
+
+          # Y se vuelve a leer para comprobar que el PATCH **surtió efecto**. Es el paso que
+          # convierte «creo que Dokploy acepta este campo» en un hecho comprobado en cada corrida:
+          # si un día la API cambia de forma, esto se pone rojo en vez de desplegar la fecha de ayer
+          # con toda la pinta de haber funcionado.
+          confirmado="$(curl -sSf -H "x-api-key: $DOKPLOY_API_KEY" \
+            "$DOKPLOY_API_URL/api/application.byId?applicationId=$DOKPLOY_WEB_APP_ID" \
+            | jq -r '.buildArgs // ""')"
+          if ! printf '%s\n' "$confirmado" | grep -qx "BUILD_DATE=$HOY"; then
+            echo "::error::El build arg BUILD_DATE=$HOY no quedó guardado en Dokploy; sin él el build reutilizaría la capa cacheada y el sitio publicaría la fecha de ayer."
+            exit 1
+          fi
+
+      - name: Desplegar
+        run: |
+          set -eu
+          curl -sSf -X POST -H "x-api-key: $DOKPLOY_API_KEY" -H 'Content-Type: application/json' \
+            --data "{\"applicationId\":\"$DOKPLOY_WEB_APP_ID\"}" \
+            "$DOKPLOY_API_URL/api/application.deploy" > /dev/null
+
+      - name: Comprobar que el sitio publica ya el día de hoy
+        env:
+          HOY: ${{ steps.fecha.outputs.hoy }}
+        run: |
+          set -eu
+          # Lo que se comprueba es el RESULTADO, no que la llamada de despliegue devolviera 200:
+          # «se pidió un despliegue» y «el sitio publica hoy» son cosas distintas, y la segunda es
+          # la que le importa a quien lo visita.
+          intento=1
+          while [ "$intento" -le 20 ]; do
+            html="$(curl -sS --max-time 20 "$SITIO$PAGINA_TESTIGO" || true)"
+            if printf '%s' "$html" | grep -q "data-otro-dia-build=\"$HOY\""; then
+              echo "El sitio publica $HOY (intento $intento)."
+              exit 0
+            fi
+            echo "Todavía no ($intento/20); se reintenta en 30 s."
+            sleep 30
+            intento=$((intento + 1))
+          done
+          publicado="$(printf '%s' "${html:-}" | grep -o 'data-otro-dia-build="[^"]*"' | head -1)"
+          echo "::error::Diez minutos después del despliegue, $SITIO$PAGINA_TESTIGO sigue sin publicar $HOY (lo último leído: ${publicado:-nada}). El portal está sirviendo un día que no es hoy."
+          exit 1

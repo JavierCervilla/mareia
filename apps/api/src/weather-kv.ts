@@ -8,9 +8,11 @@
  * necesita. El módulo declara **qué** necesita (el puerto `WeatherCache`); el composition root
  * decide **con qué** se cumple, igual que `core-deps.ts` decide que los puertos son ficheros JSON.
  *
- * Si KV no está disponible (falta `--unstable-kv`, disco de solo lectura…), se degrada a la caché
- * en memoria del propio módulo: perder la caché entre reinicios es aceptable; dejar de servir —o
- * peor, machacar a Open-Meteo en cada petición— no lo es.
+ * Si KV no está disponible (falta `--unstable-kv`, disco de solo lectura, el volumen sin montar o
+ * sin permiso sobre él…), se degrada a la caché en memoria del propio módulo: perder la caché
+ * entre reinicios es aceptable; dejar de servir —o peor, machacar a Open-Meteo en cada petición—
+ * no lo es. Eso es lo que hace que el volumen sea una **comodidad y no un requisito**: si el día
+ * del despliegue no está montado, el servicio arranca igual y lo cuenta por stderr.
  */
 
 import type { CacheEntry, WeatherCache } from "@mareia/module-weather";
@@ -37,7 +39,10 @@ function openOnce(path: string | undefined): () => Promise<Deno.Kv | undefined> 
 /**
  * Caché del módulo meteo respaldada por Deno KV.
  *
- * @param path Ruta del almacén; por defecto, el KV por defecto del proceso.
+ * @param path Ruta del almacén; por defecto, el KV por defecto del proceso. **Con ruta explícita
+ * hacen falta `--allow-read` y `--allow-write` sobre ella** — comprobado: sin `--allow-write`,
+ * `Deno.openKv(ruta)` lanza `NotCapable`. Sin ruta no hacen falta, porque el almacén por defecto
+ * lo abre el runtime por su cuenta.
  */
 export function createDenoKvWeatherCache(path?: string): WeatherCache {
   const kv = openOnce(path);

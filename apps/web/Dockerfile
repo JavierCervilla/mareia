@@ -22,11 +22,12 @@ FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a55
 # del gestor es dato del repo, no de esta imagen, y así no se puede desincronizar del lockfile.
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable
-# Queda una dependencia de red que este Dockerfile no puede cerrar solo: corepack DESCARGA el
-# tarball de pnpm en cada build limpio, así que el build no es hermético. Cerrarlo del todo pide
-# tocar el `packageManager` de la raíz para que lleve su hash de integridad (`pnpm@10.33.0+sha512.…`,
-# que corepack verifica) o vendorizar el tarball; las dos cosas son del monorepo, no de la imagen,
-# y van apuntadas en `docs/despliegue.md` como pendiente de T-15.
+# corepack sigue DESCARGANDO el tarball de pnpm en cada build limpio —eso no lo cierra un
+# Dockerfile—, pero desde T-15 lo que se descargue ya no puede ser cualquier cosa: el
+# `packageManager` de la raíz lleva su hash de integridad (`pnpm@10.33.0+sha512.…`) y corepack
+# **verifica el tarball contra él** antes de ejecutarlo. Es decir, el build depende de la red pero
+# ya no confía en ella: un registry comprometido o un intermediario que sirva otro pnpm hacen
+# fallar el build en vez de meter un gestor de paquetes ajeno en la imagen que se despliega.
 
 WORKDIR /repo
 
