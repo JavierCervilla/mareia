@@ -55,6 +55,13 @@ En concreto:
 6. **Los assets con hash van `cache-first`**, y ahí es seguro: `/_astro/AlmanaqueLayout.<hash>.css`
    cambia de URL cuando cambia de contenido, así que una copia guardada no puede ser la versión
    vieja de nada.
+6 bis. **Las constantes armónicas (`/offline/estaciones/<slug>.json`) NO van `cache-first`, van
+   `stale-while-revalidate`**, y la distinción es la que se coló en la primera versión de este ADR:
+   esa URL **no lleva hash**. El pipeline de datos corrige constantes —para eso existe, y T-13 acaba
+   de regenerar el dataset entero—, así que un `cache-first` puro dejaría al teléfono calculando con
+   las viejas indefinidamente bajo el rótulo «las mismas que usa el servidor», que entonces sería
+   falso. Se sirve la copia al instante (sin red incluida) y se refresca de camino cuando hay
+   cobertura; la página hace lo propio con su copia de IndexedDB.
 7. **La caché no se versiona por build.** Se versiona por *esquema* (`ESQUEMA_CACHE`), que se sube a
    mano cuando cambia la forma de lo guardado. Versionar por build obligaría a re-descargarlo todo
    cada día y —lo grave— dejaría sin copia offline a quien actualizara el worker justo cuando se
@@ -95,6 +102,14 @@ Tres cosas, y conviene tenerlas escritas:
   dónde mirarlo, más allá de la fecha de los datos. Si algún día hace falta —por ejemplo, para un
   aviso de seguridad— la salida no es el banner: es que el worker publique su `VERSION` en un sitio
   visible de la página de transparencia.
+- **En la primerísima visita, la meteo no se queda guardada.** El worker se está registrando cuando
+  la isla dispara su petición, así que esa respuesta sale sin pasar por él y no hay copia que sellar.
+  A partir de la segunda visita la página va controlada (`clients.claim()`) y cada respuesta servida
+  queda guardada con su hora. Se acepta —quien se quede sin cobertura tras una única visita ve la
+  quinta ausencia, «sin conexión y sin copia guardada aquí», que es verdad— pero es un agujero real
+  y su sitio es este documento, no un comentario en un spec. Cerrarlo exigiría retrasar la petición
+  de la isla hasta que el worker controle la página, y eso es pagar latencia en **todas** las
+  visitas para arreglar la primera.
 
 ## Cómo se comprueba
 
@@ -104,4 +119,18 @@ Tres cosas, y conviene tenerlas escritas:
 - `apps/web/src/pwa-construido.test.ts` — el `/sw.js` del `dist/` es exactamente el que genera el
   fuente de este commit.
 - `tests/e2e/journeys/offline.spec.ts` — con cobertura, la navegación pasa por el worker **y
-  transfiere bytes**: la sirvió la red, no la caché.
+  transfiere bytes**: la sirvió la red, no la caché. Y dos favoritos guardados en dos builds
+  distintos conservan cada uno sus ficheros, que es la parte del punto 7 que se comprobaba sola.
+
+## Apéndice — por qué el worker lleva un registro de favoritos
+
+La Cache API es un saco de respuestas **sin dueño**: sabe que tiene guardado
+`/_astro/hoja.<hash>.css`, no para quién. La primera versión de la poda daba por hecho que los
+assets que no usara la página que se estaba guardando «ya no los referencia ningún HTML guardado», y
+eso es falso en cuanto hay dos favoritos de dos builds — que con el rebuild diario del punto 7 es el
+caso **normal**. Guardar el segundo puerto dejaba al primero con su página y cero assets: se abría
+sin estilos, sin la isla meteo y sin el trozo de la calculadora, sin un solo error por ninguna parte.
+
+Por eso el worker guarda, bajo una clave sintética de su propia caché, qué URL necesita cada
+favorito, y poda conservando **la unión**. Es lo único que convierte «qué sobra» en una pregunta con
+respuesta en vez de en una adivinanza.

@@ -11,6 +11,11 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   ahora se importa de `@mareia/usecases/dto` en vez de reescribirse. Un test lo comprueba en los
   **doce puertos** contra `getTides`, evento a evento, y otro lo comprueba en la noche en que la
   hora cambia y el día civil dura 23 h.
+- **La prueba de la promesa muerde sobre el fichero publicado**, y no solo sobre el motor: el bucle
+  de los doce puertos lee `dist/offline/estaciones/<slug>.json` —el fichero que de verdad se baja al
+  teléfono— y lo compara evento a evento con `getTides`, ventana del día civil incluida. Sin eso, un
+  endpoint que publicara constantes de menos dejaba toda la suite en verde mientras la tabla del
+  navegador se separaba centímetros y minutos de la del servidor: horas plausibles y equivocadas.
 - **Un favorito guarda constantes, no un almanaque.** Medido: **2 535–2 640 B** por puerto (los doce
   del catálogo, **30,9 kB** en total) frente a los **49 162 B** que ocuparía el almanaque
   precalculado de **un solo año** de un puerto — **18,6×** más, y caducando en Nochevieja. Con las
@@ -28,7 +33,27 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   Sin conexión: esto es la última copia que se guardó en este dispositivo». Y **no se confunde** con
   el `stale` del backend («la fuente no responde»), que es otra avería. Cuando no hay ni copia, la
   frase es la quinta: «Sin conexión… y no hay ninguna copia guardada aquí. El dato existe; lo que
-  falta es la red». Es un sello **por fuente**: una copia guardada no le cuelga su edad a la otra.
+  falta es la red». Es un sello **por fuente**: una copia guardada no le cuelga su edad a la otra. Y
+  **falla hacia el silencio**: una copia que llega sin la marca de la hora se lee «de fecha
+  desconocida», no «consultado hace menos de un minuto», que era la más confiada de las salidas.
+- **La ventana de años la manda la copia guardada, no el build de la página.** Se congelan en
+  instantes distintos —el payload el día que se guardó, la página cada madrugada—, así que un
+  favorito de diciembre en una página ya de enero hacía que la sección prometiera «cualquier día
+  entre 2026 y 2028» mientras la calculadora contestaba «esta copia calcula de 2025 a 2027», con el
+  campo de fecha dejando elegir el año que luego rechazaba. La regla vive ahora en un solo sitio y
+  el campo, el rótulo y el cálculo salen de ella.
+- **Guardar un segundo favorito ya no desarma al primero.** La Cache API no sabe de quién es cada
+  fichero, así que el worker lleva su propio registro de qué necesita cada puerto guardado y poda
+  conservando la unión. Antes tiraba todo asset que no usara la página que se estaba guardando —una
+  premisa que es falsa en cuanto hay dos favoritos de dos builds, que con el rebuild diario de T-15
+  es el caso normal—: el primero se quedaba con su página y **cero assets**, abriéndose sin estilos,
+  sin la isla meteo y sin el trozo de la calculadora. Hay recorrido nuevo que simula el rebuild y lo
+  reproduce en rojo con el comportamiento viejo.
+- **Las constantes guardadas se revalidan.** Su URL no lleva hash y el pipeline las corrige —T-13
+  acaba de regenerar el dataset entero—, así que el worker las sirve `stale-while-revalidate` y la
+  página compara su copia de IndexedDB con la del servidor cuando hay cobertura. Un `cache-first`
+  puro habría dejado al teléfono calculando con las viejas bajo el rótulo «las mismas que usa el
+  servidor».
 - **Y la sección «sin cobertura» tiene sus cinco estados**, con el mismo sello de T-11 —que se muda
   de la meteo al core (`src/sello.ts`) porque ya no es cosa de un módulo—: sin soporte para guardar,
   con red y sin guardar, **sin red y sin guardar** (no se ofrece un botón que iba a fallar), guardado
@@ -41,7 +66,8 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   arranque instantáneo offline-first, y que una pestaña abierta días conserva el worker viejo.
 - **El worker es un `.ts` de verdad**, tipado contra el protocolo y contra el contrato de módulos, y
   el build lo publica en `/sw.js` quitándole los tipos con el propio Node. **El build se cae** si el
-  fichero acaba con un solo `import` de runtime. **No conoce ni una ruta de meteo**: las políticas
+  fichero acaba con un solo `import` de runtime — estático, **dinámico** o `require`, y sin
+  confundirse con los que aparecen en sus propios comentarios. **No conoce ni una ruta de meteo**: las políticas
   salen de la `PrecachePolicy` que cada módulo declara en `AppModule` (T-06), así que dar de baja un
   módulo se lleva su política por delante.
 - **Instalable**: manifiesto (`minimal-ui`, no `standalone` — quien instala esto sigue queriendo ver
@@ -54,12 +80,14 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   pueden ser HTML y en qué páginas se sirven. La cuenta sigue siendo **exacta** página a página, y la
   portada, el 404 y los índices geográficos siguen en **cero** JavaScript.
 - **Coste medido en la página de puerto**: el bundle que baja *cualquiera* que abra un puerto sube
-  **13 781 B** (5 123 comprimidos) — el motor de mareas, que son **70 347 B** (29 874 comprimidos),
-  va en un trozo aparte con `import()` dinámico y solo lo baja quien pide otro día o guarda el
-  puerto. Sin ese corte eran 82 916 B para todo el mundo. El `/sw.js` publicado pesa **16 852 B**
-  (5 525 comprimidos), comentarios incluidos: son su documentación y su auditoría. Un favorito ocupa
-  en la Cache API unos **144 kB** el primero (página, hoja de estilos, las dos islas, el motor y sus
-  constantes) y unos **31 kB** cada siguiente, porque los assets se comparten.
+  **14 626 B** (5 369 comprimidos) — el motor de mareas, que son **70 372 B**, va en un trozo aparte
+  con `import()` dinámico y solo lo baja quien pide otro día o guarda el puerto. Sin ese corte eran
+  82 916 B para todo el mundo. El `/sw.js` publicado pesa **20 953 B** (6 781 comprimidos),
+  comentarios incluidos: son su documentación y su auditoría. Un favorito ocupa en la Cache API
+  **147 040 B** el primero —página 28 778, hoja de estilos 15 883, isla meteo 13 234, bundle de la
+  PWA 14 626, su trozo común 1 610, motor 70 372 y constantes 2 537— y **31 343 B** cada siguiente,
+  porque los assets se comparten. Todas las cifras en kB de mil y medidas sobre el `dist/` de este
+  commit con `zlib.gzipSync(datos, { level: 9 })` para las comprimidas.
 - **Los gates de antes siguen mordiendo con el worker puesto**: los pases adversarios de T-09, T-10 y
   T-11 quedan en verde sin tocar un solo assert suyo, salvo los dos que contaban scripts, que se
   re-apuntan al registro de scripts de core. `apps/web` pasa de **114 a 172 tests** y los recorridos
