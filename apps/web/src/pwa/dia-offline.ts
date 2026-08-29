@@ -33,9 +33,23 @@ export interface EventoOffline {
   readonly kind: "high" | "low";
 }
 
-/** O el día calculado, o el motivo exacto de que no se pueda. Nunca las dos, nunca ninguna. */
+/**
+ * O el día calculado, o el motivo exacto de que no se pueda. Nunca las dos, nunca ninguna.
+ *
+ * La respuesta lleva **el intervalo que cubre**, igual que la del API lleva su `range`, y por el
+ * mismo motivo: un día civil no siempre dura 24 h. Las dos noches del año en que cambia la hora
+ * duran 23 y 25, y la página lo dice cuando toca en vez de dejar que quien lea la tabla lo deduzca.
+ */
 export type DiaOffline =
-  | { readonly ok: true; readonly fechaIso: string; readonly eventos: readonly EventoOffline[] }
+  | {
+      readonly ok: true;
+      readonly fechaIso: string;
+      readonly eventos: readonly EventoOffline[];
+      /** Principio del día civil del puerto, en ms UTC. */
+      readonly inicioUtcMs: number;
+      /** Final del día civil (excluido), en ms UTC. */
+      readonly finUtcMs: number;
+    }
   | { readonly ok: false; readonly motivo: string };
 
 const FORMATO_FECHA = /^\d{4}-\d{2}-\d{2}$/u;
@@ -67,6 +81,8 @@ export function diaOffline(estacion: EstacionOffline, fechaIso: string): DiaOffl
     return {
       ok: true,
       fechaIso,
+      inicioUtcMs: startUtcMs,
+      finUtcMs: endUtcMs,
       eventos: findExtremes(estacion.estacion, startUtcMs, endUtcMs).map((extremo) => ({
         timeUtcMs: toInstant(extremo.timeUtcMs).timeUtcMs,
         height_m: toHeight(extremo.height_m),

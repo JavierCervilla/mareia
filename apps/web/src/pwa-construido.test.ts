@@ -18,7 +18,10 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { getTides } from "@mareia/usecases";
+
 import { cargarPuertos } from "./datos/catalogo.ts";
+import { deps } from "./datos/deps.ts";
 import { FECHA_DE_BUILD } from "./datos/fecha-build.ts";
 import { activeModules } from "./modules.config.ts";
 import { generarServiceWorker } from "./pwa/generar-sw.ts";
@@ -128,19 +131,52 @@ test("todas las páginas del sitio enlazan el manifiesto: la identidad no cambia
 // Las constantes armónicas que se lleva un favorito
 // =================================================================================================
 
-test("cada puerto publica sus constantes, y con ellas se calcula un día que no está en ninguna página", async (t) => {
+/**
+ * **El gate de la promesa, sobre el artefacto publicado.**
+ *
+ * Aquí está la lección que costó el rechazo del verificador: `pwa/dia-offline.test.ts` compara el
+ * cálculo del navegador con `getTides` en los doce puertos, pero **compone el payload dentro del
+ * test**, así que prueba el motor y no el fichero que se le baja al teléfono. Sonda del verificador:
+ * un `constituents.slice(0, 8)` en el endpoint dejaba los 172 tests y los 35 recorridos en verde
+ * mientras la tabla offline de Vigo se separaba **13 cm y 6 min** de la del API. Horas plausibles y
+ * equivocadas, que es justo lo que este proyecto dice no publicar.
+ *
+ * Así que el bucle que ya tenía el payload publicado en la mano lo compara **evento a evento**.
+ */
+test("lo que se publica calcula EXACTAMENTE lo mismo que el API, en los doce puertos", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
   }
+  // Un día que no publica ninguna página construida: es lo que un caché de páginas no puede dar.
+  const fechaIso = "2027-03-14";
+
   for (const puerto of await cargarPuertos()) {
     const ruta = rutaEstacionOffline(puerto.slug).slice(1);
     const payload: unknown = JSON.parse(fichero(ruta));
     assert.ok(esEstacionOffline(payload), `${puerto.slug}: el payload publicado no valida`);
 
-    const dia = diaOffline(payload, "2027-03-14");
+    const dia = diaOffline(payload, fechaIso);
     assert.ok(dia.ok, `${puerto.slug}: no se puede calcular con lo que se publica`);
     assert.ok(dia.eventos.length > 0, `${puerto.slug}: el día calculado sale vacío`);
+
+    const { events, range } = await getTides(deps, { slug: puerto.slug, from: fechaIso, to: fechaIso });
+    assert.deepEqual(
+      dia.eventos.map((evento) => ({
+        timeUtcMs: evento.timeUtcMs,
+        height_m: evento.height_m,
+        kind: evento.kind,
+      })),
+      events.map((evento) => ({
+        timeUtcMs: evento.timeUtcMs,
+        height_m: evento.height_m,
+        kind: evento.kind,
+      })),
+      `${puerto.slug}: el fichero PUBLICADO no calcula lo mismo que el API`,
+    );
+    // Y la ventana también: un día civil no siempre dura 24 h.
+    assert.equal(dia.inicioUtcMs, range.startUtcMs, `${puerto.slug}: el día empieza en otro sitio`);
+    assert.equal(dia.finUtcMs, range.endUtcMs, `${puerto.slug}: el día acaba en otro sitio`);
 
     // La procedencia viaja con el dato: una tabla calculada en el móvil también responde por sí.
     assert.ok(payload.atribuciones.length > 0, `${puerto.slug}: sin atribuciones`);
