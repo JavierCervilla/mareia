@@ -63,16 +63,23 @@ permanente, así que deshacer un arreglo pone el CI en rojo.
 - **El rótulo que califica la cifra ya no puede prometer pesca a espaldas de nadie.** «Actividad
   prevista por la convención» estaba escrito a mano en la plantilla, fuera de los textos auditados:
   el adversario lo sustituyó por **«Hoy pican seguro»**, las 12 páginas lo publicaron y la suite
-  entera quedó en verde. Ahora vive en `textos.ts`, la regla «aquí no se promete pesca» se aplica a
-  **todas** las cadenas del módulo (y no a tres elegidas a mano) y la lista negra caza el ataque
-  exacto. Y el rótulo se reescribe a **«Índice de la convención solunar»**: «prever» era justo lo que
-  el aviso niega doce párrafos más abajo.
+  entera quedó en verde. Ahora vive en `textos.ts` y la regla «aquí no se promete pesca» se aplica a
+  **todas las cadenas de la superficie pública del package** —se recorre `index.ts`, que es
+  exactamente el conjunto que el gate del `dist/` declara auditado— en vez de a tres elegidas a
+  mano; y la lista negra caza el ataque exacto, que con las palabras de antes no casaba. Y el rótulo
+  se reescribe a **«Índice de la convención solunar»**: «prever» era justo lo que el aviso niega doce
+  párrafos más abajo.
 - **Las bandas se ven al sol y se distinguen sin depender del color.** Medían **1,30:1** y
   **1,14:1** sobre el fondo, y mayor contra menor **1,14:1**, frente al 3:1 de WCAG 1.4.11. Ahora la
-  banda lleva **filete** en terracota a opacidad plena —**5,40:1** en claro, **5,69:1** en noche
-  sobre los tokens; **5,06–5,42:1** y **5,27–5,68:1** medidos sobre píxeles renderizados— y la
-  diferencia mayor↔menor es **continuo de 1,8 px contra discontinuo de 1 px**, que se ve en escala
-  de grises. La mancha se queda tenue a propósito: subirla al 3:1 exigiría 0,70 de opacidad y
+  banda lleva **filete** en terracota a opacidad plena, **continuo de 2 px** el mayor y
+  **discontinuo de 1,6 px** el menor: una diferencia que se ve en escala de grises y que no depende
+  de distinguir dos tonos del mismo naranja. Medido **sobre el SVG servido** —14 anchos de
+  presentación de 300 a 1440 px × 2 temas × los 4 bordes, 56 muestras por caso—: mayor
+  **5,42–5,81:1** en claro y **5,68–5,99:1** en noche, menor **3,95–5,78:1** y **4,13–5,94:1**,
+  **cero muestras por debajo de 3:1**. Los grosores no son de gusto: un filete de w px centrado en el
+  borde reparte su cobertura entre dos columnas de píxel y en la peor alineación se queda en w/2, así
+  que por debajo de 1,36 px no hay 3:1 que valga — con 1 px el menor caía a **2,31:1** en 9 de esos
+  14 anchos. La mancha se queda tenue a propósito: subirla al 3:1 exigiría 0,70 de opacidad y
   taparía la curva.
 - **La sección del módulo se expone como región.** La página tenía ocho secciones y Chromium
   anunciaba **siete**: la del módulo salía sin nombre accesible, con su `<h2>` ya emitido y sin que

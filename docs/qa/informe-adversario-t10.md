@@ -142,15 +142,33 @@ se publica.
   ser cromática: **filete continuo de 1,8 px contra discontinuo de 1 px**, con
   `vector-effect: non-scaling-stroke` para que no se adelgace en el móvil, y con la leyenda del pie
   nombrando las dos tramas (A-15) — una trama que no se explica tampoco distingue.
-  **Medido sobre píxeles renderizados** (Chromium 1440 px, dSF 1), contra el fondo real de cada tema:
+  **Medido sobre el SVG servido** (no sobre el CSS fuente), barriendo **14 anchos de presentación**
+  —300, 320, 340, 360, 380, 400, 414, 500, 600, 760, 900, 1100, 1280 y 1440 px— × 2 temas × los 4
+  bordes de banda = **56 muestras por caso**. Solo cuentan los píxeles que caen sobre el segmento
+  fondo→terracota (tolerancia 10/255), para no medir la curva, la línea de nivel ni los círculos de
+  los extremos; y el filete discontinuo se mide **donde hay trazo**, porque un hueco de la
+  discontinua no es un trazo flojo, es la ausencia de trazo (el ciclo de trabajo se reporta aparte:
+  es lo que la hace legible *como* discontinua).
 
-  | Tema | filete mayor | filete menor | mancha mayor | mancha menor |
-  |---|---|---|---|---|
-  | claro | 5,06–5,42:1 | 3,37–3,47:1 | 1,30:1 | 1,14:1 |
-  | noche | 5,27–5,68:1 | 3,63–3,69:1 | 1,27:1 | 1,11:1 |
+  | Tema | filete mayor (2 px) | filete menor (1,6 px) | filas del borde con trazo | mancha mayor | mancha menor |
+  |---|---|---|---|---|---|
+  | claro | 5,42–5,81:1 | 3,95–5,78:1 | 96–99 % / 41–57 % | 1,30:1 | 1,14:1 |
+  | noche | 5,68–5,99:1 | 4,13–5,94:1 | 96–99 % / 41–57 % | 1,27:1 | 1,11:1 |
 
-  (el menor pierde algo por el antialias de un trazo de 1 px discontinuo y aun así queda sobre 3:1;
-  la mancha sigue donde estaba **a propósito**: el contraste ya no vive ahí).
+  **0 de 56 muestras por debajo de 3:1** en cada caso. La mancha sigue donde estaba **a propósito**:
+  el contraste ya no vive ahí.
+
+- **Corrección de una medida anterior de este informe.** La primera versión del arreglo publicaba
+  solo la medida a 1440 px (3,37–3,47:1 para el menor) y concluía «aun así queda sobre 3:1». **No
+  quedaba**: el verificador barrió 10 anchos y encontró el filete menor por debajo del umbral en 8
+  de ellos, y al reproducirlo con el método de arriba sobre aquella configuración (menor de **1 px**)
+  salen **2,31:1** en claro y **2,45:1** en noche, por debajo de 3:1 en **9 de 14 anchos** — justo en
+  los de móvil. La causa es geométrica: un filete de w px centrado en el borde del `<rect>` reparte
+  su cobertura entre dos columnas de píxel y en la peor alineación la mejor columna se queda en w/2,
+  así que 1 px garantiza 0,5 de cobertura = 2,18:1. Para 3:1 hacen falta 0,679 de cobertura en claro
+  y 0,634 en noche, o sea **1,36 px**. De ahí los grosores actuales: **2 px** el mayor (cobertura
+  plena en cualquier alineación) y **1,6 px** el menor (3,75:1 / 4,07:1 en la peor alineación, y
+  3,95:1 medido en el peor de los 56 casos reales).
 - **Caveat honesto (cumplido):** el cuerpo medía contraste, y la distinción se resolvió con un canal
   **no cromático**, así que el assert se reescribió en vez de destrincarse solo. De paso quedó
   demostrado que **la vara original era insatisfacible**: si el menor da 3:1 contra el fondo y el
@@ -158,7 +176,17 @@ se publica.
   da 5,40:1; barrido exhaustivo de las dos opacidades en pasos de 0,01, el mejor mínimo alcanzable
   es **2,31:1** (claro) y **2,37:1** (noche). Lo que mide ahora: filete ≥3:1 en los dos temas,
   distinción por grosor y trama, y mancha ≤0,25 para que subirla no sea el atajo con el que alguien
-  tape la curva. Verificado en rojo contra el CSS de antes y contra dos mutaciones.
+  tape la curva.
+- **Y el gate se reforzó tras el rechazo del verificador.** Su primera versión medía el **token** a
+  su opacidad más dos desigualdades declarativas: con eso, bajar el filete a `0.1px` dejaba el gate
+  verde 4/4 mientras las bandas renderizadas volvían a 1,38:1 y 1,16:1 — los números del hallazgo
+  original. Medía la declaración, no el objeto gráfico. Ahora el contraste se calcula **a partir del
+  grosor** con la cota inferior de cobertura (w/2 en la peor alineación), se exige que el grosor vaya
+  en `px` y que la banda declare `vector-effect: non-scaling-stroke` —sin él el filete escala con el
+  ancho de presentación y ninguna cuenta en píxeles vale—, y `stroke-dasharray: none` se normaliza a
+  «continuo» para que igualar las tramas por esa vía no cuele. **Muerden las seis mutaciones**:
+  `0.1px`, menor a `1px`, grosor en unidades del lienzo, quitar `non-scaling-stroke`, igualar la
+  trama y apagar el filete con `stroke-opacity`.
 - **Severidad:** molestia — información contextual degradada, no dato erróneo
 - **Escalado:** no
 
@@ -208,6 +236,12 @@ se publica.
   `asegura`, `seguro`, `promete`, con cuidado de no tumbar «cuánto pica hoy» ni «no una predicción
   de capturas». **Verificado revirtiendo el ataque exacto**: con `ROTULO_DEL_RATING = "Hoy pican
   seguro"` el CI se pone rojo (`ROTULO_DEL_RATING promete: …`).
+  **Corregido tras el rechazo del verificador:** la primera versión recorría `textos.ts` mientras
+  A-16 acepta como auditada cualquier cadena del índice (`Object.values(fishing)`), y por esa
+  rendija cabía el ataque original — exportar el rótulo desde `module.ts` y usarlo: 12 páginas
+  publicando «Hoy pican seguro» con guardián 9/9, adversario 4/4 y lint limpio. El guardián recorre
+  ahora **`index.ts`**, exactamente el mismo conjunto que A-16 declara auditado. Reproducido el
+  escape sobre el guardián nuevo: rojo (`ROTULO_ALT promete: Hoy pican seguro`).
   **Y el rótulo se reescribió** («Índice de la convención solunar»), que es el juicio J-3 de más
   abajo: «Actividad **prevista**» era exactamente lo que el aviso niega
 - **Severidad:** **la más alta de la pasada** — es la promesa central de la trayectoria («jamás
@@ -300,8 +334,8 @@ la sección entera es falsa y no hay nada dentro de ella que lo delate.
 
 | Hallazgo | Estado | Commit | Qué lo impide ahora |
 |---|---|---|---|
-| **A-16** · el rótulo escapaba a los textos auditados | ✅ corregido | `9b4d70b` | el rótulo vive en `textos.ts`, la lista negra cubre **todos** los textos del módulo y caza «Hoy pican seguro» |
-| **A-14** · bandas por debajo del umbral y sin distinción | ✅ corregido | `cc564b5` | filete de 5,40:1 / 5,69:1 y distinción **no cromática** (continuo vs discontinuo) |
+| **A-16** · el rótulo escapaba a los textos auditados | ✅ corregido | `9b4d70b` + `43884ec` | el rótulo vive en `textos.ts` y la lista negra cubre **toda la superficie pública del package** (`index.ts`), el mismo conjunto que A-16 audita: caza «Hoy pican seguro» viva donde viva |
+| **A-14** · bandas por debajo del umbral y sin distinción | ✅ corregido | `cc564b5` + `a889f73` | filete de 2 px / 1,6 px medido sobre el SVG servido en 14 anchos (mín. 3,95:1) y distinción **no cromática** (continuo vs discontinuo) |
 | **A-13** · la sección sin nombre accesible | ✅ corregido | `9b0e89d` | `aria-labelledby` en el envoltorio: 8 regiones de 8, y T-11 lo hereda |
 | **A-15** · el pie no explicaba las manchas | ✅ corregido | `4bff71c` | leyenda visible con la clave de las dos tramas |
 
