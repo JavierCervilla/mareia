@@ -65,6 +65,16 @@ export type Traida<T> =
        * anteayer se pintaría con el sello de «consultado hace menos de un minuto».
        */
       readonly guardadoEnMs?: number;
+      /**
+       * `true` si esta respuesta **no vino de la red**: o la sirvió el worker de su copia, o el
+       * navegador está sin conexión y por tanto no puede haber salido de aquí.
+       *
+       * Va aparte de `guardadoEnMs` a propósito, porque son dos preguntas distintas: «¿es una
+       * copia?» y «¿de cuándo?». Una copia guardada por una versión anterior del worker puede no
+       * traer el sello de la hora, y entonces la respuesta a la segunda es «no se sabe» — que es
+       * mucho mejor que la que salía antes, «consultado hace menos de un minuto».
+       */
+      readonly deLaCopiaGuardada?: boolean;
     }
   | { readonly ok: false; readonly motivo: string };
 
@@ -229,6 +239,19 @@ function selloDeFuente(
   const edad = edadSegundos(report.ageSeconds, contexto.recibidoEnMs, contexto.ahoraMs);
   const consultadoALas = hora(Date.parse(report.fetchedAt), contexto.zona);
   if (contexto.deLaCopiaGuardada) {
+    // Una copia sin sello de hora es una copia de edad DESCONOCIDA, y así se dice. Antes esto caía
+    // al camino normal y se pintaba «Consultado hace menos de un minuto»: el fallo abría hacia la
+    // afirmación más confiada de las tres, que es la dirección exactamente equivocada.
+    if (contexto.guardadoEnMs === undefined) {
+      return {
+        clase: "caducado",
+        titular: "Copia guardada en este dispositivo, de fecha desconocida",
+        detalle:
+          `Esto no ha venido de la red y no trae la marca de cuándo se guardó, así que esta ` +
+          `página no puede decir de cuándo es. ${fuente.nombre} lo sirvió en su momento a las ` +
+          `${consultadoALas}. Recarga con cobertura para pedir el estado de ahora.`,
+      };
+    }
     return {
       clase: "caducado",
       titular: `Dato de hace ${antiguedad(edad)}`,
@@ -395,8 +418,10 @@ interface Contexto {
   readonly recibidoEnMs: number;
   readonly ahoraMs: number;
   readonly zona: string;
-  /** `true` si lo que se está sellando salió de la copia que guardó el service worker (T-12). */
+  /** `true` si lo que se está sellando salió de una copia y no de la red (T-12). */
   readonly deLaCopiaGuardada: boolean;
+  /** Cuándo se guardó esa copia, si la copia lo dice. `undefined` = es una copia de fecha ignota. */
+  readonly guardadoEnMs: number | undefined;
 }
 
 /** Un bloque de Open-Meteo (mar o atmósfera) con su sello y sus filas, o su motivo. */
@@ -635,12 +660,16 @@ export function vistaMeteo(
   // se guardaron en instantes distintos, y con red una puede venir de la copia y la otra no. Un
   // `recibidoEnMs` común le colgaría a una la edad de la otra.
   const contextoDe = (traida: EstadoDeFuente<unknown>): Contexto => {
-    const guardadoEnMs = !estaPidiendo(traida) && traida.ok ? traida.guardadoEnMs : undefined;
+    const servida = !estaPidiendo(traida) && traida.ok ? traida : undefined;
+    const guardadoEnMs = servida?.guardadoEnMs;
     return {
       recibidoEnMs: guardadoEnMs ?? respuesta.recibidoEnMs,
       ahoraMs,
       zona: zonaHoraria,
-      deLaCopiaGuardada: guardadoEnMs !== undefined,
+      // Basta con que UNA de las dos señales diga que es copia: el sello de la hora que estampa el
+      // worker, o que el navegador esté sin línea (y entonces esto no ha podido venir de la red).
+      deLaCopiaGuardada: guardadoEnMs !== undefined || servida?.deLaCopiaGuardada === true,
+      guardadoEnMs,
     };
   };
   const bloques = [

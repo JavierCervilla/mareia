@@ -28,8 +28,20 @@ import { stripTypeScriptTypes } from "node:module";
 import type { PoliticaResuelta } from "./precacheo.ts";
 import type { Protocolo } from "./protocolo.ts";
 
-/** Un `import`/`export` que sobreviva al borrado de tipos: es decir, uno de runtime. */
-const IMPORT_DE_RUNTIME = /^\s*(?:import|export)\s/mu;
+/**
+ * Cualquier forma de traer código de fuera que sobreviva al borrado de tipos.
+ *
+ * Son **tres** y las tres tienen que estar: el `import`/`export` estático al principio de una línea,
+ * el `import(...)` dinámico —que puede aparecer dentro de una función, en mitad de un fichero, y
+ * que un guardián que solo mire el principio de línea no ve— y el `require(...)`. El dinámico es el
+ * peligroso justo por eso: el build quedaría verde y el worker reventaría en el navegador, que es
+ * exactamente el fallo silencioso que este guardián existe para impedir.
+ */
+const FORMAS_DE_IMPORTAR: readonly (readonly [RegExp, string])[] = [
+  [/^\s*(?:import|export)\s/mu, "un import/export estático"],
+  [/\bimport\s*\(/u, "un import() dinámico"],
+  [/\brequire\s*\(/u, "un require()"],
+];
 
 /** Longitud de la huella que va en la versión. 8 hex bastan para distinguir builds de un día. */
 const LARGO_HUELLA = 8;
@@ -52,15 +64,110 @@ export interface EntradasDelWorker {
  */
 export function generarServiceWorker(entradas: EntradasDelWorker): string {
   const cuerpo = stripTypeScriptTypes(entradas.fuente, { mode: "strip" });
-  if (IMPORT_DE_RUNTIME.test(cuerpo)) {
-    throw new Error(
-      "apps/web/src/pwa/sw.ts tiene un import/export de runtime: el worker se sirve como fichero " +
-        "suelto en /sw.js y no pasa por ningún bundler. Usa `import type`, o inyecta el valor por " +
-        "el preámbulo de generar-sw.ts.",
-    );
+  // Se busca sobre el CÓDIGO, sin comentarios ni cadenas: este fichero está lleno de prosa que
+  // habla de imports, y un guardián que salta con su propia documentación acaba desactivado.
+  const codigo = soloCodigo(cuerpo);
+  for (const [patron, que] of FORMAS_DE_IMPORTAR) {
+    if (patron.test(codigo)) {
+      throw new Error(
+        `apps/web/src/pwa/sw.ts tiene ${que}: el worker se sirve como fichero suelto en /sw.js, ` +
+          "sin bundler y como script clásico. Usa `import type`, o inyecta el valor por el " +
+          "preámbulo de generar-sw.ts.",
+      );
+    }
   }
   const version = versionDelWorker(entradas);
   return `${preambulo(version, entradas)}\n${cuerpo}`;
+}
+
+/** En qué parte del texto va el escáner. */
+type Zona = "codigo" | "linea" | "bloque" | "cadena";
+
+/** Lo que el escáner hace en un carácter: qué emite, a qué zona pasa y cuántos caracteres consume. */
+interface Paso {
+  readonly emite: string;
+  readonly zona: Zona;
+  readonly saltar: number;
+}
+
+/** El blanco que sustituye a un carácter tapado, conservando los saltos de línea. */
+function enBlanco(caracter: string): string {
+  return caracter === "\n" ? "\n" : " ";
+}
+
+const ABRE_CADENA = new Set(['"', "'", "`"]);
+
+/** En código: se copia tal cual, salvo que empiece un comentario o una cadena. */
+function pasoEnCodigo(caracter: string, siguiente: string): Paso {
+  if (caracter === "/" && siguiente === "/") {
+    return { emite: " ", zona: "linea", saltar: 0 };
+  }
+  if (caracter === "/" && siguiente === "*") {
+    return { emite: " ", zona: "bloque", saltar: 0 };
+  }
+  return {
+    emite: caracter,
+    zona: ABRE_CADENA.has(caracter) ? "cadena" : "codigo",
+    saltar: 0,
+  };
+}
+
+/** En un comentario: todo en blanco hasta que se cierre. */
+function pasoEnComentario(zona: "linea" | "bloque", caracter: string, siguiente: string): Paso {
+  if (zona === "linea") {
+    return { emite: enBlanco(caracter), zona: caracter === "\n" ? "codigo" : "linea", saltar: 0 };
+  }
+  return caracter === "*" && siguiente === "/"
+    ? { emite: "  ", zona: "codigo", saltar: 1 }
+    : { emite: enBlanco(caracter), zona: "bloque", saltar: 0 };
+}
+
+/** En una cadena: todo en blanco hasta su comilla, respetando los escapes. */
+function pasoEnCadena(caracter: string, comilla: string, escapado: boolean): Paso {
+  if (escapado) {
+    return { emite: " ", zona: "cadena", saltar: 0 };
+  }
+  if (caracter === comilla) {
+    return { emite: caracter, zona: "codigo", saltar: 0 };
+  }
+  return { emite: caracter === "\\" ? " " : enBlanco(caracter), zona: "cadena", saltar: 0 };
+}
+
+/**
+ * El mismo texto con los comentarios y el contenido de las cadenas puestos en blanco.
+ *
+ * Es un escáner de caracteres y no una expresión regular porque una regex no distingue un
+ * `import(` escrito en un comentario de uno escrito en el código, y este proyecto documenta mucho:
+ * un guardián que salta con su propia documentación acaba desactivado, y desactivado no guarda
+ * nada. Se conservan los saltos de línea para que el `^` de los patrones siga significando lo mismo.
+ */
+export function soloCodigo(fuente: string): string {
+  const salida: string[] = [];
+  let zona: Zona = "codigo";
+  let comilla = "";
+  let escapado = false;
+
+  for (let indice = 0; indice < fuente.length; indice += 1) {
+    const caracter = fuente[indice] ?? "";
+    const siguiente = fuente[indice + 1] ?? "";
+    // La anotación no es adorno: `zona` se reasigna desde `paso.zona`, así que sin ella TypeScript
+    // se muerde la cola intentando inferir el tipo y lo deja en `any`.
+    const paso: Paso =
+      zona === "codigo"
+        ? pasoEnCodigo(caracter, siguiente)
+        : zona === "cadena"
+          ? pasoEnCadena(caracter, comilla, escapado)
+          : pasoEnComentario(zona, caracter, siguiente);
+
+    escapado = zona === "cadena" && !escapado && caracter === "\\";
+    if (zona === "codigo" && paso.zona === "cadena") {
+      comilla = caracter;
+    }
+    zona = paso.zona;
+    salida.push(paso.emite);
+    indice += paso.saltar;
+  }
+  return salida.join("");
 }
 
 /**

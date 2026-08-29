@@ -16,7 +16,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { activeModules } from "../modules.config.ts";
-import { generarServiceWorker, versionDelWorker } from "./generar-sw.ts";
+import { generarServiceWorker, soloCodigo, versionDelWorker } from "./generar-sw.ts";
 import type { EntradasDelWorker } from "./generar-sw.ts";
 import { politicasDeModulos } from "./precacheo.ts";
 import { PROTOCOLO } from "./protocolo.ts";
@@ -42,11 +42,51 @@ test("el worker publicado no tiene ni un import ni un export de runtime", () => 
   assert.doesNotMatch(worker, /\brequire\(/u);
 });
 
-test("si alguien le mete un import al worker, el build se cae diciendo qué pasa", () => {
+test("si alguien le mete un import estático al worker, el build se cae diciendo qué pasa", () => {
   assert.throws(
     () => generarServiceWorker(entradas({ fuente: `import { x } from "./y.ts";\n${FUENTE}` })),
-    /import\/export de runtime/u,
+    /import\/export estático/u,
   );
+});
+
+/**
+ * El caso que se le escapaba al guardián y que era el peligroso de los tres: un `import()` dentro de
+ * una función no aparece al principio de ninguna línea, así que el build quedaba **verde** y el
+ * worker reventaba en el navegador — sin error en CI y sin nada en los logs, que es la clase de
+ * fallo silencioso que este guardián existe para impedir.
+ */
+test("un import() dinámico escondido dentro de una función también rompe el build", () => {
+  const conTrampa = FUENTE.replace(
+    "ambito.addEventListener(\"install\", () => {",
+    'ambito.addEventListener("install", () => {\n  void import("./precacheo.ts");',
+  );
+  assert.notEqual(conTrampa, FUENTE, "la sonda no ha llegado a inyectarse");
+  assert.throws(() => generarServiceWorker(entradas({ fuente: conTrampa })), /import\(\) dinámico/u);
+});
+
+test("un require() tampoco pasa", () => {
+  assert.throws(
+    () => generarServiceWorker(entradas({ fuente: `${FUENTE}\nconst x = require("./y.js");\n` })),
+    /require\(\)/u,
+  );
+});
+
+/**
+ * Y el guardián no puede saltar con la documentación del propio worker, que habla de imports en
+ * cada párrafo: uno que se dispara solo acaba desactivado, y desactivado no guarda nada.
+ */
+test("hablar de imports en un comentario o en una cadena no rompe el build", () => {
+  const soloProsa = `${FUENTE}\n// aquí iría un import("./x.ts") si esto fuera código\n` +
+    `/* y aquí un require("y") */\nconst nota = "import(\'z\')";\nconsole.warn(nota);\n`;
+  assert.doesNotThrow(() => generarServiceWorker(entradas({ fuente: soloProsa })));
+});
+
+test("el escáner vacía comentarios y cadenas y deja el código en su sitio", () => {
+  assert.equal(soloCodigo('const a = 1; // import("x")').trim(), "const a = 1;");
+  assert.match(soloCodigo('await import("./real.ts");'), /await import\(/u);
+  assert.doesNotMatch(soloCodigo('const b = "import(x)";'), /import\(/u);
+  // Los saltos de línea se conservan: si no, el `^` de los patrones dejaría de significar lo mismo.
+  assert.equal(soloCodigo("uno\n/* dos */\ntres").split("\n").length, 3);
 });
 
 test("el preámbulo declara las tres constantes que el worker no puede importar", () => {

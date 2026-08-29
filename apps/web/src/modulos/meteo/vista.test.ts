@@ -518,3 +518,31 @@ test("el sello de guardado es POR FUENTE: una de la copia no le cuelga su edad a
     "el boletín llegó por la red: no puede heredar el sello de la copia del mar",
   );
 });
+
+/**
+ * Y el fallo abre hacia el silencio, no hacia la afirmación.
+ *
+ * Una copia que llega **sin** la marca de cuándo se guardó —la escribió una versión anterior del
+ * worker, o el navegador la sirvió de su propia caché— caía antes al camino normal y se pintaba
+ * «Consultado hace menos de un minuto»: de las tres salidas posibles, la más confiada. Ahora dice lo
+ * único que sabe, que es que no lo sabe.
+ */
+test("una copia sin marca de hora se pinta «de fecha desconocida», nunca como recién consultada", () => {
+  const respuesta: RespuestaMeteo = {
+    meteo: { ok: true, cuerpo: meteoDe(METEO_OK), deLaCopiaGuardada: true },
+    boletin: PIDIENDO,
+    recibidoEnMs: RECIBIDO,
+  };
+  const sello = bloque(vistaMeteo(respuesta, RECIBIDO, ZONA), "meteo-mar").sello;
+
+  assert.equal(sello.clase, "caducado");
+  assert.match(sello.titular, /de fecha desconocida/u);
+  assert.doesNotMatch(sello.titular, /Consultado hace/u);
+  assert.match(sello.detalle ?? "", /no puede decir de cuándo es/u);
+});
+
+test("con marca de hora sí se dice la edad: el «no se sabe» es el caso raro, no el normal", () => {
+  const sello = bloque(escenaGuardada(RECIBIDO, RECIBIDO + 3_600_000), "meteo-mar").sello;
+  assert.match(sello.titular, /^Dato de hace /u);
+  assert.doesNotMatch(sello.titular, /desconocida/u);
+});

@@ -152,8 +152,18 @@ async function traer<T>(
       motivo: `El servidor de Mareia contestó a la petición ${de(que)}, pero su respuesta no tiene la forma que esta página sabe leer.`,
     };
   }
+  // Dos señales, y la segunda es la que impide que el fallo abra hacia la mentira: si el navegador
+  // está sin línea, esta respuesta NO ha podido venir de la red, traiga sello o no. Sin ella, una
+  // copia guardada por una versión anterior del worker —sin la cabecera— se pintaba como recién
+  // consultada.
   const guardadoEnMs = selloDeGuardado(respuesta);
-  return guardadoEnMs === undefined ? { ok: true, cuerpo } : { ok: true, cuerpo, guardadoEnMs };
+  const deLaCopiaGuardada = guardadoEnMs !== undefined || sinConexion();
+  return {
+    ok: true,
+    cuerpo,
+    ...(guardadoEnMs === undefined ? {} : { guardadoEnMs }),
+    ...(deLaCopiaGuardada ? { deLaCopiaGuardada } : {}),
+  };
 }
 
 /**
