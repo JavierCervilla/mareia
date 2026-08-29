@@ -23,9 +23,9 @@ quedó fuera y una frase que explicaba un dato con el motivo de otro.
   como viajan, 1.965 → 2.078 B (**+5,7 %**) y 1.351 → 1.402 B (**+3,8 %**): la señal es texto que se
   repite, y eso es lo que gzip hace mejor.
 - **El filtro no baja con la señal, y se dice por qué.** Es un mando para descartar en una lista que
-  no cabe de un vistazo —en la portada quita 120 de 153—, y aquí la región mediana tiene **17**
-  puertos y la provincia mediana **5**: el control y su nota de 63 palabras pesarían más que la
-  lista que filtran. Además, en **7 de las 24 provincias** «Solo los medidos» dejaría la página
+  no cabe de un vistazo —en la portada quita 120 de 153—, y aquí la región mediana tiene **12**
+  puertos y la provincia mediana **5,5**: el control, sus tres cuentas y su nota explicativa
+  pesarían más que la lista que filtran. Además, en **7 de las 24 provincias** «Solo los medidos» dejaría la página
   vacía (Alicante 11/0, Barcelona 9/0, Castellón 3/0, Lugo 2/0, Gipuzkoa 2/0, Sevilla 1/0, Ceuta
   1/0). Quien quiera filtrar tiene el catálogo entero en la portada, a un toque. El razonamiento
   completo, en `apps/web/design-brief.md` §7 quater.

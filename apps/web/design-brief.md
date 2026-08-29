@@ -214,10 +214,16 @@ puertos planos. **306 entradas mudas**, y el último clic antes de la ficha dado
   sigue siendo *contextual* y la marca es lo último que se lee de la entrada.
 - **El filtro NO baja a estas 36 páginas** (decisión, no olvido), por tres razones medidas:
   1. **Lo que habría que descartar no lo pide.** El filtro es un mando para una lista que no cabe
-     de un vistazo: en la portada descarta 120 de 153. La región mediana tiene **17** puertos (la
-     mayor, Andalucía, 32; dos tienen **1**) y la provincia mediana **5** (la mayor, 17). El mando
-     cuesta tres radios más su nota de 63 palabras: en una provincia de 5 puertos, el control pesa
-     más que la lista que filtra.
+     de un vistazo: en la portada descarta 120 de 153. La región mediana tiene **12** puertos (la
+     mayor, Andalucía, 32; dos tienen **1**) y la provincia mediana **5,5** (la mayor, 17). El mando
+     cuesta tres radios, sus tres cuentas y una nota que explica qué significa «medida»: en una
+     provincia de 5 puertos, el control pesa más que la lista que filtra.
+
+     (Las medianas se recontaron del catálogo al cerrar la trayectoria: las 12 regiones miden
+     `1,1,2,4,5,7,17,17,19,22,26,32` y las 24 provincias `1,1,1,2,2,2,2,3,4,5,5,5,6,7,7,8,8,9,10,
+     11,11,12,14,17`. Antes decía 17 y 5, que son los centrales de arriba y de abajo y no las
+     medianas; y daba una nota «de 63 palabras» que ninguna forma de contarlas reproduce. Con las
+     cifras buenas el argumento es **más** fuerte, no menos.)
   2. **En 7 de las 24 provincias «Solo los medidos» dejaría la página vacía** (Alicante 11/0,
      Barcelona 9/0, Castellón 3/0, Lugo 2/0, Gipuzkoa 2/0, Sevilla 1/0, Ceuta 1/0). Un mando cuyo
      resultado más probable en un tercio de las páginas es «no hay nada» no es un filtro: es un
