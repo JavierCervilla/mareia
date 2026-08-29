@@ -134,6 +134,148 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   página de puerto— y sustituirla por el índice de regiones es una decisión de producto, no una
   consecuencia de este cambio.
 
+## 2026-08-29 — T-12 · el almanaque funciona sin cobertura, y lo dice
+
+- **Un puerto guardado se abre y *calcula* sin red.** Es la diferencia entre una PWA y un caché de
+  páginas: la copia guardada trae el día que se guardó, pero pedir el **14 de marzo de 2027** en una
+  playa sin cobertura devuelve su tabla, calculada ahí mismo con las constantes armónicas del puerto
+  y **el mismo motor de `@mareia/domain-core` que usa el API** — incluido el mismo redondeo, que
+  ahora se importa de `@mareia/usecases/dto` en vez de reescribirse. Un test lo comprueba en los
+  **doce puertos** contra `getTides`, evento a evento, y otro lo comprueba en la noche en que la
+  hora cambia y el día civil dura 23 h.
+- **La prueba de la promesa muerde sobre el fichero publicado**, y no solo sobre el motor: el bucle
+  de los doce puertos lee `dist/offline/estaciones/<slug>.json` —el fichero que de verdad se baja al
+  teléfono— y lo compara evento a evento con `getTides`, ventana del día civil incluida. Sin eso, un
+  endpoint que publicara constantes de menos dejaba toda la suite en verde mientras la tabla del
+  navegador se separaba centímetros y minutos de la del servidor: horas plausibles y equivocadas.
+- **Un favorito guarda constantes, no un almanaque.** Medido: **2 535–2 640 B** por puerto (los doce
+  del catálogo, **30,9 kB** en total) frente a los **49 162 B** que ocuparía el almanaque
+  precalculado de **un solo año** de un puerto — **18,6×** más, y caducando en Nochevieja. Con las
+  constantes se calcula cualquier día de la ventana (año del build ±1, **la misma que sirve el
+  API**), y fuera de ella la página **dice por qué no puede** en vez de dar una hora que no sostiene.
+- **Guardar es un acto explícito y la página dice lo que ocupa.** No se precachea nada al instalar el
+  worker ni al navegar: solo lo que se pide con el botón. El sello enseña la medida con su unidad
+  completa —«Ocupa 2,6 kB de constantes armónicas»— en **kB de mil**, nunca en KiB ni en un «KB» que
+  cada cual interprete.
+- **«Sin red» y «el dato no existe» son dos ausencias distintas, y ahora también en la meteo.** Es la
+  lección de A-11 (T-09) y H-6 (T-11) llevada al caso offline. Sin cobertura, el estado del mar se
+  sirve de la copia que guardó el service worker **con la edad real en la cara**: el worker sella
+  cada respuesta con la hora a la que la guardó (`x-mareia-guardado-en`) y la sección suma esa espera
+  a la edad que declaró el backend, así que una copia de hace tres horas se lee «Dato de hace 3 h ·
+  Sin conexión: esto es la última copia que se guardó en este dispositivo». Y **no se confunde** con
+  el `stale` del backend («la fuente no responde»), que es otra avería. Cuando no hay ni copia, la
+  frase es la quinta: «Sin conexión… y no hay ninguna copia guardada aquí. El dato existe; lo que
+  falta es la red». Es un sello **por fuente**: una copia guardada no le cuelga su edad a la otra. Y
+  **falla hacia el silencio**: una copia que llega sin la marca de la hora se lee «de fecha
+  desconocida», no «consultado hace menos de un minuto», que era la más confiada de las salidas.
+- **La ventana de años la manda la copia guardada, no el build de la página.** Se congelan en
+  instantes distintos —el payload el día que se guardó, la página cada madrugada—, así que un
+  favorito de diciembre en una página ya de enero hacía que la sección prometiera «cualquier día
+  entre 2026 y 2028» mientras la calculadora contestaba «esta copia calcula de 2025 a 2027», con el
+  campo de fecha dejando elegir el año que luego rechazaba. La regla vive ahora en un solo sitio y
+  el campo, el rótulo y el cálculo salen de ella.
+- **Guardar un segundo favorito ya no desarma al primero.** La Cache API no sabe de quién es cada
+  fichero, así que el worker lleva su propio registro de qué necesita cada puerto guardado y poda
+  conservando la unión. Antes tiraba todo asset que no usara la página que se estaba guardando —una
+  premisa que es falsa en cuanto hay dos favoritos de dos builds, que con el rebuild diario de T-15
+  es el caso normal—: el primero se quedaba con su página y **cero assets**, abriéndose sin estilos,
+  sin la isla meteo y sin el trozo de la calculadora. Hay recorrido nuevo que simula el rebuild y lo
+  reproduce en rojo con el comportamiento viejo.
+- **Y no podar es una respuesta válida.** Si el registro no se puede leer —no está, o se quedó a
+  medias— el worker guarda igual pero **no poda**: no saber qué sobra no es que sobre todo, y
+  colapsar las dos cosas en un «no hay favoritos» borraba de golpe todo lo que había bajo `/_astro/`,
+  o sea el mismo fallo que el registro vino a arreglar. Va con su recorrido, que corrompe el registro
+  a propósito y comprueba sobre la caché —no sobre cómo pinte el navegador, que puede taparlo con su
+  propia caché HTTP— que no falta un solo fichero.
+- **El esquema de caché sube a v2.** Una caché de la v1 tiene favoritos y no tiene registro, y ese
+  estado a medias es indistinguible de uno corrupto. Subiendo el esquema, `activate` la barre entera
+  y quien tuviera un puerto guardado lo vuelve a guardar con un clic; el precio se paga una vez y
+  solo dentro de este PR, que no está desplegado.
+- **Las constantes guardadas se revalidan.** Su URL no lleva hash y el pipeline las corrige —T-13
+  acaba de regenerar el dataset entero—, así que el worker las sirve `stale-while-revalidate` y la
+  página compara su copia de IndexedDB con la del servidor cuando hay cobertura. Un `cache-first`
+  puro habría dejado al teléfono calculando con las viejas bajo el rótulo «las mismas que usa el
+  servidor».
+- **Y la sección «sin cobertura» tiene sus cinco estados**, con el mismo sello de T-11 —que se muda
+  de la meteo al core (`src/sello.ts`) porque ya no es cosa de un módulo—: sin soporte para guardar,
+  con red y sin guardar, **sin red y sin guardar** (no se ofrece un botón que iba a fallar), guardado
+  con red, y guardado sin red. Los cinco dicen además qué de la página depende de la conexión y qué
+  no: las mareas y las efemérides se calcularon en build, el estado del mar no.
+- **Política de actualización decidida y escrita** (`docs/adr/ADR-02`): el HTML va **`network-first`**
+  —con red nunca se sirve una página vieja, aunque el worker sea el de ayer—, los assets con hash van
+  `cache-first` (su URL cambia con su contenido, así que no pueden envejecer), **no** se llama a
+  `skipWaiting` y **no** hay banner de «hay versión nueva». Lo que se pierde está en el ADR: el
+  arranque instantáneo offline-first, y que una pestaña abierta días conserva el worker viejo.
+- **El worker es un `.ts` de verdad**, tipado contra el protocolo y contra el contrato de módulos, y
+  el build lo publica en `/sw.js` quitándole los tipos con el propio Node. **El build se cae** si el
+  fichero acaba con una sola forma de traer código de fuera: estático, **dinámico**, `require` o
+  **`importScripts`** —que es la que más importa, porque es la única de las cuatro que *sí* funciona
+  en un worker clásico y por tanto la única capaz de colar código sin auditar sin romper nada—. Y sin
+  confundirse con los que aparecen en sus propios comentarios, cadenas o expresiones regulares. **No conoce ni una ruta de meteo**: las políticas
+  salen de la `PrecachePolicy` que cada módulo declara en `AppModule` (T-06), así que dar de baja un
+  módulo se lleva su política por delante.
+- **Instalable**: manifiesto (`minimal-ui`, no `standalone` — quien instala esto sigue queriendo ver
+  la URL) e icono SVG dibujado con la curva de marea y el filete doble del almanaque. Sus dos colores
+  son la conversión sRGB de los tokens `--m-bg` y `--m-navy`, y hay un test que los recalcula desde
+  `tokens.css` para que no se conviertan en una paleta paralela.
+- **El cero-JS del core aguanta, re-apuntado por segunda vez y sin relajarse.** La PWA no es de
+  ningún módulo, así que en vez de ampliar la excepción a ojo se le da al gate la otra mitad de la
+  lista: `src/scripts-de-core.ts`, un registro que declara qué scripts de core existen, por qué no
+  pueden ser HTML y en qué páginas se sirven. La cuenta sigue siendo **exacta** página a página, y la
+  portada, el 404 y los índices geográficos siguen en **cero** JavaScript.
+- **Coste medido en la página de puerto**: el bundle que baja *cualquiera* que abra un puerto sube
+  **16 639 B** (5 970 comprimidos) — el motor de mareas, que son **70 372 B**, va en un trozo aparte
+  con `import()` dinámico y solo lo baja quien pide otro día o guarda el puerto. Sin ese corte serían
+  **83 980 B** para todo el mundo (medido haciendo estático el `import()` y reconstruyendo). El
+  `/sw.js` publicado pesa **27 329 B** (8 771 comprimidos), comentarios incluidos: son su
+  documentación y su auditoría. Un favorito ocupa en la Cache API **164 547 B** el primero —página
+  28 906, hoja de estilos 15 883, isla meteo 13 234, bundle de la PWA 16 639, su trozo común 1 698,
+  motor 70 372, constantes 2 537 y el camino desde la portada 15 278— y **entre 36 553 y 38 770 B**
+  cada siguiente (su página, sus constantes y los dos índices que no comparte), porque el resto ya
+  está. Se publica el rango y no una media: los doce puertos van de bilbao a la-manga y **ninguno**
+  vale la cifra única que decía antes esta línea. Todas las
+  cifras en bytes y kB de mil, medidas sobre el `dist/` de este commit, y las comprimidas con
+  `zlib.gzipSync(datos, { level: 9 })`.
+- **El sello mira los dos almacenes, no uno.** Prometía los bytes de la caché del worker
+  componiéndose **solo** con IndexedDB, y los dos se separan por caminos nada exóticos: un `addAll`
+  que falla porque un fichero con hash ya no está en el servidor, el barrido de un cambio de esquema,
+  un desalojo del navegador. La pantalla llegaba a decir «Guardado en este dispositivo… La página se
+  guarda con su hoja de estilos» con la caché **vacía**, y quien lo leía se iba a la playa creyendo
+  que llevaba el almanaque encima. Hay dos estados nuevos para los dos lados de esa separación —«La
+  copia de esta página ya no está en este dispositivo» y «Guardado en este dispositivo, pero sin sus
+  constantes»— y el invariante «el sello afirma que hay copia si y solo si la hay» se comprueba en
+  las ocho combinaciones sin navegador y en tres recorridos con él.
+- **La app instalada abre sin red.** El manifiesto invita a instalar Mareia y quien acepta se queda
+  sin barra de direcciones: su única puerta es el `start_url`, que es `/` y **no se guardaba nunca**,
+  así que el icono de la pantalla de inicio abría el error de red del navegador con el almanaque
+  intacto a un toque. Un favorito guarda ahora **el camino hasta él** —portada, índice de mareas, su
+  región y su provincia: **15 278 B** los cuatro, compartidos entre favoritos— y hay un test que lee
+  el `start_url` del manifiesto **publicado** y exige que esté entre lo que se guarda.
+- **Sin cobertura no se ofrece borrar el almanaque que se está leyendo.** Era la única acción
+  destructiva de la sección, pegada al sello que se lee justo para comprobar la copia, sin
+  confirmación y sin deshacer — y sin red no se podía rehacer, cosa que la propia página decía dos
+  estados más arriba. Ahora se dice y se ofrece cuando hay cobertura, igual que ya pasaba con guardar.
+- **La poda exige un censo completo, no solo legible.** El fail-safe anterior no evitaba el borrado:
+  lo aplazaba un paso. Con el registro ilegible se escribía un censo de un puerto indistinguible de
+  uno completo, y el siguiente «dejar de guardar» lo trataba como la verdad y borraba los ficheros
+  del otro favorito. El registro lleva ahora si es completo, y **la página le manda el censo entero**
+  desde IndexedDB para repararlo (tercer verbo del protocolo).
+- **Y dos cosas que el pase señaló sin poder reproducir, cerradas igual.** El `fetch` de las
+  navegaciones va con `cache: "no-store"`: un `fetch` dentro del worker puede contestarse desde la
+  caché HTTP del navegador, y entonces el `network-first` de ADR-02 dependería de unas cabeceras que
+  el despliegue no fija — si la garantía depende de eso, no existe. Y las operaciones sobre el
+  registro se serializan en una cola: la carrera estaba en el código aunque no se supiera disparar.
+- **Los gates de antes siguen mordiendo con el worker puesto**: los pases adversarios de T-09, T-10 y
+  T-11 quedan en verde sin tocar un solo assert suyo, salvo los dos que contaban scripts, que se
+  re-apuntan al registro de scripts de core. `apps/web` pasa de **114 a 193 tests** y los recorridos
+  Playwright de **25 a 44**, cortando la red de verdad (`context.setOffline` + enrutado de contexto,
+  porque las peticiones del worker no pasan por la página).
+- **Pase adversario cerrado**: los 4 hallazgos arreglados y sus 6 recorridos **como gate permanente**,
+  cada uno comprobado en rojo revirtiendo su arreglo antes de retirar el trinquete. Ver
+  `docs/qa/informe-adversario-t12.md`. Los dos juicios de producto que dejó abiertos —el «segundo
+  día» y el orden de lectura del sello cuando la copia es vieja— quedan anotados como trabajo, no
+  parcheados al final de la trayectoria.
+
 ## 2026-08-29 — T-11 · los 7 hallazgos del pase adversario, arreglados
 
 - **El sello de antigüedad ya no se congela.** Era el hallazgo grave: la isla calculaba la edad al

@@ -20,11 +20,17 @@ import "../estilos/pagina-puerto.css";
 // (`secciones.ts`): la sección se publicaba sin estilos y con el build en verde. Un test del
 // `dist/` comprueba que las reglas siguen publicándose.
 import "../estilos/actividad-solunar.css";
+// La hoja de la PWA (T-12): la sección «sin cobertura» y la calculadora de otro día. Se importa
+// aquí por el mismo motivo que la de arriba —una sola hoja compartida y cacheada por todas las
+// páginas— aunque sus dos secciones solo salgan en la página de puerto.
+import "../estilos/offline.css";
 
 import { FECHA_DE_BUILD } from "../datos/fecha-build.ts";
 import { escaparMarcado } from "../escapar-marcado.ts";
 import { fechaLarga } from "../formato.ts";
 import { serializarJsonLd } from "../json-ld.ts";
+import { COLOR_MARCA } from "../pwa/marca.ts";
+import { RUTA_MANIFEST } from "../pwa/protocolo.ts";
 
 interface Props {
   titulo: string;
@@ -53,6 +59,15 @@ const FUENTES =
     {/* `escaparMarcado`: Astro no escapa `<`/`>` en un valor de atributo — ver el módulo. */}
     <meta name="description" content={escaparMarcado(descripcion)} />
     {canonica && <link rel="canonical" href={canonica} />}
+    {/*
+      El manifiesto va en TODAS las páginas y el service worker solo se registra en la de puerto
+      (T-12): el manifiesto es una declaración de identidad de nueve líneas de JSON, no cuesta
+      JavaScript y no tiene sentido que el sitio se presente con un nombre distinto según por dónde
+      se entre. `theme-color` acompaña al manifiesto porque el navegador lo lee del documento antes
+      de instalar nada.
+    */}
+    <link rel="manifest" href={RUTA_MANIFEST} />
+    <meta name="theme-color" content={COLOR_MARCA} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href={FUENTES} />

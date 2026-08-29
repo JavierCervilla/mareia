@@ -42,10 +42,40 @@ import type {
 } from "@mareia/module-weather/ui";
 
 import { acimut, hora, metros, numero } from "../../formato.ts";
+// El sello nació aquí en T-11 y con la PWA (T-12) dejó de ser cosa de la meteo: una página guardada
+// en el teléfono también tiene edad. Vive en el core y esta capa lo re-exporta, así que quien
+// importaba `antiguedad` o `SelloDeAntiguedad` de este módulo no tiene que cambiar nada.
+import { antiguedad } from "../../sello.ts";
+import type { ClaseDeSello, SelloDeAntiguedad } from "../../sello.ts";
+
+export { antiguedad } from "../../sello.ts";
+export type { ClaseDeSello, SelloDeAntiguedad } from "../../sello.ts";
 
 /** Lo que se pudo traer de un endpoint, o por qué no se pudo. */
 export type Traida<T> =
-  | { readonly ok: true; readonly cuerpo: T }
+  | {
+      readonly ok: true;
+      readonly cuerpo: T;
+      /**
+       * Reloj del navegador cuando el service worker **guardó** esta respuesta, si es que viene de
+       * la copia guardada y no de la red (T-12; lo estampa el worker en una cabecera).
+       *
+       * Cuando está, manda sobre `recibidoEnMs` para medir la edad de ese bloque: una copia servida
+       * sin red no se recibió ahora, se recibió cuando se guardó. Sin esto, una respuesta de
+       * anteayer se pintaría con el sello de «consultado hace menos de un minuto».
+       */
+      readonly guardadoEnMs?: number;
+      /**
+       * `true` si esta respuesta **no vino de la red**: o la sirvió el worker de su copia, o el
+       * navegador está sin conexión y por tanto no puede haber salido de aquí.
+       *
+       * Va aparte de `guardadoEnMs` a propósito, porque son dos preguntas distintas: «¿es una
+       * copia?» y «¿de cuándo?». Una copia guardada por una versión anterior del worker puede no
+       * traer el sello de la hora, y entonces la respuesta a la segunda es «no se sabe» — que es
+       * mucho mejor que la que salía antes, «consultado hace menos de un minuto».
+       */
+      readonly deLaCopiaGuardada?: boolean;
+    }
   | { readonly ok: false; readonly motivo: string };
 
 /**
@@ -90,20 +120,6 @@ export interface FilaMeteo {
   readonly ausencia: string | undefined;
 }
 
-/** Los tonos del sello. El CSS los distingue; el texto ya se distingue solo. */
-export type ClaseDeSello = "fresco" | "caducado" | "sin-dato" | "pidiendo";
-
-/**
- * El sello de antigüedad de un bloque. Es obligatorio: **ningún bloque se pinta sin decir de cuándo
- * es lo que enseña**, que es la razón de ser de esta trayectoria.
- */
-export interface SelloDeAntiguedad {
-  readonly clase: ClaseDeSello;
-  /** La frase corta que se lee primero. En un dato caducado, lleva la edad. */
-  readonly titular: string;
-  /** El porqué, la hora absoluta o el motivo del backend. */
-  readonly detalle: string | undefined;
-}
 
 /** Un párrafo del boletín oficial, citado con su rótulo y **sin reescribir**. */
 export interface ParrafoOficial {
@@ -166,41 +182,6 @@ export function anuncioDeLaSeccion(vista: VistaMeteo): string {
     .join(" ");
 }
 
-const SEGUNDOS_POR_MINUTO = 60;
-const SEGUNDOS_POR_HORA = 3_600;
-const SEGUNDOS_POR_DIA = 86_400;
-
-/** «1 minuto» / «7 minutos», sin que el singular delate una plantilla. */
-function plural(cantidad: number, singular: string, pluralizado: string): string {
-  return `${cantidad} ${cantidad === 1 ? singular : pluralizado}`;
-}
-
-/**
- * Una antigüedad como se dice en voz alta: «3 h 10 min», «12 min», «2 días 4 h».
- *
- * Se escribe **completa hasta el minuto** dentro del día porque es la escala en la que se decide
- * si el dato sirve: «hace unas horas» vale para un titular y no para saber si el viento que
- * enseña la página es el que hay en la playa.
- */
-export function antiguedad(segundos: number): string {
-  const enteros = Math.max(0, Math.floor(segundos));
-  if (enteros < SEGUNDOS_POR_MINUTO) {
-    return "menos de un minuto";
-  }
-  if (enteros < SEGUNDOS_POR_HORA) {
-    return plural(Math.floor(enteros / SEGUNDOS_POR_MINUTO), "minuto", "minutos");
-  }
-  if (enteros < SEGUNDOS_POR_DIA) {
-    const horas = Math.floor(enteros / SEGUNDOS_POR_HORA);
-    const minutos = Math.floor((enteros % SEGUNDOS_POR_HORA) / SEGUNDOS_POR_MINUTO);
-    return minutos === 0 ? `${horas} h` : `${horas} h ${minutos} min`;
-  }
-  const dias = Math.floor(enteros / SEGUNDOS_POR_DIA);
-  const horas = Math.floor((enteros % SEGUNDOS_POR_DIA) / SEGUNDOS_POR_HORA);
-  const cabeza = plural(dias, "día", "días");
-  return horas === 0 ? cabeza : `${cabeza} ${horas} h`;
-}
-
 /**
  * Edad real del dato en el instante en que se pinta: lo que dijo el servidor **más** lo que ha
  * pasado desde que su respuesta llegó. Ver la regla 2 de la cabecera.
@@ -253,10 +234,34 @@ interface FuenteServida {
 function selloDeFuente(
   report: FuenteServida,
   fuente: Fuente,
-  contexto: { readonly recibidoEnMs: number; readonly ahoraMs: number; readonly zona: string },
+  contexto: Contexto,
 ): SelloDeAntiguedad {
   const edad = edadSegundos(report.ageSeconds, contexto.recibidoEnMs, contexto.ahoraMs);
   const consultadoALas = hora(Date.parse(report.fetchedAt), contexto.zona);
+  if (contexto.deLaCopiaGuardada) {
+    // Una copia sin sello de hora es una copia de edad DESCONOCIDA, y así se dice. Antes esto caía
+    // al camino normal y se pintaba «Consultado hace menos de un minuto»: el fallo abría hacia la
+    // afirmación más confiada de las tres, que es la dirección exactamente equivocada.
+    if (contexto.guardadoEnMs === undefined) {
+      return {
+        clase: "caducado",
+        titular: "Copia guardada en este dispositivo, de fecha desconocida",
+        detalle:
+          `Esto no ha venido de la red y no trae la marca de cuándo se guardó, así que esta ` +
+          `página no puede decir de cuándo es. ${fuente.nombre} lo sirvió en su momento a las ` +
+          `${consultadoALas}. Recarga con cobertura para pedir el estado de ahora.`,
+      };
+    }
+    return {
+      clase: "caducado",
+      titular: `Dato de hace ${antiguedad(edad)}`,
+      detalle:
+        `Sin conexión: esto es la última copia que se guardó en este dispositivo. ` +
+        `${fuente.nombre} la sirvió a las ${consultadoALas} y desde entonces no se ha podido ` +
+        `volver a preguntar. No es el estado de ahora y no hay forma de comprobarlo hasta que ` +
+        `vuelva la red.`,
+    };
+  }
   if (report.stale) {
     return {
       clase: "caducado",
@@ -413,6 +418,10 @@ interface Contexto {
   readonly recibidoEnMs: number;
   readonly ahoraMs: number;
   readonly zona: string;
+  /** `true` si lo que se está sellando salió de una copia y no de la red (T-12). */
+  readonly deLaCopiaGuardada: boolean;
+  /** Cuándo se guardó esa copia, si la copia lo dice. `undefined` = es una copia de fecha ignota. */
+  readonly guardadoEnMs: number | undefined;
 }
 
 /** Un bloque de Open-Meteo (mar o atmósfera) con su sello y sus filas, o su motivo. */
@@ -647,14 +656,25 @@ export function vistaMeteo(
   ahoraMs: number,
   zonaHoraria: string,
 ): VistaMeteo {
-  const contexto: Contexto = {
-    recibidoEnMs: respuesta.recibidoEnMs,
-    ahoraMs,
-    zona: zonaHoraria,
+  // Un contexto POR FUENTE y no uno para las dos: sin red las dos vienen de la copia guardada, pero
+  // se guardaron en instantes distintos, y con red una puede venir de la copia y la otra no. Un
+  // `recibidoEnMs` común le colgaría a una la edad de la otra.
+  const contextoDe = (traida: EstadoDeFuente<unknown>): Contexto => {
+    const servida = !estaPidiendo(traida) && traida.ok ? traida : undefined;
+    const guardadoEnMs = servida?.guardadoEnMs;
+    return {
+      recibidoEnMs: guardadoEnMs ?? respuesta.recibidoEnMs,
+      ahoraMs,
+      zona: zonaHoraria,
+      // Basta con que UNA de las dos señales diga que es copia: el sello de la hora que estampa el
+      // worker, o que el navegador esté sin línea (y entonces esto no ha podido venir de la red).
+      deLaCopiaGuardada: guardadoEnMs !== undefined || servida?.deLaCopiaGuardada === true,
+      guardadoEnMs,
+    };
   };
   const bloques = [
-    ...bloquesDeLaMeteo(respuesta.meteo, contexto),
-    bloqueDelBoletin(respuesta.boletin, contexto),
+    ...bloquesDeLaMeteo(respuesta.meteo, contextoDe(respuesta.meteo)),
+    bloqueDelBoletin(respuesta.boletin, contextoDe(respuesta.boletin)),
   ];
 
   const sinNadaQueEnsenar = bloques.every((bloque) => bloque.sello.clase === "sin-dato");

@@ -1,0 +1,101 @@
+{
+  "snapshotId": "b3d55218409f",
+  "runId": "run-2026-08-29T09-37-06-420Z",
+  "test": {
+    "title": "adversarial/a3-sello-sin-copia.spec.ts > A3 · un fichero que ya no está deja el favorito sin página, y la recarga se lleva el aviso",
+    "file": "/home/user/mareia-t12/tests/e2e/journeys/adversarial/a3-sello-sin-copia.spec.ts",
+    "line": 76,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 414,
+  "urlAtFailure": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/",
+  "error": {
+    "message": "Error: el sello dice «Guardado en este dispositivo hace menos de un minutoOcupa 2,5 kB de constantes armónicas y calcula cualquier día entre 2025 y 2027 sin cobertura. La página se guarda con su hoja de estilos; la tipografía no, y sin red se lee en Georgia.» y en la caché del worker hay []\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true",
+    "stack": "Error: el sello dice «Guardado en este dispositivo hace menos de un minutoOcupa 2,5 kB de constantes armónicas y calcula cualquier día entre 2025 y 2027 sin cobertura. La página se guarda con su hoja de estilos; la tipografía no, y sin red se lee en Georgia.» y en la caché del worker hay []\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true\n    at elSelloYLaCacheDicenLoMismo (/home/user/mareia-t12/tests/e2e/journeys/adversarial/a3-sello-sin-copia.spec.ts:73:5)\n    at /home/user/mareia-t12/tests/e2e/journeys/adversarial/a3-sello-sin-copia.spec.ts:104:3"
+  },
+  "events": [
+    {
+      "at": 8,
+      "kind": "step",
+      "text": "abrir el puerto y esperar al worker"
+    },
+    {
+      "at": 30,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"
+    },
+    {
+      "at": 45,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 45,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "at": 146,
+      "kind": "step",
+      "text": "la pestaña lleva abierta desde ayer: el rebuild diario se llevó su hoja de estilos"
+    },
+    {
+      "at": 147,
+      "kind": "step",
+      "text": "guardar el puerto: las constantes bajan, los bytes de la página no"
+    },
+    {
+      "at": 258,
+      "kind": "step",
+      "text": "y quien lee recarga, que es lo primero que hace cualquiera al volver a la página"
+    },
+    {
+      "at": 274,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"
+    },
+    {
+      "at": 287,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 288,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "at": 288,
+      "kind": "httperror",
+      "text": "HTTP 404 GET http://127.0.0.1:4321/_astro/AlmanaqueLayout.CBCOLnoy.css"
+    },
+    {
+      "at": 289,
+      "kind": "console",
+      "text": "[error] Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "at": 289,
+      "kind": "requestfailed",
+      "text": "GET http://127.0.0.1:4321/_astro/AlmanaqueLayout.CBCOLnoy.css",
+      "detail": "net::ERR_ABORTED"
+    },
+    {
+      "at": 354,
+      "kind": "step",
+      "text": "comprobar que el sello no afirma un offline que no existe"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

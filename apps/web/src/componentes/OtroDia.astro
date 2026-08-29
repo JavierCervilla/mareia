@@ -1,0 +1,79 @@
+---
+/**
+ * «Mareas de otro día»: la sección donde se cumple la promesa de T-12.
+ *
+ * Lo que viaja en el HTML es el marco y la explicación; el formulario viaja `hidden` porque sin
+ * JavaScript no calcularía nada, y un formulario que no hace nada al pulsarlo es peor que no
+ * tenerlo. Lo enseña `src/pwa/cliente/otro-dia.ts`, que es también quien calcula —en el navegador,
+ * con las constantes armónicas del puerto y el motor de `@mareia/domain-core`, el mismo que usa el
+ * servidor.
+ *
+ * Va después del cuerpo (tabla del día, curva, sol y luna) y antes de la tabla mensual: es
+ * información **consultable** en la jerarquía del design brief §1 —se viene a por el día de hoy,
+ * no a explorar— y por eso no compite con lo crítico.
+ *
+ * Los límites del campo de fecha son los mismos que respeta el API (año del build ±1). No es una
+ * restricción de la interfaz: fuera de esa ventana la predicción armónica pierde garantía, y este
+ * portal prefiere no dar una hora a dar una que no puede sostener.
+ *
+ * Los que se construyen aquí son los del build, que es lo correcto **mientras no haya nada
+ * guardado**. En cuanto lo hay mandan las constantes guardadas, que se congelaron el día que se
+ * guardaron: el cliente corrige el campo y el rótulo (`pwa/cliente/otro-dia.ts`). Sin esa
+ * corrección, una página reconstruida en enero con un favorito de diciembre prometía un año que la
+ * calculadora rechazaba, y el campo dejaba elegirlo.
+ */
+import { FECHA_DE_BUILD } from "../datos/fecha-build.ts";
+import { fechaLarga } from "../formato.ts";
+import { ventanaDeAnos } from "../pwa/estacion-offline.ts";
+
+interface Props {
+  slug: string;
+  nombre: string;
+}
+
+const { slug, nombre } = Astro.props;
+const { desde, hasta } = ventanaDeAnos(FECHA_DE_BUILD);
+---
+
+<section
+  class="bloque otro-dia"
+  id="otro-dia"
+  aria-labelledby="titulo-otro-dia"
+  data-otro-dia
+  data-otro-dia-slug={slug}
+  data-otro-dia-build={FECHA_DE_BUILD}
+>
+  <h2 class="bloque__titulo" id="titulo-otro-dia">Mareas de otro día en {nombre}</h2>
+
+  <p class="otro-dia__nota">
+    Esta página publica el {fechaLarga(FECHA_DE_BUILD)}. Cualquier otro día entre <span
+      data-otro-dia-ventana>{desde} y {hasta}</span> se
+    calcula <strong>aquí mismo, en tu navegador</strong>, con las constantes armónicas de la estación
+    y el mismo motor que usa el servidor — y también <strong>sin cobertura</strong>, si has guardado
+    el puerto arriba. Hace falta JavaScript: sin él no aparece el formulario, y la tabla de arriba
+    sigue completa.
+  </p>
+
+  <form class="otro-dia__form" data-otro-dia-form hidden>
+    <label class="etiqueta etiqueta--corta" for="otro-dia-fecha">Día</label>
+    <input
+      class="otro-dia__fecha"
+      id="otro-dia-fecha"
+      name="fecha"
+      type="date"
+      required
+      min={`${desde}-01-01`}
+      max={`${hasta}-12-31`}
+      value={FECHA_DE_BUILD}
+      data-otro-dia-fecha
+    />
+    <button class="otro-dia__accion" type="submit">Calcular</button>
+  </form>
+
+  {/*
+    El resultado es una región viva: quien navega con lector de pantalla tiene que enterarse de que
+    la tabla ha cambiado sin volver a buscarla. Viaja vacía por el mismo motivo que la de la sección
+    de arriba (hallazgo H-7 de T-11).
+  */}
+  <div class="otro-dia__resultado" data-otro-dia-resultado role="status" aria-live="polite"></div>
+</section>

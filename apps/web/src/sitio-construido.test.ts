@@ -20,6 +20,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { activeModules } from "./modules.config.ts";
+import { scriptsDeCoreEn } from "./scripts-de-core.ts";
 import { cargarCatalogo, cargarPuertos, puertosDeRegion } from "./datos/catalogo.ts";
 import { cargarDatosDePuerto } from "./datos/pagina-puerto.ts";
 import { diasDelMes } from "./datos/fecha-build.ts";
@@ -495,18 +497,37 @@ test("sin JavaScript, la sección meteo explica el hueco en vez de quedarse muda
   assert.match(html, /AEMET — Agencia Estatal de Meteorología<\/a> · Uso condicionado/u);
 });
 
-test("el único JavaScript de una página de puerto es la isla meteo: el core sigue sin JS", async (t) => {
+/**
+ * RE-APUNTADO en T-12, no relajado.
+ *
+ * Hasta T-11 la página de puerto servía exactamente dos `<script>`: el JSON-LD (que son datos) y la
+ * isla meteo. La PWA añade **uno** —el de `src/pwa/cliente/montar.ts`, declarado en
+ * `src/scripts-de-core.ts`—, así que lo que se comprueba ya no es un número escrito a mano sino
+ * que cada script servido tenga un dueño declarado: o es dato, o es la isla de un módulo del
+ * registry, o es un script de core del registro. Lo que no cambia ni un ápice: los índices
+ * geográficos siguen en **cero** JavaScript.
+ */
+test("cada JavaScript de una página de puerto tiene dueño declarado; los índices siguen en cero", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
   }
   const html = paginaDe(rutaPuerto((await cargarPuertos())[0]!));
   const scripts = [...html.matchAll(/<script[^>]*>/gu)].map((encontrado) => encontrado[0]);
+  const islas = activeModules
+    .flatMap((modulo) => modulo.pageSections ?? [])
+    .filter((seccion) => seccion.renderMode === "island").length;
 
-  assert.equal(scripts.length, 2, `scripts inesperados en la página: ${scripts.join(" ")}`);
+  assert.equal(
+    scripts.length,
+    1 + islas + scriptsDeCoreEn(true),
+    `scripts inesperados en la página: ${scripts.join(" ")}`,
+  );
   assert.match(scripts[0] ?? "", /type="application\/ld\+json"/u, "el JSON-LD son datos, no código");
-  assert.match(scripts[1] ?? "", /src="\/_astro\/Meteo\.astro[^"]*\.js"/u);
+  assert.match(scripts[1] ?? "", /src="\/_astro\/Meteo\.astro[^"]*\.js"/u, "la isla del módulo meteo");
+  assert.match(scripts[2] ?? "", /src="\/_astro\/index\.astro[^"]*\.js"/u, "el script de core de la PWA");
 
-  // Los índices geográficos no tienen módulos: siguen con cero JavaScript.
+  // Los índices geográficos no tienen módulos ni PWA: siguen con cero JavaScript.
   assert.equal([...paginaDe(RUTA_MAREAS).matchAll(/<script[^>]*src=/gu)].length, 0);
+  assert.equal(scriptsDeCoreEn(false), 0, "un script de core en los índices rompería su cero-JS");
 });

@@ -1,0 +1,12 @@
+{"at":12,"kind":"step","text":"guardar Vigo con cobertura: es el favorito que hay que proteger"}
+{"at":37,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":50,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":50,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":310,"kind":"step","text":"el registro se queda ilegible (escritura a medias por cuota, o un worker anterior)"}
+{"at":316,"kind":"step","text":"llega el rebuild diario y se guarda un segundo puerto: aquí el fail-safe NO poda…"}
+{"at":346,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/cantabria/cantabria/santander/"}
+{"at":358,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":358,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":561,"kind":"step","text":"…pero deja escrito un registro de un solo puerto que afirma ser el censo completo"}
+{"at":561,"kind":"step","text":"y ahora se deja de guardar ese mismo puerto, que es cuando la poda se lo cree"}
+{"at":609,"kind":"step","text":"comprobar que el favorito de Vigo conserva los ficheros con los que se pinta"}

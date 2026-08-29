@@ -130,6 +130,32 @@ avisos). Nada más: cinco colores, dos temas.
 3. **Tablas horarias ferroviarias suizas** — de ahí, la disciplina de retícula y de reglas finas:
    densidad altísima con lectura inequívoca, sin una sola línea decorativa.
 
+## 7 bis. Ampliación T-12 — la PWA y sus dos controles
+
+Esta sección **amplía el brief** (no abre otro) al llegar la PWA offline, tal y como anuncia la
+cabecera.
+
+- **Dos secciones nuevas en la página de puerto y ninguna en el resto del sitio**: «Sin cobertura»
+  (justo después de los avisos del puerto: cuando no hay red, saber que se está leyendo una copia es
+  **crítico** en la jerarquía de §1, porque cambia cómo hay que leer todo lo de abajo) y «Mareas de
+  otro día» (después del cuerpo: es **consultable**, se viene a por el día de hoy).
+- **Los dos primeros controles del portal** —un botón y un campo de fecha— se componen como
+  tipografía del almanaque: sin relleno de color, sin sombra, sin esquinas redondeadas; un filete
+  bajo el texto, como un pie de imprenta que se puede pulsar. El anti-objetivo del dashboard (§3)
+  sigue en pie y este portal no tiene ningún CTA que vender. Altura mínima de 44 px, que es lo que
+  pide el entorno de uso de §1 (guantes, manos mojadas).
+- **El sello se generaliza.** El sello de antigüedad de T-11 deja de ser de la sección meteo y pasa
+  al core: una copia guardada en el teléfono también tiene edad, y para quien lee es la misma
+  pregunta. Mismos tres tonos y misma regla — **lo que separa los estados es el texto**, el filete
+  solo refuerza, y en papel siguen distinguiéndose.
+- **Sin motion, también aquí** (§6). Guardar un puerto no anima nada: cambia el texto del sello y la
+  etiqueta del botón. La única señal de progreso es la palabra «Guardando…».
+- **En papel, las dos secciones desaparecen.** Son controles, y un control impreso es tinta gastada;
+  la tabla del día y la del mes ya viajan en el papel, que es de lo que va imprimir un almanaque.
+- **Instalado no es otra cosa.** El manifiesto declara `minimal-ui` y **no** `standalone`: quien
+  instala esto sigue queriendo ver la URL —para compartirla y para recortarla, que es una promesa de
+  la jerarquía de URL de T-09— y sigue queriendo recargar. Parecer una app nativa no es un objetivo.
+
 ## 8. Cómo se audita
 
 ```bash

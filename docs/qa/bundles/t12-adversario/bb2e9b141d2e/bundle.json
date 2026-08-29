@@ -1,0 +1,90 @@
+{
+  "snapshotId": "bb2e9b141d2e",
+  "runId": "run-2026-08-29T09-37-12-937Z",
+  "test": {
+    "title": "adversarial/a4-registro-que-miente.spec.ts > A4 · el registro que escribe el fail-safe deja al otro favorito sin un solo fichero",
+    "file": "/home/user/mareia-t12/tests/e2e/journeys/adversarial/a4-registro-que-miente.spec.ts",
+    "line": 48,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 659,
+  "urlAtFailure": "http://127.0.0.1:4321/mareas/cantabria/cantabria/santander/",
+  "error": {
+    "message": "Error: el favorito de Vigo se ha quedado sin /_astro/AlmanaqueLayout.CBCOLnoy.css\n\nexpect(received).toContain(expected) // indexOf\n\nExpected value: \"/_astro/AlmanaqueLayout.CBCOLnoy.css\"\nReceived array: []",
+    "stack": "Error: el favorito de Vigo se ha quedado sin /_astro/AlmanaqueLayout.CBCOLnoy.css\n\nexpect(received).toContain(expected) // indexOf\n\nExpected value: \"/_astro/AlmanaqueLayout.CBCOLnoy.css\"\nReceived array: []\n    at /home/user/mareia-t12/tests/e2e/journeys/adversarial/a4-registro-que-miente.spec.ts:80:74"
+  },
+  "events": [
+    {
+      "at": 12,
+      "kind": "step",
+      "text": "guardar Vigo con cobertura: es el favorito que hay que proteger"
+    },
+    {
+      "at": 37,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"
+    },
+    {
+      "at": 50,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 50,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "at": 310,
+      "kind": "step",
+      "text": "el registro se queda ilegible (escritura a medias por cuota, o un worker anterior)"
+    },
+    {
+      "at": 316,
+      "kind": "step",
+      "text": "llega el rebuild diario y se guarda un segundo puerto: aquí el fail-safe NO poda…"
+    },
+    {
+      "at": 346,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/cantabria/cantabria/santander/"
+    },
+    {
+      "at": 358,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 358,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "at": 561,
+      "kind": "step",
+      "text": "…pero deja escrito un registro de un solo puerto que afirma ser el censo completo"
+    },
+    {
+      "at": 561,
+      "kind": "step",
+      "text": "y ahora se deja de guardar ese mismo puerto, que es cuando la poda se lo cree"
+    },
+    {
+      "at": 609,
+      "kind": "step",
+      "text": "comprobar que el favorito de Vigo conserva los ficheros con los que se pinta"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

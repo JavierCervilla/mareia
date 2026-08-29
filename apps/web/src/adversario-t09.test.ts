@@ -36,6 +36,7 @@ import { fileURLToPath } from "node:url";
 import { heightAt, prepareStation } from "@mareia/domain-core";
 
 import { activeModules } from "./modules.config.ts";
+import { scriptsDeCoreEn } from "./scripts-de-core.ts";
 import { cargarPuertos } from "./datos/catalogo.ts";
 import { cargarDatosDePuerto } from "./datos/pagina-puerto.ts";
 import { deps } from "./datos/deps.ts";
@@ -487,12 +488,20 @@ test("A-7 · el tema forzado por data-theme ajusta también el color-scheme", (t
  * isla de módulo y entra por el contrato `AppModule`».
  *
  * Así que la promesa que se vigila ahora es más estrecha y más comprobable que «cero scripts»: el
- * JavaScript que se sirve tiene que estar **declarado en el registry** como `renderMode: "island"`.
- * Ni uno más, ni inline, ni manejadores en atributos, ni hidratación de framework. Una isla que se
- * cuele sin declararse —o un `client:load` en una página del core— sigue poniendo esto en rojo, y el
- * argumento de que la página se lee sin cobertura sigue en pie para todo lo que no es el módulo.
+ * JavaScript que se sirve tiene que estar **declarado**. Ni uno más, ni inline, ni manejadores en
+ * atributos, ni hidratación de framework. Una isla que se cuele sin declararse —o un `client:load`
+ * en una página del core— sigue poniendo esto en rojo, y el argumento de que la página se lee sin
+ * cobertura sigue en pie para todo lo que no esté declarado.
+ *
+ * RE-APUNTADO OTRA VEZ EN T-12, y por segunda vez sin relajarlo. La PWA (guardar el puerto,
+ * registrar el service worker, calcular un día sin red) **no es de ningún módulo**: es del core, y
+ * no hay forma de hacerla sin JavaScript. En vez de ampliar la excepción a ojo, se le da al gate la
+ * otra mitad de la lista: `src/scripts-de-core.ts`, un registro que dice qué scripts de core existen,
+ * por qué no pueden ser HTML y en qué páginas se sirven. La cuenta sigue siendo exacta y el resto
+ * del sitio —portada e índices— sigue teniendo que estar en CERO, que es lo que este test comprueba
+ * página a página. Un script nuevo sin declarar en ninguno de los dos registros sigue en rojo.
  */
-test("promesa 2 · el único JavaScript del sitio son las islas declaradas en el registry", async (t) => {
+test("promesa 2 · todo el JavaScript del sitio está declarado: islas del registry y scripts de core", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
@@ -511,12 +520,14 @@ test("promesa 2 · el único JavaScript del sitio son las islas declaradas en el
       .map((etiqueta) => etiqueta[0])
       .filter((etiqueta) => !etiqueta.includes('type="application/ld+json"'));
 
-    // Solo las páginas de puerto llevan secciones de módulo; el resto del sitio sigue en cero.
-    const permitidos = paginasDePuerto.has(pagina) ? islasDeclaradas : 0;
+    // Solo las páginas de puerto llevan secciones de módulo y PWA; el resto del sitio en cero.
+    const esDePuerto = paginasDePuerto.has(pagina);
+    const permitidos = (esDePuerto ? islasDeclaradas : 0) + scriptsDeCoreEn(esDePuerto);
     assert.equal(
       ejecutables.length,
       permitidos,
-      `${nombre}: se sirven ${ejecutables.length} scripts y el registry declara ${permitidos}`,
+      `${nombre}: se sirven ${ejecutables.length} scripts y solo hay ${permitidos} declarados ` +
+        `(islas del registry + src/scripts-de-core.ts)`,
     );
     for (const etiqueta of ejecutables) {
       // Con `src`: el código va en un fichero cacheable y auditable, no incrustado en 12 páginas.
