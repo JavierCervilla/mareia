@@ -48,6 +48,11 @@
 .meteo__sello-detalle {
   font-size: var(--m-text-meta);
   color: var(--m-sub);
+  /* La otra puerta del desbordamiento de H-5: aquí cae el `reason` del backend, que es texto que no
+     escribimos nosotros y puede traer la URL que falló. Medido con una sonda sobre el `dist/`
+     servido: un motivo con la URL de Open-Meteo desbordaba 49 px a 320. Misma cura y por la misma
+     razón que en `.meteo__cita`. */
+  overflow-wrap: anywhere;
 }
 
 /* Fresco: el filete se apaga. Un dato de ahora no necesita llamar la atención, y
