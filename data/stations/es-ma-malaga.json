@@ -45,11 +45,6 @@
         "phase_deg": 133.311
       },
       {
-        "name": "EP2",
-        "amplitude_m": 0.001488,
-        "phase_deg": 342.0746
-      },
-      {
         "name": "N4",
         "amplitude_m": 0.001379,
         "phase_deg": 79.8805
@@ -68,11 +63,6 @@
         "name": "MSQM",
         "amplitude_m": 0.000747,
         "phase_deg": 218.0123
-      },
-      {
-        "name": "MB2",
-        "amplitude_m": 0.000714,
-        "phase_deg": 203.2369
       },
       {
         "name": "3L2",
@@ -95,11 +85,6 @@
         "phase_deg": 126.9548
       },
       {
-        "name": "MKS2",
-        "amplitude_m": 0.000332,
-        "phase_deg": 41.2221
-      },
-      {
         "name": "2MO5",
         "amplitude_m": 0.000193,
         "phase_deg": 166.611
@@ -108,19 +93,9 @@
         "name": "2MK5",
         "amplitude_m": 0.000121,
         "phase_deg": 35.8094
-      },
-      {
-        "name": "MA2",
-        "amplitude_m": 9.7e-05,
-        "phase_deg": 315.51
-      },
-      {
-        "name": "2MS6",
-        "amplitude_m": 8e-05,
-        "phase_deg": 291.1902
       }
     ],
-    "derived_at": "2026-08-28T02:27:59Z",
+    "derived_at": "2026-08-29T09:58:50Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -250,6 +225,11 @@
       "phase_deg": 74.72
     },
     {
+      "name": "EP2",
+      "amplitude_m": 0.001488,
+      "phase_deg": 342.0746
+    },
+    {
       "name": "M3",
       "amplitude_m": 0.003108,
       "phase_deg": 186.4826
@@ -280,6 +260,11 @@
       "phase_deg": 229.8961
     },
     {
+      "name": "MKS2",
+      "amplitude_m": 0.000332,
+      "phase_deg": 41.2221
+    },
+    {
       "name": "M6",
       "amplitude_m": 0.0003,
       "phase_deg": 257.8107
@@ -300,6 +285,16 @@
       "phase_deg": 141.7431
     },
     {
+      "name": "MA2",
+      "amplitude_m": 9.7e-05,
+      "phase_deg": 315.51
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.000714,
+      "phase_deg": 203.2369
+    },
+    {
       "name": "RHO",
       "amplitude_m": 0.000304,
       "phase_deg": 115.5361
@@ -308,55 +303,61 @@
       "name": "2SM2",
       "amplitude_m": 0.000245,
       "phase_deg": 127.2129
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 8e-05,
+      "phase_deg": 291.1902
     }
   ],
   "quality": {
-    "rmse_m": 0.0577,
-    "hw_time_err_p95_min": 43.98,
+    "rmse_m": 0.0624,
+    "hw_time_err_p95_min": 42.41,
     "grade": "B",
     "validated_against": "IOC mal3",
-    "grade_reason": "no alcanza A: RMSE normalizado 0.089 > 0.05",
+    "grade_reason": "no alcanza A: RMSE normalizado 0,096 > 0,05; y error de hora de extremo p95 42 min > 20 min",
+    "estimated": false,
+    "estimated_reason": null,
     "metrics": {
-      "window_start": "2026-07-29T00:00:00Z",
+      "window_start": "2026-07-30T00:00:00Z",
       "window_days": 30.0,
       "samples": 43137,
-      "predicted_range_m": 0.6481,
-      "rmse_m": 0.0577,
-      "nrmse": 0.08895,
-      "r2": 0.86176,
-      "hw_time_err_p95_min": 43.98,
-      "hw_height_err_p95_m": 0.0806,
+      "predicted_range_m": 0.6531,
+      "rmse_m": 0.0624,
+      "nrmse": 0.09554,
+      "r2": 0.84305,
+      "hw_time_err_p95_min": 42.41,
+      "hw_height_err_p95_m": 0.0859,
       "matched_extremes": 115,
       "predicted_extremes": 116,
       "predicted_extremes_in_window": 115,
-      "observed_extremes": 177,
+      "observed_extremes": 179,
       "extremes_usable": true,
       "cross_rmse_m": 0.0054,
       "cross_source": "malagatg-mal-esp-cmems",
       "cross_rmse_worst_m": 0.0054,
       "cross_source_worst": "malagatg-mal-esp-cmems",
-      "truncation_rms_m": 0.0024,
-      "dropped_amplitude_m": 0.01036,
-      "dropped_amplitude_fraction": 0.019084,
+      "truncation_rms_m": 0.00197,
+      "dropped_amplitude_m": 0.00765,
+      "dropped_amplitude_fraction": 0.014091,
       "dropped_constituents": [
         "MTM",
-        "EP2",
         "N4",
         "T3",
         "R3",
         "MSQM",
-        "MB2",
         "3L2",
         "S3",
         "SGM",
         "3N2",
-        "MKS2",
         "2MO5",
-        "2MK5",
-        "MA2",
-        "2MS6"
+        "2MK5"
       ],
-      "observation_source": "IOC mal3"
+      "observation_source": "IOC mal3",
+      "observation_code": "mal3",
+      "observation_distance_km": 0.161,
+      "observation_lat": 36.71184,
+      "observation_lon": -4.41709
     }
   }
 }

@@ -109,7 +109,7 @@ def _to_record(dataset: str, raw: dict[str, Any]) -> GaugeRecord | None:
 
 
 def _git(*args: str, cwd: Path) -> None:
-    subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True)  # noqa: S603, S607
+    subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True)
 
 
 def sync_clone(*, refresh: bool = False) -> Path:

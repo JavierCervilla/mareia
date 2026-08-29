@@ -33,11 +33,20 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { heightAt, prepareStation } from "@mareia/domain-core";
+
 import { activeModules } from "./modules.config.ts";
 import { scriptsDeCoreEn } from "./scripts-de-core.ts";
 import { cargarPuertos } from "./datos/catalogo.ts";
 import { cargarDatosDePuerto } from "./datos/pagina-puerto.ts";
+import { deps } from "./datos/deps.ts";
 import { escaparMarcado } from "./escapar-marcado.ts";
+import {
+  PASO_DE_PUBLICACION_M,
+  congelacionesDeLaCurva,
+  excursionRealEnLaMeseta,
+  tramoPlanoMasLargo,
+} from "./curva-congelada.ts";
 import { alturaEn, trazarCurvaMarea } from "./grafico-marea.ts";
 import { rutaPuerto } from "./rutas.ts";
 import type { EntradaCurva } from "./grafico-marea.ts";
@@ -130,25 +139,6 @@ function distanciaAlTrazo(punto: Punto, trazo: readonly Punto[]): number {
   return mejor;
 }
 
-/** Duración, en minutos, del tramo más largo del día en el que la marea no se mueve nada. */
-function tramoPlanoMasLargo(dia: EntradaCurva): { minutos: number; desdeUtcMs: number } {
-  let mejor = 0;
-  let mejorDesde = dia.inicioUtcMs;
-  let inicio = dia.inicioUtcMs;
-  for (let instante = dia.inicioUtcMs + MINUTO; instante <= dia.finUtcMs; instante += MINUTO) {
-    const anterior = alturaEn(dia.muestras, instante - MINUTO);
-    if (Math.abs(alturaEn(dia.muestras, instante) - anterior) > 1e-9) {
-      inicio = instante;
-      continue;
-    }
-    if (instante - inicio > mejor * MINUTO) {
-      mejor = (instante - inicio) / MINUTO;
-      mejorDesde = inicio;
-    }
-  }
-  return { minutos: mejor, desdeUtcMs: mejorDesde };
-}
-
 // =================================================================================================
 // HALLAZGOS REPRODUCIDOS Y CORREGIDOS · sin trinquete, en verde, como gate permanente
 // =================================================================================================
@@ -162,22 +152,164 @@ function tramoPlanoMasLargo(dia: EntradaCurva): { minutos: number; desdeUtcMs: n
  * «menos preciso», era falso, y nada en la página avisaba.
  *
  * CORREGIDO Y SUPERADO: la página ya no reconstruye nada. Dibuja la curva **predicha** por el motor
- * armónico (`sampleCurve`, 145 puntos del día) con los extremos insertados. El gate se re-apunta al
- * mecanismo nuevo y se amplía a los DOCE puertos, incluidos los micromareales, donde la marea es de
- * centímetros y aplanarse sería aún más fácil de no notar.
+ * armónico (`sampleCurve`, 145 puntos del día) con los extremos insertados.
  *
- * Comportamiento correcto: la marea nunca se para. Ninguna ventana de una hora puede ser constante.
+ * **Re-apuntado en T-13, y sin ningún número elegido.** Al escalar a 153 puertos, la versión
+ * anterior de este gate —«ninguna meseta de más de una hora»— se puso en rojo en 17 puertos y
+ * ninguno era la avería: son puertos cuya carrera del día es de milímetros a centímetros, y la
+ * curva se publica al **milímetro** (`toHeight`, 3 decimales), así que muestras contiguas empatan
+ * en el último dígito. El primer intento de arreglo cambió una constante por otras dos igual de
+ * arbitrarias, y las dos estaban mal: el corte de carrera dejaba fuera mesetas de 80 min con
+ * 0,178 m de carrera, y el tope del 60 % del día dejaba pasar una congelación real de catorce
+ * horas.
+ *
+ * Lo que se comprueba ahora no es cuánto dura la meseta, sino **si la marea se movió durante ella**
+ * más de lo que la publicación puede enseñar. El umbral no se elige: **es el paso de publicación**.
+ *
+ * **Y se mide dentro del tramo, no en sus puntas.** El segundo intento preguntaba la altura real en
+ * los dos extremos de la meseta, y eso es exactamente la magnitud que la avería original pone a
+ * cero: una meseta **centrada en un extremo** —«dibujaba una pleamar de cinco horas», que es lo que
+ * le dio nombre a A-1— tiene los dos bordes a la misma altura pase lo que pase en medio. Medido
+ * sobre los 153 puertos congelando la curva a propósito, aquel instrumento dejaba pasar en verde
+ * mesetas de **670 min en Gijón** (0,49 mm en los bordes, 3 283,7 mm de movimiento real dentro) y
+ * de 610 min en Vigo y en Huelva, y las admitía en **133 de los 153 puertos**: para el caso que le
+ * da nombre al hallazgo era más débil que la regla de una hora que sustituía.
+ *
+ * La sonda mira ahora **los instantes de muestreo publicados que caen dentro del tramo**, que son
+ * los que la página de verdad podría haber dibujado distintos y no dibujó. No se mira la curva
+ * continua minuto a minuto a propósito: entre dos muestras separadas diez minutos la marea puede
+ * abombarse sobre un extremo hasta 2,4 mm y eso **no es representable** en el artefacto, así que
+ * exigirlo sería pedirle a la publicación una resolución que no tiene.
+ *
+ * Medido sobre 153 puertos × 15 días (2 295 días-puerto, **9 941 mesetas**): la excursión real
+ * máxima en los instantes de muestreo de una meseta legítima es de **0,995 mm**, justo por debajo
+ * del milímetro que el redondeo permite. La meseta más larga son 380 min, en Calvià, con 6 mm de
+ * carrera en todo el día.
+ *
+ * **Y se miran TODAS las mesetas del día, no la más larga** (hallazgo A-17 del pase adversario de
+ * T-13). El instrumento medía bien *un* tramo y el día tiene muchos: preguntaba por la meseta máxima
+ * y sólo sondeaba dentro de ésa, así que cualquier congelación más corta que la meseta natural del
+ * puerto le era invisible por construcción y **la meseta natural hacía de escondite**. Con 12
+ * puertos apenas había mesetas; con los 153 de T-13 hay 103, y en **65 (42,5 % del catálogo)** cabía
+ * una congelación real que el gate no veía: el peor caso, el golfo de Valencia —Valencia, Alboraya,
+ * Silla y Sueca—, una meseta natural de 200 min escondiendo 190 min de curva falsa con **62,06 mm**
+ * de marea real suprimida, sesenta y dos veces el umbral. La respuesta del gate cambiaba con el
+ * tamaño del catálogo, que es la señal de que la pregunta estaba mal hecha.
+ *
+ * Recorrer las mesetas enteras no ensancha nada ni puede enrojecer sola: los tramos son maximales y
+ * disjuntos, y dentro de cualquiera de ellos todas las muestras publicadas valen lo mismo, así que
+ * sus alturas reales no pueden diferir más que el propio paso de publicación. El umbral sigue sin
+ * elegirse; lo único que ha cambiado es **cuántas veces se aplica**.
+ *
+ * **Y el instrumento vive en `curva-congelada.ts`, no aquí.** El ataque A-17 mide lo que este gate
+ * alcanza a ver, y mientras lo medía con una copia suya el trinquete no trinqueteaba: se podía
+ * estrechar el detector a una sola meseta y A-17 seguía verde. Ahora los dos ficheros llaman al
+ * mismo cuerpo, así que estrechar `tramosPlanos` pone A-17 en rojo con sus 65 puertos.
  */
+
+/** Semiancho de la meseta que inyecta A-1 bis: cinco horas de pleamar congelada, 150 min a cada lado. */
+const SEMIANCHO_DE_LA_AVERIA_MIN = 150;
+
+/**
+ * La pleamar del día que tiene **sitio para la avería a los dos lados** dentro del día publicado.
+ *
+ * Se elige la de mayor margen, no la primera. La versión anterior cogía la primera pleamar del día
+ * y cuando ésa caía cerca de la medianoche —**33 de los 365 días de 2026, el 9,0 %**, con un mínimo
+ * de 150 min el 27-02, 28-03, 25-05, 20-10, 20-11 y 20-12— la ventana se recortaba contra el borde
+ * del día, la meseta inyectada no llegaba a las cuatro horas y **el test se ponía rojo sin que nada
+ * estuviera averiado** (hallazgo A-18 del pase adversario de T-13; reproducible con
+ * `BUILD_DATE=2026-03-29`). El día que se mide no lo elige nadie: el sitio publica el día en que se
+ * construyó y CI construye sin `BUILD_DATE`.
+ *
+ * Un gate que enrojece por el calendario invita a bajar la constante de las cuatro horas hasta que
+ * el día malo pase, que es justo por donde un gate deja de medir. Así que **se cambia de ventana, no
+ * de umbral**: el escenario se construye donde cabe. Vigo es semidiurno —dos pleamares separadas
+ * ~12,4 h—, así que si una se pega a un borde del día la otra cae de lleno en el interior, y por eso
+ * siempre hay dónde ponerla.
+ */
+function pleamarConSitio(
+  dia: EntradaCurva,
+  semianchoMin: number,
+): { readonly timeUtcMs: number; readonly height_m: number } | undefined {
+  const margen = (instante: number): number =>
+    Math.min(instante - dia.inicioUtcMs, dia.finUtcMs - instante);
+  return dia.extremos
+    .filter((extremo) => extremo.kind === "high" && margen(extremo.timeUtcMs) >= semianchoMin * MINUTO)
+    .sort((a, b) => margen(b.timeUtcMs) - margen(a.timeUtcMs))[0];
+}
+
 test("A-1 · la curva no se congela en ningún puerto del catálogo", async () => {
   const fechaIso = HAY_BUILD ? fechaDelBuild() : new Date().toISOString().slice(0, 10);
-  for (const puerto of await cargarPuertos()) {
-    const plano = tramoPlanoMasLargo(await curvaDe(puerto.slug, fechaIso));
-    assert.ok(
-      plano.minutos < 60,
-      `${puerto.name}: la marea se queda quieta ${plano.minutos} min desde ` +
-        `${new Date(plano.desdeUtcMs).toISOString()}`,
-    );
+  const congelados: string[] = [];
+  for (const puerto of await deps.ports.list()) {
+    const dia = await curvaDe(puerto.slug, fechaIso);
+    const estacion = prepareStation(await deps.stations.load(puerto.stationFile));
+    for (const { tramo, movimientoM } of congelacionesDeLaCurva(dia, estacion)) {
+      congelados.push(
+        `${puerto.name}: la curva se queda quieta ${tramo.minutos} min desde ` +
+          `${new Date(tramo.desdeUtcMs).toISOString()} mientras la marea se mueve ` +
+          `${(movimientoM * 1000).toFixed(1)} mm`,
+      );
+    }
   }
+  assert.deepEqual(congelados, []);
+});
+
+/**
+ * A-1 bis · **que el gate sepa fallar**, y precisamente en el caso que le da nombre al hallazgo.
+ *
+ * La avería original no era una meseta cualquiera: era una meseta que **se tragaba una pleamar**.
+ * El instrumento anterior —medir en las dos puntas del tramo— daba cero justo ahí, y por eso este
+ * test existe: reconstruye esa avería sobre un puerto de marea real, congelando la curva publicada
+ * durante cinco horas centradas en su pleamar, y exige que el gate la vea. Si alguien vuelve a
+ * apuntar la sonda a los bordes, este test se pone rojo antes de que la avería llegue a la página.
+ *
+ * La pleamar sobre la que se construye la avería **se elige** (`pleamarConSitio`): la primera del
+ * día servía sólo 332 días de cada 365. El porqué, con los números, está en esa función.
+ */
+test("A-1 bis · una pleamar congelada de cinco horas no se le escapa al gate", async () => {
+  const fechaIso = HAY_BUILD ? fechaDelBuild() : new Date().toISOString().slice(0, 10);
+  const puerto = (await deps.ports.list()).find((candidato) => candidato.slug === "vigo");
+  assert.ok(puerto, "Vigo tiene que seguir en el catálogo: es el puerto de marea real de referencia");
+  const dia = await curvaDe(puerto.slug, fechaIso);
+  const estacion = prepareStation(await deps.stations.load(puerto.stationFile));
+
+  const pleamar = pleamarConSitio(dia, SEMIANCHO_DE_LA_AVERIA_MIN);
+  assert.ok(
+    pleamar,
+    `el día ${fechaIso} de Vigo no trae ninguna pleamar con ${SEMIANCHO_DE_LA_AVERIA_MIN} min de ` +
+      "día a cada lado: no hay dónde construir la avería",
+  );
+  const desdeUtcMs = pleamar.timeUtcMs - SEMIANCHO_DE_LA_AVERIA_MIN * MINUTO;
+  const hastaUtcMs = pleamar.timeUtcMs + SEMIANCHO_DE_LA_AVERIA_MIN * MINUTO;
+
+  // La curva de la avería: cinco horas planas a la altura de la pleamar, como la dibujaba la
+  // reconstrucción de T-09 en los días de tres extremos.
+  const congelada = dia.muestras.map((muestra) =>
+    muestra.timeUtcMs >= desdeUtcMs && muestra.timeUtcMs <= hastaUtcMs
+      ? { ...muestra, height_m: pleamar.height_m }
+      : muestra,
+  );
+  const plano = tramoPlanoMasLargo({ ...dia, muestras: congelada });
+  assert.ok(
+    plano.minutos >= 4 * 60,
+    `la meseta inyectada debería durar horas y dura ${plano.minutos} min`,
+  );
+
+  const enLasPuntas = Math.abs(
+    heightAt(estacion, plano.hastaUtcMs) - heightAt(estacion, plano.desdeUtcMs),
+  );
+  const dentro = excursionRealEnLaMeseta(congelada, estacion, plano);
+  assert.ok(
+    dentro > PASO_DE_PUBLICACION_M,
+    `el gate no ve la pleamar congelada: sólo ${(dentro * 1000).toFixed(1)} mm`,
+  );
+  // Y la razón por la que hizo falta cambiar de sonda: en las puntas, la misma avería casi no se ve.
+  assert.ok(
+    enLasPuntas < dentro / 10,
+    `medida en las puntas la avería da ${(enLasPuntas * 1000).toFixed(1)} mm frente a los ` +
+      `${(dentro * 1000).toFixed(1)} mm de dentro: si se parecen, el ejemplo ha dejado de serlo`,
+  );
 });
 
 /**

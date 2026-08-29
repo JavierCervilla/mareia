@@ -2,148 +2,452 @@
   "schema": "ports/v1",
   "ports": [
     {
-      "slug": "cadiz",
-      "name": "Cádiz",
+      "slug": "alicante",
+      "name": "Alicante",
       "province": {
-        "slug": "cadiz",
-        "name": "Cádiz"
+        "slug": "alicante",
+        "name": "Alicante"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 38.3407,
+      "lon": -0.483,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-a-alicante.json"
+    },
+    {
+      "slug": "altea",
+      "name": "Altea",
+      "province": {
+        "slug": "alicante",
+        "name": "Alicante"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 38.5894,
+      "lon": -0.0548,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-a-altea.json"
+    },
+    {
+      "slug": "benidorm",
+      "name": "Benidorm",
+      "province": {
+        "slug": "alicante",
+        "name": "Alicante"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 38.5345,
+      "lon": -0.1331,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-a-benidorm.json"
+    },
+    {
+      "slug": "calp",
+      "name": "Calp",
+      "province": {
+        "slug": "alicante",
+        "name": "Alicante"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 38.6345,
+      "lon": 0.0348,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-a-calp.json"
+    },
+    {
+      "slug": "denia",
+      "name": "Dénia",
+      "province": {
+        "slug": "alicante",
+        "name": "Alicante"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 38.8428,
+      "lon": 0.1144,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-a-denia.json"
+    },
+    {
+      "slug": "guardamar-del-segura",
+      "name": "Guardamar del Segura",
+      "province": {
+        "slug": "alicante",
+        "name": "Alicante"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 38.1081,
+      "lon": -0.6458,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-a-guardamar-del-segura.json"
+    },
+    {
+      "slug": "javea",
+      "name": "Javea",
+      "province": {
+        "slug": "alicante",
+        "name": "Alicante"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 38.7973,
+      "lon": 0.1864,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-a-javea.json"
+    },
+    {
+      "slug": "orihuela",
+      "name": "Orihuela",
+      "province": {
+        "slug": "alicante",
+        "name": "Alicante"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 37.8671,
+      "lon": -0.7578,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-a-orihuela.json"
+    },
+    {
+      "slug": "santa-pola",
+      "name": "Santa Pola",
+      "province": {
+        "slug": "alicante",
+        "name": "Alicante"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 38.1895,
+      "lon": -0.5613,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-a-santa-pola.json"
+    },
+    {
+      "slug": "teulada",
+      "name": "Teulada",
+      "province": {
+        "slug": "alicante",
+        "name": "Alicante"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 38.6864,
+      "lon": 0.1368,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-a-teulada.json"
+    },
+    {
+      "slug": "torrevieja",
+      "name": "Torrevieja",
+      "province": {
+        "slug": "alicante",
+        "name": "Alicante"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 37.9699,
+      "lon": -0.6828,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-a-torrevieja.json"
+    },
+    {
+      "slug": "adra",
+      "name": "Adra",
+      "province": {
+        "slug": "almeria",
+        "name": "Almería"
       },
       "region": {
         "slug": "andalucia",
         "name": "Andalucía"
       },
-      "lat": 36.534,
-      "lon": -6.28,
+      "lat": 36.7454,
+      "lon": -3.021,
       "timezone": "Europe/Madrid",
-      "stationFile": "es-ca-cadiz.json"
+      "stationFile": "es-al-adra.json"
     },
     {
-      "slug": "huelva",
-      "name": "Huelva",
+      "slug": "carboneras",
+      "name": "Carboneras",
       "province": {
-        "slug": "huelva",
-        "name": "Huelva"
+        "slug": "almeria",
+        "name": "Almería"
       },
       "region": {
         "slug": "andalucia",
         "name": "Andalucía"
       },
-      "lat": 37.13,
-      "lon": -6.834,
+      "lat": 36.9908,
+      "lon": -1.8976,
       "timezone": "Europe/Madrid",
-      "stationFile": "es-h-huelva.json"
+      "stationFile": "es-al-carboneras.json"
     },
     {
-      "slug": "malaga",
-      "name": "Málaga",
+      "slug": "cuevas-del-almanzora",
+      "name": "Cuevas del Almanzora",
       "province": {
-        "slug": "malaga",
-        "name": "Málaga"
+        "slug": "almeria",
+        "name": "Almería"
       },
       "region": {
         "slug": "andalucia",
         "name": "Andalucía"
       },
-      "lat": 36.713,
-      "lon": -4.416,
+      "lat": 37.2515,
+      "lon": -1.7671,
       "timezone": "Europe/Madrid",
-      "stationFile": "es-ma-malaga.json"
+      "stationFile": "es-al-cuevas-del-almanzora.json"
     },
     {
-      "slug": "las-palmas-de-gran-canaria",
-      "name": "Las Palmas de Gran Canaria",
+      "slug": "garrucha",
+      "name": "Garrucha",
       "province": {
-        "slug": "las-palmas",
-        "name": "Las Palmas"
+        "slug": "almeria",
+        "name": "Almería"
       },
       "region": {
-        "slug": "canarias",
-        "name": "Canarias"
+        "slug": "andalucia",
+        "name": "Andalucía"
       },
-      "lat": 28.142,
-      "lon": -15.413,
-      "timezone": "Atlantic/Canary",
-      "stationFile": "es-gc-las-palmas.json"
-    },
-    {
-      "slug": "santa-cruz-de-tenerife",
-      "name": "Santa Cruz de Tenerife",
-      "province": {
-        "slug": "santa-cruz-de-tenerife",
-        "name": "Santa Cruz de Tenerife"
-      },
-      "region": {
-        "slug": "canarias",
-        "name": "Canarias"
-      },
-      "lat": 28.478,
-      "lon": -16.234,
-      "timezone": "Atlantic/Canary",
-      "stationFile": "es-tf-santa-cruz-de-tenerife.json"
-    },
-    {
-      "slug": "santander",
-      "name": "Santander",
-      "province": {
-        "slug": "cantabria",
-        "name": "Cantabria"
-      },
-      "region": {
-        "slug": "cantabria",
-        "name": "Cantabria"
-      },
-      "lat": 43.4623,
-      "lon": -3.79,
+      "lat": 37.1852,
+      "lon": -1.8174,
       "timezone": "Europe/Madrid",
-      "stationFile": "es-s-santander.json"
+      "stationFile": "es-al-garrucha.json"
     },
     {
-      "slug": "a-coruna",
-      "name": "A Coruña",
+      "slug": "nijar",
+      "name": "Níjar",
       "province": {
-        "slug": "a-coruna",
-        "name": "A Coruña"
+        "slug": "almeria",
+        "name": "Almería"
       },
       "region": {
-        "slug": "galicia",
-        "name": "Galicia"
+        "slug": "andalucia",
+        "name": "Andalucía"
       },
-      "lat": 43.3623,
-      "lon": -8.3927,
+      "lat": 36.7625,
+      "lon": -2.1026,
       "timezone": "Europe/Madrid",
-      "stationFile": "es-c-a-coruna.json"
+      "stationFile": "es-al-nijar.json"
     },
     {
-      "slug": "vigo",
-      "name": "Vigo",
+      "slug": "pulpi",
+      "name": "Pulpí",
       "province": {
-        "slug": "pontevedra",
-        "name": "Pontevedra"
+        "slug": "almeria",
+        "name": "Almería"
       },
       "region": {
-        "slug": "galicia",
-        "name": "Galicia"
+        "slug": "andalucia",
+        "name": "Andalucía"
       },
-      "lat": 42.2406,
-      "lon": -8.7207,
+      "lat": 37.3667,
+      "lon": -1.6667,
       "timezone": "Europe/Madrid",
-      "stationFile": "es-po-vigo.json"
+      "stationFile": "es-al-pulpi.json"
     },
     {
-      "slug": "palma-de-mallorca",
-      "name": "Palma de Mallorca",
+      "slug": "roquetas-de-mar",
+      "name": "Roquetas de Mar",
       "province": {
-        "slug": "illes-balears",
-        "name": "Illes Balears"
+        "slug": "almeria",
+        "name": "Almería"
       },
       "region": {
-        "slug": "illes-balears",
-        "name": "Illes Balears"
+        "slug": "andalucia",
+        "name": "Andalucía"
       },
-      "lat": 39.556,
-      "lon": 2.63,
+      "lat": 36.7566,
+      "lon": -2.6052,
       "timezone": "Europe/Madrid",
-      "stationFile": "es-pm-palma.json"
+      "stationFile": "es-al-roquetas-de-mar.json"
+    },
+    {
+      "slug": "arenys-de-mar",
+      "name": "Arenys de Mar",
+      "province": {
+        "slug": "barcelona",
+        "name": "Barcelona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.5783,
+      "lon": 2.5593,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-b-arenys-de-mar.json"
+    },
+    {
+      "slug": "badalona",
+      "name": "Badalona",
+      "province": {
+        "slug": "barcelona",
+        "name": "Barcelona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.4351,
+      "lon": 2.2425,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-b-badalona.json"
+    },
+    {
+      "slug": "barcelona",
+      "name": "Barcelona",
+      "province": {
+        "slug": "barcelona",
+        "name": "Barcelona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.4134,
+      "lon": 2.2292,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-b-barcelona.json"
+    },
+    {
+      "slug": "castelldefels",
+      "name": "Castelldefels",
+      "province": {
+        "slug": "barcelona",
+        "name": "Barcelona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.2595,
+      "lon": 1.9261,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-b-castelldefels.json"
+    },
+    {
+      "slug": "el-masnou",
+      "name": "El Masnou",
+      "province": {
+        "slug": "barcelona",
+        "name": "Barcelona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.4764,
+      "lon": 2.313,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-b-el-masnou.json"
+    },
+    {
+      "slug": "mataro",
+      "name": "Mataró",
+      "province": {
+        "slug": "barcelona",
+        "name": "Barcelona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.5301,
+      "lon": 2.4468,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-b-mataro.json"
+    },
+    {
+      "slug": "premia-de-mar",
+      "name": "Premià de Mar",
+      "province": {
+        "slug": "barcelona",
+        "name": "Barcelona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.4891,
+      "lon": 2.368,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-b-premia-de-mar.json"
+    },
+    {
+      "slug": "sitges",
+      "name": "Sitges",
+      "province": {
+        "slug": "barcelona",
+        "name": "Barcelona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.2343,
+      "lon": 1.8246,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-b-sitges.json"
+    },
+    {
+      "slug": "vilanova-i-la-geltru",
+      "name": "Vilanova i la Geltrú",
+      "province": {
+        "slug": "barcelona",
+        "name": "Barcelona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.213,
+      "lon": 1.7331,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-b-vilanova-i-la-geltru.json"
+    },
+    {
+      "slug": "bermeo",
+      "name": "Bermeo",
+      "province": {
+        "slug": "bizkaia",
+        "name": "Bizkaia"
+      },
+      "region": {
+        "slug": "pais-vasco",
+        "name": "País Vasco"
+      },
+      "lat": 43.4199,
+      "lon": -2.7196,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-bi-bermeo.json"
     },
     {
       "slug": "bilbao",
@@ -162,6 +466,902 @@
       "stationFile": "es-bi-bilbao.json"
     },
     {
+      "slug": "elantxobe",
+      "name": "Elantxobe",
+      "province": {
+        "slug": "bizkaia",
+        "name": "Bizkaia"
+      },
+      "region": {
+        "slug": "pais-vasco",
+        "name": "País Vasco"
+      },
+      "lat": 43.4034,
+      "lon": -2.6382,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-bi-elantxobe.json"
+    },
+    {
+      "slug": "lekeitio",
+      "name": "Lekeitio",
+      "province": {
+        "slug": "bizkaia",
+        "name": "Bizkaia"
+      },
+      "region": {
+        "slug": "pais-vasco",
+        "name": "País Vasco"
+      },
+      "lat": 43.3639,
+      "lon": -2.5023,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-bi-lekeitio.json"
+    },
+    {
+      "slug": "mundaka",
+      "name": "Mundaka",
+      "province": {
+        "slug": "bizkaia",
+        "name": "Bizkaia"
+      },
+      "region": {
+        "slug": "pais-vasco",
+        "name": "País Vasco"
+      },
+      "lat": 43.4084,
+      "lon": -2.6974,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-bi-mundaka.json"
+    },
+    {
+      "slug": "a-coruna",
+      "name": "A Coruña",
+      "province": {
+        "slug": "a-coruna",
+        "name": "A Coruña"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 43.3623,
+      "lon": -8.3927,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-c-a-coruna.json"
+    },
+    {
+      "slug": "boiro",
+      "name": "Boiro",
+      "province": {
+        "slug": "a-coruna",
+        "name": "A Coruña"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.6365,
+      "lon": -8.9011,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-c-boiro.json"
+    },
+    {
+      "slug": "ferrol",
+      "name": "Ferrol",
+      "province": {
+        "slug": "a-coruna",
+        "name": "A Coruña"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 43.4771,
+      "lon": -8.2463,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-c-ferrol.json"
+    },
+    {
+      "slug": "pobra-do-caraminal",
+      "name": "Pobra do Caramiñal",
+      "province": {
+        "slug": "a-coruna",
+        "name": "A Coruña"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.6077,
+      "lon": -8.9342,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-c-pobra-do-caraminal.json"
+    },
+    {
+      "slug": "rianxo",
+      "name": "Rianxo",
+      "province": {
+        "slug": "a-coruna",
+        "name": "A Coruña"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.6482,
+      "lon": -8.8237,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-c-rianxo.json"
+    },
+    {
+      "slug": "ribeira",
+      "name": "Ribeira",
+      "province": {
+        "slug": "a-coruna",
+        "name": "A Coruña"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.5204,
+      "lon": -9.0177,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-c-ribeira.json"
+    },
+    {
+      "slug": "sada",
+      "name": "Sada",
+      "province": {
+        "slug": "a-coruna",
+        "name": "A Coruña"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 43.3584,
+      "lon": -8.2466,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-c-sada.json"
+    },
+    {
+      "slug": "algeciras",
+      "name": "Algeciras",
+      "province": {
+        "slug": "cadiz",
+        "name": "Cádiz"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.1302,
+      "lon": -5.4415,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ca-algeciras.json"
+    },
+    {
+      "slug": "barbate",
+      "name": "Barbate",
+      "province": {
+        "slug": "cadiz",
+        "name": "Cádiz"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.1847,
+      "lon": -5.9307,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ca-barbate.json"
+    },
+    {
+      "slug": "cadiz",
+      "name": "Cádiz",
+      "province": {
+        "slug": "cadiz",
+        "name": "Cádiz"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.534,
+      "lon": -6.28,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ca-cadiz.json"
+    },
+    {
+      "slug": "chiclana-de-la-frontera",
+      "name": "Chiclana de la Frontera",
+      "province": {
+        "slug": "cadiz",
+        "name": "Cádiz"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.3961,
+      "lon": -6.2088,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ca-chiclana-de-la-frontera.json"
+    },
+    {
+      "slug": "chipiona",
+      "name": "Chipiona",
+      "province": {
+        "slug": "cadiz",
+        "name": "Cádiz"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.7455,
+      "lon": -6.4296,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ca-chipiona.json"
+    },
+    {
+      "slug": "conil-de-la-frontera",
+      "name": "Conil de la Frontera",
+      "province": {
+        "slug": "cadiz",
+        "name": "Cádiz"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.295,
+      "lon": -6.1367,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ca-conil-de-la-frontera.json"
+    },
+    {
+      "slug": "la-linea-de-la-concepcion",
+      "name": "La Línea de la Concepción",
+      "province": {
+        "slug": "cadiz",
+        "name": "Cádiz"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.1583,
+      "lon": -5.3573,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ca-la-linea-de-la-concepcion.json"
+    },
+    {
+      "slug": "rota",
+      "name": "Rota",
+      "province": {
+        "slug": "cadiz",
+        "name": "Cádiz"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.6164,
+      "lon": -6.3538,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ca-rota.json"
+    },
+    {
+      "slug": "san-roque",
+      "name": "San Roque",
+      "province": {
+        "slug": "cadiz",
+        "name": "Cádiz"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.2899,
+      "lon": -5.2718,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ca-san-roque.json"
+    },
+    {
+      "slug": "sanlucar-de-barrameda",
+      "name": "Sanlúcar de Barrameda",
+      "province": {
+        "slug": "cadiz",
+        "name": "Cádiz"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.8039,
+      "lon": -6.3364,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ca-sanlucar-de-barrameda.json"
+    },
+    {
+      "slug": "tarifa",
+      "name": "Tarifa",
+      "province": {
+        "slug": "cadiz",
+        "name": "Cádiz"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.0097,
+      "lon": -5.606,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ca-tarifa.json"
+    },
+    {
+      "slug": "ceuta",
+      "name": "Ceuta",
+      "province": {
+        "slug": "ceuta",
+        "name": "Ceuta"
+      },
+      "region": {
+        "slug": "ceuta",
+        "name": "Ceuta"
+      },
+      "lat": 35.8939,
+      "lon": -5.3211,
+      "timezone": "Africa/Ceuta",
+      "stationFile": "es-ce-ceuta.json"
+    },
+    {
+      "slug": "borriana",
+      "name": "Borriana",
+      "province": {
+        "slug": "castellon",
+        "name": "Castellón"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 39.8618,
+      "lon": -0.0704,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-cs-borriana.json"
+    },
+    {
+      "slug": "castellon-de-la-plana",
+      "name": "Castellón de la Plana",
+      "province": {
+        "slug": "castellon",
+        "name": "Castellón"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 39.9716,
+      "lon": 0.0175,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-cs-castellon-de-la-plana.json"
+    },
+    {
+      "slug": "oropesa-del-mar",
+      "name": "Oropesa del Mar",
+      "province": {
+        "slug": "castellon",
+        "name": "Castellón"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 40.076,
+      "lon": 0.1342,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-cs-oropesa-del-mar.json"
+    },
+    {
+      "slug": "agaete",
+      "name": "Agaete",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.1009,
+      "lon": -15.7123,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-agaete.json"
+    },
+    {
+      "slug": "antigua",
+      "name": "Antigua",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.3923,
+      "lon": -13.8555,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-antigua.json"
+    },
+    {
+      "slug": "arrecife",
+      "name": "Arrecife",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.9709,
+      "lon": -13.5295,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-arrecife.json"
+    },
+    {
+      "slug": "haria",
+      "name": "Haría",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 29.2231,
+      "lon": -13.4525,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-haria.json"
+    },
+    {
+      "slug": "la-aldea-de-san-nicolas",
+      "name": "La Aldea de San Nicolás",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.0063,
+      "lon": -15.8187,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-la-aldea-de-san-nicolas.json"
+    },
+    {
+      "slug": "la-oliva",
+      "name": "La Oliva",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.7408,
+      "lon": -13.8635,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-la-oliva.json"
+    },
+    {
+      "slug": "las-palmas-de-gran-canaria",
+      "name": "Las Palmas de Gran Canaria",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.142,
+      "lon": -15.413,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-las-palmas.json"
+    },
+    {
+      "slug": "mogan",
+      "name": "Mogán",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 27.7831,
+      "lon": -15.7151,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-mogan.json"
+    },
+    {
+      "slug": "puerto-del-rosario",
+      "name": "Puerto del Rosario",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.4991,
+      "lon": -13.8555,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-puerto-del-rosario.json"
+    },
+    {
+      "slug": "san-bartolome-de-tirajana",
+      "name": "San Bartolomé de Tirajana",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 27.7465,
+      "lon": -15.6239,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-san-bartolome-de-tirajana.json"
+    },
+    {
+      "slug": "telde",
+      "name": "Telde",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 27.9763,
+      "lon": -15.3774,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-telde.json"
+    },
+    {
+      "slug": "tias",
+      "name": "Tías",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.9207,
+      "lon": -13.6728,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-tias.json"
+    },
+    {
+      "slug": "tuineje",
+      "name": "Tuineje",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.2064,
+      "lon": -14.027,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-tuineje.json"
+    },
+    {
+      "slug": "yaiza",
+      "name": "Yaiza",
+      "province": {
+        "slug": "las-palmas",
+        "name": "Las Palmas"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.8594,
+      "lon": -13.8354,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-gc-yaiza.json"
+    },
+    {
+      "slug": "almunecar",
+      "name": "Almuñécar",
+      "province": {
+        "slug": "granada",
+        "name": "Granada"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.7276,
+      "lon": -3.7261,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-gr-almunecar.json"
+    },
+    {
+      "slug": "motril",
+      "name": "Motril",
+      "province": {
+        "slug": "granada",
+        "name": "Granada"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.723,
+      "lon": -3.5218,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-gr-motril.json"
+    },
+    {
+      "slug": "ayamonte",
+      "name": "Ayamonte",
+      "province": {
+        "slug": "huelva",
+        "name": "Huelva"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 37.2114,
+      "lon": -7.4067,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-h-ayamonte.json"
+    },
+    {
+      "slug": "cartaya",
+      "name": "Cartaya",
+      "province": {
+        "slug": "huelva",
+        "name": "Huelva"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 37.2159,
+      "lon": -7.1293,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-h-cartaya.json"
+    },
+    {
+      "slug": "huelva",
+      "name": "Huelva",
+      "province": {
+        "slug": "huelva",
+        "name": "Huelva"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 37.13,
+      "lon": -6.834,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-h-huelva.json"
+    },
+    {
+      "slug": "isla-cristina",
+      "name": "Isla Cristina",
+      "province": {
+        "slug": "huelva",
+        "name": "Huelva"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 37.1963,
+      "lon": -7.3282,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-h-isla-cristina.json"
+    },
+    {
+      "slug": "palos-de-la-frontera",
+      "name": "Palos de la Frontera",
+      "province": {
+        "slug": "huelva",
+        "name": "Huelva"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 37.169,
+      "lon": -6.9049,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-h-palos-de-la-frontera.json"
+    },
+    {
+      "slug": "punta-umbria",
+      "name": "Punta Umbría",
+      "province": {
+        "slug": "huelva",
+        "name": "Huelva"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 37.1803,
+      "lon": -6.9565,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-h-punta-umbria.json"
+    },
+    {
+      "slug": "foz",
+      "name": "Foz",
+      "province": {
+        "slug": "lugo",
+        "name": "Lugo"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 43.5663,
+      "lon": -7.2553,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-lu-foz.json"
+    },
+    {
+      "slug": "viveiro",
+      "name": "Viveiro",
+      "province": {
+        "slug": "lugo",
+        "name": "Lugo"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 43.6672,
+      "lon": -7.595,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-lu-viveiro.json"
+    },
+    {
+      "slug": "estepona",
+      "name": "Estepona",
+      "province": {
+        "slug": "malaga",
+        "name": "Málaga"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.415,
+      "lon": -5.1572,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ma-estepona.json"
+    },
+    {
+      "slug": "fuengirola",
+      "name": "Fuengirola",
+      "province": {
+        "slug": "malaga",
+        "name": "Málaga"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.5429,
+      "lon": -4.6177,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ma-fuengirola.json"
+    },
+    {
+      "slug": "malaga",
+      "name": "Málaga",
+      "province": {
+        "slug": "malaga",
+        "name": "Málaga"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.713,
+      "lon": -4.416,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ma-malaga.json"
+    },
+    {
+      "slug": "manilva",
+      "name": "Manilva",
+      "province": {
+        "slug": "malaga",
+        "name": "Málaga"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.3558,
+      "lon": -5.2297,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ma-manilva.json"
+    },
+    {
+      "slug": "marbella",
+      "name": "Marbella",
+      "province": {
+        "slug": "malaga",
+        "name": "Málaga"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 36.5061,
+      "lon": -4.8889,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ma-marbella.json"
+    },
+    {
+      "slug": "melilla",
+      "name": "Melilla",
+      "province": {
+        "slug": "melilla",
+        "name": "Melilla"
+      },
+      "region": {
+        "slug": "melilla",
+        "name": "Melilla"
+      },
+      "lat": 35.2889,
+      "lon": -2.9348,
+      "timezone": "Africa/Ceuta",
+      "stationFile": "es-me-melilla.json"
+    },
+    {
+      "slug": "aguilas",
+      "name": "Águilas",
+      "province": {
+        "slug": "murcia",
+        "name": "Murcia"
+      },
+      "region": {
+        "slug": "region-de-murcia",
+        "name": "Región de Murcia"
+      },
+      "lat": 37.405,
+      "lon": -1.5729,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-mu-aguilas.json"
+    },
+    {
       "slug": "cabo-de-palos",
       "name": "Cabo de Palos",
       "province": {
@@ -178,6 +1378,22 @@
       "stationFile": "es-mu-cabo-de-palos.json"
     },
     {
+      "slug": "cartagena",
+      "name": "Cartagena",
+      "province": {
+        "slug": "murcia",
+        "name": "Murcia"
+      },
+      "region": {
+        "slug": "region-de-murcia",
+        "name": "Región de Murcia"
+      },
+      "lat": 37.5833,
+      "lon": -1.0,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-mu-cartagena.json"
+    },
+    {
       "slug": "la-manga-del-mar-menor",
       "name": "La Manga del Mar Menor",
       "province": {
@@ -192,6 +1408,1046 @@
       "lon": -0.7167,
       "timezone": "Europe/Madrid",
       "stationFile": "es-mu-la-manga.json"
+    },
+    {
+      "slug": "mazarron",
+      "name": "Mazarrón",
+      "province": {
+        "slug": "murcia",
+        "name": "Murcia"
+      },
+      "region": {
+        "slug": "region-de-murcia",
+        "name": "Región de Murcia"
+      },
+      "lat": 37.5569,
+      "lon": -1.2738,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-mu-mazarron.json"
+    },
+    {
+      "slug": "castropol",
+      "name": "Castropol",
+      "province": {
+        "slug": "asturias",
+        "name": "Asturias"
+      },
+      "region": {
+        "slug": "asturias",
+        "name": "Asturias"
+      },
+      "lat": 43.5373,
+      "lon": -7.0236,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-o-castropol.json"
+    },
+    {
+      "slug": "gijon",
+      "name": "Gijón",
+      "province": {
+        "slug": "asturias",
+        "name": "Asturias"
+      },
+      "region": {
+        "slug": "asturias",
+        "name": "Asturias"
+      },
+      "lat": 43.5458,
+      "lon": -5.6669,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-o-gijon.json"
+    },
+    {
+      "slug": "alcudia",
+      "name": "Alcúdia",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 39.8391,
+      "lon": 3.1352,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-alcudia.json"
+    },
+    {
+      "slug": "calvia",
+      "name": "Calvià",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 39.5112,
+      "lon": 2.468,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-calvia.json"
+    },
+    {
+      "slug": "campos",
+      "name": "Campos",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 39.362,
+      "lon": 2.954,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-campos.json"
+    },
+    {
+      "slug": "ciutadella-de-menorca",
+      "name": "Ciutadella de Menorca",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 40.0016,
+      "lon": 3.8354,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-ciutadella-de-menorca.json"
+    },
+    {
+      "slug": "es-castell",
+      "name": "Es Castell",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 39.8784,
+      "lon": 4.2932,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-es-castell.json"
+    },
+    {
+      "slug": "es-mercadal",
+      "name": "es Mercadal",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 40.0549,
+      "lon": 4.1311,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-es-mercadal.json"
+    },
+    {
+      "slug": "felanitx",
+      "name": "Felanitx",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 39.4235,
+      "lon": 3.2625,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-felanitx.json"
+    },
+    {
+      "slug": "formentera",
+      "name": "Formentera",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 38.7339,
+      "lon": 1.4148,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-formentera.json"
+    },
+    {
+      "slug": "ibiza",
+      "name": "Ibiza",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 38.9122,
+      "lon": 1.4482,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-ibiza.json"
+    },
+    {
+      "slug": "llucmajor",
+      "name": "Llucmajor",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 39.501,
+      "lon": 2.7475,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-llucmajor.json"
+    },
+    {
+      "slug": "mahon",
+      "name": "Mahón",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 39.8908,
+      "lon": 4.2642,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-mahon.json"
+    },
+    {
+      "slug": "manacor",
+      "name": "Manacor",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 39.5393,
+      "lon": 3.3346,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-manacor.json"
+    },
+    {
+      "slug": "palma-de-mallorca",
+      "name": "Palma de Mallorca",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 39.556,
+      "lon": 2.63,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-palma.json"
+    },
+    {
+      "slug": "pollenca",
+      "name": "Pollença",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 39.9045,
+      "lon": 3.0854,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-pollenca.json"
+    },
+    {
+      "slug": "sant-antoni-de-portmany",
+      "name": "Sant Antoni de Portmany",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 38.9767,
+      "lon": 1.2978,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-sant-antoni-de-portmany.json"
+    },
+    {
+      "slug": "santa-eularia-des-riu",
+      "name": "Santa Eulària des Riu",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 38.984,
+      "lon": 1.5398,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-santa-eularia-des-riu.json"
+    },
+    {
+      "slug": "soller",
+      "name": "Sóller",
+      "province": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "region": {
+        "slug": "illes-balears",
+        "name": "Illes Balears"
+      },
+      "lat": 39.797,
+      "lon": 2.6939,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-pm-soller.json"
+    },
+    {
+      "slug": "baiona",
+      "name": "Baiona",
+      "province": {
+        "slug": "pontevedra",
+        "name": "Pontevedra"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.1196,
+      "lon": -8.8455,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-po-baiona.json"
+    },
+    {
+      "slug": "bueu",
+      "name": "Bueu",
+      "province": {
+        "slug": "pontevedra",
+        "name": "Pontevedra"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.3283,
+      "lon": -8.7861,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-po-bueu.json"
+    },
+    {
+      "slug": "cambados",
+      "name": "Cambados",
+      "province": {
+        "slug": "pontevedra",
+        "name": "Pontevedra"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.5185,
+      "lon": -8.8231,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-po-cambados.json"
+    },
+    {
+      "slug": "marin",
+      "name": "Marín",
+      "province": {
+        "slug": "pontevedra",
+        "name": "Pontevedra"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.3994,
+      "lon": -8.6977,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-po-marin.json"
+    },
+    {
+      "slug": "o-grove",
+      "name": "O Grove",
+      "province": {
+        "slug": "pontevedra",
+        "name": "Pontevedra"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.4969,
+      "lon": -8.8604,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-po-o-grove.json"
+    },
+    {
+      "slug": "poio",
+      "name": "Poio",
+      "province": {
+        "slug": "pontevedra",
+        "name": "Pontevedra"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.4286,
+      "lon": -8.705,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-po-poio.json"
+    },
+    {
+      "slug": "redondela",
+      "name": "Redondela",
+      "province": {
+        "slug": "pontevedra",
+        "name": "Pontevedra"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.2944,
+      "lon": -8.6163,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-po-redondela.json"
+    },
+    {
+      "slug": "sanxenxo",
+      "name": "Sanxenxo",
+      "province": {
+        "slug": "pontevedra",
+        "name": "Pontevedra"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.398,
+      "lon": -8.8036,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-po-sanxenxo.json"
+    },
+    {
+      "slug": "vigo",
+      "name": "Vigo",
+      "province": {
+        "slug": "pontevedra",
+        "name": "Pontevedra"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.2406,
+      "lon": -8.7207,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-po-vigo.json"
+    },
+    {
+      "slug": "vilagarcia-de-arousa",
+      "name": "Vilagarcía de Arousa",
+      "province": {
+        "slug": "pontevedra",
+        "name": "Pontevedra"
+      },
+      "region": {
+        "slug": "galicia",
+        "name": "Galicia"
+      },
+      "lat": 42.5985,
+      "lon": -8.7749,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-po-vilagarcia-de-arousa.json"
+    },
+    {
+      "slug": "castro-urdiales",
+      "name": "Castro-Urdiales",
+      "province": {
+        "slug": "cantabria",
+        "name": "Cantabria"
+      },
+      "region": {
+        "slug": "cantabria",
+        "name": "Cantabria"
+      },
+      "lat": 43.3835,
+      "lon": -3.217,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-s-castro-urdiales.json"
+    },
+    {
+      "slug": "el-astillero",
+      "name": "El Astillero",
+      "province": {
+        "slug": "cantabria",
+        "name": "Cantabria"
+      },
+      "region": {
+        "slug": "cantabria",
+        "name": "Cantabria"
+      },
+      "lat": 43.4,
+      "lon": -3.8149,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-s-el-astillero.json"
+    },
+    {
+      "slug": "santander",
+      "name": "Santander",
+      "province": {
+        "slug": "cantabria",
+        "name": "Cantabria"
+      },
+      "region": {
+        "slug": "cantabria",
+        "name": "Cantabria"
+      },
+      "lat": 43.4623,
+      "lon": -3.79,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-s-santander.json"
+    },
+    {
+      "slug": "santona",
+      "name": "Santoña",
+      "province": {
+        "slug": "cantabria",
+        "name": "Cantabria"
+      },
+      "region": {
+        "slug": "cantabria",
+        "name": "Cantabria"
+      },
+      "lat": 43.4369,
+      "lon": -3.4264,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-s-santona.json"
+    },
+    {
+      "slug": "seville",
+      "name": "Seville",
+      "province": {
+        "slug": "sevilla",
+        "name": "Sevilla"
+      },
+      "region": {
+        "slug": "andalucia",
+        "name": "Andalucía"
+      },
+      "lat": 37.3703,
+      "lon": -5.9935,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-se-seville.json"
+    },
+    {
+      "slug": "donostia",
+      "name": "Donostia",
+      "province": {
+        "slug": "gipuzkoa",
+        "name": "Gipuzkoa"
+      },
+      "region": {
+        "slug": "pais-vasco",
+        "name": "País Vasco"
+      },
+      "lat": 43.3228,
+      "lon": -1.9885,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ss-donostia.json"
+    },
+    {
+      "slug": "getaria",
+      "name": "Getaria",
+      "province": {
+        "slug": "gipuzkoa",
+        "name": "Gipuzkoa"
+      },
+      "region": {
+        "slug": "pais-vasco",
+        "name": "País Vasco"
+      },
+      "lat": 43.3053,
+      "lon": -2.2004,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-ss-getaria.json"
+    },
+    {
+      "slug": "calafell",
+      "name": "Calafell",
+      "province": {
+        "slug": "tarragona",
+        "name": "Tarragona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.1885,
+      "lon": 1.6066,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-t-calafell.json"
+    },
+    {
+      "slug": "el-vendrell",
+      "name": "el Vendrell",
+      "province": {
+        "slug": "tarragona",
+        "name": "Tarragona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.1773,
+      "lon": 1.5261,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-t-el-vendrell.json"
+    },
+    {
+      "slug": "l-ametlla-de-mar",
+      "name": "l'Ametlla de Mar",
+      "province": {
+        "slug": "tarragona",
+        "name": "Tarragona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 40.9286,
+      "lon": 0.851,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-t-l-ametlla-de-mar.json"
+    },
+    {
+      "slug": "l-ampolla",
+      "name": "l'Ampolla",
+      "province": {
+        "slug": "tarragona",
+        "name": "Tarragona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 40.7764,
+      "lon": 0.7438,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-t-l-ampolla.json"
+    },
+    {
+      "slug": "roda-de-bera",
+      "name": "Roda de Berà",
+      "province": {
+        "slug": "tarragona",
+        "name": "Tarragona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.1686,
+      "lon": 1.486,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-t-roda-de-bera.json"
+    },
+    {
+      "slug": "tarragona",
+      "name": "Tarragona",
+      "province": {
+        "slug": "tarragona",
+        "name": "Tarragona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.108,
+      "lon": 1.2521,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-t-tarragona.json"
+    },
+    {
+      "slug": "torredembarra",
+      "name": "Torredembarra",
+      "province": {
+        "slug": "tarragona",
+        "name": "Tarragona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 41.1355,
+      "lon": 1.4023,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-t-torredembarra.json"
+    },
+    {
+      "slug": "vandellos-i-l-hospitalet-de-l-infant",
+      "name": "Vandellòs i l'Hospitalet de l'Infant",
+      "province": {
+        "slug": "tarragona",
+        "name": "Tarragona"
+      },
+      "region": {
+        "slug": "cataluna",
+        "name": "Cataluña"
+      },
+      "lat": 40.9891,
+      "lon": 0.9285,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-t-vandellos-i-l-hospitalet-de-l-infant.json"
+    },
+    {
+      "slug": "adeje",
+      "name": "Adeje",
+      "province": {
+        "slug": "santa-cruz-de-tenerife",
+        "name": "Santa Cruz de Tenerife"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.0786,
+      "lon": -16.7371,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-tf-adeje.json"
+    },
+    {
+      "slug": "alajero",
+      "name": "Alajeró",
+      "province": {
+        "slug": "santa-cruz-de-tenerife",
+        "name": "Santa Cruz de Tenerife"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.0271,
+      "lon": -17.1976,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-tf-alajero.json"
+    },
+    {
+      "slug": "arona",
+      "name": "Arona",
+      "province": {
+        "slug": "santa-cruz-de-tenerife",
+        "name": "Santa Cruz de Tenerife"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.0488,
+      "lon": -16.7191,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-tf-arona.json"
+    },
+    {
+      "slug": "candelaria",
+      "name": "Candelaria",
+      "province": {
+        "slug": "santa-cruz-de-tenerife",
+        "name": "Santa Cruz de Tenerife"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.3571,
+      "lon": -16.3684,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-tf-candelaria.json"
+    },
+    {
+      "slug": "el-pinar-de-el-hierro",
+      "name": "El Pinar de El Hierro",
+      "province": {
+        "slug": "santa-cruz-de-tenerife",
+        "name": "Santa Cruz de Tenerife"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 27.6399,
+      "lon": -17.9804,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-tf-el-pinar-de-el-hierro.json"
+    },
+    {
+      "slug": "el-rosario",
+      "name": "El Rosario",
+      "province": {
+        "slug": "santa-cruz-de-tenerife",
+        "name": "Santa Cruz de Tenerife"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.4009,
+      "lon": -16.3219,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-tf-el-rosario.json"
+    },
+    {
+      "slug": "fasnia",
+      "name": "Fasnia",
+      "province": {
+        "slug": "santa-cruz-de-tenerife",
+        "name": "Santa Cruz de Tenerife"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.2333,
+      "lon": -16.3833,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-tf-fasnia.json"
+    },
+    {
+      "slug": "garachico",
+      "name": "Garachico",
+      "province": {
+        "slug": "santa-cruz-de-tenerife",
+        "name": "Santa Cruz de Tenerife"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.3734,
+      "lon": -16.7545,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-tf-garachico.json"
+    },
+    {
+      "slug": "guia-de-isora",
+      "name": "Guía de Isora",
+      "province": {
+        "slug": "santa-cruz-de-tenerife",
+        "name": "Santa Cruz de Tenerife"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.1795,
+      "lon": -16.8148,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-tf-guia-de-isora.json"
+    },
+    {
+      "slug": "san-sebastian-de-la-gomera",
+      "name": "San Sebastián de la Gomera",
+      "province": {
+        "slug": "santa-cruz-de-tenerife",
+        "name": "Santa Cruz de Tenerife"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.0887,
+      "lon": -17.1077,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-tf-san-sebastian-de-la-gomera.json"
+    },
+    {
+      "slug": "santa-cruz-de-tenerife",
+      "name": "Santa Cruz de Tenerife",
+      "province": {
+        "slug": "santa-cruz-de-tenerife",
+        "name": "Santa Cruz de Tenerife"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.478,
+      "lon": -16.234,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-tf-santa-cruz-de-tenerife.json"
+    },
+    {
+      "slug": "tazacorte",
+      "name": "Tazacorte",
+      "province": {
+        "slug": "santa-cruz-de-tenerife",
+        "name": "Santa Cruz de Tenerife"
+      },
+      "region": {
+        "slug": "canarias",
+        "name": "Canarias"
+      },
+      "lat": 28.6445,
+      "lon": -17.9435,
+      "timezone": "Atlantic/Canary",
+      "stationFile": "es-tf-tazacorte.json"
+    },
+    {
+      "slug": "alboraya",
+      "name": "Alboraya",
+      "province": {
+        "slug": "valencia",
+        "name": "Valencia"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 39.5111,
+      "lon": -0.3167,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-v-alboraya.json"
+    },
+    {
+      "slug": "canet-d-en-berenguer",
+      "name": "Canet d'En Berenguer",
+      "province": {
+        "slug": "valencia",
+        "name": "Valencia"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 39.6737,
+      "lon": -0.2022,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-v-canet-d-en-berenguer.json"
+    },
+    {
+      "slug": "gandia",
+      "name": "Gandia",
+      "province": {
+        "slug": "valencia",
+        "name": "Valencia"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 38.9951,
+      "lon": -0.156,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-v-gandia.json"
+    },
+    {
+      "slug": "oliva",
+      "name": "Oliva",
+      "province": {
+        "slug": "valencia",
+        "name": "Valencia"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 38.9322,
+      "lon": -0.0948,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-v-oliva.json"
+    },
+    {
+      "slug": "sagunto",
+      "name": "Sagunto",
+      "province": {
+        "slug": "valencia",
+        "name": "Valencia"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 39.6458,
+      "lon": -0.2146,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-v-sagunto.json"
+    },
+    {
+      "slug": "silla",
+      "name": "Silla",
+      "province": {
+        "slug": "valencia",
+        "name": "Valencia"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 39.3612,
+      "lon": -0.39,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-v-silla.json"
+    },
+    {
+      "slug": "sueca",
+      "name": "Sueca",
+      "province": {
+        "slug": "valencia",
+        "name": "Valencia"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 39.2785,
+      "lon": -0.2748,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-v-sueca.json"
+    },
+    {
+      "slug": "valencia",
+      "name": "Valencia",
+      "province": {
+        "slug": "valencia",
+        "name": "Valencia"
+      },
+      "region": {
+        "slug": "comunitat-valenciana",
+        "name": "Comunitat Valenciana"
+      },
+      "lat": 39.4419,
+      "lon": -0.3171,
+      "timezone": "Europe/Madrid",
+      "stationFile": "es-v-valencia.json"
     }
   ]
 }

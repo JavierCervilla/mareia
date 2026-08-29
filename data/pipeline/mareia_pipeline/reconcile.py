@@ -32,7 +32,7 @@ from typing import Any
 
 from mareia_pipeline.engine_contract import ENGINE_CONSTITUENTS
 from mareia_pipeline.ports import Port
-from mareia_pipeline.sources.tide_database import GaugeRecord, REPOSITORY_URL, candidates_near
+from mareia_pipeline.sources.tide_database import REPOSITORY_URL, GaugeRecord, candidates_near
 
 #: Prioridad de conjunto de datos: menor es mejor.
 _DATASET_RANK = {"redmar": 0, "noaa": 1, "ticon": 2}
@@ -42,6 +42,12 @@ _LICENSE_RANK = {"cc-by-4.0": 0, "public-domain": 0, "cc-by-nc-4.0": 1}
 
 #: Nombre del proyecto que agrega y normaliza las constantes, para la atribución.
 _AGGREGATOR_NAME = "openwatersio/tide-database"
+
+#: Dos mareógrafos separados por menos de esto miden, a efectos de constantes, la misma marea. Es el
+#: mismo número que el umbral de distancia del grade A (``grade.MAX_GAUGE_DISTANCE_KM['A']``) y lo
+#: es a propósito: si a esa distancia el grade considera que el mareógrafo describe el puerto, la
+#: selección puede considerar que dos mareógrafos a esa distancia describen el mismo sitio.
+SAME_PLACE_RADIUS_KM = 5.0
 
 
 @dataclass(frozen=True)
@@ -64,15 +70,34 @@ def _sort_key(distance_km: float, gauge: GaugeRecord) -> tuple[int, int, float, 
 
 
 def select(port: Port, gauges: list[GaugeRecord]) -> Selection:
-    """Aplica la política de selección al puerto dado."""
+    """Aplica la política de selección al puerto dado.
+
+    La licencia y los años de registro deciden **entre los mareógrafos del mismo sitio**, no entre
+    sitios distintos: primero se acota a los que están a menos de ``SAME_PLACE_RADIUS_KM`` del más
+    cercano y sólo dentro de ese grupo se ordena por el criterio de arriba. Sin esa acotación, al
+    ensanchar el radio de búsqueda a los 60 km que T-13 necesita para la costa sin mareógrafo, un
+    puerto podía acabar con las constantes de un mareógrafo mejor documentado a 54 km teniendo otro
+    en su propia bocana —le pasó a Gandía en la primera pasada del catálogo completo—, y eso no es
+    elegir mejor análisis: es elegir otro mar.
+    """
     candidates = candidates_near(gauges, port.lat, port.lon, port.search_radius_km)
     if not candidates:
         raise LookupError(
             f"sin mareógrafos a menos de {port.search_radius_km:g} km de {port.name} ({port.id})"
         )
-    ordered = sorted(candidates, key=lambda item: _sort_key(item[0], item[1]))
+    nearest_km = min(distance for distance, _ in candidates)
+    same_place = [
+        item for item in candidates if item[0] <= nearest_km + SAME_PLACE_RADIUS_KM
+    ]
+    ordered = sorted(same_place, key=lambda item: _sort_key(item[0], item[1]))
     best_distance, best = ordered[0]
-    return Selection(port=port, chosen=best, chosen_distance_km=round(best_distance, 3), rejected=ordered[1:])
+    rest = [item for item in candidates if item[1].station_id != best.station_id]
+    return Selection(
+        port=port,
+        chosen=best,
+        chosen_distance_km=round(best_distance, 3),
+        rejected=sorted(rest, key=lambda item: _sort_key(item[0], item[1])),
+    )
 
 
 def _gauge_reference(distance_km: float, gauge: GaugeRecord) -> dict[str, Any]:
@@ -116,8 +141,15 @@ def to_station_v1(
     quality: dict[str, Any],
     derived_at: dt.datetime,
     tarball_sha256: str,
+    extra_attribution: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
-    """Construye el documento ``station/v1`` de un puerto."""
+    """Construye el documento ``station/v1`` de un puerto.
+
+    ``extra_attribution`` es para las fuentes que no aportan constantes pero sí exigen crédito: el
+    volcado de GeoNames (CC-BY 4.0) del que sale la identidad de los puertos derivados en T-13. Va
+    dentro del propio JSON, como el resto, porque la atribución tiene que viajar con el dato que la
+    obliga y no vivir en un README que nadie sirve.
+    """
     gauge = selection.chosen
     msl_offset = gauge.msl_offset_m
     if msl_offset is None:
@@ -140,7 +172,7 @@ def to_station_v1(
             ],
             "dropped_constituents": dropped_constituents(gauge),
             "derived_at": derived_at.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-            "attribution": _attribution(gauge, tarball_sha256),
+            "attribution": [*_attribution(gauge, tarball_sha256), *(extra_attribution or [])],
         },
         "constituents": [
             _emit_constituent(constituent)

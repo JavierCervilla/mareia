@@ -6,3 +6,7 @@ jsonschema==4.25.1
 
 # Sólo para `make test`.
 pytest==9.1.1
+
+# Sólo para `make lint`: el gate anti-slop del lado Python (ver `ruff.toml`). Pinneado como el
+# resto: un linter que cambia de reglas entre dos ejecuciones del mismo commit deja de ser un gate.
+ruff==0.14.6

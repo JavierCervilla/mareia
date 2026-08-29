@@ -1,0 +1,357 @@
+{
+  "schema": "station/v1",
+  "id": "es-me-melilla",
+  "name": "Melilla",
+  "lat": 35.2889,
+  "lon": -2.9348,
+  "timezone": "Africa/Ceuta",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 0.328
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "melillatg-mel-esp-cmems",
+      "station_name": "Melilla",
+      "lat": 35.291,
+      "lon": -2.918,
+      "distance_km": 1.543,
+      "analysis_epoch": {
+        "start": "2008-01-01",
+        "end": "2025-06-30"
+      },
+      "license": "cc-by-nc-4.0"
+    },
+    "fallback": [],
+    "dropped_constituents": [
+      {
+        "name": "MTM",
+        "amplitude_m": 0.002266,
+        "phase_deg": 155.5432
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.00126,
+        "phase_deg": 187.6625
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.001189,
+        "phase_deg": 8.3749
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.000968,
+        "phase_deg": 83.1256
+      },
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.000836,
+        "phase_deg": 11.2057
+      },
+      {
+        "name": "3L2",
+        "amplitude_m": 0.00055,
+        "phase_deg": 178.6082
+      },
+      {
+        "name": "SGM",
+        "amplitude_m": 0.000492,
+        "phase_deg": 55.8457
+      },
+      {
+        "name": "3N2",
+        "amplitude_m": 0.000437,
+        "phase_deg": 106.687
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 0.000282,
+        "phase_deg": 163.6876
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 0.000244,
+        "phase_deg": 61.7656
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.000223,
+        "phase_deg": 10.8915
+      }
+    ],
+    "derived_at": "2026-08-29T09:58:50Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-nc-4.0",
+        "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+        "role": "constantes armónicas",
+        "notes": "Upstream GESLA data provider restricts commercial use. See https://gesla787883612.wordpress.com/license/"
+      },
+      {
+        "name": "openwatersio/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      },
+      {
+        "name": "GeoNames",
+        "url": "https://www.geonames.org/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "catálogo de puertos: nombre del municipio y coordenadas de la dársena · huella sha256 del volcado e2aa4fa9e6801568…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 0.127271,
+      "phase_deg": 66.1877
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.025769,
+      "phase_deg": 52.2385
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.048296,
+      "phase_deg": 87.8255
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.013203,
+      "phase_deg": 84.5617
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.003527,
+      "phase_deg": 37.5582
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.001272,
+      "phase_deg": 90.5373
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.034046,
+      "phase_deg": 146.771
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.011957,
+      "phase_deg": 143.6477
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.019755,
+      "phase_deg": 116.2809
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.001383,
+      "phase_deg": 99.2725
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.001128,
+      "phase_deg": 47.7652
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.014305,
+      "phase_deg": 169.7149
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.002741,
+      "phase_deg": 29.3528
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.000947,
+      "phase_deg": 271.9321
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.065,
+      "phase_deg": 164.9997
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.024703,
+      "phase_deg": 72.2832
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.002824,
+      "phase_deg": 92.6878
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.001677,
+      "phase_deg": 161.9092
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.002931,
+      "phase_deg": 78.6348
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.001004,
+      "phase_deg": 50.3389
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.000253,
+      "phase_deg": 231.825
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.003597,
+      "phase_deg": 127.5368
+    },
+    {
+      "name": "EP2",
+      "amplitude_m": 0.000949,
+      "phase_deg": 11.7521
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.002676,
+      "phase_deg": 180.3085
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.004487,
+      "phase_deg": 28.3652
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.004887,
+      "phase_deg": 56.108
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.000641,
+      "phase_deg": 56.4694
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.005322,
+      "phase_deg": 127.9407
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.009828,
+      "phase_deg": 233.1394
+    },
+    {
+      "name": "MKS2",
+      "amplitude_m": 0.000162,
+      "phase_deg": 56.4035
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 0.0004,
+      "phase_deg": 271.2367
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 3.3e-05,
+      "phase_deg": 188.6102
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 0.000948,
+      "phase_deg": 92.3548
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.00097,
+      "phase_deg": 159.8456
+    },
+    {
+      "name": "MA2",
+      "amplitude_m": 0.000471,
+      "phase_deg": 242.278
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.000869,
+      "phase_deg": 130.6149
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.000446,
+      "phase_deg": 105.2561
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.000229,
+      "phase_deg": 132.0479
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 0.000464,
+      "phase_deg": 325.9843
+    }
+  ],
+  "quality": {
+    "rmse_m": 0.0444,
+    "hw_time_err_p95_min": null,
+    "grade": "B",
+    "validated_against": "IOC meli",
+    "grade_reason": "no alcanza A: la observación no tiene pleamares identificables (el residuo meteorológico genera más extremos que la marea), así que no se puede medir su hora; y RMSE normalizado 0,097 > 0,05",
+    "estimated": false,
+    "estimated_reason": null,
+    "metrics": {
+      "window_start": "2026-07-30T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 43158,
+      "predicted_range_m": 0.4589,
+      "rmse_m": 0.0444,
+      "nrmse": 0.09667,
+      "r2": 0.8438,
+      "hw_time_err_p95_min": null,
+      "hw_height_err_p95_m": null,
+      "matched_extremes": 0,
+      "predicted_extremes": 116,
+      "predicted_extremes_in_window": 115,
+      "observed_extremes": 427,
+      "extremes_usable": false,
+      "cross_rmse_m": null,
+      "cross_source": null,
+      "cross_rmse_worst_m": null,
+      "cross_source_worst": null,
+      "truncation_rms_m": 0.00254,
+      "dropped_amplitude_m": 0.00875,
+      "dropped_amplitude_fraction": 0.019434,
+      "dropped_constituents": [
+        "MTM",
+        "T3",
+        "R3",
+        "N4",
+        "MSQM",
+        "3L2",
+        "SGM",
+        "3N2",
+        "2MO5",
+        "2MK5",
+        "S3"
+      ],
+      "observation_source": "IOC meli",
+      "observation_code": "meli",
+      "observation_distance_km": 0.6,
+      "observation_lat": 35.29061,
+      "observation_lon": -2.92853
+    }
+  }
+}

@@ -55,6 +55,8 @@ function readQuality(reader: JsonReader, document: Record<string, unknown>): Sta
     hw_time_err_p95_min: reader.nullableNumber(quality, "hw_time_err_p95_min", path),
     grade_reason: reader.nullableString(quality, "grade_reason", path),
     validated_against: reader.nullableString(quality, "validated_against", path),
+    estimated: reader.flag(quality, "estimated", path),
+    estimated_reason: reader.nullableString(quality, "estimated_reason", path),
   };
 }
 

@@ -105,21 +105,6 @@
     ],
     "dropped_constituents": [
       {
-        "name": "EP2",
-        "amplitude_m": 0.007363,
-        "phase_deg": 322.3778
-      },
-      {
-        "name": "MB2",
-        "amplitude_m": 0.006494,
-        "phase_deg": 107.123
-      },
-      {
-        "name": "MA2",
-        "amplitude_m": 0.004196,
-        "phase_deg": 124.8398
-      },
-      {
         "name": "SGM",
         "amplitude_m": 0.003074,
         "phase_deg": 30.8233
@@ -128,16 +113,6 @@
         "name": "3L2",
         "amplitude_m": 0.002754,
         "phase_deg": 150.9696
-      },
-      {
-        "name": "MKS2",
-        "amplitude_m": 0.001788,
-        "phase_deg": 348.7396
-      },
-      {
-        "name": "2MS6",
-        "amplitude_m": 0.00175,
-        "phase_deg": 12.3301
       },
       {
         "name": "MTM",
@@ -185,7 +160,7 @@
         "phase_deg": 226.2508
       }
     ],
-    "derived_at": "2026-08-28T02:27:59Z",
+    "derived_at": "2026-08-29T09:58:50Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -315,6 +290,11 @@
       "phase_deg": 52.989
     },
     {
+      "name": "EP2",
+      "amplitude_m": 0.007363,
+      "phase_deg": 322.3778
+    },
+    {
       "name": "M3",
       "amplitude_m": 0.004292,
       "phase_deg": 160.5964
@@ -345,6 +325,11 @@
       "phase_deg": 187.9378
     },
     {
+      "name": "MKS2",
+      "amplitude_m": 0.001788,
+      "phase_deg": 348.7396
+    },
+    {
       "name": "M6",
       "amplitude_m": 0.001359,
       "phase_deg": 305.283
@@ -365,6 +350,16 @@
       "phase_deg": 145.898
     },
     {
+      "name": "MA2",
+      "amplitude_m": 0.004196,
+      "phase_deg": 124.8398
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.006494,
+      "phase_deg": 107.123
+    },
+    {
       "name": "RHO",
       "amplitude_m": 0.002875,
       "phase_deg": 248.7899
@@ -373,44 +368,46 @@
       "name": "2SM2",
       "amplitude_m": 0.001591,
       "phase_deg": 214.4034
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 0.00175,
+      "phase_deg": 12.3301
     }
   ],
   "quality": {
-    "rmse_m": 0.0468,
-    "hw_time_err_p95_min": 13.24,
+    "rmse_m": 0.0471,
+    "hw_time_err_p95_min": 11.34,
     "grade": "A",
     "validated_against": "IOC lasp",
     "grade_reason": "cumple todos los umbrales de grade A",
+    "estimated": false,
+    "estimated_reason": null,
     "metrics": {
-      "window_start": "2026-07-29T00:00:00Z",
+      "window_start": "2026-07-30T00:00:00Z",
       "window_days": 30.0,
-      "samples": 43178,
-      "predicted_range_m": 2.5296,
-      "rmse_m": 0.0468,
-      "nrmse": 0.01849,
-      "r2": 0.99328,
-      "hw_time_err_p95_min": 13.24,
-      "hw_height_err_p95_m": 0.0689,
-      "matched_extremes": 115,
+      "samples": 43177,
+      "predicted_range_m": 2.5434,
+      "rmse_m": 0.0471,
+      "nrmse": 0.01853,
+      "r2": 0.99331,
+      "hw_time_err_p95_min": 11.34,
+      "hw_height_err_p95_m": 0.0696,
+      "matched_extremes": 114,
       "predicted_extremes": 116,
-      "predicted_extremes_in_window": 115,
+      "predicted_extremes_in_window": 114,
       "observed_extremes": 121,
       "extremes_usable": true,
-      "cross_rmse_m": 0.0036,
+      "cross_rmse_m": 0.003,
       "cross_source": "las_palmas-217-esp-uhslc_fd",
-      "cross_rmse_worst_m": 0.2822,
+      "cross_rmse_worst_m": 0.2854,
       "cross_source_worst": "las_palmas-217a-esp-uhslc_rq",
-      "truncation_rms_m": 0.00839,
-      "dropped_amplitude_m": 0.03388,
-      "dropped_amplitude_fraction": 0.020246,
+      "truncation_rms_m": 0.00288,
+      "dropped_amplitude_m": 0.01229,
+      "dropped_amplitude_fraction": 0.007342,
       "dropped_constituents": [
-        "EP2",
-        "MB2",
-        "MA2",
         "SGM",
         "3L2",
-        "MKS2",
-        "2MS6",
         "MTM",
         "R3",
         "T3",
@@ -421,7 +418,11 @@
         "2MK5",
         "2MO5"
       ],
-      "observation_source": "IOC lasp"
+      "observation_source": "IOC lasp",
+      "observation_code": "lasp",
+      "observation_distance_km": 0.198,
+      "observation_lat": 28.14056,
+      "observation_lon": -15.41181
     }
   }
 }

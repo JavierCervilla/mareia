@@ -16,7 +16,8 @@
  *    Medido contra los valores publicados de 2026 (ver `__tests__/fixtures/`), la predicción
  *    completa se desvía hasta 5 unidades y la reducción semidiurna se queda en 2. La escala
  *    caracteriza la parte semidiurna de la marea astronómica, así que aquí se filtra la estación a
- *    los constituyentes de especie 2 antes de predecir.
+ *    los constituyentes de especie 2 antes de predecir — **y se le quitan los radiacionales**, que
+ *    son especie 2 pero no son marea astronómica (ver `RADIATIONAL_CONSTITUENTS`).
  * 2. **El semirrango se mide contra las dos bajamares adyacentes** (la de antes y la de después de
  *    la pleamar), no contra el nivel medio del datum: así el resultado no depende de que
  *    `msl_offset_m` sea exactamente el nivel medio de la estación.
@@ -51,6 +52,23 @@ export const MAX_TIDAL_COEFFICIENT = 120;
 /** Especie de Doodson de los constituyentes semidiurnos: dos ciclos por día lunar. */
 const SEMIDIURNAL_SPECIES = 2;
 
+/**
+ * Constituyentes de especie 2 que **no son marea astronómica** y por tanto no entran en la escala.
+ *
+ * `MA2` y `MB2` son la modulación anual de M2 (M2 ∓ h) y su origen es **radiacional**: los mueve el
+ * calentamiento solar del océano y de la atmósfera, no la atracción gravitatoria. En este mismo
+ * repositorio ya se les trata como tales —`tides/constituents.ts` los define sin corrección nodal
+ * lunar precisamente porque su origen es solar—, y el coeficiente del SHOM describe la marea
+ * astronómica de Brest, no su estacionalidad meteorológica.
+ *
+ * La exclusión aparece en T-13, cuando el dataset se regeneró con los 42 constituyentes del motor:
+ * hasta entonces el fichero de Brest venía truncado a 37 y estos dos ni llegaban aquí. Sin esta
+ * línea, meterlos en el cálculo desviaba el golden hasta 3 unidades sobre los valores publicados.
+ * La medida completa —incluida la razón por la que la lista se queda en estos dos y no crece
+ * hasta que el golden quede perfecto— está en `__tests__/fixtures/README.md`.
+ */
+const RADIATIONAL_CONSTITUENTS: ReadonlySet<string> = new Set(["MA2", "MB2"]);
+
 const HOUR_MS = 3_600_000;
 /**
  * Margen con el que se amplía la búsqueda de extremos para que toda pleamar del rango tenga sus
@@ -61,7 +79,7 @@ const ADJACENT_LOW_MARGIN_MS = 13 * HOUR_MS;
 const NOON_HOUR = 12;
 
 /**
- * La misma estación reducida a su onda semidiurna.
+ * La misma estación reducida a su onda semidiurna **astronómica**.
  *
  * @throws {UnsupportedConstituentError} si algún constituyente no está en la tabla del motor: sin
  * esta comprobación, filtrar por especie se tragaría en silencio un nombre desconocido, que es
@@ -76,7 +94,9 @@ export function semidiurnalTide(station: TideStation): TideStation {
     throw new UnsupportedConstituentError(unsupported);
   }
   const constituents = station.constituents.filter(
-    (constituent) => findConstituent(constituent.name)?.doodson[0] === SEMIDIURNAL_SPECIES,
+    (constituent) =>
+      findConstituent(constituent.name)?.doodson[0] === SEMIDIURNAL_SPECIES &&
+      !RADIATIONAL_CONSTITUENTS.has(constituent.name),
   );
   if (constituents.length === 0) {
     throw new NoSemidiurnalTideError(station.id);

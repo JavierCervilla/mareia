@@ -1,0 +1,357 @@
+{
+  "schema": "station/v1",
+  "id": "es-pm-es-castell",
+  "name": "Es Castell",
+  "lat": 39.8784,
+  "lon": 4.2932,
+  "timezone": "Europe/Madrid",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 0.208
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "mahontg-mah-esp-cmems",
+      "station_name": "Mahon",
+      "lat": 39.893002,
+      "lon": 4.27056,
+      "distance_km": 2.523,
+      "analysis_epoch": {
+        "start": "2009-10-29",
+        "end": "2025-06-30"
+      },
+      "license": "cc-by-nc-4.0"
+    },
+    "fallback": [],
+    "dropped_constituents": [
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.003047,
+        "phase_deg": 14.2713
+      },
+      {
+        "name": "MTM",
+        "amplitude_m": 0.001904,
+        "phase_deg": 196.4437
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.000693,
+        "phase_deg": 181.0371
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.000643,
+        "phase_deg": 4.2786
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.000374,
+        "phase_deg": 17.1483
+      },
+      {
+        "name": "SGM",
+        "amplitude_m": 0.000326,
+        "phase_deg": 167.1506
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.000292,
+        "phase_deg": 256.6972
+      },
+      {
+        "name": "3N2",
+        "amplitude_m": 0.000202,
+        "phase_deg": 201.2266
+      },
+      {
+        "name": "3L2",
+        "amplitude_m": 0.000153,
+        "phase_deg": 223.7004
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 6.9e-05,
+        "phase_deg": 298.8703
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 3.5e-05,
+        "phase_deg": 23.8665
+      }
+    ],
+    "derived_at": "2026-08-29T09:58:50Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-nc-4.0",
+        "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+        "role": "constantes armónicas",
+        "notes": "Upstream GESLA data provider restricts commercial use. See https://gesla787883612.wordpress.com/license/"
+      },
+      {
+        "name": "openwatersio/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      },
+      {
+        "name": "GeoNames",
+        "url": "https://www.geonames.org/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "catálogo de puertos: nombre del municipio y coordenadas de la dársena · huella sha256 del volcado e2aa4fa9e6801568…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 0.050774,
+      "phase_deg": 223.4737
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.010585,
+      "phase_deg": 210.2331
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.020005,
+      "phase_deg": 242.3735
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.005596,
+      "phase_deg": 239.5247
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.001517,
+      "phase_deg": 194.2705
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.002005,
+      "phase_deg": 201.9678
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.036584,
+      "phase_deg": 174.0613
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.012671,
+      "phase_deg": 170.0349
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.020644,
+      "phase_deg": 106.4677
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.002621,
+      "phase_deg": 45.9773
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.001383,
+      "phase_deg": 56.8621
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.004273,
+      "phase_deg": 348.0925
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.000655,
+      "phase_deg": 337.3254
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.002727,
+      "phase_deg": 214.5926
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.08879,
+      "phase_deg": 179.1449
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.02334,
+      "phase_deg": 67.676
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.001336,
+      "phase_deg": 250.5456
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.001308,
+      "phase_deg": 191.9659
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.001386,
+      "phase_deg": 233.2184
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.000232,
+      "phase_deg": 275.2778
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.00044,
+      "phase_deg": 304.285
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.001426,
+      "phase_deg": 230.4012
+    },
+    {
+      "name": "EP2",
+      "amplitude_m": 0.000301,
+      "phase_deg": 169.661
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.001008,
+      "phase_deg": 166.7089
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.00165,
+      "phase_deg": 184.9418
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.001978,
+      "phase_deg": 210.544
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.000441,
+      "phase_deg": 224.6785
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.001627,
+      "phase_deg": 306.4571
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.002724,
+      "phase_deg": 50.3394
+    },
+    {
+      "name": "MKS2",
+      "amplitude_m": 6.4e-05,
+      "phase_deg": 92.49
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 7.3e-05,
+      "phase_deg": 132.2651
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 4.3e-05,
+      "phase_deg": 135.5954
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 0.000482,
+      "phase_deg": 316.5058
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.000326,
+      "phase_deg": 181.2802
+    },
+    {
+      "name": "MA2",
+      "amplitude_m": 0.000234,
+      "phase_deg": 325.8009
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.000393,
+      "phase_deg": 302.1556
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.000657,
+      "phase_deg": 52.0284
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.000274,
+      "phase_deg": 113.5591
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 8.4e-05,
+      "phase_deg": 200.9705
+    }
+  ],
+  "quality": {
+    "rmse_m": 0.0359,
+    "hw_time_err_p95_min": null,
+    "grade": "B",
+    "validated_against": "IOC maho",
+    "grade_reason": "no alcanza A: la observación no tiene pleamares identificables (el residuo meteorológico genera más extremos que la marea), así que no se puede medir su hora; y RMSE normalizado 0,139 > 0,05",
+    "estimated": false,
+    "estimated_reason": null,
+    "metrics": {
+      "window_start": "2026-07-30T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 42441,
+      "predicted_range_m": 0.2582,
+      "rmse_m": 0.0359,
+      "nrmse": 0.13893,
+      "r2": 0.70072,
+      "hw_time_err_p95_min": null,
+      "hw_height_err_p95_m": null,
+      "matched_extremes": 0,
+      "predicted_extremes": 112,
+      "predicted_extremes_in_window": 110,
+      "observed_extremes": 382,
+      "extremes_usable": false,
+      "cross_rmse_m": null,
+      "cross_source": null,
+      "cross_rmse_worst_m": null,
+      "cross_source_worst": null,
+      "truncation_rms_m": 0.00359,
+      "dropped_amplitude_m": 0.00774,
+      "dropped_amplitude_fraction": 0.024929,
+      "dropped_constituents": [
+        "MSQM",
+        "MTM",
+        "T3",
+        "R3",
+        "S3",
+        "SGM",
+        "N4",
+        "3N2",
+        "3L2",
+        "2MK5",
+        "2MO5"
+      ],
+      "observation_source": "IOC maho",
+      "observation_code": "maho",
+      "observation_distance_km": 2.526,
+      "observation_lat": 39.89304,
+      "observation_lon": 4.27056
+    }
+  }
+}

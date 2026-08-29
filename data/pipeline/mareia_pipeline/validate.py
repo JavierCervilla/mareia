@@ -96,6 +96,17 @@ class Metrics:
     dropped_amplitude_fraction: float
     dropped_constituents: list[str]
     observation_source: str | None
+    #: Código del mareógrafo del IOC con el que se midió, y **a qué distancia de la dársena
+    #: estaba**. Sin este par, el RMSE publicado es un número sin procedencia: mirando el JSON no
+    #: se puede saber si se midió en este puerto o en otro a treinta kilómetros, y eso es
+    #: exactamente lo que T-13 vino a impedir. Con él, un test lo comprueba sin salir a la red.
+    observation_code: str | None
+    observation_distance_km: float | None
+    #: Coordenadas del mareógrafo con el que se midió, para que la distancia de arriba se pueda
+    #: **recomputar** desde el JSON en vez de creérsela. Sin ellas, la procedencia de la observación
+    #: era autodeclarada: bastaba escribir «0,9 km» al lado de un RMSE ajeno para que cuadrara.
+    observation_lat: float | None
+    observation_lon: float | None
 
     def as_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -176,7 +187,7 @@ def evaluate(
     best = agreements[0] if agreements else None
     worst = agreements[-1] if agreements else None
 
-    rmse = nrmse = r2 = None
+    rmse = r2 = None
     time_p95 = height_p95 = None
     matched = 0
     samples = 0
@@ -195,7 +206,7 @@ def evaluate(
         # Cadencia real del mareógrafo: la mediana de los intervalos, no el primero, porque las
         # series del IOC tienen huecos y un primer salto anómalo desajustaría todo lo que sigue.
         observed_step = float(np.median(np.diff(observed_hours)) * 60.0) or 1.0
-        half_width = max(1, int(round(SMOOTHING_HALF_WIDTH_MINUTES / observed_step)))
+        half_width = max(1, round(SMOOTHING_HALF_WIDTH_MINUTES / observed_step))
         smoothed = _smooth(observed_levels - observed_levels.mean(), half_width)
         observed_extremes = find_extremes(
             observed_hours, smoothed, observations.times[0], observed_step, prominence
@@ -242,4 +253,8 @@ def evaluate(
         dropped_amplitude_fraction=round(dropped_m / total_m, 6) if total_m else 0.0,
         dropped_constituents=dropped_names,
         observation_source=None if observations is None else f"IOC {observations.code}",
+        observation_code=None if observations is None else observations.code,
+        observation_distance_km=None if observations is None else observations.distance_km,
+        observation_lat=None if observations is None else observations.lat,
+        observation_lon=None if observations is None else observations.lon,
     )

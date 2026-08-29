@@ -7,7 +7,7 @@
  * rojo en vez de servir mareas del sitio equivocado.
  */
 
-import { readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -30,9 +30,35 @@ function stationFilesOnDisk(): readonly string[] {
     .sort();
 }
 
-test("el catálogo tiene los 12 puertos del piloto, con slugs únicos y en forma de URL", async () => {
+/**
+ * Los doce puertos que T-05 escribió a mano y T-13 no toca. El catálogo creció a toda la costa
+ * derivándolo del volcado de GeoNames, pero estos siguen siendo dato editorial: sus coordenadas de
+ * dársena, sus identificadores y sus URL están publicados y moverlos rompe enlaces de verdad.
+ */
+const PILOTO = [
+  "a-coruna",
+  "bilbao",
+  "cabo-de-palos",
+  "cadiz",
+  "huelva",
+  "la-manga-del-mar-menor",
+  "las-palmas-de-gran-canaria",
+  "malaga",
+  "palma-de-mallorca",
+  "santa-cruz-de-tenerife",
+  "santander",
+  "vigo",
+] as const;
+
+/** Cota inferior del catálogo publicado: T-13 lo llevó de 12 a ciento y pico. */
+const MINIMO_DE_PUERTOS = 120;
+
+test("el catálogo cubre la costa española, con slugs únicos y en forma de URL", async () => {
   const catalogue = await ports.list();
-  assert.equal(catalogue.length, 12);
+  assert.ok(
+    catalogue.length >= MINIMO_DE_PUERTOS,
+    `el catálogo se ha encogido a ${catalogue.length} puertos: si es a propósito, baja la cota`,
+  );
 
   const slugs = catalogue.map((port) => port.slug);
   assert.equal(new Set(slugs).size, slugs.length, "hay slugs repetidos");
@@ -40,6 +66,14 @@ test("el catálogo tiene los 12 puertos del piloto, con slugs únicos y en forma
     for (const slug of [port.slug, port.province.slug, port.region.slug]) {
       assert.match(slug, SLUG_PATTERN);
     }
+  }
+});
+
+test("los doce puertos del piloto siguen en el catálogo con su URL intacta", async () => {
+  const catalogue = await ports.list();
+  const bySlug = new Map(catalogue.map((port) => [port.slug, port]));
+  for (const slug of PILOTO) {
+    assert.ok(bySlug.get(slug) !== undefined, `el piloto '${slug}' ha desaparecido del catálogo`);
   }
 });
 
@@ -77,10 +111,117 @@ test("toda estación referenciada trae su calidad, y la de un grade C viaja con 
     assert.ok(attributions.length > 0, `${port.slug} sin atribuciones`);
   }
 
-  // Cabo de Palos es micromareal: no hay pleamares identificables en la observación, así que el
-  // error de hora se publica como `null` y el grade explica por qué no llega a B.
-  const microtidal = await stations.load("es-mu-cabo-de-palos.json");
-  assert.equal(microtidal.quality.grade, "C");
-  assert.equal(microtidal.quality.hw_time_err_p95_min, null);
-  assert.equal(typeof microtidal.quality.grade_reason, "string");
+  // Cabo de Palos es el ejemplo con nombre del invariante de más abajo, no el invariante: toma las
+  // constantes de Cartagena, a 24,8 km, y no tiene observación propia, así que no publica ni RMSE
+  // ni error de hora. Si algún día los tuviera —porque le pongan un mareógrafo— este caso se cae y
+  // el invariante sigue en pie, que es como debe ser.
+  const borrowed = await stations.load("es-mu-cabo-de-palos.json");
+  assert.equal(borrowed.quality.estimated, true);
+  assert.equal(borrowed.quality.rmse_m, null);
+  assert.equal(borrowed.quality.hw_time_err_p95_min, null);
+  assert.equal(typeof borrowed.quality.grade_reason, "string");
+});
+
+/**
+ * Radio, en km, dentro del cual una observación es «de este puerto». Es el mismo umbral con el que
+ * el pipeline concede el grade A por cercanía del mareógrafo: dos varas de medir serían ninguna.
+ */
+const RADIO_DE_LA_DARSENA_KM = 5;
+
+/**
+ * Distancia de círculo máximo, en km. Se implementa aquí en vez de importarla del pipeline —que la
+ * tiene— a propósito: el sentido de este fichero es comprobar el artefacto **desde fuera**, con su
+ * propia aritmética, para que un error en la del productor no se cancele con el del comprobador.
+ */
+function distanciaKm(latA: number, lonA: number, latB: number, lonB: number): number {
+  const RADIO_TIERRA_KM = 6371.0088;
+  const rad = (grados: number): number => (grados * Math.PI) / 180;
+  const dLat = rad(latB - latA);
+  const dLon = rad(lonB - lonA);
+  const a =
+    Math.sin(dLat / 2) ** 2 + Math.cos(rad(latA)) * Math.cos(rad(latB)) * Math.sin(dLon / 2) ** 2;
+  return 2 * RADIO_TIERRA_KM * Math.asin(Math.sqrt(a));
+}
+
+/** El `quality.metrics` crudo del JSON: el DTO no lo expone y aquí hace falta la procedencia. */
+function metricsDe(stationFile: string): Record<string, unknown> {
+  const documento = JSON.parse(readFileSync(`${STATIONS_DIR}/${stationFile}`, "utf8")) as {
+    quality: { metrics: Record<string, unknown> };
+  };
+  return documento.quality.metrics;
+}
+
+/**
+ * El invariante que T-13 añade y que vale más que cualquier recuento: **ningún puerto publica un
+ * número que no se haya medido en él**.
+ *
+ * No basta con que los campos sean coherentes entre sí —lo eran cuando el RMSE de Cartagena se
+ * publicaba como el de Cabo de Palos—: hay que comprobar la **procedencia** del número, y para eso
+ * el dataset publica con qué mareógrafo del IOC se midió y **a qué distancia de la dársena estaba**.
+ * Un puerto puede estar marcado como estimado y aun así tener error medido (mareógrafo del IOC
+ * propio, constantes prestadas de lejos: es el caso de Garachico), pero lo que no puede es publicar
+ * un error medido a treinta kilómetros como si fuera suyo.
+ */
+test("ningún puerto publica una precisión que no tiene", async () => {
+  const incoherentes: string[] = [];
+  for (const port of await ports.list()) {
+    const { quality } = await stations.load(port.stationFile);
+    const metrics = metricsDe(port.stationFile);
+    const distancia = metrics["observation_distance_km"];
+    if (quality.rmse_m === null) {
+      if (metrics["observation_source"] !== null) {
+        incoherentes.push(`${port.slug}: hay observación y no publica su RMSE`);
+      }
+      if (quality.hw_time_err_p95_min !== null) {
+        incoherentes.push(`${port.slug}: error de hora sin observación con la que medirlo`);
+      }
+    } else {
+      const lat = metrics["observation_lat"];
+      const lon = metrics["observation_lon"];
+      if (typeof distancia !== "number") {
+        incoherentes.push(`${port.slug}: publica RMSE sin decir a qué distancia se midió`);
+      } else if (distancia > RADIO_DE_LA_DARSENA_KM) {
+        incoherentes.push(
+          `${port.slug}: publica como suyo un error medido a ${distancia} km de su dársena`,
+        );
+      } else if (typeof lat !== "number" || typeof lon !== "number") {
+        incoherentes.push(`${port.slug}: declara una distancia de medida sin decir desde dónde`);
+      } else {
+        // La distancia no se cree, se recalcula: si sólo se comprobara el número declarado, para
+        // colar un RMSE ajeno bastaría con escribir al lado una distancia pequeña.
+        const recomputada = distanciaKm(port.lat, port.lon, lat, lon);
+        if (Math.abs(recomputada - distancia) > 0.01) {
+          incoherentes.push(
+            `${port.slug}: dice haber medido a ${distancia} km y sus coordenadas dan ` +
+              `${recomputada.toFixed(3)} km`,
+          );
+        }
+      }
+      if (metrics["observation_source"] === null) {
+        incoherentes.push(`${port.slug}: publica RMSE sin decir contra qué se midió`);
+      }
+    }
+    if (!quality.estimated && quality.rmse_m === null) {
+      incoherentes.push(`${port.slug}: no estimado y sin RMSE medido`);
+    }
+    if (quality.estimated !== (quality.estimated_reason !== null)) {
+      incoherentes.push(`${port.slug}: el flag de estimado y su motivo no dicen lo mismo`);
+    }
+    if (quality.grade !== "A" && quality.grade_reason === null) {
+      incoherentes.push(`${port.slug}: no llega a A y no dice por qué`);
+    }
+  }
+  assert.deepEqual(incoherentes, []);
+});
+
+/** Un puerto que hereda las constantes de lejos no puede heredar también el grade de quien se las presta. */
+test("ningún puerto estimado alcanza el grade A", async () => {
+  const impostores: string[] = [];
+  for (const port of await ports.list()) {
+    const { quality } = await stations.load(port.stationFile);
+    if (quality.estimated && quality.grade === "A") {
+      impostores.push(port.slug);
+    }
+  }
+  assert.deepEqual(impostores, []);
 });

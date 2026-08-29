@@ -1,0 +1,400 @@
+ok 1 - A-17 premisa · la congelación inyectada se dibuja plana en la curva publicada
+  ---
+  duration_ms: 12762.999935
+  type: 'test'
+  ...
+not ok 2 - A-17 · ninguna congelación real de la curva se le escapa al detector
+  ---
+  duration_ms: 12281.088554
+  type: 'test'
+  location: '/home/user/mareia-t13/apps/web/src/adversario-t13.test.ts:292:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   'Alboraya: congelación de 190 min invisible tras una meseta natural de 200 min · suprime 62.06 mm reales',
+    +   'Silla: congelación de 190 min invisible tras una meseta natural de 200 min · suprime 62.06 mm reales',
+    +   'Sueca: congelación de 190 min invisible tras una meseta natural de 200 min · suprime 62.06 mm reales',
+    +   'Valencia: congelación de 190 min invisible tras una meseta natural de 200 min · suprime 62.06 mm reales',
+    +   'Calafell: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales',
+    +   'el Vendrell: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales',
+    +   "l'Ametlla de Mar: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales",
+    +   "l'Ampolla: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales",
+    +   'Roda de Berà: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales',
+    +   'Tarragona: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales',
+    +   'Torredembarra: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales',
+    +   "Vandellòs i l'Hospitalet de l'Infant: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales",
+    +   'Alicante: congelación de 50 min invisible tras una meseta natural de 60 min · suprime 20.34 mm reales',
+    +   'Altea: congelación de 50 min invisible tras una meseta natural de 60 min · suprime 20.34 mm reales',
+    +   'Benidorm: congelación de 50 min invisible tras una meseta natural de 60 min · suprime 20.34 mm reales',
+    +   'Guardamar del Segura: congelación de 50 min invisible tras una meseta natural de 60 min · suprime 20.34 mm reales',
+    +   'Santa Pola: congelación de 50 min invisible tras una meseta natural de 60 min · suprime 20.34 mm reales',
+    +   'Torrevieja: congelación de 50 min invisible tras una meseta natural de 60 min · suprime 20.34 mm reales',
+    +   'Calp: congelación de 60 min invisible tras una meseta natural de 70 min · suprime 19.85 mm reales',
+    +   'Dénia: congelación de 60 min invisible tras una meseta natural de 70 min · suprime 19.85 mm reales',
+    +   'Javea: congelación de 60 min invisible tras una meseta natural de 70 min · suprime 19.85 mm reales',
+    +   'Teulada: congelación de 60 min invisible tras una meseta natural de 70 min · suprime 19.85 mm reales',
+    +   'Gandia: congelación de 60 min invisible tras una meseta natural de 70 min · suprime 19.85 mm reales',
+    +   'Oliva: congelación de 60 min invisible tras una meseta natural de 70 min · suprime 19.85 mm reales',
+    +   'Melilla: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 18.82 mm reales',
+    +   'Orihuela: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 16.47 mm reales',
+    +   'Cabo de Palos: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 16.47 mm reales',
+    +   'Cartagena: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 16.47 mm reales',
+    +   'La Manga del Mar Menor: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 16.47 mm reales',
+    +   'Mazarrón: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 16.47 mm reales',
+    +   'Arenys de Mar: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales',
+    +   'Badalona: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales',
+    +   'Barcelona: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales',
+    +   'Castelldefels: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales',
+    +   'El Masnou: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales',
+    +   'Mataró: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales',
+    +   'Premià de Mar: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales',
+    +   'Sitges: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales',
+    +   'Vilanova i la Geltrú: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales',
+    +   'Felanitx: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.60 mm reales',
+    +   'Manacor: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.60 mm reales',
+    +   'Formentera: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 11.05 mm reales',
+    +   'Ibiza: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 11.01 mm reales',
+    +   'Sant Antoni de Portmany: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 11.01 mm reales',
+    +   'Santa Eulària des Riu: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 11.01 mm reales',
+    +   'Borriana: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 10.55 mm reales',
+    +   'Castellón de la Plana: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 10.55 mm reales',
+    +   'Oropesa del Mar: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 10.55 mm reales',
+    +   "Canet d'En Berenguer: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 10.55 mm reales",
+    +   'Sagunto: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 10.55 mm reales',
+    +   'Carboneras: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 10.47 mm reales',
+    +   'Cuevas del Almanzora: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 10.47 mm reales',
+    +   'Garrucha: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 10.47 mm reales',
+    +   'Pulpí: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 10.47 mm reales',
+    +   'Águilas: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 10.47 mm reales',
+    +   'Campos: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 9.85 mm reales',
+    +   'Llucmajor: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 9.85 mm reales',
+    +   'Palma de Mallorca: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 9.85 mm reales',
+    +   'Sóller: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 9.85 mm reales',
+    +   'Ciutadella de Menorca: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 8.65 mm reales',
+    +   'Es Castell: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 8.65 mm reales',
+    +   'es Mercadal: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 8.65 mm reales',
+    +   'Mahón: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 8.65 mm reales',
+    +   'Alcúdia: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 8.16 mm reales',
+    +   'Pollença: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 7.78 mm reales'
+    + ]
+    - []
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0: 'Alboraya: congelación de 190 min invisible tras una meseta natural de 200 min · suprime 62.06 mm reales'
+    1: 'Silla: congelación de 190 min invisible tras una meseta natural de 200 min · suprime 62.06 mm reales'
+    2: 'Sueca: congelación de 190 min invisible tras una meseta natural de 200 min · suprime 62.06 mm reales'
+    3: 'Valencia: congelación de 190 min invisible tras una meseta natural de 200 min · suprime 62.06 mm reales'
+    4: 'Calafell: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales'
+    5: 'el Vendrell: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales'
+    6: "l'Ametlla de Mar: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales"
+    7: "l'Ampolla: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales"
+    8: 'Roda de Berà: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales'
+    9: 'Tarragona: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales'
+    10: 'Torredembarra: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales'
+    11: "Vandellòs i l'Hospitalet de l'Infant: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 20.47 mm reales"
+    12: 'Alicante: congelación de 50 min invisible tras una meseta natural de 60 min · suprime 20.34 mm reales'
+    13: 'Altea: congelación de 50 min invisible tras una meseta natural de 60 min · suprime 20.34 mm reales'
+    14: 'Benidorm: congelación de 50 min invisible tras una meseta natural de 60 min · suprime 20.34 mm reales'
+    15: 'Guardamar del Segura: congelación de 50 min invisible tras una meseta natural de 60 min · suprime 20.34 mm reales'
+    16: 'Santa Pola: congelación de 50 min invisible tras una meseta natural de 60 min · suprime 20.34 mm reales'
+    17: 'Torrevieja: congelación de 50 min invisible tras una meseta natural de 60 min · suprime 20.34 mm reales'
+    18: 'Calp: congelación de 60 min invisible tras una meseta natural de 70 min · suprime 19.85 mm reales'
+    19: 'Dénia: congelación de 60 min invisible tras una meseta natural de 70 min · suprime 19.85 mm reales'
+    20: 'Javea: congelación de 60 min invisible tras una meseta natural de 70 min · suprime 19.85 mm reales'
+    21: 'Teulada: congelación de 60 min invisible tras una meseta natural de 70 min · suprime 19.85 mm reales'
+    22: 'Gandia: congelación de 60 min invisible tras una meseta natural de 70 min · suprime 19.85 mm reales'
+    23: 'Oliva: congelación de 60 min invisible tras una meseta natural de 70 min · suprime 19.85 mm reales'
+    24: 'Melilla: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 18.82 mm reales'
+    25: 'Orihuela: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 16.47 mm reales'
+    26: 'Cabo de Palos: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 16.47 mm reales'
+    27: 'Cartagena: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 16.47 mm reales'
+    28: 'La Manga del Mar Menor: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 16.47 mm reales'
+    29: 'Mazarrón: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 16.47 mm reales'
+    30: 'Arenys de Mar: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales'
+    31: 'Badalona: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales'
+    32: 'Barcelona: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales'
+    33: 'Castelldefels: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales'
+    34: 'El Masnou: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales'
+    35: 'Mataró: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales'
+    36: 'Premià de Mar: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales'
+    37: 'Sitges: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales'
+    38: 'Vilanova i la Geltrú: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.65 mm reales'
+    39: 'Felanitx: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.60 mm reales'
+    40: 'Manacor: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 15.60 mm reales'
+    41: 'Formentera: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 11.05 mm reales'
+    42: 'Ibiza: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 11.01 mm reales'
+    43: 'Sant Antoni de Portmany: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 11.01 mm reales'
+    44: 'Santa Eulària des Riu: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 11.01 mm reales'
+    45: 'Borriana: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 10.55 mm reales'
+    46: 'Castellón de la Plana: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 10.55 mm reales'
+    47: 'Oropesa del Mar: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 10.55 mm reales'
+    48: "Canet d'En Berenguer: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 10.55 mm reales"
+    49: 'Sagunto: congelación de 30 min invisible tras una meseta natural de 40 min · suprime 10.55 mm reales'
+    50: 'Carboneras: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 10.47 mm reales'
+    51: 'Cuevas del Almanzora: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 10.47 mm reales'
+    52: 'Garrucha: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 10.47 mm reales'
+    53: 'Pulpí: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 10.47 mm reales'
+    54: 'Águilas: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 10.47 mm reales'
+    55: 'Campos: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 9.85 mm reales'
+    56: 'Llucmajor: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 9.85 mm reales'
+    57: 'Palma de Mallorca: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 9.85 mm reales'
+    58: 'Sóller: congelación de 20 min invisible tras una meseta natural de 30 min · suprime 9.85 mm reales'
+    59: 'Ciutadella de Menorca: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 8.65 mm reales'
+    60: 'Es Castell: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 8.65 mm reales'
+    61: 'es Mercadal: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 8.65 mm reales'
+    62: 'Mahón: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 8.65 mm reales'
+    63: 'Alcúdia: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 8.16 mm reales'
+    64: 'Pollença: congelación de 10 min invisible tras una meseta natural de 20 min · suprime 7.78 mm reales'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/user/mareia-t13/apps/web/src/adversario-t13.test.ts:295:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+not ok 3 - A-18 · la prueba de sensibilidad del gate A-1 no depende del día en que corra CI
+  ---
+  duration_ms: 28758.837913
+  type: 'test'
+  location: '/home/user/mareia-t13/apps/web/src/adversario-t13.test.ts:331:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   '2026-01-14: la meseta inyectada dura 180 min',
+    +   '2026-01-29: la meseta inyectada dura 160 min',
+    +   '2026-01-30: la meseta inyectada dura 230 min',
+    +   '2026-02-13: la meseta inyectada dura 220 min',
+    +   '2026-02-27: la meseta inyectada dura 150 min',
+    +   '2026-02-28: la meseta inyectada dura 230 min',
+    +   '2026-03-14: la meseta inyectada dura 180 min',
+    +   '2026-03-28: la meseta inyectada dura 150 min',
+    +   '2026-03-29: la meseta inyectada dura 220 min',
+    +   '2026-04-12: la meseta inyectada dura 190 min',
+    +   '2026-04-26: la meseta inyectada dura 190 min',
+    +   '2026-05-12: la meseta inyectada dura 190 min',
+    +   '2026-05-25: la meseta inyectada dura 150 min',
+    +   '2026-05-26: la meseta inyectada dura 210 min',
+    +   '2026-06-11: la meseta inyectada dura 200 min',
+    +   '2026-06-24: la meseta inyectada dura 160 min',
+    +   '2026-06-25: la meseta inyectada dura 220 min',
+    +   '2026-07-10: la meseta inyectada dura 160 min',
+    +   '2026-07-11: la meseta inyectada dura 230 min',
+    +   '2026-07-24: la meseta inyectada dura 180 min',
+    +   '2026-08-09: la meseta inyectada dura 230 min',
+    +   '2026-09-07: la meseta inyectada dura 230 min',
+    +   '2026-09-21: la meseta inyectada dura 210 min',
+    +   '2026-10-06: la meseta inyectada dura 230 min',
+    +   '2026-10-20: la meseta inyectada dura 150 min',
+    +   '2026-10-21: la meseta inyectada dura 220 min',
+    +   '2026-11-05: la meseta inyectada dura 200 min',
+    +   '2026-11-20: la meseta inyectada dura 150 min',
+    +   '2026-11-21: la meseta inyectada dura 200 min',
+    +   '2026-12-04: la meseta inyectada dura 160 min',
+    +   '2026-12-05: la meseta inyectada dura 210 min',
+    +   '2026-12-20: la meseta inyectada dura 150 min',
+    +   '2026-12-21: la meseta inyectada dura 200 min'
+    + ]
+    - []
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0: '2026-01-14: la meseta inyectada dura 180 min'
+    1: '2026-01-29: la meseta inyectada dura 160 min'
+    2: '2026-01-30: la meseta inyectada dura 230 min'
+    3: '2026-02-13: la meseta inyectada dura 220 min'
+    4: '2026-02-27: la meseta inyectada dura 150 min'
+    5: '2026-02-28: la meseta inyectada dura 230 min'
+    6: '2026-03-14: la meseta inyectada dura 180 min'
+    7: '2026-03-28: la meseta inyectada dura 150 min'
+    8: '2026-03-29: la meseta inyectada dura 220 min'
+    9: '2026-04-12: la meseta inyectada dura 190 min'
+    10: '2026-04-26: la meseta inyectada dura 190 min'
+    11: '2026-05-12: la meseta inyectada dura 190 min'
+    12: '2026-05-25: la meseta inyectada dura 150 min'
+    13: '2026-05-26: la meseta inyectada dura 210 min'
+    14: '2026-06-11: la meseta inyectada dura 200 min'
+    15: '2026-06-24: la meseta inyectada dura 160 min'
+    16: '2026-06-25: la meseta inyectada dura 220 min'
+    17: '2026-07-10: la meseta inyectada dura 160 min'
+    18: '2026-07-11: la meseta inyectada dura 230 min'
+    19: '2026-07-24: la meseta inyectada dura 180 min'
+    20: '2026-08-09: la meseta inyectada dura 230 min'
+    21: '2026-09-07: la meseta inyectada dura 230 min'
+    22: '2026-09-21: la meseta inyectada dura 210 min'
+    23: '2026-10-06: la meseta inyectada dura 230 min'
+    24: '2026-10-20: la meseta inyectada dura 150 min'
+    25: '2026-10-21: la meseta inyectada dura 220 min'
+    26: '2026-11-05: la meseta inyectada dura 200 min'
+    27: '2026-11-20: la meseta inyectada dura 150 min'
+    28: '2026-11-21: la meseta inyectada dura 200 min'
+    29: '2026-12-04: la meseta inyectada dura 160 min'
+    30: '2026-12-05: la meseta inyectada dura 210 min'
+    31: '2026-12-20: la meseta inyectada dura 150 min'
+    32: '2026-12-21: la meseta inyectada dura 200 min'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///home/user/mareia-t13/apps/web/src/adversario-t13.test.ts:355:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+not ok 4 - A-19 · ninguna página publica una cifra con el decimal en formato inglés
+  ---
+  duration_ms: 40.248541
+  type: 'test'
+  location: '/home/user/mareia-t13/apps/web/src/adversario-t13.test.ts:381:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   'mareas/andalucia/almeria/adra/index.html: «44.9»',
+    +   'mareas/andalucia/almeria/adra/index.html: «44.9»',
+    +   'mareas/andalucia/almeria/adra/index.html: «44.9»',
+    +   'mareas/andalucia/almeria/carboneras/index.html: «0.15»',
+    +   'mareas/andalucia/almeria/cuevas-del-almanzora/index.html: «33.0»',
+    +   'mareas/andalucia/almeria/cuevas-del-almanzora/index.html: «33.0»',
+    +   'mareas/andalucia/almeria/cuevas-del-almanzora/index.html: «33.0»',
+    +   'mareas/andalucia/almeria/garrucha/index.html: «24.6»',
+    +   'mareas/andalucia/almeria/garrucha/index.html: «24.6»',
+    +   'mareas/andalucia/almeria/nijar/index.html: «34.3»',
+    +   'mareas/andalucia/almeria/nijar/index.html: «34.3»',
+    +   'mareas/andalucia/almeria/nijar/index.html: «34.3»',
+    +   'mareas/andalucia/almeria/pulpi/index.html: «48.3»',
+    +   'mareas/andalucia/almeria/pulpi/index.html: «48.3»',
+    +   'mareas/andalucia/almeria/pulpi/index.html: «48.3»',
+    +   'mareas/andalucia/almeria/roquetas-de-mar/index.html: «14.0»',
+    +   'mareas/andalucia/almeria/roquetas-de-mar/index.html: «14.0»',
+    +   'mareas/andalucia/cadiz/barbate/index.html: «35.4»',
+    +   'mareas/andalucia/cadiz/barbate/index.html: «35.4»',
+    +   'mareas/andalucia/cadiz/barbate/index.html: «35.4»',
+    +   'mareas/andalucia/cadiz/chiclana-de-la-frontera/index.html: «17.3»',
+    +   'mareas/andalucia/cadiz/chiclana-de-la-frontera/index.html: «17.3»',
+    +   'mareas/andalucia/cadiz/chipiona/index.html: «10.0»',
+    +   'mareas/andalucia/cadiz/chipiona/index.html: «10.0»',
+    +   'mareas/andalucia/cadiz/conil-de-la-frontera/index.html: «30.2»',
+    +   'mareas/andalucia/cadiz/conil-de-la-frontera/index.html: «30.2»',
+    +   'mareas/andalucia/cadiz/conil-de-la-frontera/index.html: «30.2»',
+    +   'mareas/andalucia/cadiz/la-linea-de-la-concepcion/index.html: «0.05»',
+    +   'mareas/andalucia/cadiz/rota/index.html: «10.6»',
+    +   'mareas/andalucia/cadiz/rota/index.html: «10.6»',
+    +   'mareas/andalucia/cadiz/san-roque/index.html: «18.8»',
+    +   'mareas/andalucia/cadiz/san-roque/index.html: «18.8»',
+    +   'mareas/andalucia/granada/almunecar/index.html: «18.0»',
+    +   'mareas/andalucia/granada/almunecar/index.html: «18.0»',
+    +   'mareas/andalucia/huelva/ayamonte/index.html: «51.5»',
+    +   'mareas/andalucia/huelva/ayamonte/index.html: «51.5»',
+    +   'mareas/andalucia/huelva/ayamonte/index.html: «51.5»',
+    +   'mareas/andalucia/huelva/cartaya/index.html: «27.8»',
+    +   'mareas/andalucia/huelva/cartaya/index.html: «27.8»',
+    +   'mareas/andalucia/huelva/isla-cristina/index.html: «44.4»',
+    +   'mareas/andalucia/huelva/isla-cristina/index.html: «44.4»',
+    +   'mareas/andalucia/huelva/isla-cristina/index.html: «44.4»',
+    +   'mareas/andalucia/huelva/palos-de-la-frontera/index.html: «7.5»',
+    +   'mareas/andalucia/huelva/palos-de-la-frontera/index.html: «7.5»',
+    +   'mareas/andalucia/huelva/punta-umbria/index.html: «12.1»',
+    +   'mareas/andalucia/huelva/punta-umbria/index.html: «12.1»',
+    +   'mareas/andalucia/malaga/estepona/index.html: «35.8»',
+    +   'mareas/andalucia/malaga/estepona/index.html: «35.8»',
+    +   'mareas/andalucia/malaga/estepona/index.html: «35.8»',
+    +   'mareas/andalucia/malaga/fuengirola/index.html: «26.1»',
+    +   'mareas/andalucia/malaga/fuengirola/index.html: «26.1»',
+    +   'mareas/andalucia/malaga/malaga/index.html: «0.05»',
+    +   'mareas/andalucia/malaga/manilva/index.html: «27.0»',
+    +   'mareas/andalucia/malaga/manilva/index.html: «27.0»',
+    +   'mareas/andalucia/malaga/marbella/index.html: «48.1»',
+    +   'mareas/andalucia/malaga/marbella/index.html: «48.1»',
+    +   'mareas/andalucia/malaga/marbella/index.html: «48.1»',
+    +   'mareas/andalucia/sevilla/seville/index.html: «5.9»',
+    +   'mareas/andalucia/sevilla/seville/index.html: «5.9»',
+    +   'mareas/asturias/asturias/castropol/index.html: «40.0»',
+    +   'mareas/asturias/asturias/castropol/index.html: «40.0»',
+    +   'mareas/asturias/asturias/castropol/index.html: «40.0»',
+    +   'mareas/canarias/las-palmas/agaete/index.html: «29.2»',
+    +   'mareas/canarias/las-palmas/agaete/index.html: «29.2»',
+    +   'mareas/canarias/las-palmas/antigua/index.html: «12.0»',
+    +   'mareas/canarias/las-palmas/antigua/index.html: «12.0»',
+    +   'mareas/canarias/las-palmas/haria/index.html: «28.9»',
+    +   'mareas/canarias/las-palmas/haria/index.html: «28.9»',
+    +   'mareas/canarias/las-palmas/la-aldea-de-san-nicolas/index.html: «41.9»',
+    +   'mareas/canarias/las-palmas/la-aldea-de-san-nicolas/index.html: «41.9»',
+    +   'mareas/canarias/las-palmas/la-aldea-de-san-nicolas/index.html: «41.9»',
+    +   'mareas/canarias/las-palmas/la-oliva/index.html: «26.8»',
+    +   'mareas/canarias/las-palmas/la-oliva/index.html: «26.8»',
+    +   'mareas/canarias/las-palmas/mogan/index.html: «48.7»',
+    +   'mareas/canarias/las-palmas/mogan/index.html: «48.7»',
+    +   'mareas/canarias/las-palmas/mogan/index.html: «48.7»',
+    +   'mareas/canarias/las-palmas/puerto-del-rosario/index.html: «0.15»',
+    +   'mareas/canarias/las-palmas/san-bartolome-de-tirajana/index.html: «47.5»',
+    +   'mareas/canarias/las-palmas/san-bartolome-de-tirajana/index.html: «47.5»',
+    +   'mareas/canarias/las-palmas/san-bartolome-de-tirajana/index.html: «47.5»',
+    +   'mareas/canarias/las-palmas/telde/index.html: «17.9»',
+    +   'mareas/canarias/las-palmas/telde/index.html: «17.9»',
+    +   'mareas/canarias/las-palmas/tias/index.html: «15.0»',
+    +   'mareas/canarias/las-palmas/tias/index.html: «15.0»',
+    +   'mareas/canarias/las-palmas/tuineje/index.html: «37.0»',
+    +   'mareas/canarias/las-palmas/tuineje/index.html: «37.0»',
+    +   'mareas/canarias/las-palmas/tuineje/index.html: «37.0»',
+    +   'mareas/canarias/las-palmas/yaiza/index.html: «32.2»',
+    +   'mareas/canarias/las-palmas/yaiza/index.html: «32.2»',
+    +   'mareas/canarias/las-palmas/yaiza/index.html: «32.2»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/alajero/index.html: «19.6»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/alajero/index.html: «19.6»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/candelaria/index.html: «18.4»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/candelaria/index.html: «18.4»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/el-pinar-de-el-hierro/index.html: «17.5»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/el-pinar-de-el-hierro/index.html: «17.5»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/el-rosario/index.html: «11.7»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/el-rosario/index.html: «11.7»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/fasnia/index.html: «30.6»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/fasnia/index.html: «30.6»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/fasnia/index.html: «30.6»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/garachico/index.html: «20.6»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/garachico/index.html: «20.6»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/guia-de-isora/index.html: «17.5»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/guia-de-isora/index.html: «17.5»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/san-sebastian-de-la-gomera/index.html: «14.5»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/san-sebastian-de-la-gomera/index.html: «14.5»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/san-sebastian-de-la-gomera/index.html: «14.5»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/tazacorte/index.html: «17.4»',
+    +   'mareas/canarias/santa-cruz-de-tenerife/tazacorte/index.html: «17.4»',
+    +   'mareas/cantabria/cantabria/castro-urdiales/index.html: «13.8»',
+    +   'mareas/cantabria/cantabria/castro-urdiales/index.html: «13.8»',
+    +   'mareas/cantabria/cantabria/el-astillero/index.html: «7.1»',
+    +   'mareas/cantabria/cantabria/el-astillero/index.html: «7.1»',
+    +   'mareas/cantabria/cantabria/santona/index.html: «29.5»',
+    +   'mareas/cantabria/cantabria/santona/index.html: «29.5»',
+    +   'mareas/cataluna/barcelona/arenys-de-mar/index.html: «42.2»',
+    +   'mareas/cataluna/barcelona/arenys-de-mar/index.html: «42.2»',
+    +   'mareas/cataluna/barcelona/arenys-de-mar/index.html: «42.2»',
+    +   'mareas/cataluna/barcelona/badalona/index.html: «12.3»',
+    +   'mareas/cataluna/barcelona/badalona/index.html: «12.3»',
+    +   'mareas/cataluna/barcelona/barcelona/index.html: «9.7»',
+    +   'mareas/cataluna/barcelona/barcelona/index.html: «9.7»',
+    +   'mareas/cataluna/barcelona/castelldefels/index.html: «21.8»',
+    +   'mareas/cataluna/barcelona/castelldefels/index.html: «21.8»',
+    +   'mareas/cataluna/barcelona/el-masnou/index.html: «19.5»',
+    +   'mareas/cataluna/barcelona/el-masnou/index.html: «19.5»',
+    +   'mareas/cataluna/barcelona/mataro/index.html: «31.6»',
+    +   'mareas/cataluna/barcelona/mataro/index.html: «31.6»',
+    +   'mareas/cataluna/barcelona/mataro/index.html: «31.6»',
+    +   'mareas/cataluna/barcelona/premia-de-mar/index.html: «23.7»',
+    +   'mareas/cataluna/barcelona/premia-de-mar/index.html: «23.7»',
+    +   'mareas/cataluna/barcelona/sitges/index.html: «30.7»',
+    +   'mareas/cataluna/barcelona/sitges/index.html: «30.7»',
+    +   'mareas/cataluna/barcelona/sitges/index.html: «30.7»',
+    +   'mareas/cataluna/barcelona/vilanova-i-la-geltru/index.html: «38.7»',
+    +   'mareas/cataluna/barcelona/vilanova-i-la-geltru/index.html: «38.7»',
+    +   'mareas/cataluna/barcelona/vilanova-i-la-geltru/index.html: «38.7»',
+    +   'mareas/cataluna/tarragona/calafell/index.html: «35.1»',
+    +   'mareas/cataluna/tarragona/calafell/index.html: «35.1»',

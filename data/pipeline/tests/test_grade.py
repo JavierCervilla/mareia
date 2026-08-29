@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import re
 
 import pytest
 
@@ -33,6 +34,10 @@ _EXCELLENT = Metrics(
     dropped_amplitude_fraction=0.01,
     dropped_constituents=["EP2"],
     observation_source="IOC test",
+    observation_code="test",
+    observation_distance_km=1.0,
+    observation_lat=42.24,
+    observation_lon=-8.72,
 )
 
 
@@ -96,7 +101,17 @@ def test_a_contradicting_second_analysis_vetoes() -> None:
 
 
 def test_without_observations_corroboration_only_reaches_b() -> None:
-    blind = _with(rmse_m=None, nrmse=None, r2=None, hw_time_err_p95_min=None, observation_source=None)
+    blind = _with(
+        rmse_m=None,
+        nrmse=None,
+        r2=None,
+        hw_time_err_p95_min=None,
+        observation_source=None,
+        observation_code=None,
+        observation_distance_km=None,
+        observation_lat=None,
+        observation_lon=None,
+    )
     result = grading.assign(blind, epoch_years=19.0)
     assert result.grade == "B"
     assert "observaciones" in result.reason
@@ -109,6 +124,10 @@ def test_without_observations_nor_corroboration_the_grade_is_c() -> None:
         r2=None,
         hw_time_err_p95_min=None,
         observation_source=None,
+        observation_code=None,
+        observation_distance_km=None,
+        observation_lat=None,
+        observation_lon=None,
         cross_rmse_m=None,
         cross_source=None,
         cross_rmse_worst_m=None,
@@ -122,3 +141,66 @@ def test_the_reason_always_explains_why_it_did_not_go_higher() -> None:
         result = grading.assign(metrics, years)
         assert result.reason and result.grade in {"B", "C"}
         assert result.reason.startswith("no alcanza")
+
+
+def test_the_reason_names_every_unmet_threshold_not_just_the_first() -> None:
+    """Un puerto lejos **y** sin observación tiene que decir las dos cosas.
+
+    Es el caso mayoritario desde T-13 —un puerto que toma prestadas las constantes de más de 30 km y
+    no tiene mareógrafo propio con el que validar— y el primer arreglo de esto lo dejaba fuera: 39
+    puertos publicaban un motivo que sólo culpaba a la distancia. La frase se imprime en la página,
+    así que callar la mitad del motivo es publicar media verdad.
+    """
+    borrowed_and_blind = _with(
+        rmse_m=None,
+        nrmse=None,
+        r2=None,
+        hw_time_err_p95_min=None,
+        observation_source=None,
+        observation_code=None,
+        observation_distance_km=None,
+        observation_lat=None,
+        observation_lon=None,
+        cross_rmse_m=None,
+        cross_source=None,
+        cross_rmse_worst_m=None,
+        cross_source_worst=None,
+    )
+    result = grading.assign(borrowed_and_blind, epoch_years=19.0, gauge_distance_km=46.2)
+    assert result.grade == "C"
+    assert "46,2 km" in result.reason
+    assert "sin observaciones ni segunda fuente" in result.reason
+
+
+def test_a_port_that_fails_two_a_thresholds_names_both() -> None:
+    """El caso de Vigo en T-05: truncado alto **y** error de hora alto, y sólo se contaba uno."""
+    two_faults = _with(truncation_rms_m=0.013, hw_time_err_p95_min=25.4)
+    result = grading.assign(two_faults, epoch_years=19.0, gauge_distance_km=0.8)
+    assert result.grade == "B"
+    assert "coste de truncar" in result.reason
+    assert "error de hora de extremo p95" in result.reason
+
+
+def test_published_figures_use_the_spanish_decimal_separator() -> None:
+    """Las dos frases que van **a la página** se escriben en español, cifras incluidas.
+
+    Salían con el decimal en formato inglés —«a 24.8 km de la dársena», «RMSE normalizado 0.221 >
+    0.15»— en páginas es-ES donde el punto sí separa millares dos bloques más abajo («381.367 km» a
+    la Luna): 130 de las 153 páginas y 283 ocurrencias (hallazgo A-19 del pase adversario de T-13).
+    Es la cifra sobre la que descansa la promesa de que un puerto no publica una precisión que no
+    tiene, así que se comprueba aquí, donde el número se convierte en texto, y no sólo en el HTML.
+    """
+    frases = [
+        grading.assign(_with(nrmse=0.221), epoch_years=19.0, gauge_distance_km=24.8).reason,
+        grading.assign(
+            _with(truncation_rms_m=0.013, hw_time_err_p95_min=25.4), epoch_years=19.0
+        ).reason,
+        grading.assign(_with(cross_rmse_m=0.2, nrmse=None, hw_time_err_p95_min=None), 19.0).reason,
+        grading.estimate(gauge_id="g", gauge_distance_km=24.8, observation_source=None).reason,
+        grading.estimate(gauge_id="g", gauge_distance_km=24.8, observation_source="IOC").reason,
+    ]
+    for frase in frases:
+        assert frase is not None
+        assert not re.search(r"\d\.\d", frase), f"decimal en formato inglés: {frase}"
+    assert "0,221 > 0,15" in frases[0]
+    assert "a 24,8 km de la dársena" in frases[3]

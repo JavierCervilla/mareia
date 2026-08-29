@@ -51,6 +51,27 @@ MAX_GAUGE_DISTANCE_KM = {"A": 5.0, "B": 30.0}
 MAX_TRUNCATION_RMS_M = {"A": 0.01, "B": 0.03}
 
 
+def _cifra(valor: float, decimales: int) -> str:
+    """Formatea un número **para publicarlo**: separador decimal español.
+
+    Los motivos de esta función no se quedan en el JSON: son las dos frases que la página de cada
+    puerto enseña —«las constantes son las del mareógrafo `X`, a 24,8 km de la dársena» y «no
+    alcanza B: RMSE normalizado 0,221 > 0,15»— y son justo las que sostienen la promesa de que un
+    puerto no publica una precisión que no tiene. Escritas con ``f"{km:.1f}"`` salían en formato
+    inglés («24.8») en páginas es-ES donde el punto **sí** separa millares dos bloques más abajo
+    («381.367 km» a la Luna): la misma pantalla le enseñaba al lector dos significados del punto
+    (hallazgo A-19 del pase adversario de T-13, **130 de 153 páginas y 283 ocurrencias**).
+
+    Se arregla aquí, que es donde el número se convierte en texto, y no en la plantilla: la página
+    recibe una frase ya escrita y ahí sólo cabría un reemplazo a ciegas sobre prosa.
+
+    No pone separador de millares porque ninguna de las magnitudes que publica lo alcanza —km hasta
+    decenas, cm hasta unidades, RMSE normalizado por debajo de uno—; el día que alguna lo alcance,
+    éste es el sitio.
+    """
+    return f"{valor:.{decimales}f}".replace(".", ",")
+
+
 @dataclass(frozen=True)
 class GradeResult:
     """El grade concedido y el motivo legible por el que no subió más."""
@@ -59,55 +80,123 @@ class GradeResult:
     reason: str
 
 
-def _fails(level: str, metrics: Metrics, epoch_years: float, gauge_distance_km: float) -> str | None:
-    """Primer umbral de ``level`` que el puerto incumple, o ``None`` si los cumple todos."""
+def _failures(level: str, metrics: Metrics, epoch_years: float, gauge_distance_km: float) -> list[str]:
+    """**Todos** los umbrales de ``level`` que el puerto incumple, en el orden en que se comprueban.
+
+    La diferencia con devolver sólo el primero no es cosmética. En T-05 el informe decía que a Vigo
+    lo que le impedía llegar a A era el coste de truncar el dataset, y de ahí salió la predicción de
+    que añadir los cinco constituyentes que faltaban lo subiría a A. El coste bajó como estaba
+    previsto —de 1,30 a 0,69 cm RMS— y Vigo siguió en B, porque también incumplía el error de hora
+    de pleamar (25,4 min sobre un umbral de 20) y el motivo, que se paraba en el primer fallo, nunca
+    lo dijo. Un informe que sólo nombra un obstáculo invita a predecir que quitarlo basta.
+
+    El primer intento de arreglo dejó fuera justo las ramas de «sin observaciones», que son las
+    mayoritarias desde que T-13 amplió el catálogo: 39 puertos publicaban un motivo que sólo culpaba
+    a la distancia al mareógrafo y callaba que tampoco había con qué validar. Por eso ahora hay una
+    sola función, la que evalúa, y no dos listas que puedan desincronizarse.
+    """
+    unmet: list[str] = []
     if gauge_distance_km > MAX_GAUGE_DISTANCE_KM[level]:
-        return (
-            f"el mareógrafo más cercano está a {gauge_distance_km:.1f} km > "
+        unmet.append(
+            f"el mareógrafo más cercano está a {_cifra(gauge_distance_km, 1)} km > "
             f"{MAX_GAUGE_DISTANCE_KM[level]:.0f} km"
         )
     if metrics.truncation_rms_m > MAX_TRUNCATION_RMS_M[level]:
-        return (
-            f"coste de truncar al catálogo del motor {metrics.truncation_rms_m * 100:.1f} cm RMS > "
-            f"{MAX_TRUNCATION_RMS_M[level] * 100:.0f} cm"
+        unmet.append(
+            f"coste de truncar al catálogo del motor {_cifra(metrics.truncation_rms_m * 100, 1)} cm "
+            f"RMS > {MAX_TRUNCATION_RMS_M[level] * 100:.0f} cm"
         )
     if epoch_years < MIN_EPOCH_YEARS[level]:
-        return f"registro de {epoch_years:.0f} años < {MIN_EPOCH_YEARS[level]:.0f}"
+        unmet.append(f"registro de {epoch_years:.0f} años < {MIN_EPOCH_YEARS[level]:.0f}")
     # El contraste entre fuentes veta cuando existe y desmiente.
     if metrics.cross_rmse_m is not None and metrics.cross_rmse_m > MAX_CROSS_RMSE_M[level]:
-        return (
+        unmet.append(
             f"ningún análisis independiente corrobora las constantes "
-            f"(mejor acuerdo {metrics.cross_rmse_m:.3f} m > {MAX_CROSS_RMSE_M[level]:.2f} m)"
+            f"(mejor acuerdo {_cifra(metrics.cross_rmse_m, 3)} m > "
+            f"{_cifra(MAX_CROSS_RMSE_M[level], 2)} m)"
         )
     if metrics.nrmse is None or metrics.hw_time_err_p95_min is None:
         if level == "A":
             if metrics.nrmse is not None and not metrics.extremes_usable:
-                return (
+                unmet.append(
                     "la observación no tiene pleamares identificables (el residuo meteorológico "
                     "genera más extremos que la marea), así que no se puede medir su hora"
                 )
-            return "sin observaciones con las que medir la predicción"
-        if metrics.cross_rmse_m is None and metrics.nrmse is None:
-            return "sin observaciones ni segunda fuente: no hay con qué validar"
+            else:
+                unmet.append("sin observaciones con las que medir la predicción")
+        elif metrics.cross_rmse_m is None and metrics.nrmse is None:
+            unmet.append("sin observaciones ni segunda fuente: no hay con qué validar")
         if metrics.nrmse is not None and metrics.nrmse > MAX_NRMSE[level]:
-            return f"RMSE normalizado {metrics.nrmse:.3f} > {MAX_NRMSE[level]:.2f}"
-        return None
+            unmet.append(
+                f"RMSE normalizado {_cifra(metrics.nrmse, 3)} > {_cifra(MAX_NRMSE[level], 2)}"
+            )
+        return unmet
     if metrics.nrmse > MAX_NRMSE[level]:
-        return f"RMSE normalizado {metrics.nrmse:.3f} > {MAX_NRMSE[level]:.2f}"
+        unmet.append(
+            f"RMSE normalizado {_cifra(metrics.nrmse, 3)} > {_cifra(MAX_NRMSE[level], 2)}"
+        )
     if metrics.hw_time_err_p95_min > MAX_EXTREME_TIME_P95_MIN[level]:
-        return (
+        unmet.append(
             f"error de hora de extremo p95 {metrics.hw_time_err_p95_min:.0f} min > "
             f"{MAX_EXTREME_TIME_P95_MIN[level]:.0f} min"
         )
-    return None
+    return unmet
 
 
 def assign(metrics: Metrics, epoch_years: float, gauge_distance_km: float = 0.0) -> GradeResult:
-    """Concede el grade más alto cuyos umbrales se cumplen todos."""
-    blocked_from_a = _fails("A", metrics, epoch_years, gauge_distance_km)
-    if blocked_from_a is None:
+    """Concede el grade más alto cuyos umbrales se cumplen todos.
+
+    El motivo enumera **todos** los umbrales que el puerto incumple del nivel al que no llega, para
+    que nadie deduzca del informe que quitando el primero sube de grade.
+    """
+    blocked_from_a = _failures("A", metrics, epoch_years, gauge_distance_km)
+    if not blocked_from_a:
         return GradeResult("A", "cumple todos los umbrales de grade A")
-    blocked_from_b = _fails("B", metrics, epoch_years, gauge_distance_km)
-    if blocked_from_b is None:
-        return GradeResult("B", f"no alcanza A: {blocked_from_a}")
-    return GradeResult("C", f"no alcanza B: {blocked_from_b}")
+    blocked_from_b = _failures("B", metrics, epoch_years, gauge_distance_km)
+    if not blocked_from_b:
+        return GradeResult("B", f"no alcanza A: {'; y '.join(blocked_from_a)}")
+    return GradeResult("C", f"no alcanza B: {'; y '.join(blocked_from_b)}")
+
+
+@dataclass(frozen=True)
+class Estimation:
+    """Si la marea de un puerto es una **estimación** y, si lo es, por qué."""
+
+    estimated: bool
+    #: Frase publicable —va a la página, no sólo al JSON— con el motivo. ``None`` si no es estimada.
+    reason: str | None
+
+
+def estimate(
+    *, gauge_id: str, gauge_distance_km: float, observation_source: str | None
+) -> Estimation:
+    """Decide si el puerto publica una marea medida en él o prestada de otro sitio.
+
+    Un puerto **no** es estimado sólo cuando se dan las dos cosas a la vez: sus constantes salen de
+    un mareógrafo que está en su propia dársena —el mismo umbral de distancia que exige el grade A,
+    ``MAX_GAUGE_DISTANCE_KM['A']``, para no tener dos varas de medir— y hemos podido contrastar la
+    predicción contra observaciones de ese puerto. Cualquier otra combinación es una estimación y se
+    dice: en la duda se marca, porque el error caro de esta trayectoria es el contrario.
+    """
+    own_harbour = gauge_distance_km <= MAX_GAUGE_DISTANCE_KM["A"]
+    if own_harbour and observation_source is not None:
+        return Estimation(False, None)
+    if not own_harbour and observation_source is None:
+        return Estimation(
+            True,
+            f"las constantes armónicas son las del mareógrafo `{gauge_id}`, a "
+            f"{_cifra(gauge_distance_km, 1)} km de la dársena, y no hay observaciones de este "
+            "puerto con las que comprobar la predicción",
+        )
+    if not own_harbour:
+        return Estimation(
+            True,
+            f"las constantes armónicas son las del mareógrafo `{gauge_id}`, a "
+            f"{_cifra(gauge_distance_km, 1)} km de la dársena: describen la marea de ese punto, no "
+            "la de este puerto",
+        )
+    return Estimation(
+        True,
+        "no hay observaciones de este puerto con las que comprobar la predicción: las constantes "
+        f"son las de `{gauge_id}`, en la propia dársena, pero nadie las ha contrastado aquí",
+    )

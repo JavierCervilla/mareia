@@ -46,7 +46,7 @@
         },
         "dropped_constituents": {
           "type": "array",
-          "description": "Constantes que la fuente publica pero el motor de producción no soporta, descartadas al truncar al juego estándar de 37 de NOAA. Se conservan aquí para poder estimar el error de truncado.",
+          "description": "Constantes que la fuente publica pero el motor de producción no soporta, descartadas al truncar a su catálogo. Se conservan aquí para poder estimar el error de truncado.",
           "items": { "$ref": "#/$defs/constituent" }
         },
         "derived_at": { "type": "string", "format": "date-time" },
@@ -77,7 +77,7 @@
     },
     "quality": {
       "type": "object",
-      "required": ["rmse_m", "hw_time_err_p95_min", "grade", "validated_against"],
+      "required": ["rmse_m", "hw_time_err_p95_min", "grade", "validated_against", "estimated"],
       "additionalProperties": true,
       "properties": {
         "rmse_m": {
@@ -91,6 +91,14 @@
         "grade": { "enum": ["A", "B", "C"] },
         "validated_against": { "type": "string", "minLength": 1 },
         "grade_reason": { "type": "string" },
+        "estimated": {
+          "type": "boolean",
+          "description": "El puerto publica una marea estimada: sus constantes armónicas vienen de un mareógrafo que no está en su dársena, o no hay observaciones suyas con las que comprobar la predicción. Es obligatorio porque un consumidor que no sepa distinguir los dos casos publicará el estimado como si estuviera medido."
+        },
+        "estimated_reason": {
+          "type": ["string", "null"],
+          "description": "Por qué la marea es estimada, en una frase publicable. `null` cuando no lo es."
+        },
         "metrics": { "type": "object" }
       }
     }

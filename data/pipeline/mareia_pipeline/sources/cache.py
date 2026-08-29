@@ -32,7 +32,7 @@ def fetch(url: str, *, suffix: str = ".bin", refresh: bool = False) -> bytes:
     if path.exists() and not refresh:
         return path.read_bytes()
     request = urllib.request.Request(url, headers={"User-Agent": _USER_AGENT})
-    with urllib.request.urlopen(request, timeout=_TIMEOUT_SECONDS) as response:  # noqa: S310
+    with urllib.request.urlopen(request, timeout=_TIMEOUT_SECONDS) as response:
         body = response.read()
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path.write_bytes(body)

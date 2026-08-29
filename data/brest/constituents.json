@@ -92,34 +92,9 @@
     ],
     "dropped_constituents": [
       {
-        "name": "EP2",
-        "amplitude_m": 0.019687,
-        "phase_deg": 89.4347
-      },
-      {
-        "name": "2MS6",
-        "amplitude_m": 0.016788,
-        "phase_deg": 53.3496
-      },
-      {
-        "name": "MB2",
-        "amplitude_m": 0.012439,
-        "phase_deg": 101.15
-      },
-      {
-        "name": "MA2",
-        "amplitude_m": 0.011018,
-        "phase_deg": 39.4504
-      },
-      {
         "name": "3L2",
         "amplitude_m": 0.008246,
         "phase_deg": 276.7206
-      },
-      {
-        "name": "MKS2",
-        "amplitude_m": 0.007598,
-        "phase_deg": 174.8149
       },
       {
         "name": "R3",
@@ -172,7 +147,7 @@
         "phase_deg": 51.3608
       }
     ],
-    "derived_at": "2026-08-28T02:27:59Z",
+    "derived_at": "2026-08-29T09:58:50Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -302,6 +277,11 @@
       "phase_deg": 27.1388
     },
     {
+      "name": "EP2",
+      "amplitude_m": 0.019687,
+      "phase_deg": 89.4347
+    },
+    {
       "name": "M3",
       "amplitude_m": 0.019768,
       "phase_deg": 15.8574
@@ -332,6 +312,11 @@
       "phase_deg": 181.7466
     },
     {
+      "name": "MKS2",
+      "amplitude_m": 0.007598,
+      "phase_deg": 174.8149
+    },
+    {
       "name": "M6",
       "amplitude_m": 0.031456,
       "phase_deg": 354.8529
@@ -352,6 +337,16 @@
       "phase_deg": 212.7798
     },
     {
+      "name": "MA2",
+      "amplitude_m": 0.011018,
+      "phase_deg": 39.4504
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.012439,
+      "phase_deg": 101.15
+    },
+    {
       "name": "RHO",
       "amplitude_m": 0.00336,
       "phase_deg": 284.2351
@@ -360,43 +355,45 @@
       "name": "2SM2",
       "amplitude_m": 0.017315,
       "phase_deg": 312.0507
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 0.016788,
+      "phase_deg": 53.3496
     }
   ],
   "quality": {
-    "rmse_m": 0.0794,
-    "hw_time_err_p95_min": 14.53,
-    "grade": "B",
+    "rmse_m": 0.0806,
+    "hw_time_err_p95_min": 13.31,
+    "grade": "A",
     "validated_against": "IOC bres",
-    "grade_reason": "no alcanza A: coste de truncar al catálogo del motor 2.2 cm RMS > 1 cm",
+    "grade_reason": "cumple todos los umbrales de grade A",
+    "estimated": false,
+    "estimated_reason": null,
     "metrics": {
-      "window_start": "2026-07-29T00:00:00Z",
+      "window_start": "2026-07-30T00:00:00Z",
       "window_days": 30.0,
-      "samples": 42556,
-      "predicted_range_m": 6.6059,
-      "rmse_m": 0.0794,
-      "nrmse": 0.01203,
-      "r2": 0.99731,
-      "hw_time_err_p95_min": 14.53,
-      "hw_height_err_p95_m": 0.1465,
-      "matched_extremes": 116,
+      "samples": 42052,
+      "predicted_range_m": 6.6297,
+      "rmse_m": 0.0806,
+      "nrmse": 0.01215,
+      "r2": 0.99728,
+      "hw_time_err_p95_min": 13.31,
+      "hw_height_err_p95_m": 0.1645,
+      "matched_extremes": 115,
       "predicted_extremes": 116,
-      "predicted_extremes_in_window": 116,
-      "observed_extremes": 117,
+      "predicted_extremes_in_window": 115,
+      "observed_extremes": 116,
       "extremes_usable": true,
       "cross_rmse_m": 0.0001,
       "cross_source": "bresttg_60minute-bre-fra-cmems",
-      "cross_rmse_worst_m": 0.0022,
+      "cross_rmse_worst_m": 0.0024,
       "cross_source_worst": "brest-822-fra-uhslc_fd",
-      "truncation_rms_m": 0.0223,
-      "dropped_amplitude_m": 0.1038,
-      "dropped_amplitude_fraction": 0.02384,
+      "truncation_rms_m": 0.00474,
+      "dropped_amplitude_m": 0.03627,
+      "dropped_amplitude_fraction": 0.00833,
       "dropped_constituents": [
-        "EP2",
-        "2MS6",
-        "MB2",
-        "MA2",
         "3L2",
-        "MKS2",
         "R3",
         "T3",
         "SGM",
@@ -408,7 +405,11 @@
         "MTM",
         "2MO5"
       ],
-      "observation_source": "IOC bres"
+      "observation_source": "IOC bres",
+      "observation_code": "bres",
+      "observation_distance_km": 0.489,
+      "observation_lat": 48.38,
+      "observation_lon": -4.5
     }
   }
 }

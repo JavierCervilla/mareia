@@ -1,0 +1,27 @@
+# Gate anti-slop del pipeline (doctrina `code-anti-slop`), en el mismo espíritu que el preset
+# ESLint+sonarjs del lado TypeScript: determinista, sin cloud y **sin una montaña de excepciones**,
+# porque un gate que se instala con veinte exclusiones no es un gate.
+#
+# Existe desde T-13 por una razón medida: esa trayectoria añadió ~1.200 líneas de Python y CI no
+# tenía nada que las mirara, mientras el TypeScript pasaba por dos linters. El primer pase encontró
+# una variable muerta en `validate.py` y dos `int()` redundantes, que es exactamente el tipo de cosa
+# que un humano no ve en una revisión de 190 ficheros.
+
+line-length = 110
+
+[lint]
+# `E,F,W` errores y estilo de pycodestyle/pyflakes · `I` orden de imports · `B` bugbear (los fallos
+# de verdad) · `UP` modernización · `RET`/`SIM`/`C4` legibilidad · `ARG` argumentos muertos · `RUF`
+# las propias de ruff.
+select = ["E", "F", "W", "I", "B", "UP", "RET", "SIM", "ARG", "C4", "RUF"]
+
+# Las tres de «unicode ambiguo» avisan de que el código escribe `−` (signo menos), `×` y letras
+# griegas en la prosa y en las fórmulas. Aquí eso no es un despiste de copia y pega: es el catálogo
+# de constituyentes y la documentación en español, donde `M2 ∓ h` o `×2` se escriben así a
+# propósito. Se apagan las tres enteras y no caso por caso para no sembrar `noqa` por el repo.
+ignore = ["RUF001", "RUF002", "RUF003"]
+
+[lint.per-file-ignores]
+# Los tests declaran dobles y espías cuya firma la impone el código bajo prueba: un argumento que no
+# se usa ahí es la firma, no un descuido.
+"tests/*" = ["ARG001", "ARG005"]

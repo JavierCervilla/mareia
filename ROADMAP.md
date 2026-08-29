@@ -69,7 +69,23 @@
 
 ## Hito 4 — España completa y transparencia
 
-- [ ] T-13 · ~200–300 puertos con grade ≥ B o flag «estimado»
+- [x] T-13 · **153 puertos** con grade ≥ B o flag «estimado» (8 A · 15 B · 130 C; 120 estimados)
+      · La horquilla de 200-300 **no se alcanza y es un hecho medido, no un recorte**: el catálogo
+      se deriva del volcado público de GeoNames y la cornisa cantábrica está poco documentada ahí
+      (Asturias 2 puertos, Cantabria 3, Lugo 2, Gipuzkoa 2). 19 candidatos más se descartan por no
+      tener mareógrafo a menos de 60 km —toda la Costa Brava—, con su lista en el informe QC.
+      Subir de ahí pide una segunda fuente de topónimos portuarios, no relajar el filtro.
+      (pase adversario cerrado: 3 de los 4 hallazgos arreglados y sus recorridos como gate
+      permanente — el detector de curva congelada mira **todas** las mesetas del día y no sólo la
+      más larga (65 de 153 puertos admitían una congelación invisible), su prueba de sensibilidad
+      elige la ventana en vez de bajar el umbral (enrojecía 33 días de cada 365 sin avería) y las
+      cifras que justifican la estimación se publican en español (130 páginas, 283 ocurrencias).
+      **A-20 queda abierto con trinquete** y escalado al rol `seguridad`: la procedencia del error
+      medido es autodeclarada y ningún puerto real está afectado hoy;
+      ver `docs/qa/informe-adversario-t13.md`. El `verificador` rechazó el primer intento porque el
+      recorrido de A-17 medía con una **copia** del detector y no trinqueteaba —estrechar el gate
+      real lo dejaba verde—: el detector vive ahora en `apps/web/src/curva-congelada.ts` y lo
+      importan los dos ficheros, comprobado en rojo con los 65 puertos)
 - [ ] T-14 · Metodología pública + QC navegable + dataset CC-BY + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario
       (queda del peldaño 1 del gate de seguridad `actionlint` sobre `.github/workflows/` —es el

@@ -1,0 +1,474 @@
+{
+  "schema": "station/v1",
+  "id": "es-ca-algeciras",
+  "name": "Algeciras",
+  "lat": 36.1302,
+  "lon": -5.4415,
+  "timezone": "Europe/Madrid",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 0.61
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "algeciras-alge-esp-ieo",
+      "station_name": "Algeciras",
+      "lat": 36.117,
+      "lon": -5.4333,
+      "distance_km": 1.642,
+      "analysis_epoch": {
+        "start": "1997-12-31",
+        "end": "2016-12-31"
+      },
+      "license": "cc-by-4.0"
+    },
+    "fallback": [
+      {
+        "dataset": "TICON-4",
+        "station_id": "tarifa-tari-esp-ieo",
+        "station_name": "Tarifa",
+        "lat": 36.0086,
+        "lon": -5.6026,
+        "distance_km": 19.811,
+        "analysis_epoch": {
+          "start": "1997-12-31",
+          "end": "2016-12-31"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "ceuta-207-esp-uhslc_fd",
+        "station_name": "Ceuta",
+        "lat": 35.9,
+        "lon": -5.317,
+        "distance_km": 27.939,
+        "analysis_epoch": {
+          "start": "2005-09-24",
+          "end": "2024-09-24"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "ceuta-207a-esp-uhslc_rq",
+        "station_name": "Ceuta",
+        "lat": 35.9,
+        "lon": -5.317,
+        "distance_km": 27.939,
+        "analysis_epoch": {
+          "start": "1998-12-31",
+          "end": "2017-12-31"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "ceuta-ceta-esp-ieo",
+        "station_name": "Ceuta",
+        "lat": 35.89,
+        "lon": -5.314,
+        "distance_km": 29.067,
+        "analysis_epoch": {
+          "start": "1997-12-31",
+          "end": "2016-12-31"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "gibraltar-289a-gbr-uhslc_rq",
+        "station_name": "Gibraltar",
+        "lat": 36.133,
+        "lon": -5.35,
+        "distance_km": 8.223,
+        "analysis_epoch": {
+          "start": "2006-10-01",
+          "end": "2014-05-21"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "gibraltar-289b-gbr-uhslc_rq",
+        "station_name": "Gibraltar",
+        "lat": 36.133,
+        "lon": -5.35,
+        "distance_km": 8.223,
+        "analysis_epoch": {
+          "start": "1993-03-25",
+          "end": "2000-04-30"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "gibraltar-289-gbr-uhslc_fd",
+        "station_name": "Gibraltar",
+        "lat": 36.117,
+        "lon": -5.35,
+        "distance_km": 8.348,
+        "analysis_epoch": {
+          "start": "2023-11-01",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "algecirastg-alg-esp-cmems",
+        "station_name": "Algeciras",
+        "lat": 36.176899,
+        "lon": -5.39833,
+        "distance_km": 6.48,
+        "analysis_epoch": {
+          "start": "2009-07-16",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "tarifatg-tar-esp-cmems",
+        "station_name": "Tarifa",
+        "lat": 36.006401,
+        "lon": -5.60361,
+        "distance_km": 20.045,
+        "analysis_epoch": {
+          "start": "2009-07-17",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      }
+    ],
+    "dropped_constituents": [
+      {
+        "name": "MTM",
+        "amplitude_m": 0.002551,
+        "phase_deg": 159.2762
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.001584,
+        "phase_deg": 73.1426
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.001064,
+        "phase_deg": 29.8913
+      },
+      {
+        "name": "3L2",
+        "amplitude_m": 0.000872,
+        "phase_deg": 125.4772
+      },
+      {
+        "name": "3N2",
+        "amplitude_m": 0.00086,
+        "phase_deg": 155.2826
+      },
+      {
+        "name": "SGM",
+        "amplitude_m": 0.000847,
+        "phase_deg": 22.397
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.000595,
+        "phase_deg": 178.5406
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 0.000552,
+        "phase_deg": 287.1012
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.000421,
+        "phase_deg": 319.756
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 0.000394,
+        "phase_deg": 38.238
+      },
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.000128,
+        "phase_deg": 346.7455
+      }
+    ],
+    "derived_at": "2026-08-29T09:58:50Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "constantes armónicas"
+      },
+      {
+        "name": "openwatersio/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      },
+      {
+        "name": "GeoNames",
+        "url": "https://www.geonames.org/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "catálogo de puertos: nombre del municipio y coordenadas de la dársena · huella sha256 del volcado e2aa4fa9e6801568…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 0.319148,
+      "phase_deg": 48.1149
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.064776,
+      "phase_deg": 32.9591
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.116776,
+      "phase_deg": 74.1327
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.033963,
+      "phase_deg": 73.1805
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.0088,
+      "phase_deg": 17.1693
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.003582,
+      "phase_deg": 42.2206
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.022896,
+      "phase_deg": 130.3492
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.007198,
+      "phase_deg": 133.8085
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.008142,
+      "phase_deg": 163.4602
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.003488,
+      "phase_deg": 197.6009
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.001238,
+      "phase_deg": 51.0709
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.018788,
+      "phase_deg": 164.6913
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.000951,
+      "phase_deg": 89.8271
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.002225,
+      "phase_deg": 251.328
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.051711,
+      "phase_deg": 186.9626
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.020281,
+      "phase_deg": 79.0106
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.006756,
+      "phase_deg": 78.5316
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.000978,
+      "phase_deg": 145.0022
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.010032,
+      "phase_deg": 48.62
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.001952,
+      "phase_deg": 134.4054
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.0009,
+      "phase_deg": 179.8461
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.000813,
+      "phase_deg": 182.1445
+    },
+    {
+      "name": "EP2",
+      "amplitude_m": 0.00173,
+      "phase_deg": 6.0405
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.003438,
+      "phase_deg": 191.8876
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.009565,
+      "phase_deg": 18.7163
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.011876,
+      "phase_deg": 36.6143
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.002598,
+      "phase_deg": 39.6414
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.007607,
+      "phase_deg": 119.2786
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.012244,
+      "phase_deg": 228.6017
+    },
+    {
+      "name": "MKS2",
+      "amplitude_m": 0.001789,
+      "phase_deg": 20.3075
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 0.000549,
+      "phase_deg": 144.747
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 0.000129,
+      "phase_deg": 82.8406
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 0.000922,
+      "phase_deg": 101.892
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.000551,
+      "phase_deg": 144.0591
+    },
+    {
+      "name": "MA2",
+      "amplitude_m": 0.003178,
+      "phase_deg": 164.3023
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.003696,
+      "phase_deg": 188.9449
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.000768,
+      "phase_deg": 218.4269
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.001114,
+      "phase_deg": 241.8578
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 0.000804,
+      "phase_deg": 173.3197
+    }
+  ],
+  "quality": {
+    "rmse_m": null,
+    "hw_time_err_p95_min": null,
+    "grade": "C",
+    "validated_against": "sin observación propia: la predicción no se ha comprobado en este puerto",
+    "grade_reason": "no alcanza B: sin observaciones ni segunda fuente: no hay con qué validar",
+    "estimated": true,
+    "estimated_reason": "no hay observaciones de este puerto con las que comprobar la predicción: las constantes son las de `algeciras-alge-esp-ieo`, en la propia dársena, pero nadie las ha contrastado aquí",
+    "metrics": {
+      "window_start": "2026-07-30T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 0,
+      "predicted_range_m": 1.0312,
+      "rmse_m": null,
+      "nrmse": null,
+      "r2": null,
+      "hw_time_err_p95_min": null,
+      "hw_height_err_p95_m": null,
+      "matched_extremes": 0,
+      "predicted_extremes": 116,
+      "predicted_extremes_in_window": 0,
+      "observed_extremes": 0,
+      "extremes_usable": false,
+      "cross_rmse_m": null,
+      "cross_source": null,
+      "cross_rmse_worst_m": null,
+      "cross_source_worst": null,
+      "truncation_rms_m": 0.00288,
+      "dropped_amplitude_m": 0.00987,
+      "dropped_amplitude_fraction": 0.012688,
+      "dropped_constituents": [
+        "MTM",
+        "N4",
+        "R3",
+        "3L2",
+        "3N2",
+        "SGM",
+        "T3",
+        "2MK5",
+        "S3",
+        "2MO5",
+        "MSQM"
+      ],
+      "observation_source": null,
+      "observation_code": null,
+      "observation_distance_km": null,
+      "observation_lat": null,
+      "observation_lon": null
+    }
+  }
+}

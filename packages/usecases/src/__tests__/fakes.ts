@@ -51,6 +51,8 @@ export function fakeStation(port: Port): StationRecord {
       hw_time_err_p95_min: null,
       grade_reason: "no alcanza B: RMSE normalizado 0.188 > 0.15",
       validated_against: "IOC de mentira",
+      estimated: false,
+      estimated_reason: null,
     },
     attributions: [
       {

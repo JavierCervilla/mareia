@@ -2,9 +2,12 @@
 /**
  * Portada: `/`.
  *
- * Con los 12 puertos del piloto, el camino más corto al dato es enseñarlos todos agrupados por
- * región — un toque, no tres. Cuando el catálogo crezca a 200-300 (T-13) esta lista se sustituye
- * por el índice de regiones, que ya existe en `/mareas/` y es la ruta canónica de navegación.
+ * Enseña **todos** los puertos agrupados por región: el camino más corto al dato, un toque y no
+ * tres. T-13 llevó el catálogo de 12 puertos a toda la costa española y la portada aguantó el
+ * cambio sin tocarla —35,6 KB de HTML, por encima de los 26,5 KB de una página de puerto—, así que
+ * la lista se queda: sustituirla por el índice de regiones (que ya existe en `/mareas/` y es la
+ * ruta canónica de navegación) es una decisión de producto, no una consecuencia de que el dataset
+ * creciera, y le tocaría a la trayectoria que rediseñe la portada.
  */
 import Indice from "../componentes/Indice.astro";
 import { cargarCatalogo, puertosDeRegion } from "../datos/catalogo.ts";

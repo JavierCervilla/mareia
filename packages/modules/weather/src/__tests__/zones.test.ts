@@ -21,12 +21,51 @@ function catalogueSlugs(): readonly string[] {
   return ports.map((port) => port.slug);
 }
 
+/** Los doce del piloto, para los que el mapeo se escribió a mano en T-08. */
+const PILOTO = [
+  "a-coruna",
+  "bilbao",
+  "cabo-de-palos",
+  "cadiz",
+  "huelva",
+  "la-manga-del-mar-menor",
+  "las-palmas-de-gran-canaria",
+  "malaga",
+  "palma-de-mallorca",
+  "santa-cruz-de-tenerife",
+  "santander",
+  "vigo",
+] as const;
+
 test("los 12 puertos del piloto tienen zona marítima asignada", () => {
-  const slugs = catalogueSlugs();
-  assert.equal(slugs.length, 12);
-  for (const slug of slugs) {
+  const slugs = new Set(catalogueSlugs());
+  for (const slug of PILOTO) {
+    assert.ok(slugs.has(slug), `el piloto '${slug}' ya no está en el catálogo`);
     assert.ok(zoneForPort(slug) !== undefined, `el puerto '${slug}' no tiene zona de AEMET`);
   }
+});
+
+/**
+ * T-13 llevó el catálogo de 12 puertos a toda la costa española y **el mapeo de zonas no creció con
+ * él**: asignar la zona costera de AEMET a ciento y pico puertos es trabajo editorial (las zonas no
+ * siguen la frontera de provincia) y no se hace a ojo desde una trayectoria de datos.
+ *
+ * El módulo ya degrada bien —`zoneForPort` devuelve `undefined` y el boletín responde `unavailable`
+ * con su motivo—, así que el hueco no rompe nada. Este test lo deja **contado** en vez de callado:
+ * si alguien amplía el mapeo, la cifra sube y se actualiza aquí a sabiendas; si alguien lo rompe,
+ * baja. Lo que no puede pasar es que la cobertura se pierda sin que nadie se entere.
+ */
+test("la cobertura de zonas marítimas es un hueco conocido, no un olvido", () => {
+  const slugs = catalogueSlugs();
+  const conZona = slugs.filter((slug) => zoneForPort(slug) !== undefined);
+  assert.ok(
+    conZona.length >= PILOTO.length,
+    `la cobertura ha bajado de ${PILOTO.length} a ${conZona.length} puertos`,
+  );
+  assert.ok(
+    conZona.length < slugs.length,
+    "si ya están todos mapeados, borra este test y exige cobertura completa",
+  );
 });
 
 test("el mapeo no inventa puertos que no estén en el catálogo", () => {

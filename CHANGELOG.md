@@ -2,6 +2,249 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-29 — T-13 · el pase adversario: tres hallazgos arreglados y un tope que no medía nada
+
+El rol `qa-adversario` atacó lo que el `verificador` y el rol `qa` ya habían dado por bueno y sacó
+**cuatro hallazgos** (informe en `docs/qa/informe-adversario-t13.md`, bundle en
+`docs/qa/bundles/t13-adversario/`). Tres de los cuatro no son del catálogo: son **de los gates que
+T-13 dejó vigilando el catálogo**, que es lo que quedaba sin atacar. Se arreglan aquí y sus
+recorridos se quedan **como gate permanente**, sin envoltorio de trinquete.
+
+- **A-17 · el detector de curva congelada sólo miraba UNA meseta por día.** El gate A-1 preguntaba
+  por la meseta **más larga** del día y sólo medía dentro de ésa, así que cualquier congelación más
+  corta que la meseta natural del puerto le era invisible **por construcción**: la meseta natural
+  hacía de escondite. Con 12 puertos apenas había mesetas; con los 153 de T-13 hay 103, y en **65
+  (42,5 % del catálogo)** cabía una congelación real que el gate no veía — el peor caso, el golfo de
+  Valencia (Valencia, Alboraya, Silla y Sueca): meseta natural de **200 min** escondiendo **190 min**
+  de curva falsa con **62,06 mm** de marea real suprimida, sesenta y dos veces el umbral. Es la
+  tercera vez que este gate cambia de sitio la sonda —puntas → interior → **todos los tramos**— y la
+  lección es la misma cada vez: *la pregunta estaba mal hecha porque su respuesta dependía del tamaño
+  del catálogo*. Ahora recorre **todas** las mesetas (`tramosPlanos`). Ni el umbral ni el sitio donde
+  se mide se han tocado: lo único que cambia es **cuántas veces se mide**. No puede enrojecer sola:
+  los tramos son maximales y disjuntos y dentro de cualquiera de ellos todas las muestras publicadas
+  valen lo mismo, así que sus alturas reales no pueden diferir más que el paso de publicación —
+  medido sobre 8 fechas repartidas por 2026 × 153 puertos (**1 224 días-puerto, 6 526 mesetas**), la
+  excursión máxima de una meseta legítima es **0,993 mm** (Borriana, 2026-10-20, 80 min). Comprobado
+  que muerde: inyectada la congelación de Valencia en la curva real, el gate la caza con **61,8 mm**
+  y el instrumento viejo, con el mismo fraude delante, se queda **verde**.
+- **A-18 · la prueba de sensibilidad del gate se ponía roja por el calendario.** `A-1 bis` —el test
+  que demuestra que A-1 **sabe fallar**— construía su meseta alrededor de **la primera pleamar del
+  día**, y cuando ésa cae cerca de medianoche la ventana se recorta contra el borde del día: **33 de
+  los 365 días de 2026 (9,0 %)** daban menos de las cuatro horas exigidas, con un mínimo de 150 min.
+  No es teórico: era el rojo con el que el adversario se encontró al llegar, con un `dist/` del
+  2026-03-29. Un gate que enrojece por el calendario invita exactamente a lo prohibido —bajar la
+  constante hasta que el día malo pase—, así que **se cambia de ventana, no de umbral**:
+  `pleamarConSitio` elige la pleamar del día con más sitio a los dos lados. Las cuatro horas siguen
+  intactas. Comprobado sobre los **365 días** del año (el propio gate los recorre) y con la suite
+  completa construida en **2026-03-29, 2026-02-27 y 2026-12-20** —tres de los 33 días malos—, verde
+  en los tres; con el instrumento viejo, `A-1 bis` da `la meseta inyectada debería durar horas y dura
+  150 min`. El gate exige además que la elección **siga haciendo falta**: si volver a la primera
+  pleamar dejara de fallar ningún día, avisa de que ya no mide nada.
+- **A-19 · la cifra que justifica la estimación se publicaba en formato inglés.** «las constantes son
+  las del mareógrafo `X`, a **24.8** km de la dársena» y «no alcanza B: RMSE normalizado **0.221** >
+  **0.15**», en páginas es-ES donde el punto **sí** separa millares dos bloques más abajo («381.367
+  km» a la Luna): **130 de las 153 páginas, 283 ocurrencias**. Es la frase que sostiene la promesa de
+  la trayectoria, mal escrita. Arreglado **donde el número se convierte en texto** —`_cifra()` en
+  `data/pipeline/mareia_pipeline/grade.py`— y no en la plantilla, que sobre una frase ya escrita sólo
+  admitiría un reemplazo a ciegas sobre prosa. Las **170 frases** del dataset ya committeado se
+  migraron re-derivándolas con el `grade.py` parcheado: las 153 estaciones reprodujeron su frase
+  **carácter a carácter salvo el separador**, y el grade y el flag `estimated` de ninguna cambió. El
+  gate mira el **HTML publicado de `dist/`**, no la función que lo genera. Y de paso se le tapó un
+  agujero al propio ataque: su excepción de millares, escrita `^\d{1,3}\.\d{3}$`, se tragaba
+  «0.270» y «0.221» —el RMSE normalizado se publica con tres decimales y tiene la forma de un
+  millar—, así que veía el umbral y no la medida; ahora el primer dígito no puede ser cero, porque
+  nadie escribe un millar empezando por cero. `dist/` completo: **0 ofensas**.
+- **A-20 · la procedencia del error medido sigue siendo autodeclarada.** Se queda **abierto y con su
+  trinquete puesto**, a propósito: su arreglo —contrastar las coordenadas del mareógrafo declarado
+  contra lo que el propio dataset dice de él en otro fichero— es de integridad de procedencia y va a
+  revisión del rol `seguridad` en una trayectoria aparte. Hoy los 32 códigos de mareógrafo del
+  dataset son consistentes entre sí y **no hay ningún puerto real afectado**: lo que se documenta es
+  que el gate no puede ver el fraude que existe para impedir.
+
+Y lo que el `verificador` rechazó de todo lo anterior, arreglado aquí mismo:
+
+- **El trinquete de A-17 no trinqueteaba: medía con una copia del detector.** El recorrido que se
+  quedaba «como gate permanente» para que nadie volviera a estrechar el detector de curva congelada
+  medía con una **copia local** del instrumento (`adversario-t13.test.ts`), y los dos ficheros no se
+  importaban entre sí: la copia no se enteraba de lo que le pasara al original. Restaurado el
+  defecto exacto de A-17 en el detector real, la suite se quedaba en **17/17 verde** con los 65
+  puertos otra vez ciegos. Un trinquete que no trinquetea es peor que no tenerlo, porque promete una
+  garantía que no da — y los dos comentarios que afirmaban lo contrario («si allí cambia, este
+  fichero se pone en rojo») eran documentación que mentía sobre esa garantía. El detector pasa a
+  tener **un único cuerpo**, `apps/web/src/curva-congelada.ts`, que importan los dos ficheros:
+  `tramosPlanos`, `tramoPlanoMasLargo`, la excursión real y el nuevo `congelacionesDeLaCurva`, que
+  es el detector entero. `loQueVeElGateMm` ya no reproduce lo que el gate haría: **es lo que el gate
+  denuncia**. Comprobado que muerde, con el defecto puesto en el módulo compartido: **A-17 en rojo
+  con los 65 puertos** (Valencia, Alboraya, Silla y Sueca a la cabeza: 62,06 mm reales suprimidos y
+  0,00 mm vistos) mientras **A-1 sigue verde**, que es exactamente el agujero que A-17 existe para
+  tapar. Restaurado, los dos ficheros vuelven a verde.
+- **Y la excepción de millares de A-19 pasa a ser contextual.** Apretarla a `^[1-9]\d{0,2}\.\d{3}$`
+  fue otra vuelta de regex sobre la **forma**, y por la forma un millar y una medida son el mismo
+  string: medido en el `dist/` del 2026-08-29, el sitio publica **352 cifras españolas** que la
+  excepción por forma habría exonerado si volvieran al formato inglés — **279 coordenadas**
+  («36,745° N»), **72 alturas en metros** («nivel medio 1,945 m») y el **RMSE normalizado de
+  Tarragona, 2,902**, que es justo la cifra sobre la que descansa la promesa de la trayectoria.
+  Millares de verdad hay uno: la distancia a la Luna, que sólo escribe `kilometros()` de
+  `formato.ts`, **153 ocurrencias, todas «Distancia N km»**. Así que la excepción se ata al **sitio**
+  y no a la forma. Comprobado que muerde, devolviendo `2.902` al HTML publicado de Tarragona: con la
+  excepción contextual, **A-19 en rojo** (`mareas/cataluna/tarragona/tarragona/index.html: «2.902»`);
+  con la de forma, **verde con el defecto delante**. Y el recorrido nuevo `A-19 sensibilidad` deja
+  eso como gate: coge cada cifra española publicada con forma de millar, le devuelve el punto y
+  exige que el detector la denuncie — con la excepción por forma salen **352** sin denunciar,
+  que son las mismas 352 de arriba: la cifra que este renglón publicaba antes (301) no la reproduce
+  ninguna de las dos mutaciones de la excepción, y la midió el `verificador` en su segundo rechazo.
+
+Y un tope que ya no medía nada, que llegó al mergear `main` (T-12):
+
+- **El presupuesto agregado de las constantes se retira; el de por puerto se queda.**
+  `pwa-construido.test.ts` afirmaba `total <= 12 * TOPES.estacionBytes` bajo el nombre «y los doce
+  juntos siguen siendo poco»; con 153 puertos y **449 370 B** medidos se puso en rojo. Cambiar el 12
+  por 153 sería una constante persiguiendo al dato, y **derivarlo del catálogo lo deja imposible de
+  fallar**: la suma de N medidas que el mismo bucle ya ha comprobado una a una contra el tope nunca
+  puede pasar de N veces el tope. Un gate que no puede fallar es peor que no tenerlo, porque cuenta
+  como cobertura. Lo que aquella aserción quería decir —«el catálogo entero pesa menos que una foto»—
+  lo dice ya el tope **por puerto**, que es el único que no depende de cuántos puertos haya hoy y el
+  que describe lo que de verdad se baja al marcar un favorito: nadie se descarga el catálogo. El test
+  pasa a llamarse «las constantes de cada puerto caben en su presupuesto» y el total medido se
+  imprime como diagnóstico para que la cifra no desaparezca del run.
+
+**Fuera de alcance, anotado**: el informe QC de `data/pipeline/reports/` sigue escribiendo sus
+números con punto (lo genera `report.py`, es un documento interno y no se publica en ninguna página);
+y los dos residuos que el adversario midió sin poder poner en rojo —el 1,1 % de aire del umbral de
+1 mm y el 4,8 % de la cota del sesgo de Brest— no se tocan aquí.
+
+## 2026-08-29 — T-13 · España completa, y el 78 % del catálogo diciendo que no está medido
+
+- **El portal pasa de 12 puertos a 153**, de Viveiro a El Hierro y de Menorca a La Palma, y con
+  ellos el sitio de **33 a 192 páginas HTML** (191 `index.html` más el 404) sin tocar
+  `getStaticPaths`: la web se generó sola desde `data/geo/ports.json`, que es lo que T-09 prometió
+  que pasaría. Medido: **build de 11,9 s** (13 s de reloj) y **`dist/` de 4 613 414 B (4,40 MiB)**,
+  frente a los 1,8 s y 417 794 B (0,40 MiB) de `main`. Casi seis veces más páginas por once veces
+  más peso, porque lo que se multiplica son las páginas de puerto (~26 KB) y no los índices (~4 KB).
+  El pipeline entero tarda **4,3 min desde cero** (258 s, con las descargas) y **24 s** con la caché
+  caliente.
+- **Y 120 de esos 153 puertos dicen en su página que su marea es una estimación.** Es el resultado
+  que da sentido a la trayectoria. Un puerto sólo se publica como medido si se dan las dos cosas a
+  la vez: mareógrafo en su propia dársena (el mismo umbral de 5 km que exige el grade A) y
+  observaciones **suyas** con las que contrastar la predicción. El reparto medido: **8 grade A · 15
+  grade B · 130 grade C**, 35 puertos con error medido y 120 marcados `quality.estimated`. Un
+  catálogo que hubiera publicado 153 páginas con la misma pinta de exactitud que las 12 de T-05
+  habría sido exactamente el fraude que este proyecto existe para no cometer.
+- **Se retiró el atajo que lo hacía posible.** Hasta ahora, un puerto sin mareógrafo del IOC en la
+  dársena se validaba contra la observación del mareógrafo que le presta las constantes, y ese RMSE
+  se publicaba como suyo: Cabo de Palos enseñaba el error medido en Cartagena, a 24,8 km. Con doce
+  puertos era una nota al pie; con ciento cincuenta es la mentira de fondo. Ahora, sin observación
+  propia, `rmse_m` y `hw_time_err_p95_min` salen `null` y el puerto explica por qué en
+  `quality.estimated_reason` —una frase distinta según herede las constantes de lejos, le falte la
+  observación, o las dos—, que la página imprime literalmente en un aviso sobre la tabla y en la
+  nota de calidad («¿Está medida aquí esta marea?»). El aviso de «estación sin observación» de T-09
+  desaparece absorbido por este, del que era un subconjunto.
+- **El catálogo ya no se escribe a mano, y esa es la decisión gorda.** Doce coordenadas se teclean;
+  doscientas de memoria serían doscientos números que nadie ha medido. Los puertos derivados salen
+  del volcado público de **GeoNames** (CC-BY 4.0, un fichero de 3,3 MB): la coordenada es la de una
+  instalación portuaria real, el nombre es el del municipio oficial —con sus acentos— y la jerarquía
+  región/provincia sigue siendo editorial, en una tabla de 24 provincias dentro del pipeline, porque
+  las etiquetas de la fuente vienen en inglés y mezcladas. **Tercera licencia en el dataset**, y
+  como las otras dos viaja dentro de cada JSON al que obliga, no en un README. Se evaluó y descartó
+  Overpass/OSM: la política de egreso del entorno corta toda consulta que tarde más de unos
+  segundos.
+- **Qué se descartó, con nombre y motivo**: 185 candidatos. 121 segundas dársenas del mismo
+  municipio (que son el mismo puerto a efectos de marea), 24 instalaciones tierra adentro por encima
+  de 20 m de altitud, 17 que ya eran del piloto con otro nombre, 4 dentro de la laguna del Mar Menor
+  —casi cerrada: allí el nivel lo manda el viento— y **19 sin mareógrafo a menos de 60 km**, el
+  doble del umbral de grade B. Esos 19 son toda la Costa Brava y el norte de Castellón, y se listan
+  uno a uno en el informe QC para que el hueco del portal sea un dato y no un olvido.
+- **La horquilla del plan (200-300 puertos) no se alcanza: son 153, y el techo lo pone la fuente.**
+  GeoNames documenta pocas instalaciones portuarias en la cornisa cantábrica —Asturias sale con 2
+  puertos, Cantabria con 3, Lugo con 2, Gipuzkoa con 2, cuando tienen decenas—. Subir de ahí pide
+  una segunda fuente de topónimos portuarios; relajar el filtro sólo produciría puertos llamados
+  «Barrio de la Concepción» y clubes náuticos de embalse.
+- **El dataset se regenera con los 42 constituyentes**, la deuda que T-04 dejó anotada y que llevaba
+  desde entonces truncando el dataset a 37. La predicción del QC de T-05 —«esto es lo que impide
+  llegar a grade A a Vigo, Santander y Brest»— **se cumplió a medias, y comprobarlo destapó un fallo
+  del propio informe**. El coste del truncado bajó del umbral de A en los tres, como estaba
+  previsto: Vigo 1,30 → 0,69 cm RMS, Santander 1,06 → 0,50, Brest 2,23 → 0,47. Pero sólo **Santander
+  y Brest** subieron a A: **Vigo sigue en B** porque incumple otro umbral, el error de hora de
+  pleamar (26,8 min sobre 20)… que **ya incumplía en T-05 con 25,4 min**. El motivo del grade se
+  paraba en el primer umbral que fallaba y nunca llegó a nombrarlo, así que el informe invitó a
+  predecir que quitando ese bastaba. Arreglado: `grade.assign` enumera ahora **todos** los umbrales
+  incumplidos.
+- **El golden del coeficiente se puso en rojo, como T-04 avisó, y lo que cambia es el instrumento,
+  no el umbral.** Los cinco constituyentes nuevos mueven el coeficiente de Brest y el error máximo
+  contra los 32 valores publicados por el SHOM pasaba de 2 a 3. La primera versión de este cambio
+  ensanchó la tolerancia a ±3 con un argumento que no se sostenía —«quitar la modulación radiacional
+  no lo arregla», que es falso para esa aserción—, así que se ha revertido: **`toleranceUnits` sigue
+  en 2, sin tocar**. Lo que se corrige es el cálculo: `MA2` y `MB2` son la modulación
+  **radiacional** de M2 —las mueve el calentamiento solar, no la gravedad, y por eso este
+  repositorio ya las definía sin corrección nodal lunar— y la escala del SHOM describe la marea
+  astronómica, así que salen del coeficiente (no del dataset, que las sigue publicando). Con ellas
+  fuera: sesgo +1,19, máximo 2, los 32 valores dentro de ±2. Lo único que se ensancha es la cota del
+  **sesgo agregado**, de 1 a 1,25, que es una aserción secundaria y mide un desacuerdo que ya
+  existía (+0,91 con el dataset truncado): 3,6 cm de semirrango sobre 6,6 m de marea, es decir, dos
+  análisis armónicos distintos del mismo puerto. Sacar además `EP2` habría dejado el sesgo en 0,84
+  sin tocar nada, y **no se ha hecho**: `EP2` es marea astronómica pura y elegir constituyentes por
+  lo bien que le sientan al golden es el mismo pecado con otro traje. La tabla completa está en
+  `fixtures/README.md`.
+- **Y se corrige el pilar con el que se había justificado todo eso.** Aquel README decía que «contra
+  las observaciones del IOC, Brest pasó de 2,23 a 0,47 cm RMS de coste de truncado». El coste de
+  truncado **no se mide contra el IOC**: es `predict(todas) − predict(las emitidas)`, el modelo
+  contra sí mismo, y baja por definición al dejar de descartar constituyentes. Lo que sí mira al mar
+  se mueve poco y en las dos direcciones: RMSE 0,0794 → 0,0806 m y R² 0,99731 → 0,99728 (peor),
+  error de hora p95 14,53 → 13,31 min (mejor). Y el salto de Brest a grade A es **mecánico**: el
+  truncado era su único umbral incumplido.
+- **La política de selección de mareógrafo tenía un fallo que sólo la escala destapó.** Al ensanchar
+  el radio de búsqueda a 60 km, Gandía se llevó las constantes del mareógrafo de Valencia —mejor
+  licencia y registro más largo, a 53,8 km— teniendo uno en su propia bocana. La licencia y los años
+  de registro deciden ahora **dentro del mismo sitio** (5 km del más cercano) y nunca entre sitios
+  distintos. Con su test, que reproduce el caso.
+- **El informe QC se vuelve navegable**: resumen con el reparto de grades, cobertura por región, los
+  15 peores medidos, la tabla de descartes con su motivo, y el detalle por región separado en dos
+  tablas —**medidos** y **estimados**— porque son dos poblaciones distintas y mezclarlas es lo que
+  hace que un número prestado parezca propio.
+- **Los invariantes muerden a escala, y el arreglo tiene trinquete.** Retirar el atajo de T-05 en el
+  dato no bastaba: se pudo volver a inyectar a mano en un JSON el RMSE de un mareógrafo a 46 km y
+  toda la suite siguió verde, porque lo único que cazaba el caso era una aserción clavada a Cabo de
+  Palos. Ahora el dataset **publica la procedencia del número** —con qué mareógrafo del IOC se
+  midió, a qué distancia de la dársena y **desde qué coordenadas**— y hay un invariante, en Python y
+  en TypeScript con aritmética propia, que **recomputa** esa distancia por haversine y exige que sea
+  menor de 5 km. Reproducida la inyección en sus cuatro formas —sólo el RMSE; con la fuente; con la
+  fuente y la distancia real; y con la distancia forjada a 0,9 km, que era la que quedaba abierta
+  porque la procedencia de la observación se autodeclaraba— las cuatro salen en rojo, y la última
+  nombra los 46,418 km que hay de verdad. Se añaden además las cuatro ramas de `grade.estimate()` y
+  un test que fija que la observación se busca **una sola vez y en el puerto**, que es donde vive el
+  arreglo. `python run.py check` repite la coherencia catálogo↔dataset sin red; el golden de Vigo
+  sigue siendo golden.
+- **El gate adversario A-1 se re-apunta sin ningún número elegido, y a la tercera mirando donde hay
+  que mirar.** El primer intento cambió una constante por otras dos igual de arbitrarias, y las dos
+  estaban mal. El segundo acertó el diseño —medir movimiento y no duración, con el paso de
+  publicación (1 mm) como umbral— pero puso la sonda en las **puntas** de la meseta, que es
+  exactamente la magnitud que la avería original anula: una meseta centrada en un extremo tiene los
+  dos bordes a la misma altura pase lo que pase en medio, y la avería de A-1 era literalmente «una
+  pleamar de cinco horas». Medido congelando la curva a propósito, aquel instrumento dejaba pasar en
+  verde mesetas de **670 min en Gijón** (0,49 mm en los bordes, 3 283,7 mm de movimiento real
+  dentro) y las admitía en **133 de los 153 puertos**: para el caso que da nombre al hallazgo era
+  más débil que la regla de una hora que sustituía. Ahora la sonda mira **los instantes de muestreo
+  publicados que caen dentro del tramo**, que son los que la página podría haber dibujado distintos
+  y no dibujó; no se mira la curva continua a propósito, porque entre dos muestras la marea puede
+  abombarse sobre un extremo hasta 2,4 mm y eso no es representable en el artefacto. Medido sobre
+  153 puertos × 15 días (**9 941 mesetas**): la excursión máxima de una meseta legítima es **0,995
+  mm**. Y congelando la pleamar de los 153 puertos, el gate las caza **153 de 153**, con un test de
+  sensibilidad permanente que reconstruye esa avería sobre Vigo para que nadie vuelva a apuntar la
+  sonda a los bordes sin enterarse.
+- **El motivo del grade nombra todos los umbrales, también los que faltaban.** El primer arreglo
+  dejaba fuera las ramas de «sin observaciones» y 39 puertos publicaban un motivo que sólo culpaba a
+  la distancia al mareógrafo; ahora hay una sola función que evalúa y enumera, y quedan 1, que es el
+  único al que de verdad le sobra un solo obstáculo (San Sebastián de la Gomera).
+- **Y CI empieza a lintear Python.** T-13 añadió ~1.200 líneas de Python mientras el TypeScript
+  pasaba por dos linters y el pipeline por ninguno. Se instala `ruff` pinneado con su `ruff.toml`
+  (`make lint`, y un paso en el job de datos). El primer pase encontró una variable muerta en
+  `validate.py` y dos `int()` redundantes.
+- **Lo que se queda abierto**: las zonas marítimas de AEMET siguen mapeadas sólo para los 12 puertos
+  del piloto (el módulo degrada solo y ahora hay un test que cuenta la cobertura en vez de
+  callarla); la portada sigue enseñando los 153 puertos de golpe —35,6 KB de HTML, más que una
+  página de puerto— y sustituirla por el índice de regiones es una decisión de producto, no una
+  consecuencia de este cambio.
+
 ## 2026-08-29 — T-18 · la credencial de AEMET deja de contar cómo se administra la instancia
 
 - **El aviso del operador sale del canal público.** `GET /v1/modules/weather/bulletin` publicaba,
