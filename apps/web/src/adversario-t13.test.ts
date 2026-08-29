@@ -441,6 +441,58 @@ test("A-18 · la prueba de sensibilidad del gate A-1 no depende del día en que 
 // A-19 · clase A6 (input hostil) — la cifra que justifica la estimación iba en formato inglés
 // =================================================================================================
 
+/** Todas las páginas HTML construidas bajo un directorio. */
+function paginasHtml(directorio: string): readonly string[] {
+  return readdirSync(directorio, { withFileTypes: true }).flatMap((entrada) => {
+    const ruta = join(directorio, entrada.name);
+    if (entrada.isDirectory()) return paginasHtml(ruta);
+    return entrada.name.endsWith(".html") ? [ruta] : [];
+  });
+}
+
+/** Lo que la página enseña de verdad: sin scripts y sin marcado, que es donde se lee una cifra. */
+function textoVisible(html: string): string {
+  return html.replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<[^>]+>/g, " ");
+}
+
+/** Las versiones de licencia («CC BY 4.0», «AGPL-3.0»), que no son la medida de nada. */
+const VERSIONES_DE_LICENCIA = /^(3|4)\.0$/;
+
+/**
+ * El único punto de millares que el sitio escribe de verdad: la distancia a la Luna, que sale de
+ * `kilometros()` (`formato.ts`, el único formato del sitio con separador de millar) y se publica en
+ * su propia fila del bloque de Luna, rotulada «Distancia» y con la unidad detrás.
+ *
+ * La excepción se ata al SITIO, no a la forma: son 153 ocurrencias, una por página de puerto, y
+ * fuera de ahí un punto entre dígitos no es un millar sino una regresión. Ver el porqué, con los
+ * 352 contraejemplos medidos, en la cabecera de A-19.
+ */
+const DISTANCIA_A_LA_LUNA = /(?<=Distancia\s+)\d{1,3}\.\d{3}(?=\s+km)/g;
+
+/**
+ * Una cifra española publicada que, escrita con el punto inglés, sería **indistinguible de un
+ * millar** como string: la clase entera de medidas que la excepción por forma exoneraba.
+ */
+const CIFRA_CON_FORMA_DE_MILLAR = /(?<![\d.,])[1-9]\d{0,2},\d{3}(?![\d.,])/g;
+
+/**
+ * Las cifras que una página publica con el decimal en punto, leídas del texto visible.
+ *
+ * Es una función y no el cuerpo del test porque la prueba de sensibilidad de más abajo la llama con
+ * una página falsificada a mano: un gate que nadie ha visto fallar es una conjetura.
+ */
+function cifrasConDecimalIngles(html: string): readonly string[] {
+  const visible = textoVisible(html);
+  const millares = new Set<number>();
+  for (const millar of visible.matchAll(DISTANCIA_A_LA_LUNA)) millares.add(millar.index);
+  const ofensas: string[] = [];
+  for (const encontrado of visible.matchAll(/\d+\.\d+/g)) {
+    if (VERSIONES_DE_LICENCIA.test(encontrado[0]) || millares.has(encontrado.index)) continue;
+    ofensas.push(encontrado[0]);
+  }
+  return ofensas;
+}
+
 /**
  * A-19 · **CORREGIDO, y el recorrido se queda como gate permanente** — clase A6.
  *
@@ -464,46 +516,76 @@ test("A-18 · la prueba de sensibilidad del gate A-1 no depende del día en que 
  *
  * Lo que este gate vigila a partir de ahora: **ninguna página publica un decimal con punto**, y lo
  * mira en el **HTML publicado**, no en la función que lo genera — el sujeto es el artefacto que lee
- * la gente. Del recuento se excluyen el separador de millares español (punto seguido de exactamente
- * tres cifras) y las versiones de licencia, que no son medidas.
+ * la gente. Del recuento se excluyen las versiones de licencia, que no son medidas, y el separador
+ * de millares español.
+ *
+ * **Y la excepción de los millares es CONTEXTUAL, no de forma** (ride-along del rechazo de A-17: la
+ * misma lección, un instrumento que funciona por la forma del dato y no por su significado se rompe
+ * cuando el catálogo cambia). Escrita por la forma —`^[1-9]\d{0,2}\.\d{3}$`— exoneraba a
+ * cualquier cifra que se pareciese a un millar, y por la forma un millar y una medida **son el
+ * mismo string**. Medido en el `dist/` del 2026-08-29: el sitio publica **352 cifras españolas**
+ * que, si volvieran al formato inglés, la excepción por forma habría dado por buenas — 279
+ * coordenadas («36,745° N» → «36.745»), 72 alturas en metros («nivel medio 1,945 m») y el RMSE
+ * normalizado de Tarragona, **2,902**, que es exactamente la cifra sobre la que descansa la promesa
+ * de la trayectoria. Millares de verdad no hay más que uno, la distancia a la Luna, y sólo lo
+ * escribe `kilometros()` de `formato.ts` en su propia fila rotulada: **153 ocurrencias, una por
+ * página de puerto, todas «Distancia N km»**.
+ *
+ * Así que la excepción se ata al sitio y no a la forma (`DISTANCIA_A_LA_LUNA`). El tradeoff, dicho:
+ * si mañana se renombra ese rótulo, el gate enrojece sin que haya avería. Se acepta a propósito —un
+ * rojo que obliga a releer cuesta menos que una excepción que exonera medidas—, y el sensibilidad
+ * de abajo comprueba que la excepción sigue sin tragarse ninguna.
  */
 test("A-19 · ninguna página publica una cifra con el decimal en formato inglés", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
   }
-
-  const paginas = (function recorrer(directorio: string): readonly string[] {
-    return readdirSync(directorio, { withFileTypes: true }).flatMap((entrada) => {
-      const ruta = join(directorio, entrada.name);
-      if (entrada.isDirectory()) return recorrer(ruta);
-      return entrada.name.endsWith(".html") ? [ruta] : [];
-    });
-  })(DIST);
-
-  const VERSIONES_DE_LICENCIA = /^(3|4)\.0$/;
-  /**
-   * El punto español de los millares: «381.367 km» a la Luna.
-   *
-   * El primer dígito no puede ser un cero, y no es un detalle. Escrita `^\d{1,3}\.\d{3}$`, esta
-   * excepción se tragaba «0.270» y «0.221» —el RMSE normalizado, que se publica con tres
-   * decimales— porque tienen exactamente la forma de un millar: el gate veía el «0.15» del umbral
-   * y no la medida de al lado, que es la mitad de la frase que importa. Nadie escribe un millar
-   * empezando por cero.
-   */
-  const SEPARADOR_DE_MILLARES = /^[1-9]\d{0,2}\.\d{3}$/;
   const ofensas: string[] = [];
-  for (const pagina of paginas) {
-    const visible = readFileSync(pagina, "utf8")
-      .replace(/<script[\s\S]*?<\/script>/g, " ")
-      .replace(/<[^>]+>/g, " ");
-    for (const encontrado of visible.matchAll(/\d+\.\d+/g)) {
-      const cifra = encontrado[0];
-      if (VERSIONES_DE_LICENCIA.test(cifra) || SEPARADOR_DE_MILLARES.test(cifra)) continue;
+  for (const pagina of paginasHtml(DIST)) {
+    for (const cifra of cifrasConDecimalIngles(readFileSync(pagina, "utf8"))) {
       ofensas.push(`${pagina.slice(DIST.length + 1)}: «${cifra}»`);
     }
   }
   assert.deepEqual(ofensas, []);
+});
+
+/**
+ * A-19 sensibilidad · **que la excepción de millares no exonere una medida**, que es la única forma
+ * de que este gate se pierda una regresión sin decir nada.
+ *
+ * El escenario no se inventa: se coge cada cifra española que el sitio publica **hoy** y que tiene
+ * la forma de un millar —«2,902» del RMSE de Tarragona, «1,945 m» de un nivel medio, «36,745° N» de
+ * una coordenada—, se le devuelve el punto que A-19 vino a quitar y se exige que el detector la
+ * denuncie. Con la excepción por forma, las 352 pasaban en verde.
+ *
+ * La premisa (que haya alguna cifra así que atacar) va en la misma aserción a propósito: el día que
+ * el catálogo no publique ninguna, este test dejaría de medir en silencio, y eso hay que verlo.
+ */
+test("A-19 sensibilidad · una medida en formato inglés no se salva por parecerse a un millar", (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  const candidatas: string[] = [];
+  const exoneradas: string[] = [];
+  for (const pagina of paginasHtml(DIST)) {
+    const html = readFileSync(pagina, "utf8");
+    const visible = textoVisible(html);
+    for (const medida of new Set([...visible.matchAll(CIFRA_CON_FORMA_DE_MILLAR)].map((m) => m[0]))) {
+      const enIngles = medida.replace(",", ".");
+      candidatas.push(enIngles);
+      if (!cifrasConDecimalIngles(html.replaceAll(medida, enIngles)).includes(enIngles)) {
+        exoneradas.push(`${pagina.slice(DIST.length + 1)}: «${medida}» → «${enIngles}»`);
+      }
+    }
+  }
+  assert.ok(
+    candidatas.length > 0,
+    "ninguna cifra publicada tiene ya la forma de un millar: o el catálogo ha cambiado, o esta " +
+      "prueba de sensibilidad ha dejado de medir nada",
+  );
+  assert.deepEqual(exoneradas, []);
 });
 
 // =================================================================================================

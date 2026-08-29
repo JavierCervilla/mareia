@@ -96,6 +96,11 @@ instrumento mide bien un tramo y el día tiene muchos.
   Comprobado que muerde: con la congelación de Valencia inyectada en la curva real, el gate la caza
   con **61,8 mm** y el instrumento viejo, con el mismo fraude delante, se queda verde. Margen medido
   sobre 1 224 días-puerto y 6 526 mesetas: excursión máxima legítima **0,993 mm**.
+- **Corrección posterior (rechazo del `verificador`, mismo PR):** este recorrido medía con una
+  **copia local** del detector, así que no trinqueteaba: estrechar el detector real a una sola meseta
+  lo dejaba en verde con los 65 puertos otra vez ciegos. El detector vive ahora en un único cuerpo,
+  `apps/web/src/curva-congelada.ts`, que importan el gate y su ataque; comprobado en rojo con el
+  defecto puesto ahí (65 puertos) y en verde al restaurarlo.
 - **Premisa en verde** (deliberadamente sin trinquete): `A-17 premisa · la congelación inyectada se
   dibuja plana en la curva publicada` comprueba, sobre el `<path>` que va al SVG, que el fraude se
   dibujaría de verdad —≥ 4 puntos consecutivos a la misma altura— y no es un espejismo de la
@@ -154,6 +159,12 @@ a la Luna como «**381.367** km», donde el punto **sí** es separador de millar
   cambiar ningún grade ni ningún flag `estimated`. Al ataque se le tapó además un agujero propio: su
   excepción de millares (`^\d{1,3}\.\d{3}$`) se tragaba «0.270» y «0.221», que es la medida y no el
   umbral. `dist/` completo: **0 ofensas**.
+- **Corrección posterior (mismo PR):** apretar esa excepción a `^[1-9]\d{0,2}\.\d{3}$` seguía siendo
+  una regla sobre la **forma**, y por la forma un millar y una medida son el mismo string: exoneraba
+  las 352 cifras españolas que el sitio publica con esa pinta (279 coordenadas, 72 alturas y el RMSE
+  normalizado de Tarragona, 2,902). La excepción es ahora **contextual** —sólo la fila «Distancia N
+  km» de la Luna, la única que escribe un millar de verdad— y el recorrido `A-19 sensibilidad` lo
+  deja como gate: devuelto `2.902` al HTML de Tarragona, A-19 se pone en rojo.
 
 ### A-20 · la procedencia del error medido sigue siendo autodeclarada · clase A12 · media · **escalado a `seguridad`**
 

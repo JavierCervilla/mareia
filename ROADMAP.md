@@ -63,7 +63,10 @@
       cifras que justifican la estimación se publican en español (130 páginas, 283 ocurrencias).
       **A-20 queda abierto con trinquete** y escalado al rol `seguridad`: la procedencia del error
       medido es autodeclarada y ningún puerto real está afectado hoy;
-      ver `docs/qa/informe-adversario-t13.md`)
+      ver `docs/qa/informe-adversario-t13.md`. El `verificador` rechazó el primer intento porque el
+      recorrido de A-17 medía con una **copia** del detector y no trinqueteaba —estrechar el gate
+      real lo dejaba verde—: el detector vive ahora en `apps/web/src/curva-congelada.ts` y lo
+      importan los dos ficheros, comprobado en rojo con los 65 puertos)
 - [ ] T-14 · Metodología pública + QC navegable + dataset CC-BY + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario
       (queda del peldaño 1 del gate de seguridad `actionlint` sobre `.github/workflows/` —es el

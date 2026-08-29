@@ -61,6 +61,37 @@ recorridos se quedan **como gate permanente**, sin envoltorio de trinquete.
   dataset son consistentes entre sí y **no hay ningún puerto real afectado**: lo que se documenta es
   que el gate no puede ver el fraude que existe para impedir.
 
+Y lo que el `verificador` rechazó de todo lo anterior, arreglado aquí mismo:
+
+- **El trinquete de A-17 no trinqueteaba: medía con una copia del detector.** El recorrido que se
+  quedaba «como gate permanente» para que nadie volviera a estrechar el detector de curva congelada
+  medía con una **copia local** del instrumento (`adversario-t13.test.ts`), y los dos ficheros no se
+  importaban entre sí: la copia no se enteraba de lo que le pasara al original. Restaurado el
+  defecto exacto de A-17 en el detector real, la suite se quedaba en **17/17 verde** con los 65
+  puertos otra vez ciegos. Un trinquete que no trinquetea es peor que no tenerlo, porque promete una
+  garantía que no da — y los dos comentarios que afirmaban lo contrario («si allí cambia, este
+  fichero se pone en rojo») eran documentación que mentía sobre esa garantía. El detector pasa a
+  tener **un único cuerpo**, `apps/web/src/curva-congelada.ts`, que importan los dos ficheros:
+  `tramosPlanos`, `tramoPlanoMasLargo`, la excursión real y el nuevo `congelacionesDeLaCurva`, que
+  es el detector entero. `loQueVeElGateMm` ya no reproduce lo que el gate haría: **es lo que el gate
+  denuncia**. Comprobado que muerde, con el defecto puesto en el módulo compartido: **A-17 en rojo
+  con los 65 puertos** (Valencia, Alboraya, Silla y Sueca a la cabeza: 62,06 mm reales suprimidos y
+  0,00 mm vistos) mientras **A-1 sigue verde**, que es exactamente el agujero que A-17 existe para
+  tapar. Restaurado, los dos ficheros vuelven a verde.
+- **Y la excepción de millares de A-19 pasa a ser contextual.** Apretarla a `^[1-9]\d{0,2}\.\d{3}$`
+  fue otra vuelta de regex sobre la **forma**, y por la forma un millar y una medida son el mismo
+  string: medido en el `dist/` del 2026-08-29, el sitio publica **352 cifras españolas** que la
+  excepción por forma habría exonerado si volvieran al formato inglés — **279 coordenadas**
+  («36,745° N»), **72 alturas en metros** («nivel medio 1,945 m») y el **RMSE normalizado de
+  Tarragona, 2,902**, que es justo la cifra sobre la que descansa la promesa de la trayectoria.
+  Millares de verdad hay uno: la distancia a la Luna, que sólo escribe `kilometros()` de
+  `formato.ts`, **153 ocurrencias, todas «Distancia N km»**. Así que la excepción se ata al **sitio**
+  y no a la forma. Comprobado que muerde, devolviendo `2.902` al HTML publicado de Tarragona: con la
+  excepción contextual, **A-19 en rojo** (`mareas/cataluna/tarragona/tarragona/index.html: «2.902»`);
+  con la de forma, **verde con el defecto delante**. Y el recorrido nuevo `A-19 sensibilidad` deja
+  eso como gate: coge cada cifra española publicada con forma de millar, le devuelve el punto y
+  exige que el detector la denuncie — con la excepción por forma salen **301** sin denunciar.
+
 Y un tope que ya no medía nada, que llegó al mergear `main` (T-12):
 
 - **El presupuesto agregado de las constantes se retira; el de por puerto se queda.**
