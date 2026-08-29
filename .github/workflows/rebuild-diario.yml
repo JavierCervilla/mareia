@@ -72,32 +72,55 @@ jobs:
           # Se leen los build args que ya hay y se sustituye SOLO la línea de BUILD_DATE: mandar el
           # campo entero a ciegas borraría `SITE_URL` o cualquier otro que alguien haya puesto en el
           # panel, y el estropicio no se notaría hasta el siguiente despliegue.
-          actuales="$(curl -sSf -H "x-api-key: $DOKPLOY_API_KEY" \
-            "$DOKPLOY_API_URL/api/application.byId?applicationId=$DOKPLOY_WEB_APP_ID" \
-            | jq -r '.buildArgs // ""')"
+          # ANTES de tocar nada se guarda la ficha entera. `application.update` se asume
+          # **parcial** —mandamos solo `{applicationId, buildArgs}`— y esa asunción NO está probada
+          # contra el panel real. Si fuera un **reemplazo**, esta llamada dejaría la aplicación viva
+          # sin dominio, sin sus variables de entorno (AEMET_API_KEY) y sin `dockerContextPath`, que
+          # es justo el campo sin el cual el build falla. Y la confirmación de más abajo pasaría en
+          # VERDE, porque `buildArgs` contendría exactamente lo que acabamos de mandar: se comprueba
+          # lo que se envió, que es el peor sitio donde mirar. Así que se guarda la ficha y se
+          # compara después campo a campo.
+          antes="$(curl -sSf -H "x-api-key: $DOKPLOY_API_KEY" \
+            "$DOKPLOY_API_URL/api/application.byId?applicationId=$DOKPLOY_WEB_APP_ID")"
+          actuales="$(printf '%s' "$antes" | jq -r '.buildArgs // ""')"
           nuevos="$(printf '%s\n' "$actuales" | grep -v '^BUILD_DATE=' || true)"
           nuevos="$(printf '%s\nBUILD_DATE=%s\n' "$nuevos" "$HOY" | sed '/^$/d')"
           jq -n --arg id "$DOKPLOY_WEB_APP_ID" --arg args "$nuevos" \
-            '{applicationId: $id, buildArgs: $args}' > /tmp/patch.json
+            '{applicationId: $id, buildArgs: $args}' > /tmp/actualizacion.json
           # POST, no PATCH. La tabla de la skill de dokploy decía `PATCH` y se contradecía con su
           # propio ejemplo; el heartbeat del 2026-08-21 ya lo tenía medido en campo: con PATCH la
           # llamada devuelve otra cosa y **no aplica**. Es decir, este rebuild no habría corrido
           # nunca, y la normativa fechada que depende de él se habría quedado sin su pieza.
           curl -sSf -X POST -H "x-api-key: $DOKPLOY_API_KEY" -H 'Content-Type: application/json' \
-            --data @/tmp/patch.json "$DOKPLOY_API_URL/api/application.update" > /dev/null
+            --data @/tmp/actualizacion.json "$DOKPLOY_API_URL/api/application.update" > /dev/null
 
           # Y se vuelve a leer para comprobar que **surtió efecto**. Es el paso que
           # convierte «creo que Dokploy acepta este campo» en un hecho comprobado en cada corrida:
           # si un día la API cambia de forma —o si el método vuelve a estar mal—, esto se pone rojo
           # en vez de desplegar la fecha de ayer
           # con toda la pinta de haber funcionado.
-          confirmado="$(curl -sSf -H "x-api-key: $DOKPLOY_API_KEY" \
-            "$DOKPLOY_API_URL/api/application.byId?applicationId=$DOKPLOY_WEB_APP_ID" \
-            | jq -r '.buildArgs // ""')"
-          if ! printf '%s\n' "$confirmado" | grep -qx "BUILD_DATE=$HOY"; then
+          despues="$(curl -sSf -H "x-api-key: $DOKPLOY_API_KEY" \
+            "$DOKPLOY_API_URL/api/application.byId?applicationId=$DOKPLOY_WEB_APP_ID")"
+
+          # (a) Lo que queríamos escribir, se escribió.
+          if ! printf '%s\n' "$(printf '%s' "$despues" | jq -r '.buildArgs // ""')" \
+              | grep -qx "BUILD_DATE=$HOY"; then
             echo "::error::El build arg BUILD_DATE=$HOY no quedó guardado en Dokploy; sin él el build reutilizaría la capa cacheada y el sitio publicaría la fecha de ayer."
             exit 1
           fi
+
+          # (b) Y NADA MÁS cambió. Esto es lo que convierte la asunción «update es parcial» en algo
+          # comprobado en cada corrida en vez de en una esperanza: si el endpoint resultara ser un
+          # reemplazo, estos campos habrían desaparecido y el job se pone rojo ANTES de desplegar,
+          # con el estropicio aún reparable desde la ficha que guardamos arriba.
+          for campo in domains env dockerContextPath dockerfile buildType branch repository sourceType applicationStatus; do
+            a="$(printf '%s' "$antes"   | jq -cS --arg c "$campo" '.[$c] // null')"
+            d="$(printf '%s' "$despues" | jq -cS --arg c "$campo" '.[$c] // null')"
+            if [ "$a" != "$d" ]; then
+              echo "::error::application.update NO es parcial: al escribir buildArgs cambió también '$campo'. Antes: $a — Después: $d. La aplicación viva puede haber perdido configuración; restaura desde el panel antes de volver a correr esto."
+              exit 1
+            fi
+          done
 
       - name: Desplegar
         run: |

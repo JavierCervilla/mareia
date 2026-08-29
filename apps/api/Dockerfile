@@ -98,16 +98,17 @@ USER deno
 # `0.0.0.0` explícito: la avería silenciosa de este despliegue es un proceso que bindea a la
 # interfaz equivocada, arranca sin quejarse, deja el contenedor `running` y hace que Traefik
 # conteste 502. Lo dice `main.ts`, y el banner de arranque lo LEE del socket en vez de repetirlo.
-# Sin esto el runtime abre una conexión TLS a Cloudflare **en cada arranque**, antes de la primera
-# petición y sin que ninguna línea de nuestro código lo pida: es su comprobación de versión. No es
-# un fallo de seguridad, pero un servicio que sale a internet para algo que no le hemos pedido es
-# ruido en el perímetro y una dependencia que no controlamos en el arranque. Lo midió el
-# verificador de T-15 sobre el contenedor recién levantado.
-ENV DENO_NO_UPDATE_CHECK=1
-
 ENV HOST=0.0.0.0
 ENV PORT=8787
 ENV HEALTH_PORT=8788
+
+# El runtime abre una conexión TLS a Cloudflare **en cada arranque**, antes de la primera petición y
+# sin que ninguna línea de nuestro código lo pida: es su comprobación de versión. No es un fallo de
+# seguridad, pero un servicio que sale a internet para algo que no le hemos pedido es ruido en el
+# perímetro y una dependencia que no controlamos al arrancar. Medido sobre el contenedor recién
+# levantado: con esta variable, cero conexiones salientes; sin ella, una establecida al 443 de
+# Cloudflare.
+ENV DENO_NO_UPDATE_CHECK=1
 
 # El puerto que el dominio declara en Dokploy. El 8788 NO se expone a propósito: es el healthcheck,
 # y quien tiene que alcanzarlo está dentro de la red del despliegue.

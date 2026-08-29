@@ -281,7 +281,8 @@ imagen construida:
   __tests__:    0 directorios
   *_test.ts:    0 ficheros
   ficheros bajo /repo: 225
-  /repo pesa: 2.2M · /deno-dir pesa: 11.5M
+  /repo pesa: 2.2M · /deno-dir pesa: ~11M (no determinista: ±600K de sidecars -wal/-shm que
+                     la caché de Deno deja o no según la build; no la uses como cifra a comparar)
   /repo/apps: api  /repo/data: geo stations  /repo/packages: adapters domain-core module-contract modules usecases
 ```
 
@@ -514,8 +515,9 @@ Lo monta `.github/workflows/rebuild-diario.yml`, con `cron` a las **04:20 UTC** 
 
 Qué hace, en orden: comprueba que están los secretos → lee los `buildArgs` que ya tiene la
 aplicación y **sustituye solo la línea `BUILD_DATE`** (mandar el campo entero a ciegas borraría
-`SITE_URL` o cualquier otro que alguien haya puesto en el panel) → **relee para confirmar que el
-PATCH surtió efecto** → despliega → y **comprueba el resultado**, no la llamada: espera hasta diez
+`SITE_URL` o cualquier otro que alguien haya puesto en el panel) → lo manda por **POST** (no
+`PATCH`: con `PATCH` la llamada devuelve otra cosa y **no aplica**, medido en campo) → **relee para
+confirmar que surtió efecto y que no cambió nada más** → despliega → y **comprueba el resultado**, no la llamada: espera hasta diez
 minutos a que `mareia.cervilla.es/mareas/galicia/pontevedra/vigo/` publique
 `data-otro-dia-build="<hoy>"`.
 

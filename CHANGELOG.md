@@ -65,8 +65,10 @@ configuración y las pruebas locales que demuestran que funciona; el despliegue 
   reconstruye a diario (04:20 UTC), y la parte importante es lo que va escrito en su cabecera:
   **un redespliegue a secas no basta**, porque el `RUN` que escribe la fecha es una capa de Docker y
   con el mismo commit se reutiliza de caché — el sitio publicaría el día de ayer **con un despliegue
-  nuevo y en verde**. Por eso el workflow escribe `BUILD_DATE` antes de desplegar, y **relee** para
-  confirmar que el PATCH surtió efecto. Después no da por buena la llamada: espera a que el dominio
+  nuevo y en verde**. Por eso el workflow escribe `BUILD_DATE` antes de desplegar (por **POST**, no
+  por `PATCH`: el vault ya tenía medido que con `PATCH` la llamada no aplica) y **relee** para
+  confirmar dos cosas: que se escribió lo que se quería, y que **no cambió nada más** — porque
+  `application.update` se asume parcial y esa asunción no está probada contra el panel real. Después no da por buena la llamada: espera a que el dominio
   publique `data-otro-dia-build="<hoy>"`, porque «se pidió un despliegue» y «el sitio publica hoy»
   son cosas distintas. Sin los secretos configurados el job sale **en rojo a propósito**: un rebuild
   que no corre es invisible —el sitio sigue en pie, solo que con la fecha de otro día— y esa es la

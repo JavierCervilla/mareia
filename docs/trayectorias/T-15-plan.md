@@ -47,6 +47,18 @@ dato caducado con pinta de fresco que el proyecto existe para no publicar.
 2. La caché KV es **prescindible**: si el volumen se pierde, el API degrada a pedirle a AEMET, no se
    rompe. (Si no fuera cierto, el volumen pasaría de comodidad a requisito y habría que decirlo.)
 3. `AEMET_API_KEY` está en el entorno de Dokploy (el humano lo confirmó) y **no** se commitea.
+4. **`application.update` es PARCIAL**, no un reemplazo: mandar `{applicationId, buildArgs}` cambia
+   ese campo y deja los demás en paz. **No está probado contra el panel real** — y es la asunción de
+   esta trayectoria con peor consecuencia, porque si fuera un reemplazo la aplicación **viva**
+   perdería su dominio, sus variables de entorno (`AEMET_API_KEY`) y su `dockerContextPath`, que es
+   justo el campo sin el cual el build falla.
+   Y no basta con declararla, porque la comprobación obvia **no la ve**: releer `buildArgs` después
+   de escribirlo confirma lo que acabamos de mandar, que es el peor sitio donde mirar. Así que el
+   workflow **guarda la ficha entera antes** y compara después `domains`, `env`,
+   `dockerContextPath`, `dockerfile`, `buildType`, `branch`, `repository`, `sourceType` y
+   `applicationStatus`: si alguno cambió, el job se pone rojo **antes de desplegar** y con la ficha
+   previa a mano para restaurar. Lo que la cerraría del todo es una corrida real contra el panel;
+   hasta entonces, queda comprobada en cada ejecución en vez de supuesta.
 
 ## Tradeoffs
 
