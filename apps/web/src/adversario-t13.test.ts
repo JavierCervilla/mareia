@@ -36,8 +36,24 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { heightAt, prepareStation } from "@mareia/domain-core";
+import { prepareStation } from "@mareia/domain-core";
 
+/**
+ * **El instrumento del gate A-1, el de verdad, no una copia.**
+ *
+ * A-17 mide *lo que el gate alcanza a ver* sobre una curva falsificada, así que tiene que llamar al
+ * mismo cuerpo que corre en producción del gate. Cuando este fichero medía con una copia local, la
+ * copia no se enteraba de lo que le pasara al original: se podía estrechar el detector a una sola
+ * meseta —el defecto exacto que A-17 dice vigilar— y A-17 seguía verde. Por eso el detector se
+ * extrajo a `curva-congelada.ts` y lo importan los dos ficheros: el trinquete de abajo sólo
+ * trinquetea si no hay dos cuerpos que puedan divergir.
+ */
+import {
+  PASO_DE_PUBLICACION_M,
+  congelacionesDeLaCurva,
+  excursionRealEnLaMeseta,
+  tramoPlanoMasLargo,
+} from "./curva-congelada.ts";
 import { deps } from "./datos/deps.ts";
 import { cargarDatosDePuerto } from "./datos/pagina-puerto.ts";
 import { alturaEn, trazarCurvaMarea } from "./grafico-marea.ts";
@@ -49,15 +65,6 @@ const SIN_BUILD = "no hay apps/web/dist: corre antes `pnpm --filter web build`";
 const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "data");
 
 const MINUTO = 60_000;
-
-/**
- * Paso de publicación de las alturas, en metros. `toHeight` redondea a 3 decimales: dos muestras
- * que difieran menos que esto se publican iguales y ninguna curva puede enseñar un movimiento más
- * pequeño. Es el mismo umbral que usa el gate A-1 de T-09, y se copia aquí a propósito —no se
- * importa— porque el sentido de este fichero es medir **desde fuera** lo que aquel gate mide desde
- * dentro.
- */
-const PASO_DE_PUBLICACION_M = 0.001;
 
 /** Se lanza cuando el ataque necesita el `dist/` y no lo hay: se salta, no se confunde con el bug. */
 class SinBuild extends Error {}
@@ -106,71 +113,12 @@ interface Muestra {
   readonly height_m: number;
 }
 
-interface Tramo {
-  readonly minutos: number;
-  readonly desdeUtcMs: number;
-  readonly hastaUtcMs: number;
-}
-
 /** El día que publica el `dist/`, leído del propio HTML; sin build, el día UTC del reloj. */
 function fechaDeHoy(): string {
   if (!HAY_BUILD) return new Date().toISOString().slice(0, 10);
   const fecha = /<time datetime="(\d{4}-\d{2}-\d{2})"/.exec(readFileSync(PAGINA_SANTANDER, "utf8"))?.[1];
   assert.ok(fecha, "la página construida no declara la fecha de sus datos");
   return fecha;
-}
-
-/**
- * **Todos** los tramos del día en los que la curva publicada no se mueve nada.
- *
- * Copia del instrumento que usa el gate A-1 (`adversario-t09.test.ts`). Está aquí para poder
- * atacarlo, no para reemplazarlo: si allí cambia, este fichero se pone en rojo y hay que releerlo,
- * que es exactamente lo que se quiere de un ataque congelado en la suite.
- *
- * Cuando se escribió el ataque, la copia devolvía **sólo el tramo más largo**, que era el defecto
- * A-17. Ahora devuelve la lista entera porque el gate también: la copia sigue el instrumento, y por
- * eso el día que alguien vuelva a estrecharla a una sola meseta, el gate de abajo se pone rojo.
- */
-function tramosPlanos(muestras: readonly Muestra[], inicioUtcMs: number, finUtcMs: number): readonly Tramo[] {
-  const tramos: Tramo[] = [];
-  let inicio = inicioUtcMs;
-  let ultimoIgual: number | undefined;
-  const cerrar = (): void => {
-    if (ultimoIgual === undefined) return;
-    tramos.push({ minutos: (ultimoIgual - inicio) / MINUTO, desdeUtcMs: inicio, hastaUtcMs: ultimoIgual });
-    ultimoIgual = undefined;
-  };
-  for (let instante = inicioUtcMs + MINUTO; instante <= finUtcMs; instante += MINUTO) {
-    if (Math.abs(alturaEn(muestras, instante) - alturaEn(muestras, instante - MINUTO)) > 1e-9) {
-      cerrar();
-      inicio = instante;
-      continue;
-    }
-    ultimoIgual = instante;
-  }
-  cerrar();
-  return tramos;
-}
-
-/** El tramo plano más largo: la **meseta natural** del puerto, que es lo que hacía de escondite. */
-function tramoPlanoMasLargo(muestras: readonly Muestra[], inicioUtcMs: number, finUtcMs: number): Tramo {
-  const vacio: Tramo = { minutos: 0, desdeUtcMs: inicioUtcMs, hastaUtcMs: inicioUtcMs };
-  return tramosPlanos(muestras, inicioUtcMs, finUtcMs).reduce(
-    (mejor, tramo) => (tramo.minutos > mejor.minutos ? tramo : mejor),
-    vacio,
-  );
-}
-
-/** Cuánto se movió la marea de verdad en los instantes de muestreo que caen dentro del tramo. */
-function excursionRealEnElTramo(
-  muestras: readonly Muestra[],
-  estacion: ReturnType<typeof prepareStation>,
-  tramo: { readonly desdeUtcMs: number; readonly hastaUtcMs: number },
-): number {
-  const alturas = muestras
-    .filter((m) => m.timeUtcMs >= tramo.desdeUtcMs && m.timeUtcMs <= tramo.hastaUtcMs)
-    .map((m) => heightAt(estacion, m.timeUtcMs));
-  return alturas.length === 0 ? 0 : Math.max(...alturas) - Math.min(...alturas);
 }
 
 /** La curva del día tal y como la pinta la página, más su estación preparada. */
@@ -212,7 +160,7 @@ function congelacionMasDanina(
     const hastaUtcMs = muestra.timeUtcMs + duracionMin * MINUTO;
     if (hastaUtcMs > finDelDia) break;
     const tramo = { desdeUtcMs: muestra.timeUtcMs, hastaUtcMs };
-    const movimientoM = excursionRealEnElTramo(muestras, estacion, tramo);
+    const movimientoM = excursionRealEnLaMeseta(muestras, estacion, tramo);
     if (mejor === undefined || movimientoM > mejor.movimientoM) {
       mejor = { ...tramo, movimientoM };
     }
@@ -238,14 +186,17 @@ interface Ataque {
   readonly congelacionMin: number;
   /** Marea real que la congelación se traga, en milímetros: el daño del fraude. */
   readonly movimientoSuprimidoMm: number;
-  /** Lo que el gate A-1 mide sobre la curva ya falsificada, en milímetros: lo que llega a verse. */
+  /**
+   * Lo que el gate A-1 **denuncia** sobre la curva ya falsificada, en milímetros: la peor
+   * congelación que reporta su detector. Cero = no reporta ninguna y el fraude le pasó por debajo.
+   */
   readonly loQueVeElGateMm: number;
 }
 
 /**
  * Recorre el catálogo inyectando en cada puerto **la congelación más dañina que sigue siendo más
  * corta que su meseta natural** —la que se esconde detrás de ella— y anota, junto al daño, lo que el
- * gate A-1 alcanza a ver sobre la curva ya falsificada.
+ * gate A-1 alcanza a ver sobre la curva ya falsificada, preguntándoselo a su propio detector.
  *
  * La duración es la de la meseta natural menos un paso de muestreo: la elección más conservadora
  * posible, porque cualquier ventana más larga sería la nueva meseta más larga del día y el
@@ -256,7 +207,7 @@ async function ataquesDeCongelacion(fechaIso: string): Promise<readonly Ataque[]
   const ataques: Ataque[] = [];
   for (const puerto of await deps.ports.list()) {
     const dia = await diaDe(puerto.slug, fechaIso);
-    const natural = tramoPlanoMasLargo(dia.muestras, dia.inicioUtcMs, dia.finUtcMs);
+    const natural = tramoPlanoMasLargo(dia);
     if (natural.minutos === 0) continue;
     const primera = dia.muestras[0]?.timeUtcMs ?? 0;
     const segunda = dia.muestras[1]?.timeUtcMs ?? 0;
@@ -268,10 +219,13 @@ async function ataquesDeCongelacion(fechaIso: string): Promise<readonly Ataque[]
     if (fraude === undefined || fraude.movimientoM <= PASO_DE_PUBLICACION_M) continue;
 
     const congelada = congelar(dia.muestras, fraude);
-    const loQueVeElGate = tramosPlanos(congelada, dia.inicioUtcMs, dia.finUtcMs).reduce(
-      (peor, tramo) => Math.max(peor, excursionRealEnElTramo(congelada, dia.estacion, tramo)),
-      0,
-    );
+    // Lo que ve el gate es literalmente lo que el gate denuncia: se le pasa la curva ya falsificada
+    // al detector de `curva-congelada.ts` —el mismo que corre en A-1— y se anota la peor congelación
+    // que reporta. Si no reporta ninguna, son 0 mm: el fraude le ha pasado por debajo.
+    const loQueVeElGate = congelacionesDeLaCurva(
+      { muestras: congelada, inicioUtcMs: dia.inicioUtcMs, finUtcMs: dia.finUtcMs },
+      dia.estacion,
+    ).reduce((peor, congelacion) => Math.max(peor, congelacion.movimientoM), 0);
     ataques.push({
       slug: puerto.slug,
       nombre: puerto.name,
@@ -308,7 +262,7 @@ test("A-17 premisa · la congelación inyectada se dibuja plana en la curva publ
   const testigo = ataques[0];
   assert.ok(testigo);
   const dia = await diaDe(testigo.slug, fechaIso);
-  const natural = tramoPlanoMasLargo(dia.muestras, dia.inicioUtcMs, dia.finUtcMs);
+  const natural = tramoPlanoMasLargo(dia);
   const fraude = congelacionMasDanina(dia.muestras, dia.estacion, testigo.congelacionMin);
   assert.ok(fraude);
   const congelada = congelar(dia.muestras, fraude);
@@ -367,14 +321,24 @@ test("A-17 premisa · la congelación inyectada se dibuja plana en la curva publ
  * Sueca): meseta natural de **200 min** que escondía una congelación de **190 min** con
  * **62,06 mm** de movimiento real suprimido — sesenta y dos veces el paso de publicación.
  *
- * CORREGIDO en `adversario-t09.test.ts`: el detector recorre **todas** las mesetas del día
+ * CORREGIDO en `curva-congelada.ts`: el detector recorre **todas** las mesetas del día
  * (`tramosPlanos`) en vez de preguntar por la máxima. No se ha tocado el umbral —sigue siendo el
  * paso de publicación— ni se ha cambiado dónde se mide: lo que ha cambiado es **cuántas veces se
  * mide**, que era la pregunta mal hecha (su respuesta dependía del tamaño del catálogo).
  *
  * Lo que este gate vigila a partir de ahora: que a **ningún** puerto del catálogo se le pueda
- * esconder una congelación detrás de su meseta natural. Si alguien vuelve a estrechar el detector a
- * un solo tramo, aquí salen los 65 puertos.
+ * esconder una congelación detrás de su meseta natural.
+ *
+ * **Y lo vigila del detector de verdad.** Este ataque llama a `congelacionesDeLaCurva`, el mismo
+ * cuerpo que corre en el gate A-1 de `adversario-t09.test.ts`: `loQueVeElGateMm` no es una
+ * reproducción de lo que el gate haría, es lo que el gate denuncia. La primera versión de este
+ * fichero medía con una copia local del instrumento y por eso no trinqueteaba: estrechar el
+ * detector real a una sola meseta dejaba a A-17 en verde, ciego a los 65 puertos que dice vigilar
+ * (lo reprodujo el `verificador` sobre el commit e682097 y por eso lo rechazó).
+ *
+ * Comprobado con el defecto puesto otra vez, ahora sobre el módulo compartido
+ * (`tramosPlanos` → `return [tramoPlanoMasLargo(dia)]`): **A-17 se pone en rojo con los 65 puertos**
+ * y el gate A-1 sigue verde, que es exactamente el agujero que este ataque existe para tapar.
  */
 test("A-17 · ninguna congelación real de la curva se le escapa al detector", async () => {
   const ataques = await ataquesDeCongelacion(fechaDeHoy());
@@ -443,14 +407,14 @@ test("A-18 · la prueba de sensibilidad del gate A-1 no depende del día en que 
       .filter((extremo) => margen(extremo.timeUtcMs) >= SEMIANCHO_MIN * MINUTO)
       .sort((a, b) => margen(b.timeUtcMs) - margen(a.timeUtcMs))[0];
     const mesetaDe = (pleamar: { timeUtcMs: number }): number =>
-      tramoPlanoMasLargo(
-        congelar(dia.muestras, {
+      tramoPlanoMasLargo({
+        muestras: congelar(dia.muestras, {
           desdeUtcMs: pleamar.timeUtcMs - SEMIANCHO_MIN * MINUTO,
           hastaUtcMs: pleamar.timeUtcMs + SEMIANCHO_MIN * MINUTO,
         }),
-        dia.inicioUtcMs,
-        dia.finUtcMs,
-      ).minutos;
+        inicioUtcMs: dia.inicioUtcMs,
+        finUtcMs: dia.finUtcMs,
+      }).minutos;
 
     if (conSitio === undefined) {
       flojos.push(`${fechaIso}: ninguna pleamar del día tiene ${SEMIANCHO_MIN} min a cada lado`);

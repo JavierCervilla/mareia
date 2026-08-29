@@ -41,6 +41,12 @@ import { cargarPuertos } from "./datos/catalogo.ts";
 import { cargarDatosDePuerto } from "./datos/pagina-puerto.ts";
 import { deps } from "./datos/deps.ts";
 import { escaparMarcado } from "./escapar-marcado.ts";
+import {
+  PASO_DE_PUBLICACION_M,
+  congelacionesDeLaCurva,
+  excursionRealEnLaMeseta,
+  tramoPlanoMasLargo,
+} from "./curva-congelada.ts";
 import { alturaEn, trazarCurvaMarea } from "./grafico-marea.ts";
 import { rutaPuerto } from "./rutas.ts";
 import type { EntradaCurva } from "./grafico-marea.ts";
@@ -133,55 +139,6 @@ function distanciaAlTrazo(punto: Punto, trazo: readonly Punto[]): number {
   return mejor;
 }
 
-interface TramoPlano {
-  readonly minutos: number;
-  readonly desdeUtcMs: number;
-  readonly hastaUtcMs: number;
-}
-
-/**
- * **Todos** los tramos del día en los que la curva **publicada** no se mueve nada.
- *
- * Devuelve la lista entera y no sólo el máximo porque el día tiene muchas mesetas y el instrumento
- * sólo sabe medir una cada vez: ver el porqué en la cabecera de A-1. Los tramos son maximales y
- * **disjuntos** —cada minuto pertenece como mucho a uno—, así que recorrerlos todos no multiplica
- * el número de alturas reales que hay que calcular: son las mismas muestras del día repartidas.
- */
-function tramosPlanos(dia: EntradaCurva): readonly TramoPlano[] {
-  const tramos: TramoPlano[] = [];
-  let inicio = dia.inicioUtcMs;
-  let ultimoIgual: number | undefined;
-  const cerrar = (): void => {
-    if (ultimoIgual === undefined) return;
-    tramos.push({
-      minutos: (ultimoIgual - inicio) / MINUTO,
-      desdeUtcMs: inicio,
-      hastaUtcMs: ultimoIgual,
-    });
-    ultimoIgual = undefined;
-  };
-  for (let instante = dia.inicioUtcMs + MINUTO; instante <= dia.finUtcMs; instante += MINUTO) {
-    const anterior = alturaEn(dia.muestras, instante - MINUTO);
-    if (Math.abs(alturaEn(dia.muestras, instante) - anterior) > 1e-9) {
-      cerrar();
-      inicio = instante;
-      continue;
-    }
-    ultimoIgual = instante;
-  }
-  cerrar();
-  return tramos;
-}
-
-/**
- * El tramo plano más largo del día. Se queda porque A-1 bis necesita nombrar **la** meseta que
- * acaba de inyectar, no todas; el gate ya no lo usa.
- */
-function tramoPlanoMasLargo(dia: EntradaCurva): TramoPlano {
-  const vacio: TramoPlano = { minutos: 0, desdeUtcMs: dia.inicioUtcMs, hastaUtcMs: dia.inicioUtcMs };
-  return tramosPlanos(dia).reduce((mejor, tramo) => (tramo.minutos > mejor.minutos ? tramo : mejor), vacio);
-}
-
 // =================================================================================================
 // HALLAZGOS REPRODUCIDOS Y CORREGIDOS · sin trinquete, en verde, como gate permanente
 // =================================================================================================
@@ -243,22 +200,13 @@ function tramoPlanoMasLargo(dia: EntradaCurva): TramoPlano {
  * disjuntos, y dentro de cualquiera de ellos todas las muestras publicadas valen lo mismo, así que
  * sus alturas reales no pueden diferir más que el propio paso de publicación. El umbral sigue sin
  * elegirse; lo único que ha cambiado es **cuántas veces se aplica**.
- */
-
-/**
- * Paso de publicación de las alturas, en metros: `toHeight` redondea a 3 decimales. Dos muestras
- * que difieran menos que esto se publican iguales, y ninguna curva puede enseñar un movimiento más
- * pequeño por mucho que la marea se mueva.
- */
-const PASO_DE_PUBLICACION_M = 0.001;
-
-/**
- * Cuánto se movió la marea **de verdad** mientras la curva publicada estaba quieta, medido en los
- * instantes de muestreo que caen dentro del tramo plano (los dos extremos incluidos).
  *
- * Es una función aparte y no un trozo del test porque el test de sensibilidad de más abajo la
- * llama con una curva congelada a mano: un gate que nadie ha visto fallar es una conjetura.
+ * **Y el instrumento vive en `curva-congelada.ts`, no aquí.** El ataque A-17 mide lo que este gate
+ * alcanza a ver, y mientras lo medía con una copia suya el trinquete no trinqueteaba: se podía
+ * estrechar el detector a una sola meseta y A-17 seguía verde. Ahora los dos ficheros llaman al
+ * mismo cuerpo, así que estrechar `tramosPlanos` pone A-17 en rojo con sus 65 puertos.
  */
+
 /** Semiancho de la meseta que inyecta A-1 bis: cinco horas de pleamar congelada, 150 min a cada lado. */
 const SEMIANCHO_DE_LA_AVERIA_MIN = 150;
 
@@ -290,37 +238,18 @@ function pleamarConSitio(
     .sort((a, b) => margen(b.timeUtcMs) - margen(a.timeUtcMs))[0];
 }
 
-function excursionRealEnLaMeseta(
-  muestras: readonly { timeUtcMs: number; height_m: number }[],
-  estacion: ReturnType<typeof prepareStation>,
-  plano: { desdeUtcMs: number; hastaUtcMs: number },
-): number {
-  const alturas = muestras
-    .filter(
-      (muestra) =>
-        muestra.timeUtcMs >= plano.desdeUtcMs && muestra.timeUtcMs <= plano.hastaUtcMs,
-    )
-    .map((muestra) => heightAt(estacion, muestra.timeUtcMs));
-  return alturas.length === 0 ? 0 : Math.max(...alturas) - Math.min(...alturas);
-}
-
 test("A-1 · la curva no se congela en ningún puerto del catálogo", async () => {
   const fechaIso = HAY_BUILD ? fechaDelBuild() : new Date().toISOString().slice(0, 10);
   const congelados: string[] = [];
   for (const puerto of await deps.ports.list()) {
     const dia = await curvaDe(puerto.slug, fechaIso);
-    const planos = tramosPlanos(dia);
-    if (planos.length === 0) continue;
     const estacion = prepareStation(await deps.stations.load(puerto.stationFile));
-    for (const plano of planos) {
-      const movimiento = excursionRealEnLaMeseta(dia.muestras, estacion, plano);
-      if (movimiento > PASO_DE_PUBLICACION_M) {
-        congelados.push(
-          `${puerto.name}: la curva se queda quieta ${plano.minutos} min desde ` +
-            `${new Date(plano.desdeUtcMs).toISOString()} mientras la marea se mueve ` +
-            `${(movimiento * 1000).toFixed(1)} mm`,
-        );
-      }
+    for (const { tramo, movimientoM } of congelacionesDeLaCurva(dia, estacion)) {
+      congelados.push(
+        `${puerto.name}: la curva se queda quieta ${tramo.minutos} min desde ` +
+          `${new Date(tramo.desdeUtcMs).toISOString()} mientras la marea se mueve ` +
+          `${(movimientoM * 1000).toFixed(1)} mm`,
+      );
     }
   }
   assert.deepEqual(congelados, []);
