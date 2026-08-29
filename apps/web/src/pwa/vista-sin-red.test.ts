@@ -19,6 +19,7 @@ const HACE_DOS_HORAS = AHORA - 2 * 3_600_000;
 function entrada(cambios: Partial<EntradaSinRed> = {}): EntradaSinRed {
   return {
     copia: undefined,
+    paginaGuardada: cambios.copia !== undefined,
     conexion: true,
     sePuedeGuardar: true,
     ahoraMs: AHORA,
@@ -91,15 +92,102 @@ test("«sin guardar» y «sin red» no se leen igual: son dos situaciones y dos 
   assert.doesNotMatch(sinRed, /no está guardado/u);
 });
 
-test("los cinco estados dan cinco textos distintos: ninguno se puede confundir con otro", () => {
+// =================================================================================================
+// Los dos estados que trajo el pase adversario (H-1): los dos almacenes se separan solos.
+//
+// El sello se componía **solo** con IndexedDB y prometía los bytes de la Cache API. Un `addAll` que
+// falla por un fichero que ya no está, el barrido de un cambio de esquema o un desalojo del
+// navegador bastan para separarlos, y entonces la pantalla decía «Guardado en este dispositivo… La
+// página se guarda con su hoja de estilos» sobre una caché vacía. Quien lo leía se iba a la playa
+// creyendo que llevaba el almanaque encima.
+// =================================================================================================
+
+test("estado 6 · si el registro dice guardado y los bytes no están, se dice y no se promete offline", () => {
+  const vista = vistaSinRed(entrada({ copia: COPIA, paginaGuardada: false }));
+
+  assert.doesNotMatch(
+    vista.sello.titular,
+    /Guardado en este dispositivo/u,
+    "no se puede prometer una copia que no está",
+  );
+  assert.match(vista.sello.titular, /ya no está en este dispositivo/u);
+  // Las constantes sí siguen: se dice qué se puede hacer todavía y qué no.
+  assert.match(texto(vista), /3,4 kB/u);
+  assert.match(texto(vista), /lo que no está es la página/u);
+  assert.deepEqual(vista.accion, { verbo: "guardar", etiqueta: "Volver a guardar Vigo" });
+});
+
+test("estado 7 · si los bytes están y el registro no, no se da por perdida una copia que sigue entera", () => {
+  const vista = vistaSinRed(entrada({ copia: undefined, paginaGuardada: true }));
+
+  assert.match(vista.sello.titular, /^Guardado en este dispositivo/u);
+  assert.match(texto(vista), /se abrirá sin cobertura/u);
+  assert.match(texto(vista), /calcular otro día/u, "lo que se ha perdido también se dice");
+  assert.deepEqual(vista.accion, { verbo: "guardar", etiqueta: "Completar el guardado de Vigo" });
+});
+
+test("sin red, ninguno de los dos estados rotos ofrece una acción que no se podría completar", () => {
+  assert.equal(vistaSinRed(entrada({ copia: COPIA, paginaGuardada: false, conexion: false })).accion, undefined);
+  assert.equal(vistaSinRed(entrada({ copia: undefined, paginaGuardada: true, conexion: false })).accion, undefined);
+});
+
+/**
+ * H-4 · sin cobertura no se ofrece la acción destructiva.
+ *
+ * Es el único botón de la sección, está pegado al sello que se lee justo para comprobar la copia, y
+ * su efecto es irrecuperable en ese contexto: la propia página dice, dos estados más arriba, que
+ * «cuando vuelva la red podrás guardar Vigo desde aquí».
+ */
+test("estado 5 · sin red no se ofrece dejar de guardar, y se explica por qué", () => {
+  const vista = vistaSinRed(entrada({ copia: COPIA, conexion: false }));
+
+  assert.equal(vista.accion, undefined, "un toque no puede destruir la copia que se está leyendo");
+  assert.match(texto(vista), /Para dejar de guardarlo hace falta cobertura/u);
+});
+
+test("con red sí se ofrece dejar de guardar: entonces se puede rehacer", () => {
+  assert.deepEqual(vistaSinRed(entrada({ copia: COPIA })).accion, {
+    verbo: "olvidar",
+    etiqueta: "Dejar de guardar Vigo",
+  });
+});
+
+test("los siete estados dan siete textos distintos: ninguno se puede confundir con otro", () => {
   const textos = [
     texto(vistaSinRed(entrada({ sePuedeGuardar: false }))),
     texto(vistaSinRed(entrada())),
     texto(vistaSinRed(entrada({ conexion: false }))),
     texto(vistaSinRed(entrada({ copia: COPIA }))),
     texto(vistaSinRed(entrada({ copia: COPIA, conexion: false }))),
+    texto(vistaSinRed(entrada({ copia: COPIA, paginaGuardada: false }))),
+    texto(vistaSinRed(entrada({ copia: undefined, paginaGuardada: true }))),
   ];
   assert.equal(new Set(textos).size, textos.length);
+});
+
+/**
+ * El invariante que el pase adversario afirma en el navegador, aquí sin navegador y en las ocho
+ * combinaciones: **el sello afirma que hay una copia utilizable si y solo si la hay**.
+ *
+ * Se busca la afirmación en las dos formas en que la sección la escribe —«Guardado en este
+ * dispositivo…» con cobertura y «estás leyendo la copia guardada…» sin ella—, porque sin red lo
+ * primero que hay que decir es que no hay red, no que hay copia.
+ */
+const AFIRMA_QUE_HAY_COPIA = /Guardado en este dispositivo|estás leyendo la copia guardada/u;
+
+test("el sello afirma que hay copia si y solo si la página está en la caché del worker", () => {
+  for (const paginaGuardada of [true, false]) {
+    for (const copia of [COPIA, undefined]) {
+      for (const conexion of [true, false]) {
+        const vista = vistaSinRed(entrada({ copia, paginaGuardada, conexion }));
+        assert.equal(
+          AFIRMA_QUE_HAY_COPIA.test(vista.sello.titular),
+          paginaGuardada,
+          `copia=${copia === undefined ? "no" : "sí"} caché=${paginaGuardada} red=${conexion}: «${vista.sello.titular}»`,
+        );
+      }
+    }
+  }
 });
 
 test("el tono del sello acompaña al texto, y sin red siempre avisa", () => {

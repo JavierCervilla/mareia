@@ -12,10 +12,16 @@
 import { ventanaVigente } from "../estacion-offline.ts";
 import type { EstacionOffline } from "../estacion-offline.ts";
 import { urlsDeFavorito, urlsDeOlvido } from "../precacheo.ts";
-import { EVENTO_COPIA_CAMBIADA, MENSAJE_GUARDAR, MENSAJE_OLVIDAR } from "../protocolo.ts";
+import {
+  CACHE_PAGINAS,
+  EVENTO_COPIA_CAMBIADA,
+  MENSAJE_CENSAR,
+  MENSAJE_GUARDAR,
+  MENSAJE_OLVIDAR,
+} from "../protocolo.ts";
 import { vistaSinRed } from "../vista-sin-red.ts";
 import type { VistaSinRed } from "../vista-sin-red.ts";
-import { guardarFavorito, leerFavorito, olvidarFavorito } from "./almacen.ts";
+import { guardarFavorito, leerFavorito, listarFavoritos, olvidarFavorito } from "./almacen.ts";
 import type { Favorito } from "./almacen.ts";
 import { bajarEstacion } from "./estacion.ts";
 import { motorCargado } from "./motor.ts";
@@ -39,6 +45,8 @@ export interface AnclajeSinRed {
   readonly fechaDeBuild: string;
   /** Assets propios de los módulos activos, resueltos en build desde su `PrecachePolicy`. */
   readonly assetsDeModulos: readonly string[];
+  /** Portada e índices que hay que atravesar para llegar aquí desde la app instalada. */
+  readonly camino: readonly string[];
 }
 
 function elementoPorDato(raiz: HTMLElement, dato: string): HTMLElement | undefined {
@@ -51,7 +59,8 @@ export function anclajeSinRed(seccion: HTMLElement): AnclajeSinRed | undefined {
   const sello = elementoPorDato(seccion, "data-sin-red-sello");
   const boton = seccion.querySelector("[data-sin-red-accion]");
   const nota = elementoPorDato(seccion, "data-sin-red-nota");
-  const { sinRedSlug, sinRedNombre, sinRedRuta, sinRedFecha, sinRedAssetsModulos } = seccion.dataset;
+  const { sinRedSlug, sinRedNombre, sinRedRuta, sinRedFecha, sinRedAssetsModulos, sinRedCamino } =
+    seccion.dataset;
   if (
     sello === undefined ||
     nota === undefined ||
@@ -74,6 +83,7 @@ export function anclajeSinRed(seccion: HTMLElement): AnclajeSinRed | undefined {
     ruta: sinRedRuta,
     fechaDeBuild: sinRedFecha,
     assetsDeModulos: listaDeCadenas(sinRedAssetsModulos),
+    camino: listaDeCadenas(sinRedCamino),
   };
 }
 
@@ -152,12 +162,58 @@ export function montarSinRed(anclaje: AnclajeSinRed): void {
   window.addEventListener("online", repintar);
   window.addEventListener("offline", repintar);
   repintar();
+  void rehacerElCenso();
 }
 
-/** Lee el estado real (¿guardado?, ¿hay red?) y lo pinta. */
+/**
+ * Le pasa al worker **el censo completo** de favoritos, que solo esta página conoce.
+ *
+ * El worker apunta lo que ve pasar; si su registro se rompe, lo que escribe a partir de entonces es
+ * un censo parcial y no puede podar sin arriesgarse a borrar los ficheros de otro favorito (hallazgo
+ * H-2). Esto lo devuelve al servicio: IndexedDB tiene la lista entera y sus URL.
+ *
+ * **Solo se manda si hay al menos un favorito.** Una IndexedDB desalojada no es un censo vacío, es
+ * la ausencia de censo, y mandarla como «no hay favoritos» podaría los ficheros de una copia que
+ * sigue entera en la caché — que es justo el otro lado del hallazgo H-1.
+ */
+async function rehacerElCenso(): Promise<void> {
+  const favoritos = await listarFavoritos();
+  if (favoritos.length === 0) {
+    return;
+  }
+  await pedirAlWorker({
+    tipo: MENSAJE_CENSAR,
+    favoritos: favoritos.map((favorito) => ({ slug: favorito.slug, urls: favorito.urls })),
+  });
+}
+
+/**
+ * Si los bytes de una página siguen en la caché del service worker.
+ *
+ * Se pregunta **a la caché** y no al registro de favoritos porque son dos almacenes distintos que se
+ * separan solos (hallazgo H-1): el navegador desaloja uno y no el otro, un cambio de esquema barre
+ * uno y no el otro, y un `addAll` que falla deja el registro escrito y la caché vacía. Se usa
+ * `caches.match` con el nombre y no `caches.open`, que crearía la caché de camino.
+ */
+async function paginaEnLaCache(ruta: string): Promise<boolean> {
+  if (!("caches" in globalThis)) {
+    return false;
+  }
+  try {
+    return (await caches.match(ruta, { cacheName: CACHE_PAGINAS })) !== undefined;
+  } catch (fallo: unknown) {
+    console.warn("[mareia] no se ha podido consultar la copia guardada", fallo);
+    return false;
+  }
+}
+
+/** Lee el estado real —los DOS almacenes y la red— y lo pinta. */
 async function pintarEstado(anclaje: AnclajeSinRed, nota?: string): Promise<void> {
-  const favorito = await leerFavorito(anclaje.slug);
-  pintar(anclaje, vistaDe(anclaje, favorito), nota);
+  const [favorito, paginaGuardada] = await Promise.all([
+    leerFavorito(anclaje.slug),
+    paginaEnLaCache(anclaje.ruta),
+  ]);
+  pintar(anclaje, vistaDe(anclaje, favorito, paginaGuardada), nota);
 }
 
 /**
@@ -183,6 +239,7 @@ async function refrescarCopia(anclaje: AnclajeSinRed, favorito: Favorito): Promi
     guardadoEnMs: Date.now(),
     bytes: fresca.bytes,
     estacion: fresca.payload,
+    urls: favorito.urls,
   });
   if (guardado) {
     await pintarEstado(anclaje);
@@ -208,8 +265,13 @@ function mismasConstantes(uno: EstacionOffline, otro: EstacionOffline): boolean 
   return JSON.stringify(uno.estacion) === JSON.stringify(otro.estacion);
 }
 
-function vistaDe(anclaje: AnclajeSinRed, favorito: Favorito | undefined): VistaSinRed {
+function vistaDe(
+  anclaje: AnclajeSinRed,
+  favorito: Favorito | undefined,
+  paginaGuardada: boolean,
+): VistaSinRed {
   return vistaSinRed({
+    paginaGuardada,
     copia:
       favorito === undefined
         ? undefined
@@ -300,24 +362,22 @@ async function guardar(anclaje: AnclajeSinRed): Promise<string | undefined> {
       "Inténtalo con mejor cobertura."
     );
   }
+  const urls = urlsDeFavorito(
+    { slug: anclaje.slug, ruta: anclaje.ruta, camino: anclaje.camino },
+    assetsDeLaPagina(document),
+    anclaje.assetsDeModulos,
+  );
   const guardado = await guardarFavorito({
     slug: anclaje.slug,
     guardadoEnMs: Date.now(),
     bytes: estacion.bytes,
     estacion: estacion.payload,
+    urls,
   });
   if (!guardado) {
     return "Este navegador no ha dejado guardar el puerto en su almacenamiento local.";
   }
-  const respuesta = await pedirAlWorker({
-    tipo: MENSAJE_GUARDAR,
-    slug: anclaje.slug,
-    urls: urlsDeFavorito(
-      { slug: anclaje.slug, ruta: anclaje.ruta },
-      assetsDeLaPagina(document),
-      anclaje.assetsDeModulos,
-    ),
-  });
+  const respuesta = await pedirAlWorker({ tipo: MENSAJE_GUARDAR, slug: anclaje.slug, urls });
   return respuesta.ok
     ? undefined
     : `Las constantes ya están guardadas y podrás calcular días sin red, pero la página en sí no: ${
@@ -331,7 +391,7 @@ async function olvidar(anclaje: AnclajeSinRed): Promise<string | undefined> {
   const respuesta = await pedirAlWorker({
     tipo: MENSAJE_OLVIDAR,
     slug: anclaje.slug,
-    urls: urlsDeOlvido({ slug: anclaje.slug, ruta: anclaje.ruta }),
+    urls: urlsDeOlvido({ slug: anclaje.slug, ruta: anclaje.ruta, camino: anclaje.camino }),
   });
   if (borrado && respuesta.ok) {
     return undefined;

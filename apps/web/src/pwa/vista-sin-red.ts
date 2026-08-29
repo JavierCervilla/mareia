@@ -39,7 +39,18 @@ export interface Ventana {
 }
 
 export interface EntradaSinRed {
+  /** Lo que dice **IndexedDB**: el registro del favorito y sus constantes. */
   readonly copia: CopiaGuardada | undefined;
+  /**
+   * Lo que dice **la caché del service worker**: si los bytes de esta página siguen ahí.
+   *
+   * Es la mitad que faltaba, y la que costó el hallazgo H-1 del pase adversario: el sello se componía
+   * solo con IndexedDB y prometía «la página se guarda con su hoja de estilos» sobre una caché vacía.
+   * Los dos almacenes se separan por caminos nada exóticos —un `addAll` que falla por un fichero que
+   * ya no está, el barrido de un cambio de esquema, un desalojo del navegador— y quien lee se iba a
+   * la playa creyendo que llevaba el almanaque encima.
+   */
+  readonly paginaGuardada: boolean;
   /** `navigator.onLine`. Su negativo es fiable, que es para lo único que se usa. */
   readonly conexion: boolean;
   /** Si este navegador admite guardar (service worker + IndexedDB). */
@@ -101,12 +112,77 @@ export function vistaSinRed(entrada: EntradaSinRed): VistaSinRed {
       accion: undefined,
     };
   }
+  // El orden de las preguntas es el que evita el hallazgo H-1: **primero se mira lo que hay**, y
+  // solo después lo que se apuntó. Un sello que se compone del registro y promete los bytes es un
+  // sello que puede afirmar lo que no existe.
+  if (entrada.copia !== undefined && !entrada.paginaGuardada) {
+    return copiaPerdida(entrada);
+  }
+  if (entrada.copia === undefined && entrada.paginaGuardada) {
+    return copiaSinConstantes(entrada);
+  }
   if (entrada.copia === undefined) {
     return entrada.conexion ? sinGuardarConRed(entrada) : sinGuardarSinRed(entrada);
   }
   return entrada.conexion
     ? guardadoConRed(entrada, entrada.copia)
     : guardadoSinRed(entrada, entrada.copia);
+}
+
+/**
+ * Estado 6: **el registro dice que está guardado y los bytes no están**.
+ *
+ * Pasa cuando el navegador desaloja el almacenamiento, cuando alguien borra «imágenes y archivos»,
+ * cuando una actualización de Mareia cambia el esquema de la caché, y cuando el guardado se quedó a
+ * medias porque un fichero con hash ya no estaba en el servidor. Lo importante no es la causa: es
+ * que la página **no se va a abrir sin cobertura** y que quien lo lea tiene que enterarse aquí y no
+ * en la playa.
+ */
+function copiaPerdida(entrada: EntradaSinRed): VistaSinRed {
+  const constantes =
+    entrada.copia === undefined ? "" : ` Las constantes (${kilobytes(entrada.copia.bytes)}) sí siguen aquí, así que otro día se puede calcular; lo que no está es la página.`;
+  return {
+    sello: {
+      clase: "caducado",
+      titular: `La copia de esta página ya no está en este dispositivo`,
+      detalle:
+        `${entrada.nombre} figura como guardado, pero sus ficheros no están: el navegador libera ` +
+        `espacio por su cuenta y una actualización de Mareia puede rehacer lo guardado.` +
+        `${constantes}` +
+        (entrada.conexion
+          ? " Vuelve a guardarlo para tenerlo entero."
+          : " Cuando vuelva la red podrás volver a guardarlo."),
+    },
+    accion: entrada.conexion
+      ? { verbo: "guardar", etiqueta: `Volver a guardar ${entrada.nombre}` }
+      : undefined,
+  };
+}
+
+/**
+ * Estado 7: **los bytes están y el registro no**.
+ *
+ * El espejo del anterior: IndexedDB desalojada con la caché intacta. La página sí se abrirá sin
+ * cobertura —eso es verdad y hay que decirlo— pero sin las constantes no se puede calcular otro día
+ * ni decir de cuándo es la copia. Dar por perdida una copia que sigue entera sería la misma clase de
+ * mentira que la contraria.
+ */
+function copiaSinConstantes(entrada: EntradaSinRed): VistaSinRed {
+  return {
+    sello: {
+      clase: "caducado",
+      titular: "Guardado en este dispositivo, pero sin sus constantes",
+      detalle:
+        `La página de ${entrada.nombre} se abrirá sin cobertura, pero se ha perdido lo que hace ` +
+        `falta para calcular otro día y para saber de cuándo es esta copia. ` +
+        (entrada.conexion
+          ? "Vuelve a guardarlo y queda completo."
+          : "Cuando vuelva la red podrás completarlo."),
+    },
+    accion: entrada.conexion
+      ? { verbo: "guardar", etiqueta: `Completar el guardado de ${entrada.nombre}` }
+      : undefined,
+  };
 }
 
 /** Estado 2: hay red y no está guardado. El único en el que se puede ofrecer guardar. */
@@ -166,9 +242,16 @@ function guardadoSinRed(entrada: EntradaSinRed, copia: CopiaGuardada): VistaSinR
       titular: `Sin conexión: estás leyendo la copia guardada hace ${edad(copia, entrada.ahoraMs)}`,
       detalle:
         `${queDependeDeLaRed(entrada.fechaDeBuild)} Y puedes pedir otro día más abajo: se calcula ` +
-        `aquí mismo, en este navegador, con las constantes guardadas.`,
+        `aquí mismo, en este navegador, con las constantes guardadas. Para dejar de guardarlo hace ` +
+        `falta cobertura: sin ella no podrías volver a guardarlo.`,
     },
-    accion: { verbo: "olvidar", etiqueta: `Dejar de guardar ${entrada.nombre}` },
+    // **Sin red no se ofrece dejar de guardar**, y es el hallazgo H-4 del pase adversario. Es la
+    // única acción destructiva de la sección, está pegada al sello que se lee justo para comprobar
+    // la copia, y aquí es irreversible: la propia página lo dice dos estados más arriba —«cuando
+    // vuelva la red podrás guardar Vigo desde aquí»—. Ofrecer con un toque, sin confirmación y sin
+    // deshacer, algo que ella misma declara irrecuperable en este contexto es una trampa, no una
+    // acción. Se dice, y se ofrece cuando haya cobertura para rehacerlo.
+    accion: undefined,
   };
 }
 
