@@ -23,6 +23,28 @@
   qué caché. **No** se ha leído la justificación del diff ni el razonamiento del implementador sobre
   por qué eligió cada cosa: ése es exactamente el modelo mental que aquí no hay que compartir.
 
+## Estado tras el fix forward (añadido por el implementador, 2026-08-29)
+
+**Los cuatro hallazgos, cerrados; el residuo R-1, cerrado.** Los siete cuerpos de test que los
+reprodujeron **no se han tocado**: se les ha retirado el envoltorio `hallazgoAbierto()` y se quedan
+como gate permanente, midiendo lo mismo que medían en rojo. Dos ampliaciones, ambas porque el gate
+medía la rama sin medir el canal: el recorrido de A-18 ataca ahora con un `descripcion` de AEMET que
+**sí** lleva las señas, y el de A-19 cubre además el **borde exacto** que este informe midió
+(`8 640 000 000 000` pasa, `+1` reventaba). Cada arreglo se ha comprobado **mordiendo**: revertirlo
+pone en rojo su recorrido. Detalle y evidencia en el `CHANGELOG.md` de este mismo PR.
+
+**Lo que NO se toca aquí, a propósito:**
+
+- **R-2** (la mitad que obliga se satisface con ruido) queda **anotado y abierto**. Es un residuo de
+  vigilancia, no una rotura, y arreglarlo pide decidir qué es «decir algo» sin congelar la prosa —
+  una negociación de contrato, no un parche. Que dos de las cinco frases hayan cambiado en este fix
+  forward no lo cierra: el agujero sigue siendo que cuatro de las cinco podrían volverse ruido sin
+  que nada avise.
+- El **juicio de producto** sobre `credential.status: "valid"` (una afirmación que nadie ha
+  comprobado, porque sale de decodificar un JWT sin verificar la firma y sin preguntar a AEMET)
+  queda **anotado y sin tocar**: el propio informe lo reporta como límite de conocimiento declarado
+  y no como rotura, y cambiar esa palabra es una decisión de producto.
+
 ## Nota de método
 
 Dos sondas de esta épica dieron falsos verdes por comprobar la función y no el artefacto. Aquí

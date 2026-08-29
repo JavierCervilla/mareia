@@ -36,6 +36,12 @@ export type WarningThreshold = (typeof WARNING_THRESHOLDS_DAYS)[number] | 0;
 
 const MS_PER_DAY = 86_400_000;
 
+/**
+ * Instante más lejano que `Date` sabe representar (±100 000 000 días desde epoch). Pasado de ahí,
+ * `new Date(ms).toISOString()` lanza `RangeError` en vez de devolver una fecha rara.
+ */
+const MAX_DATE_MS = 8_640_000_000_000_000;
+
 /** Por qué se conoce (o no) la fecha de caducidad. Viaja en la respuesta: el motivo importa. */
 export type ExpirySource =
   /** El JWT declara `exp`: es la fecha real de la clave. */
@@ -79,8 +85,21 @@ function readJwtPayload(token: string): Record<string, unknown> | undefined {
   }
 }
 
+/**
+ * Días **completos** entre dos instantes, con signo. Redondea hacia CERO, no hacia abajo.
+ *
+ * `Math.floor` sobre una diferencia negativa cuenta un día entero de más desde el primer
+ * milisegundo: un ms después de caducar decía `-1`. Y ese número no se queda aquí — viaja al cuerpo
+ * público como `daysLeft`, **al lado del `expiresAt` que lo desmiente**, y al aviso del operador
+ * («caducó hace N día(s)»). Los dos canales beben de esta línea, así que el redondeo se arregla
+ * aquí y no en cada sitio que lo imprime (A-20).
+ *
+ * `Math.trunc` devuelve `-0` para las diferencias de menos de un día; se normaliza a `0` para que
+ * nadie tenga que saber que el cero negativo existe.
+ */
 function daysBetween(fromMs: number, toMs: number): number {
-  return Math.floor((toMs - fromMs) / MS_PER_DAY);
+  const dias = Math.trunc((toMs - fromMs) / MS_PER_DAY);
+  return dias === 0 ? 0 : dias;
 }
 
 /**
@@ -119,6 +138,20 @@ export function inspectAemetKey(rawKey: string | undefined, nowMs: number): Aeme
   }
   const hasExp = typeof exp === "number" && Number.isFinite(exp);
   const expiresAtMs = hasExp ? exp * 1000 : LEGACY_KEYS_DIE_AT_MS;
+  if (!Number.isFinite(expiresAtMs) || Math.abs(expiresAtMs) > MAX_DATE_MS) {
+    // Un `exp` finito todavía puede no ser una fecha: en segundos cabe cualquier número, y al
+    // pasarlo a milisegundos se sale del rango de `Date` (la confusión de unidad plausible es un
+    // `exp` en microsegundos). Sin esta guarda, el `new Date(...).toISOString()` de abajo lanzaba
+    // `RangeError` desde dentro de esta función pura y se llevaba por delante el borde entero:
+    // `GET /bulletin` devolvía HTTP 500 —sin `credential`, sin `reason`, sin hecho— y el
+    // `healthcheck()` lanzaba síncronamente. Una clave que no entendemos degrada, no rompe: para
+    // eso existe `unreadable` (A-19).
+    return {
+      status: "unreadable",
+      message:
+        "La AEMET_API_KEY declara un `exp` que no cae dentro de ninguna fecha: no se puede saber cuándo caduca. Compruébala en opendata.aemet.es",
+    };
+  }
   const source: ExpirySource = hasExp ? "jwt-exp" : "aemet-legacy-deadline";
   const daysLeft = daysBetween(nowMs, expiresAtMs);
   const expiresAt = new Date(expiresAtMs).toISOString();
@@ -126,7 +159,13 @@ export function inspectAemetKey(rawKey: string | undefined, nowMs: number): Aeme
     ? "según su propio campo `exp`"
     : "porque no declara `exp` y AEMET invalida esas claves el 15-10-2026";
 
-  if (daysLeft < 0) {
+  // El estado se decide con los **instantes**, no con `daysLeft`: desde que ese número redondea
+  // hacia cero (A-20), una clave muerta hace un minuto vale `0` y `0 < 0` la habría dado por viva.
+  // «Caducada» es «el instante ya pasó», y eso se pregunta sin redondear.
+  if (nowMs >= expiresAtMs) {
+    // Y la frase del operador interpolaba el mismo número equivocado. Con el redondeo arreglado,
+    // el primer día se cuenta como lo que es: menos de un día, no «hace 1 día(s)».
+    const desde = daysLeft === 0 ? "hace menos de un día" : `hace ${Math.abs(daysLeft)} día(s)`;
     return {
       status: "expired",
       expiresAtMs,
@@ -134,7 +173,7 @@ export function inspectAemetKey(rawKey: string | undefined, nowMs: number): Aeme
       daysLeft,
       source,
       thresholdDays: 0,
-      message: `La AEMET_API_KEY caducó hace ${Math.abs(daysLeft)} día(s) (${expiresAt}, ${origin}). Renuévala en opendata.aemet.es/centrodedescargas/altaUsuario y actualiza el secreto.`,
+      message: `La AEMET_API_KEY caducó ${desde} (${expiresAt}, ${origin}). Renuévala en opendata.aemet.es/centrodedescargas/altaUsuario y actualiza el secreto.`,
     };
   }
 
@@ -194,13 +233,24 @@ export interface PublicCredentialView {
  * Frase pública de cada estado. Se deriva del `status` y **no interpola nada**: lo que hay que
  * saber (cuándo caduca, cuántos días quedan, de dónde sale la fecha) ya viaja en campos propios, y
  * una frase sin interpolación es una frase que se puede vigilar.
+ *
+ * Y dice **el estado de la credencial y solo eso**. La primera versión de T-18 añadía a `missing` y
+ * a `expired` la consecuencia —«: no publica el boletín oficial»— y eso no es un hecho, es una
+ * predicción: la caducidad se lee **en local** del `exp`, así que una clave vencida no impide que
+ * la caché del módulo siga sirviendo el boletín durante 4×TTL, ni que el operador borre el secreto
+ * con la caché caliente. En esos dos estados alcanzables el cuerpo publicaba el `document` de AEMET
+ * y a su lado la frase que decía que no lo publicaba: se desmentía a sí mismo (A-17).
+ *
+ * Quién publica y quién no ya lo dicen el `status` de la respuesta y la presencia del `document`.
+ * La frase de la credencial habla de la credencial; hacerla depender de si hay caché acoplaría este
+ * texto al estado de otra cosa, que es cómo se escribe el bug siguiente.
  */
 const PUBLIC_MESSAGES: Readonly<Record<KeyStatus, string>> = {
-  missing: "Esta instancia no tiene credencial de AEMET: no publica el boletín oficial",
+  missing: "Esta instancia no tiene credencial de AEMET",
   unreadable: "La credencial de AEMET de esta instancia no se puede leer: se desconoce su caducidad",
   valid: "La credencial de AEMET de esta instancia está vigente",
   expiring: "La credencial de AEMET de esta instancia está a punto de caducar",
-  expired: "La credencial de AEMET de esta instancia ha caducado: no publica el boletín oficial",
+  expired: "La credencial de AEMET de esta instancia ha caducado",
 };
 
 /**

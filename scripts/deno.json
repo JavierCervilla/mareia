@@ -1,0 +1,19 @@
+{
+  "license": "AGPL-3.0-or-later",
+  "//por-qué": "Los `scripts/` son código de producción del canal del operador —el aviso de caducidad de la clave de AEMET acaba en un issue de GitHub— y hasta T-18 no los alcanzaba ningún job: `pnpm test` no los ve (son Deno) y `deno task test` corre sólo sobre `apps/api/src/`. Un canal de alarma sin gate es exactamente el fallo que ese canal existe para impedir, una capa más abajo.",
+  "//por-qué-aquí-y-no-en-la-raíz": "Un `deno.json` en la raíz del repo hace que Deno tome el `package.json` de pnpm por miembro de workspace y REESCRIBE `apps/api/deno.lock` con un `links: npm:mareia`. Medido: con la config en la raíz el lock cambia, con la config aquí no. La API tiene que seguir resolviendo exactamente lo mismo que antes de esta trayectoria.",
+  "//permisos": "Los recorridos EJECUTAN el script como subproceso (es el artefacto que lee el humano, no una función que se le parezca), así que necesitan --allow-run acotado a `deno`; --allow-env para pasarle la clave sintética por el entorno y --allow-read para localizar el script y el workflow que lo invoca.",
+  "tasks": {
+    "check": "deno check .",
+    "test": "deno test --config deno.json --allow-run=deno --allow-env --allow-read .."
+  },
+  "fmt": {
+    "lineWidth": 100
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
+  }
+}

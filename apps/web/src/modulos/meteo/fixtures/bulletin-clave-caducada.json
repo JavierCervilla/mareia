@@ -17,10 +17,10 @@
   "credential": {
     "status": "expired",
     "expiresAt": "2026-07-20T00:00:00.000Z",
-    "daysLeft": -40,
+    "daysLeft": -39,
     "source": "jwt-exp",
     "thresholdDays": 0,
-    "message": "La credencial de AEMET de esta instancia ha caducado: no publica el boletín oficial"
+    "message": "La credencial de AEMET de esta instancia ha caducado"
   },
   "status": "unavailable",
   "reason": "AEMET boletín costero no respondió: HTTP 401"

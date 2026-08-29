@@ -11,6 +11,11 @@
  * «(el servidor informa: `${reason}`)» con el `reason` tal cual, que es la puerta por la que entra
  * lo mismo que se quiso dejar fuera, escrito por AEMET en vez de por nosotros (hallazgo **A-18**).
  *
+ * **ESTADO: A-18 cerrado.** El filtro se puso en el borde —`reasonFrom`, la única puerta por la que
+ * se llena el `reason` público—, así que la pantalla queda limpia por construcción y no porque la
+ * vista se acuerde de mirar. El envoltorio `hallazgoAbierto()` gritó «YA NO FALLA» y se retiró: el
+ * cuerpo se queda igual, como gate permanente.
+ *
  * Informe: `docs/qa/informe-adversario-t18.md`.
  */
 
@@ -18,6 +23,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import type { BulletinPayload, WeatherPayload } from "@mareia/module-weather/ui";
+import { inspectAemetKey, publicCredentialView, reasonFrom } from "@mareia/module-weather/ui";
 
 import type { BloqueMeteo, RespuestaMeteo, VistaMeteo } from "./vista.ts";
 import { vistaMeteo } from "./vista.ts";
@@ -62,30 +68,6 @@ function textoDeLaSeccion(vista: VistaMeteo): string {
   return [vista.resumen ?? "", ...vista.bloques.flatMap(deBloque)].join(" · ");
 }
 
-/** El mismo trinquete que el gemelo del módulo: verde con el hallazgo abierto, rojo al arreglarlo. */
-function hallazgoAbierto(nombre: string, senaDelFallo: string, cuerpo: () => void): void {
-  test(nombre, () => {
-    let fallo: unknown;
-    try {
-      cuerpo();
-    } catch (error) {
-      fallo = error;
-    }
-    assert.notEqual(
-      fallo,
-      undefined,
-      `TRINQUETE · «${nombre}» YA NO FALLA: el hallazgo parece corregido. Quita el envoltorio ` +
-        `hallazgoAbierto() y deja el cuerpo como gate permanente.`,
-    );
-    const texto = fallo instanceof Error ? fallo.message : String(fallo);
-    assert.ok(
-      texto.includes(senaDelFallo),
-      `TRINQUETE · «${nombre}» falla por un motivo que no es el hallazgo: esperaba «${senaDelFallo}» ` +
-        `y llegó «${texto}».`,
-    );
-  });
-}
-
 /**
  * A-18 · el manual de renovación llega a la pantalla porque lo escribió AEMET.
  *
@@ -96,18 +78,41 @@ function hallazgoAbierto(nombre: string, senaDelFallo: string, cuerpo: () => voi
  *
  * Comportamiento correcto: el texto que lee un humano en la sección no lleva las señas del canal
  * del operador, las haya escrito quien las haya escrito.
+ *
+ * Lo que este gate mide desde ahora: con un `reason` que **sí** lleva las señas —el 401 redactado
+ * como se redactan los errores de credencial—, el texto que la sección produce para la pantalla no
+ * publica ninguna de las cinco, por los dos caminos de `motivoDelBoletin`: con la credencial
+ * `valid` el `reason` se pinta solo, y con `expired` se pinta detrás de la frase de la credencial.
+ * El gate se queda del lado de la pantalla **además** del lado del cuerpo HTTP a propósito: un
+ * hallazgo que solo se ve en el JSON siempre se puede desestimar diciendo que el JSON no lo lee
+ * nadie, y el filtro podría moverse de sitio sin que la punta de la pantalla se enterase.
  */
-const REASON_HOSTIL =
-  "AEMET boletín costero rechazó la petición (estado 401): API key expirada. " +
-  "Solicite una nueva en https://opendata.aemet.es/centrodedescargas/altaUsuario";
+/**
+ * Lo que AEMET escribiría en un 401 redactado como se redactan los errores de credencial: diciendo
+ * dónde se pide una nueva. No está verificado contra AEMET —no hay clave con la que comprobarlo, la
+ * misma razón por la que las zonas siguen con `verified: false`— y no hace falta que lo esté: lo que
+ * se vigila es que **nada de esto llegue a la pantalla lo escriba quien lo escriba**.
+ */
+const DESCRIPCION_HOSTIL_DE_AEMET =
+  "API key expirada. Solicite una nueva en https://opendata.aemet.es/centrodedescargas/altaUsuario";
+
+/**
+ * El `reason` **tal y como llega de verdad**: el mensaje que compone `aemet.ts` para un sobre con
+ * `estado != 200`, pasado por `reasonFrom`, que es el borde donde vive el filtro. A propósito no se
+ * copia aquí el resultado ya recortado: si alguien quita el filtro del borde, este gate se pone
+ * rojo **del lado de la pantalla**, que es donde el hallazgo se podía desestimar diciendo que el
+ * JSON no lo lee nadie.
+ */
+const REASON_HOSTIL = reasonFrom(
+  `AEMET boletín costero rechazó la petición (estado 401): ${DESCRIPCION_HOSTIL_DE_AEMET}`,
+);
 
 for (const credencial of [
   { status: "valid", expiresAt: "2026-11-20T00:00:00.000Z", daysLeft: 83, source: "jwt-exp" },
   { status: "expired", expiresAt: "2026-07-20T00:00:00.000Z", daysLeft: -40, source: "jwt-exp" },
 ]) {
-  hallazgoAbierto(
-    `A-18 · la sección pinta el manual de renovación que escribió AEMET (credencial '${credencial.status}')`,
-    "acaba en la pantalla",
+  test(
+    `A-18 · la sección NO pinta el manual de renovación aunque lo escriba AEMET (credencial '${credencial.status}')`,
     () => {
       const vista = escena({
         ...(BOLETIN_CLAVE_CADUCADA as unknown as Record<string, unknown>),
@@ -125,6 +130,42 @@ for (const credencial of [
     },
   );
 }
+
+/**
+ * GATE · el bloque `credential` de los tres fixtures es la proyección de la función real.
+ *
+ * Aquí estaba commiteado el segundo canal de A-20: `bulletin-clave-caducada.json` llevaba
+ * `daysLeft: -40` junto a un `expiresAt` de hacía **39** días, y llevaba también la frase que
+ * afirmaba la consecuencia falsa de A-17. Un fixture es un dato como cualquier otro: se re-proyecta
+ * con la función que lo produce, no se edita a mano, o vuelve a decir lo que decía antes del
+ * arreglo y encima con aire de captura.
+ *
+ * El instante de captura es el `fetchedAt` de `bulletin-ok` (y el `RECIBIDO` de estos recorridos):
+ * es lo que ata el número al reloj y lo que hace comprobable la proyección.
+ */
+const CAPTURADOS_EN = Date.parse("2026-08-28T17:49:00Z");
+
+/** JWT sintético con la caducidad de cada fixture: aquí solo se lee el `exp`. */
+function jwtQueCaducaEn(iso: string): string {
+  const b64 = (valor: unknown): string =>
+    btoa(JSON.stringify(valor)).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+  return `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ exp: Date.parse(iso) / 1000 })}.firma-de-prueba`;
+}
+
+test("GATE · el `credential` de los fixtures es lo que proyecta el módulo, no un JSON escrito a mano", () => {
+  for (const [nombre, fixture, clave] of [
+    ["bulletin-ok", BOLETIN_OK, jwtQueCaducaEn("2026-11-20T00:00:00.000Z")],
+    ["bulletin-clave-caducada", BOLETIN_CLAVE_CADUCADA, jwtQueCaducaEn("2026-07-20T00:00:00.000Z")],
+    ["bulletin-sin-clave", BOLETIN_SIN_CLAVE, undefined],
+  ] as const) {
+    assert.deepEqual(
+      (fixture as unknown as { credential: unknown }).credential,
+      publicCredentialView(inspectAemetKey(clave, CAPTURADOS_EN)),
+      `el \`credential\` de ${nombre} ya no es lo que el módulo publicaría: re-proyéctalo con ` +
+        `\`publicCredentialView(inspectAemetKey(...))\` en vez de editar el JSON`,
+    );
+  }
+});
 
 /**
  * GATE · los tres fixtures que T-18 re-proyectó siguen limpios.

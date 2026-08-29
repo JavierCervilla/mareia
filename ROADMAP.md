@@ -26,6 +26,13 @@
       con una frase neutra, y la instrucción completa se queda en el canal de quien puede renovarla
       (`aemet-key.yml`). Con gate que mira la **respuesta entera serializada** en los cinco estados
       de la credencial, no un campo, porque el defecto se mueve de campo
+      (pase adversario cerrado: los 4 hallazgos arreglados y sus 8 ataques como gate permanente — la
+      frase pública dice el estado de la credencial y no una consecuencia que la caché desmiente, el
+      texto que escribe AEMET se filtra en el borde antes de llegar al JSON y a la pantalla, un `exp`
+      que no es una fecha degrada a `unreadable` en vez de devolver un 500, y `daysLeft` cuadra con
+      el `expiresAt` que viaja a su lado; ver `docs/qa/informe-adversario-t18.md`)
+      (residuo R-1 cerrado: `scripts/check-aemet-key.ts` —lo que el operador lee dentro del issue—
+      ya tiene siete recorridos que lo **ejecutan**, y un job de CI que los corre)
 
 ## Hito 3 — Portal (10 puertos piloto)
 

@@ -107,7 +107,30 @@ export type {
   PortLocation,
   WeatherPayload,
 } from "./payload.ts";
-export type { AemetKeyState, ExpirySource, KeyStatus } from "./aemet-key.ts";
+export type {
+  AemetKeyState,
+  ExpirySource,
+  KeyStatus,
+  PublicCredentialView,
+} from "./aemet-key.ts";
+
+/**
+ * La proyección pública del estado de la credencial, también del lado UI. No la usa la sección
+ * —que pinta campos, no frases—, sino el gate que vigila los fixtures de boletín de la web: son
+ * copias congeladas de lo que este módulo publica, y la única forma de comprobar que siguen siendo
+ * esa proyección (y no un JSON editado a mano) es poder calcularla. Es lo que impidió que el
+ * `daysLeft: -40` con 39 días transcurridos siguiera commiteado sin que nadie avisara (T-18/A-20).
+ */
+export { inspectAemetKey, publicCredentialView } from "./aemet-key.ts";
+
+/**
+ * El borde que produce el `reason` público —el mismo campo que la sección pinta detrás de «el
+ * servidor informa: …»— también del lado UI, y por la misma razón: para que el gate de la pantalla
+ * ataque **el texto que llega de verdad** en vez de una copia escrita a mano. Si alguien quitara el
+ * filtro del borde, el recorrido de la web se pondría rojo donde duele, que es en lo que lee un
+ * humano y no en un JSON (T-18/A-18).
+ */
+export { reasonFrom } from "./errors.ts";
 export type { Cell } from "./cell.ts";
 export type { ForecastConditions, MarineConditions } from "./open-meteo.ts";
 export type { SourceReport } from "./source.ts";

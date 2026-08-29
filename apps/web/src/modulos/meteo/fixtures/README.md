@@ -40,6 +40,18 @@ documento no trae ninguno de los campos conocidos, la sección lo dice en vez de
 adivinado. El día que haya credencial, se recaptura de verdad y ese test cambia de fixture sin tocar
 código.
 
+## El bloque `credential` no se edita a mano
+
+Los tres fixtures de boletín llevan la **proyección pública del estado de la credencial**
+(`publicCredentialView(inspectAemetKey(clave, capturadoEn))`), y ahí estaba congelado el segundo
+canal de un defecto real: `bulletin-clave-caducada.json` decía `daysLeft: -40` junto a un `expiresAt`
+de hacía **39** días. Un dato de fixture es un dato: se **re-proyecta con la función que lo produce**
+—desde el instante de captura, que es el `fetchedAt` de `bulletin-ok`— y no se corrige a ojo, o
+vuelve a decir lo que decía antes del arreglo y encima con aire de captura.
+
+Lo vigila un gate (`adversario-t18.test.ts`): compara el bloque con lo que el módulo publicaría hoy y
+se pone rojo si alguien lo edita. Comprobado mordiendo.
+
 ## Recapturar
 
 Los fixtures se congelan a propósito (un test que sale a la red no es determinista y no corre en

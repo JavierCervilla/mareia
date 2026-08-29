@@ -25,16 +25,18 @@
  *
  * Informe: `docs/qa/informe-adversario-t18.md`. Bundle: `docs/qa/bundles/t18-adversario/FAILURE.md`.
  *
- * **ESTADO: los cuatro ABIERTOS.** Van envueltos en `hallazgoAbierto()` —el `test.fail()` de
- * Playwright traducido a `node --test`, con una vuelta de tuerca: exige que el fallo sea **este**
- * fallo y no otro, para que un test podrido no se haga pasar por un hallazgo vivo. Mientras estén
- * abiertos, CI sigue verde; el día que alguien los arregle, el envoltorio grita y se retira, y el
- * cuerpo se queda como gate duro para siempre.
+ * **ESTADO: los cuatro CERRADOS.** Nacieron envueltos en `hallazgoAbierto()` —el `test.fail()` de
+ * Playwright traducido a `node --test`, con una vuelta de tuerca: exigía que el fallo fuera **ése**
+ * y no otro, para que un test podrido no se hiciera pasar por un hallazgo vivo—. Al arreglarlos el
+ * envoltorio gritó «YA NO FALLA» (los cinco cuerpos a la vez), que es justo el trabajo que tenía
+ * que hacer, y se ha retirado: **los cuerpos se quedan tal cual como gate permanente**. Miden
+ * exactamente lo mismo que medían cuando reproducían el fallo; lo único que cambia es que ahora
+ * tienen que pasar.
  *
- * El quinto bloque (`gatePermanente`) no es un hallazgo: es el **punto ciego** que dejó abierto la
- * verificación —el gate de T-18 nunca ejercita la URL por defecto porque los tests inyectan
- * `urls.aemet`— atacado y **no roto**. Se queda como gate porque un punto ciego comprobado una vez
- * a mano vuelve a ser un punto ciego a la semana siguiente.
+ * Los bloques `GATE ·` que no llevan letra de hallazgo no vienen de una rotura: son el **punto
+ * ciego** que dejó abierto la verificación —el gate de T-18 nunca ejercita la URL por defecto
+ * porque los tests inyectan `urls.aemet`— atacado y **no roto**. Se quedan por la misma razón: un
+ * punto ciego comprobado una vez a mano vuelve a ser un punto ciego a la semana siguiente.
  */
 
 import assert from "node:assert/strict";
@@ -84,45 +86,14 @@ function jwtCon(payload: unknown): string {
 const DOCUMENTO = [{ elaborado: "2026-08-28T11:00:00Z", prediccion: { texto: "Marejada." } }];
 
 /**
- * TRINQUETE — `test.fail()` de Playwright traducido a `node --test`, y con más dientes.
+ * Un ataque que se queda vigilando: o la app lo aguantó desde el principio, o lo aguanta desde que
+ * se arregló el hallazgo que lo reprodujo. En los dos casos el cuerpo es el mismo y tiene que
+ * pasar, que es lo que convierte un pase adversario en un trinquete y no en un informe.
  *
- * Playwright se conforma con que el test falle **por cualquier motivo**, así que un selector
- * podrido mantiene el hallazgo «verde» mientras se pudre sin avisar (es el caveat que la propia
- * skill declara). Aquí el envoltorio exige además que el fallo **sea el del hallazgo**: si el
- * cuerpo revienta por otra cosa, esto se pone rojo y lo dice.
- *
- * - hallazgo vivo → el cuerpo falla con su seña → verde, CI no se bloquea por un bug ajeno.
- * - hallazgo arreglado → el cuerpo pasa → ROJO gritando: quita el envoltorio, deja el gate.
- * - test podrido → el cuerpo falla por otra cosa → ROJO: el hallazgo dejó de estar vigilado.
+ * Aquí vivía `hallazgoAbierto()`, el envoltorio que dejaba a los cuatro hallazgos en verde mientras
+ * estaban abiertos y gritaba al arreglarlos. Cumplió: los cinco cuerpos pasaron a la vez y el
+ * envoltorio se retiró. Queda escrito porque el siguiente pase lo volverá a necesitar.
  */
-function hallazgoAbierto(
-  nombre: string,
-  senaDelFallo: string,
-  cuerpo: () => Promise<void>,
-): void {
-  test(nombre, async () => {
-    let fallo: unknown;
-    try {
-      await cuerpo();
-    } catch (error) {
-      fallo = error;
-    }
-    assert.notEqual(
-      fallo,
-      undefined,
-      `TRINQUETE · «${nombre}» YA NO FALLA: el hallazgo parece corregido. Quita el envoltorio ` +
-        `hallazgoAbierto() y deja el cuerpo como gate permanente.`,
-    );
-    const texto = fallo instanceof Error ? fallo.message : String(fallo);
-    assert.ok(
-      texto.includes(senaDelFallo),
-      `TRINQUETE · «${nombre}» falla por un motivo que no es el hallazgo: esperaba «${senaDelFallo}» ` +
-        `y llegó «${texto}». Un hallazgo que dejó de vigilarse es peor que ninguno.`,
-    );
-  });
-}
-
-/** Un ataque que la app aguantó y que se queda vigilando. */
 function gatePermanente(nombre: string, cuerpo: () => Promise<void>): void {
   test(nombre, cuerpo);
 }
@@ -199,6 +170,15 @@ function aemetQueSirve(): FetchSpy {
  * Comportamiento correcto: si el cuerpo trae el boletín, la frase pública de la credencial no puede
  * negar que se publique. Puede decir que la credencial caducó —eso es cierto— pero no la
  * consecuencia que la propia respuesta desmiente.
+ *
+ * **CERRADO** en `aemet-key.ts` (`PUBLIC_MESSAGES`): las frases de `missing` y `expired` se quedan
+ * en el estado de la credencial y sueltan la consecuencia. Quién publica y quién no ya lo dicen el
+ * `status` y la presencia del `document`.
+ *
+ * Lo que este gate mide desde ahora: en los dos estados donde la credencial no vale y el boletín
+ * sale igual —clave caducada con AEMET respondiendo, y secreto borrado con la caché caliente— el
+ * cuerpo publicado trae `status: "ok"` **y** `document` **y** una frase de credencial que no niega
+ * que haya boletín. No congela la prosa: cualquier reescritura sin la negación pasa.
  */
 const NIEGA_QUE_HAYA_BOLETIN = /no\s+(?:se\s+)?publica[^.]*bolet[íi]n/iu;
 
@@ -219,9 +199,8 @@ async function seDesmiente(escenario: string, instancia: Instancia): Promise<voi
   );
 }
 
-hallazgoAbierto(
+gatePermanente(
   "A-17 · clave caducada y AEMET sirviendo: la respuesta publica el boletín y a la vez lo niega",
-  "publica el boletín y a la vez lo niega",
   async () => {
     const clock = fakeClock(T0);
     const instancia = await montar(
@@ -235,9 +214,8 @@ hallazgoAbierto(
   },
 );
 
-hallazgoAbierto(
+gatePermanente(
   "A-17 · secreto borrado con la caché caliente: la respuesta publica el boletín y a la vez lo niega",
-  "publica el boletín y a la vez lo niega",
   async () => {
     const clock = fakeClock(T0);
     let clave: string | undefined = jwt(T0 + 90 * DAY);
@@ -288,10 +266,18 @@ hallazgoAbierto(
  *
  * Comportamiento correcto: el `reason` que sale por HTTP no lleva las señas del canal del operador,
  * las haya escrito quien las haya escrito.
+ *
+ * **CERRADO** en `errors.ts` (`reasonFrom`), que es **el borde**: la única puerta por la que se
+ * llena el `reason` público. Ahí se recortan las señas antes de publicar, así que la propiedad deja
+ * de depender de que cada quien redacte con cuidado y pasa a cubrir todos los caminos hacia el
+ * `reason`, incluidos los que todavía no existen. Es lista negra y se dice en el propio comentario
+ * de la función.
+ *
+ * Lo que este gate mide desde ahora: con un `descripcion` de AEMET que **sí** lleva las señas —el
+ * de T-18 estaba elegido para no morder— ninguna de las cinco sale por el cuerpo HTTP.
  */
-hallazgoAbierto(
+gatePermanente(
   "A-18 · el `reason` público republica el manual de renovación que escribe el upstream",
-  "republica la seña",
   async () => {
     const clock = fakeClock(T0);
     // Un 401 de AEMET redactado como se redacta un error de credencial: diciendo dónde se arregla.
@@ -346,34 +332,62 @@ hallazgoAbierto(
  *
  * Comportamiento correcto: el módulo degrada, no rompe. Una clave con un `exp` que no cabe en una
  * fecha es exactamente `unreadable`.
+ *
+ * **CERRADO** en `aemet-key.ts`: antes de construir la fecha se comprueba que el instante cabe en
+ * el rango de `Date`, y si no cabe la clave sale `unreadable`, que es el estado del dominio para
+ * «una clave que no entendemos».
+ *
+ * Lo que este gate mide desde ahora: los tres `exp` que reventaban —el de microsegundos, el
+ * negativo desmesurado y **el borde exacto medido durante el pase** (`8 640 000 000 000` pasa,
+ * `+1` reventaba)— devuelven HTTP 200 con `credential.status: "unreadable"`. Se afirma sobre el
+ * cuerpo publicado: lo que se prometió conservar es que quien consume el API pueda seguir diciendo
+ * *por qué* no hay boletín, y eso solo se ve en el cuerpo.
  */
-hallazgoAbierto(
-  "A-19 · un `exp` que no cabe en un `Date` devuelve 500 en vez de degradar a 'unreadable'",
-  "rompe el borde público en vez de degradar",
+/**
+ * Los `exp` finitos, numéricos y fuera del rango de `Date`. El tercero es el **borde exacto**
+ * medido durante el pase: en milisegundos el límite de `Date` es 8 640 000 000 000 000, así que en
+ * segundos `8 640 000 000 000` es el último que cabe y `+1` es el primero que reventaba. Un gate
+ * que solo probara el caso cómodo dejaría el borde sin vigilar, que es de lo que va toda esta épica.
+ */
+const EXP_QUE_NO_ES_FECHA: readonly { readonly nombre: string; readonly exp: number }[] = [
+  { nombre: "exp en microsegundos (la confusión de unidad plausible)", exp: 1e14 },
+  { nombre: "exp negativo desmesurado", exp: -1e14 },
+  { nombre: "el primer exp que ya no cabe en un Date", exp: 8_640_000_000_001 },
+];
+
+gatePermanente(
+  "A-19 · un `exp` que no cabe en un `Date` degrada a 'unreadable' en vez de romper el endpoint",
   async () => {
-    const clock = fakeClock(T0);
-    // `exp` en microsegundos en vez de segundos: finito, numérico y fuera del rango de `Date`.
-    const clave = jwtCon({ exp: 1e14 });
-    const instancia = await montar(
-      deps({ fetch: aemetQueSirve().fetch, now: clock.now, aemetApiKey: clave }),
-    );
-    try {
-      const { status, texto } = await instancia.get(VIGO);
-      assert.equal(
-        status,
-        200,
-        `una clave con un \`exp\` fuera del rango de \`Date\` rompe el borde público en vez de ` +
-          `degradar: HTTP ${status} · ${texto}`,
+    for (const { nombre, exp } of EXP_QUE_NO_ES_FECHA) {
+      const clock = fakeClock(T0);
+      const instancia = await montar(
+        deps({ fetch: aemetQueSirve().fetch, now: clock.now, aemetApiKey: jwtCon({ exp }) }),
       );
-      const cuerpo = JSON.parse(texto) as { credential?: { status?: string } };
-      assert.equal(
-        cuerpo.credential?.status,
-        "unreadable",
-        `una clave que no se entiende tiene que salir como 'unreadable', no como ${texto}`,
-      );
-    } finally {
-      instancia.cerrar();
+      try {
+        const { status, texto } = await instancia.get(VIGO);
+        assert.equal(
+          status,
+          200,
+          `${nombre}: una clave con un \`exp\` fuera del rango de \`Date\` rompe el borde público ` +
+            `en vez de degradar: HTTP ${status} · ${texto}`,
+        );
+        const cuerpo = JSON.parse(texto) as { credential?: { status?: string } };
+        assert.equal(
+          cuerpo.credential?.status,
+          "unreadable",
+          `${nombre}: una clave que no se entiende tiene que salir como 'unreadable', no como ${texto}`,
+        );
+      } finally {
+        instancia.cerrar();
+      }
     }
+
+    // Y el último `exp` que SÍ es una fecha se sigue leyendo como tal: la guarda recorta lo que no
+    // cabe, no lo que está cerca del borde. Sin esto, «arreglar» A-19 podría ser declarar ilegible
+    // media recta real y nadie se enteraría.
+    const enElBorde = inspectAemetKey(jwtCon({ exp: 8_640_000_000_000 }), T0);
+    assert.equal(enElBorde.status, "valid");
+    assert.equal(enElBorde.expiresAt, "+275760-09-13T00:00:00.000Z");
   },
 );
 
@@ -394,10 +408,18 @@ hallazgoAbierto(
  *
  * Comportamiento correcto: `|daysLeft|` días completos tienen que haber pasado de verdad desde
  * `expiresAt`. Se afirma sobre el cuerpo HTTP publicado, no sobre la función.
+ *
+ * **CERRADO** en `aemet-key.ts` (`daysBetween`), que es de donde beben los dos canales: redondea
+ * hacia cero en vez de hacia abajo. Y de paso el **estado** dejó de decidirse con ese número: una
+ * clave muerta hace un minuto vale `daysLeft: 0`, y `0 < 0` la habría dado por viva, así que
+ * `expired` se pregunta comparando instantes. Los fixtures de la web se re-proyectaron con la
+ * función arreglada (`-40` → `-39`), no a mano, y hay un gate que lo vigila en el gemelo de la web.
+ *
+ * Lo que este gate mide desde ahora: un milisegundo después de caducar, el cuerpo publicado cumple
+ * `|daysLeft| × DÍA <= (now − expiresAt)`. Sin prosa: los días que se publican han pasado de verdad.
  */
-hallazgoAbierto(
+gatePermanente(
   "A-20 · el `daysLeft` público cuenta un día entero de más desde el primer milisegundo",
-  "días que todavía no han pasado",
   async () => {
     const clock = fakeClock(T0);
     const instancia = await montar(

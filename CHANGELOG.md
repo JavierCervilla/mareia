@@ -56,9 +56,52 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   `inspectAemetKey`: `/bulletin` devuelve **500** y el healthcheck revienta, que es la promesa
   incumplida por el lado contrario — no se filtra nada porque no se publica nada. (d) `daysLeft`
   cuenta un día entero de más desde el primer milisegundo y no cuadra con el `expiresAt` que viaja a
-  su lado (ya visible en un fixture commiteado: `-40` con 39 días transcurridos). Los cuatro viven en
-  la suite gate con `hallazgoAbierto()`, así que **CI sigue verde** y el día que se arreglen lo dice.
+  su lado (ya visible en un fixture commiteado: `-40` con 39 días transcurridos).
   Informe: `docs/qa/informe-adversario-t18.md`; bundle: `docs/qa/bundles/t18-adversario/FAILURE.md`.
+- **Pase adversario cerrado: los 4 hallazgos arreglados y sus 8 ataques como gate permanente.** El
+  envoltorio `hallazgoAbierto()` hizo su trabajo —los cinco cuerpos del módulo gritaron «YA NO
+  FALLA» a la vez— y se retiró; los cuerpos se quedan tal cual, midiendo lo mismo que medían cuando
+  reproducían el fallo, sólo que ahora tienen que pasar.
+  - **(a) La frase pública dice el estado de la credencial y sólo eso.** Se le quita la
+    consecuencia: `missing` y `expired` ya no afirman «no publica el boletín oficial», porque la
+    caducidad se lee **en local** del `exp` y la caché sigue sirviendo durante 4×TTL — el cuerpo se
+    desmentía a sí mismo. Quién publica y quién no ya lo dicen el `status` y la presencia del
+    `document`; hacer que la frase dependa de si hay caché la acoplaría al estado de otra cosa.
+  - **(b) El filtro de la tercera copia va en el borde, no en el adaptador.** `reasonFrom()`
+    —**la única** puerta por la que se llena el `reason` público— recorta las cinco señas del canal
+    del operador, las haya escrito quien las haya escrito. Es lista negra y se dice en el propio
+    comentario: conserva el diagnóstico del upstream a cambio de no prometer nada sobre prosa ajena
+    que no lleve esas señas. Ahora el gate ataca con un `descripcion` de AEMET que **sí** muerde —el
+    de T-18 estaba elegido para no morder— y el recorrido de la web compone su `reason` llamando al
+    borde real en vez de copiar el resultado a mano, así que quitar el filtro se ve en la pantalla.
+  - **(c) Una clave cuyo `exp` no es una fecha es una clave ilegible.** Antes de construir la fecha
+    se comprueba que el instante cabe en el rango de `Date`; si no cabe, `unreadable`, que ya es un
+    estado del dominio. `/bulletin` vuelve a devolver 200 con su `credential` y su `reason`, y el
+    `healthcheck()` deja de lanzar. El gate cubre los tres `exp` que reventaban, incluido **el borde
+    exacto medido** (`8 640 000 000 000` pasa, `+1` reventaba), y afirma que el último que sí es una
+    fecha se sigue leyendo como tal.
+  - **(d) El redondeo se arregla donde se calcula.** `daysBetween()` trunca hacia cero en vez de
+    hacia abajo, así que los dos canales —el `daysLeft` público y el «caducó hace N día(s)» del
+    operador— dejan de contar un día que no ha pasado. Y el **estado** deja de decidirse con ese
+    número: una clave muerta hace un minuto vale `daysLeft: 0` y `0 < 0` la habría dado por viva, de
+    modo que `expired` se pregunta comparando instantes. Los fixtures de boletín de la web se
+    re-proyectaron **con la función arreglada** (`-40` → `-39`), y un gate nuevo compara su bloque
+    `credential` con `publicCredentialView(inspectAemetKey(...))`: editar ese JSON a mano se pone
+    rojo.
+- **R-1 cerrado: el canal del operador ya tiene quien lo mire.** El «trinquete al revés» de T-18
+  vigilaba `inspectAemetKey`, pero lo que el humano lee dentro del issue de GitHub es la salida de
+  `scripts/check-aemet-key.ts`, y ese script **no lo alcanzaba ningún job** (`pnpm test` no lo ve
+  porque es Deno; el `deno task test` de la API corre sólo sobre `apps/api/src/`). Siete recorridos
+  nuevos **ejecutan el script** como subproceso —no importan su lógica: probar la función y no el
+  artefacto es el fallo que esto cierra— y afirman sobre su stdout, su stderr y su código de salida,
+  estado por estado. Comprobado mordiendo con **la mutación exacta que midió el adversario** (dos
+  líneas: imprimir la frase pública en vez del mensaje del operador y quitar los tres pasos del
+  stderr): antes dejaba la suite en 499/0 y el issue mudo; ahora pone dos recorridos en rojo
+  citando el texto que habría llegado al issue. Uno de los siete es el trinquete del trinquete: que
+  la línea de comando que se ejecuta aquí siga siendo la que ejecuta `aemet-key.yml`.
+  El job `api` de CI corre `deno task check` + `deno task test` desde `scripts/`, con su propio
+  `scripts/deno.json` — **no en la raíz** a propósito: medido que un `deno.json` en la raíz hace que
+  Deno tome el `package.json` de pnpm por miembro de workspace y reescriba `apps/api/deno.lock`.
 - **Y el punto ciego que dejó la verificación, cerrado con gate y sin hallazgo**: el recorrido nunca
   ejercitaba la URL por defecto (todos los escenarios inyectan `urls.aemet`, y `AEMET_BASE_URL` lleva
   la seña `opendata.aemet.es`). Atacado con la forma de error **medida** del runtime de producción
