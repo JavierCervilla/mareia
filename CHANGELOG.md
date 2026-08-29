@@ -2,6 +2,61 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-29 — T-11 · los 7 hallazgos del pase adversario, arreglados
+
+- **El sello de antigüedad ya no se congela.** Era el hallazgo grave: la isla calculaba la edad al
+  pintar y no la volvía a mirar, así que con la pestaña abierta tres horas la página rotulaba
+  «Consultado hace menos de un minuto» sobre un dato de hace tres horas, con la hora de consulta al
+  lado dándole crédito. El defecto que ADR-01 dice eliminar no estaba eliminado: estaba **movido**
+  del momento del build al de abrir la pestaña. Ahora la edad **sigue viva mientras la página lo
+  está**: temporizador de 30 s (la edad se escribe al minuto), `visibilitychange` (una pestaña en
+  segundo plano tiene los temporizadores estrangulados o congelados) y `pageshow` (en el bfcache la
+  página vuelve intacta de ayer al pulsar «atrás»). Medido con el mismo ataque: a las 3 h el bloque
+  dice **«Dato de hace 3 h»** donde antes decía «Consultado hace menos de un minuto».
+- **Y a partir de cierta antigüedad cambia el estado, no solo el rótulo.** Pasada la ventana de
+  frescura de esa fuente, el dato deja de tener cara de fresco. El umbral **no se lo inventa la
+  página**: las tres ventanas del módulo (mar 1 h, atmósfera 30 min, boletín 6 h) se exportan ahora
+  desde `@mareia/module-weather/ui`, así que cada fuente tiene la suya — a los 45 minutos el mar
+  sigue siendo de ahora y la atmósfera ya no. Y las **dos** caducidades se leen distinto, porque son
+  dos averías distintas: «la fuente no responde y se sirve lo último guardado» / «se consultó a las
+  15:12 y esta página no ha vuelto a preguntar; recarga».
+- **Un 200 con el cuerpo cambiado ya no mata la sección.** Un backend a medio desplegar, un proxy que
+  contesta su propio JSON o una versión del módulo por delante dejaban la sección en «Pidiendo el
+  estado del mar…» con `aria-busy="true"` **indefinidamente** —un quinto estado que no existe en el
+  contrato y que además miente—, porque la excepción se perdía en una promesa que nadie esperaba.
+  Ahora el cuerpo pasa por un portero antes de llegar a la vista y la sección resuelve a uno de sus
+  ausentes en ~300 ms; y si algo imprevisto lanza, se dice, en vez de dejar el aviso de carga colgado.
+- **Cada ausencia dice cuál es, también en la capa de red.** El 200 ilegible y el API caído
+  publicaban una frase **idéntica carácter por carácter**, aunque en un caso el servidor contestó y
+  en el otro el navegador ni pudo preguntar. Son cuatro motivos y ahora cada uno tiene el suyo. Es la
+  lección de A-11 en T-09, otra vez.
+- **El bloque que ya llegó deja de esperar al que tarda.** Los dos endpoints se pedían por separado
+  pero se pintaban juntos: con AEMET contestando a los 5 s, el estado del mar estaba descargado en el
+  navegador y la pantalla seguía diciendo «Pidiendo…» (los 8 s enteros si AEMET no contestaba). Ahora
+  cada uno se pinta al llegar —el mar está en pantalla **antes de los 3 s** en ese mismo escenario— y
+  el bloque que falta dice **qué** está pidiendo, no un «cargando» genérico.
+- **El boletín de AEMET ya no maqueta la página.** Un enlace de los que AEMET pone en sus boletines
+  (84 caracteres sin un espacio) le imponía el ancho a la sección: **490 px de `scrollWidth` en una
+  ventana de 320** (+170) y de 360 (+130), con la página entera desplazándose en horizontal. Con
+  `overflow-wrap: anywhere` vuelve a ser el de la ventana. Una sonda propia encontró la misma puerta
+  en el motivo del backend cuando trae la URL que falló (+49 px a 320): misma cura.
+- **La sección se anuncia a quien no ve la pantalla.** `aria-busy` dice «espera», no anuncia nada, y
+  nada en `#meteo` era región viva: quien navega con lector oía «El estado del mar todavía no ha
+  llegado» y **nunca** se enteraba de que el dato llegó, de que la fuente cayó ni de que lo que hay
+  en pantalla es de hace tres horas. Ahora hay un `role="status"` que dice la situación de cada
+  fuente — y que **no** lleva la edad, para no interrumpir cada minuto cantando «hace cuatro minutos».
+- **El trinquete de ADR-01 tenía cuatro puertas abiertas y ya no.** `data-ola=1,68m` (valor sin
+  comillas), `data_ola=`, `x:ola=` y un comentario HTML llegaban al `dist/` dentro de `#meteo` con el
+  gate en verde — y el comentario es justo donde un framework deja su carga de hidratación. El gate
+  deja de depender de la FORMA del atributo: lee etiqueta a etiqueta, con el nombre entero que admite
+  HTML5, con valor o sin él, y prohíbe los comentarios dentro de la sección. Las cuatro cargas ponen
+  ahora el gate en rojo; las tres que ya estaban cerradas siguen cerradas.
+- **Los 13 ataques del pase quedan como gate permanente**, sin `test.fail()` y sin que se tocara un
+  solo assert: cada uno afirmaba el comportamiento correcto, así que pasaron a verde solos. La suite
+  sube a **23 recorridos** (13 adversarios + 10 confirmatorios) y `apps/web` de **71 a 95 tests**.
+  Coste del arreglo en el bundle de la isla: de 9,3 KB a **12,8 KB** (de 3,7 a **4,8 comprimidos**),
+  medido sobre el bundle construido; el resto del portal sigue en **cero JavaScript**.
+
 ## 2026-08-29 — T-11 · la isla meteo, y el primer dato del portal que caduca
 
 - **La sección meteo en la página de puerto**, por el contrato `AppModule`: olas (total, mar de

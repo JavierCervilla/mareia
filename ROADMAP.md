@@ -31,6 +31,10 @@
 - [x] T-11 · Módulo weather UI (isla meteo con estados ok/stale/no disponible/carga sin datos)
       (el HTML construido no lleva ninguna magnitud meteo: entra por isla y con sello de antigüedad,
       ver `docs/adr/ADR-01`; el boletín de AEMET se cita con su esquema aún sin verificar)
+      (pase adversario cerrado: los 7 hallazgos arreglados y sus 13 ataques como gate permanente —
+      el sello envejece con la pestaña abierta, un 200 hostil no deja la sección pidiendo para
+      siempre y el trinquete de ADR-01 ya ve los atributos sin comillas y los comentarios;
+      ver `docs/qa/informe-adversario-t11.md`)
 - [ ] T-12 · PWA offline (almanaque de favoritos sin red)
 
 ## Hito 4 — España completa y transparencia
