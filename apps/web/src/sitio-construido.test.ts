@@ -238,17 +238,59 @@ test("cada página de puerto trae la sección meteo anclada a su puerto y a su z
   }
 });
 
+/**
+ * El trinquete de ADR-01, y por eso está escrito como LISTA BLANCA.
+ *
+ * La decisión de servir la meteo por isla en vez de hornearla en build se justifica en que un HTML
+ * horneado no puede sellar su propio dato: el que dice «consultado hace 4 minutos» lo sigue
+ * diciendo veinte horas después. Esa garantía vale lo que valga este test.
+ *
+ * La primera versión perseguía unidades (`km/h`, `hPa`, `°C`) y **no mordía**: una inyección con
+ * altura de ola, dirección, periodo y el sello congelado dentro pasaba en verde. Perseguir
+ * magnitudes una a una es una carrera que se pierde en cuanto alguien añade una unidad nueva.
+ *
+ * Así que se invierte: el `#meteo` del HTML construido tiene que decir EXACTAMENTE estas frases y
+ * ninguna más. Es deliberadamente frágil — tocar el texto de la sección obliga a actualizar esta
+ * constante — y esa fragilidad es el precio de que un dato horneado no pueda colarse jamás.
+ */
+const TEXTO_ESTATICO_DE_METEO = [
+  "Estado del mar y del cielo en {PUERTO}",
+  "El estado del mar todavía no ha llegado",
+  "Esta sección no viaja dentro de la página: se pide al servidor al abrirla, porque la meteo",
+  "caduca en horas y esta página se construye una vez al día. Si sigues leyendo esto, o la",
+  "petición no ha terminado o tu navegador no ejecuta JavaScript. El resto de la página —mareas,",
+  "curva, sol y luna— no lo necesita y ya está completa.",
+  "Fuentes de esta sección",
+  "Open-Meteo · CC-BY-4.0",
+  "AEMET — Agencia Estatal de Meteorología · Uso condicionado al reconocimiento de AEMET como",
+  "autora de los datos",
+  "Predicción de modelo numérico y boletín oficial, para saber con qué se va a encontrar quien",
+  "llegue a la orilla. No apto para navegación.",
+].join(" ");
+
+/** Texto visible de un fragmento de HTML, con los espacios normalizados. */
+function textoDe(html: string): string {
+  return html
+    .replaceAll(/<[^>]+>/gu, " ")
+    .replaceAll(/\s+/gu, " ")
+    .trim();
+}
+
 test("el HTML construido no lleva NI UNA magnitud meteorológica dentro (ADR-01)", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
   }
-  // Unidades que solo puede escribir la sección meteo. Si aparecen en el HTML es que el dato se
-  // horneó en build, y entonces envejece hasta el siguiente rebuild sin poder decir cuánto.
-  const unidadesDeMeteo = /\d[\d,]*\s*(km\/h|hPa|°C)\b|Índice UV|Mar de fondo|Temperatura del agua/u;
   for (const puerto of await cargarPuertos()) {
     const html = paginaDe(rutaPuerto(puerto));
-    assert.doesNotMatch(html, unidadesDeMeteo, `${puerto.slug}: hay meteo horneada en el HTML`);
+    const seccion = /<section id="meteo"[\s\S]*?<\/section>/u.exec(html)?.[0];
+    assert.ok(seccion !== undefined, `${puerto.slug}: no hay sección meteo que comprobar`);
+    assert.equal(
+      textoDe(seccion),
+      TEXTO_ESTATICO_DE_METEO.replace("{PUERTO}", puerto.name),
+      `${puerto.slug}: la sección meteo del HTML dice algo que no es su texto estático — si es un
+       dato, se horneó en build y va a envejecer sin poder decir cuánto`,
+    );
   }
 });
 

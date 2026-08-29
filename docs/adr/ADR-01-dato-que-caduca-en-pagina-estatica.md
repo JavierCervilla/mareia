@@ -66,8 +66,13 @@ hueco mudo. Sin JavaScript, sin red o con el API caído, la sección **escribe p
 
 ## Consecuencias comprobables
 
-- El HTML de `dist/` no contiene ninguna magnitud meteorológica: es verificable con un test sobre
-  el sitio construido (`sitio-construido.test.ts`), y es lo que hace imposible que envejezca.
+- El HTML de `dist/` no contiene ninguna magnitud meteorológica: el `#meteo` del sitio construido
+  tiene que decir **exactamente** su texto estático y ninguna frase más (`sitio-construido.test.ts`),
+  y es lo que hace imposible que envejezca. El test es una **lista blanca a propósito**: la primera
+  versión perseguía unidades (`km/h`, `hPa`, `°C`) y no mordía —una inyección con altura de ola,
+  dirección, periodo y el sello congelado dentro pasaba en verde—, porque perseguir magnitudes una
+  a una es una carrera que se pierde en cuanto alguien añade una unidad nueva. Que el test se rompa
+  al tocar el texto de la sección es el precio, y es barato al lado de la garantía.
 - Los cuatro estados (`ok`, `stale` con su antigüedad en la cara, `unavailable` con el motivo del
   backend, y «carga sin datos») tienen cada uno un test de vista y un recorrido Playwright con el
   API mockeado.
