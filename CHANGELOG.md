@@ -2,6 +2,110 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-29 — T-15 · el API en producción, `/health` fuera del enrutado público y el sitio que no envejece solo
+
+`mareia.cervilla.es` servía las 192 páginas desde T-17, pero **`/v1` devolvía 502**: `mareia-api` no
+tenía Dockerfile. Enganchar un hostname a un servicio que no puede arrancar convierte una URL «que
+aún no existe» en una URL **rota**, y para quien la visita no es lo mismo. T-15 deja la imagen, la
+configuración y las pruebas locales que demuestran que funciona; el despliegue es el paso siguiente.
+
+- **`apps/api/Dockerfile`: el API, con lo justo dentro.** Dos etapas sobre `denoland/deno:alpine-2.9.6`
+  fijada **por digest**. La final pesa **118,5 MiB** en disco, de los que **104,4 MiB** son la base:
+  la aplicación añade **14,2 MiB** (12 MiB de dependencias resueltas contra `deno.lock` y 2,3 MiB de
+  árbol). Dentro no hay `node`, `npm`, `pnpm`, `corepack` ni un solo `node_modules`; tampoco la web,
+  ni el pipeline de datos, ni los `__tests__` (552 KB de 940 KB de `packages/`, casi todo fixtures
+  dorados de la USNO: material de CI, en la imagen solo serían superficie). Son **225 ficheros**, y
+  la lista de lo que entra está **escrita en el Dockerfile**, que es lo que hace comprobable la
+  frase «la imagen lleva esto». Se descartó `deno compile`, que habría dado una imagen más pequeña,
+  porque `core-deps.ts` resuelve el dataset desde `import.meta.url` y en un binario compilado eso
+  apunta al sistema de ficheros virtual: el dataset dejaría de ser un árbol legible dentro de la
+  imagen, y el dataset es el producto.
+- **Dónde escucha, preguntado al kernel y no al log.** La avería silenciosa de este despliegue es un
+  proceso que bindea a la interfaz equivocada: arranca sin quejarse, el contenedor queda `running`,
+  el log dice «listo» y Traefik contesta 502. `main.ts` bindea a `0.0.0.0` **explícito** y su banner
+  **lee la dirección del socket** en vez de repetir la constante. Pero eso sigue siendo el proceso
+  hablando de sí mismo, así que la prueba se pidió fuera: `/proc/net/tcp` **dentro del contenedor**
+  —la imagen no trae `ss` ni `netstat`— da `00000000:2253` y `00000000:2254` en estado `0A`, es
+  decir **0.0.0.0:8787 y 0.0.0.0:8788 en LISTEN**, con `uid=1000` (no root) y sin ningún socket
+  IPv6. Y desde **otro contenedor de la misma red**, que es lo que hace Traefik: `/v1/ports` → 200
+  con los **153 puertos**, todos con su `quality`.
+- **`/health` deja de ser alcanzable desde fuera, y se corta en dos sitios.** El barato es el
+  dominio (ruta `/v1` en Dokploy), pero esa configuración vive **fuera del repositorio**: el día que
+  alguien clone el servicio, el healthcheck vuelve a internet y **ningún test lo nota**. Así que el
+  corte de verdad está en el código (`src/http/public-app.ts`): dos servidores sobre la misma app,
+  el público (8787) sin `/health` y el interno (8788) con la app entera, sin exponer. Son dos
+  **puertos** y no dos rutas porque lo que separa a los dos públicos es *quién puede llegar*, y en
+  Docker eso se dice con un puerto. El 404 del puerto público es **el mismo, byte a byte, que el de
+  cualquier ruta inventada**, con un test que lo ata: un cuerpo propio para `/health` confirmaría a
+  quien sondea que esa ruta existe y está tapada. El healthcheck sigue vivo para Dokploy, en el
+  `HEALTHCHECK` de la imagen por loopback contra el 8788 (`healthy` en ~40 s). **Ningún endpoint de
+  `/v1` cambia**: la app pública envuelve a la de `createServer()` sin sustituirla.
+- **El volumen de Deno KV, con la cifra medida.** `Deno.openKv()` sin ruta usa el almacén por
+  defecto del proceso, que en un contenedor vive en la capa efímera: cada redespliegue tiraba la
+  caché del boletín y el primer arranque volvía a pegarle a AEMET y a Open-Meteo por los 153
+  puertos. Ahora la ruta se declara con **`MAREIA_KV_PATH`** (el Dockerfile la fija en
+  `/var/lib/mareia/kv/weather.sqlite`; en desarrollo se sigue usando el almacén por defecto, que es
+  lo que allí se quiere). Tras un ciclo completo —153 puertos × `/weather` y `/bulletin`, 306
+  respuestas, 25 s, todas 200— el almacén tiene **288 entradas** (144 celdas × marine y forecast),
+  **71.970 bytes** de valores serializados y **4.296.208 bytes = 4,1 MiB en disco**, de los que
+  **4,0 MiB son el WAL de SQLite**: quien dimensione el volumen tiene que contar con el WAL y no con
+  el JSON. **Tres ciclos más no añadieron un solo byte**, que es la prueba de que la caché funciona.
+  El boletín aporta **cero** porque la instancia corrió sin `AEMET_API_KEY`: con clave cachea **por
+  zona costera y no por puerto**, como mucho 11 entradas topadas a 64 KiB cada una. Y que la caché
+  **sobrevive al redespliegue** no se supone: reiniciando el contenedor, la respuesta vuelve con el
+  `fetchedAt` de antes del reinicio y `ageSeconds: 60`.
+- **Un permiso que no era obvio.** El comentario de `weather-kv.ts` decía que el almacén de KV «lo
+  abre el runtime y no pasa por este permiso», y eso es cierto **solo mientras no se le da ruta**.
+  Con ruta explícita, `Deno.openKv()` exige `--allow-read` **y `--allow-write`** sobre ella —medido:
+  `NotCapable: Requires write access to …`—, así que el `CMD` los concede sobre ese directorio y
+  solo sobre ése. `/var/lib/mareia` es el único sitio del contenedor donde este proceso puede
+  escribir. Y `--cached-only` impide que un arranque en producción salga a internet a por código.
+- **El rebuild diario de la web, y de qué depende.** El sitio es SSG y publica **el día en que se
+  construyó**, horneado en el HTML de las 192 páginas. `.github/workflows/rebuild-diario.yml` lo
+  reconstruye a diario (04:20 UTC), y la parte importante es lo que va escrito en su cabecera:
+  **un redespliegue a secas no basta**, porque el `RUN` que escribe la fecha es una capa de Docker y
+  con el mismo commit se reutiliza de caché — el sitio publicaría el día de ayer **con un despliegue
+  nuevo y en verde**. Por eso el workflow escribe `BUILD_DATE` antes de desplegar (por **POST**, no
+  por `PATCH`: el vault ya tenía medido que con `PATCH` la llamada no aplica) y **relee** para
+  confirmar dos cosas: que se escribió lo que se quería, y que **no cambió nada más** — porque
+  `application.update` se asume parcial y esa asunción no está probada contra el panel real. Después no da por buena la llamada: espera a que el dominio
+  publique `data-otro-dia-build="<hoy>"`, porque «se pidió un despliegue» y «el sitio publica hoy»
+  son cosas distintas. Sin los secretos configurados el job sale **en rojo a propósito**: un rebuild
+  que no corre es invisible —el sitio sigue en pie, solo que con la fecha de otro día— y esa es la
+  única señal posible. **Esto es lo que la normativa fechada de T-19 necesita para poder degradar**:
+  un dato que envejece, sobre un sitio que no se reconstruye, no degrada nunca — se queda para
+  siempre en el día en que se construyó, diciendo que está fresco.
+- **`actionlint` en CI, y lo primero que encontró.** Cierra el peldaño que faltaba desde T-17: los
+  workflows son código de CI y hasta ahora no los miraba nadie. Y el primer hallazgo fue **en el
+  propio paso de `shellcheck` de T-17**: `SC2046`, `$(git ls-files '*.sh')` sin comillas. Era real —
+  un `.sh` con un espacio en la ruta se parte en dos argumentos y shellcheck acaba mirando ficheros
+  que no existen. Medido antes de escribirlo: sale con **exit 2** y «openBinaryFile: does not
+  exist», **no en verde** — el gate no se callaba, fallaba diciendo otra cosa mientras el fichero
+  que dice lintar no se lintaba nunca. Un rojo por el motivo equivocado tampoco es un gate: manda a
+  arreglar lo que no está roto. Arreglado con `git ls-files -z | xargs -0`. `hadolint` pasa
+  ahora por **los dos** Dockerfiles; sobre el del API sacó `DL3003` (un `cd` dentro de un `RUN`),
+  arreglado con rutas absolutas. Los dos linters se probaron **en rojo** además de en verde.
+- **El build es hermético.** El `packageManager` de la raíz lleva su hash de integridad
+  (`pnpm@10.33.0+sha512.…`) y **corepack verifica el tarball contra él** antes de ejecutarlo. Sigue
+  descargándolo —eso no lo cierra un Dockerfile—, pero ya no confía en lo que le llegue: un registry
+  comprometido o un intermediario que sirva otro pnpm **hacen fallar el build** en vez de meter un
+  gestor de paquetes ajeno en la imagen que se despliega. Comprobado que sabe fallar (alterando un
+  carácter: `Error: Mismatch hashes`), que la imagen de la web sigue construyendo con él, y que
+  `pnpm/action-setup` lo sigue entendiendo — ese `+sha512.…` es *build metadata* de semver y `npm`
+  lo resuelve a `10.33.0`, que es exactamente lo que la action hace por dentro.
+- **e2e contra producción** (`pnpm test:e2e:prod`): que `/v1/ports` responde con el catálogo y su
+  `quality`, que **`/health` NO es alcanzable desde fuera** y que la portada sigue sirviéndose.
+  **No necesita navegador** —todo con el fixture `request`—, así que corre sin `playwright install`,
+  que es lo que lo hace lanzable en el minuto siguiente a un despliegue. Y **se puede lanzar sin
+  haber desplegado**: los dos modos de «no está» se cuentan distintos porque llevan a mirar sitios
+  distintos —el 502 («hay un proxy delante, pero el servicio de detrás no está sirviendo») y el
+  fallo de conexión («o el dominio no resuelve, o no hay nada escuchando… si el despliegue aún no se
+  ha hecho, es lo esperado»)—, en vez de un `ENOTFOUND` que obliga a adivinar. **Sabe fallar**: con
+  los dos contenedores reales detrás de un nginx que reproduce el corte por ruta de Traefik, los
+  tres recorridos van en verde; añadiendo una línea que publique el healthcheck, el de `/health` se
+  pone en rojo. No corre en CI a propósito: atar el rojo de un PR a que producción esté en pie sería
+  atarlo a una avería que no está en el PR.
+
 ## 2026-08-29 — T-14B (arreglo del pase adversario) · la señal llega a las tres listas, y el `null` se explica por su motivo
 
 El pase adversario de T-14B reprodujo en rojo dos cosas que la trayectoria había dejado a medias.

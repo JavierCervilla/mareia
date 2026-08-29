@@ -43,15 +43,33 @@ jobs:
       # aquí lo único que los había mirado era una persona, una vez. Eso no es un gate.
       # Las dos herramientas van por imagen FIJADA para que local y CI corran exactamente lo mismo;
       # comprobado que saben fallar (un `[ "$1" = ]` y un `FROM alpine:latest` los ponen en rojo).
+      # `-z` + `xargs -0` y no `$(git ls-files …)` sin comillas: eso último lo cazó actionlint
+      # (SC2046) al instalarlo en T-15, y tenía razón — un `.sh` con un espacio en la ruta se
+      # parte en dos argumentos y shellcheck acaba mirando ficheros que no existen. Medido: sale
+      # con **exit 2** y «openBinaryFile: does not exist», no en verde. O sea que el gate no se
+      # callaba: **fallaba diciendo otra cosa**, y el fichero que dice lintar no lo lintaba nunca.
+      # Un rojo por el motivo equivocado tampoco es un gate: manda a arreglar lo que no está roto.
       - name: Shell · shellcheck -S error
         run: |
-          docker run --rm -v "$PWD:/repo" -w /repo koalaman/shellcheck:v0.10.0 \
-            -S error $(git ls-files '*.sh')
+          git ls-files -z '*.sh' | xargs -0 --no-run-if-empty \
+            docker run --rm -i -v "$PWD:/repo" -w /repo koalaman/shellcheck:v0.10.0 -S error
 
-      # Umbral por defecto de hadolint (falla desde `info`). Nuestro Dockerfile pasa limpio, entre
-      # otras cosas porque fija las bases por digest.
-      - name: Dockerfile · hadolint
-        run: docker run --rm -i hadolint/hadolint:v2.12.0-alpine hadolint - < apps/web/Dockerfile
+      # Peldaño que faltaba desde T-17: los workflows son código de CI y hasta hoy no los miraba
+      # nadie. La imagen trae shellcheck dentro, así que de paso revisa los bloques `run:`, que es
+      # shell que corre en cada PR y que el `shellcheck` de arriba **no** ve (no son ficheros `.sh`).
+      # Versión fijada por lo mismo que semgrep: un linter sin pin cambia de reglas entre dos
+      # corridas del mismo commit y deja de ser determinista.
+      - name: Workflows · actionlint
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7 -color
+
+      # Umbral por defecto de hadolint (falla desde `info`). Los dos Dockerfiles pasan limpios,
+      # entre otras cosas porque fijan las bases por digest.
+      - name: Dockerfiles · hadolint
+        run: |
+          for f in apps/web/Dockerfile apps/api/Dockerfile; do
+            echo "--- $f"
+            docker run --rm -i hadolint/hadolint:v2.12.0-alpine hadolint - < "$f"
+          done
 
   web:
     name: Web · build Astro + astro check + typecheck + tests

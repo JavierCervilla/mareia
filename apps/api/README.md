@@ -15,7 +15,7 @@ deno task test    # contract tests contra el dataset real de ../../data
 
 | Ruta | Qué devuelve |
 |---|---|
-| `GET /health` | Salud del servicio |
+| `GET /health` | Salud del servicio. **No se publica en el dominio** (ver abajo) |
 | `GET /v1/modules` | Módulos activos y sus atribuciones |
 | `GET /v1/ports` | Catálogo: los puertos de la costa española con su jerarquía región/provincia y la **calidad** de cada uno |
 | `GET /v1/ports/:slug` | Ficha del puerto + estación, datum, calidad y atribuciones |
@@ -23,6 +23,22 @@ deno task test    # contract tests contra el dataset real de ../../data
 | `GET /v1/ports/:slug/almanac/:year` | El año entero de extremos, agrupado por día civil |
 | `GET /v1/ports/:slug/astro?date` | Sol y Luna: ortos, ocasos, crepúsculos, tránsitos, fase |
 | `GET /v1/ports/:slug/solunar?date` | Periodos mayores y menores con su rating |
+
+### `/health` no sale a internet (T-15)
+
+El proceso levanta **dos servidores sobre la misma app**: el público (`PORT`, 8787), que es el que
+el dominio enruta y que **no publica `/health`**, y el interno (`HEALTH_PORT`, 8788), que sirve la
+app entera y no se expone fuera de la red del despliegue. El healthcheck dice qué versión corre y
+es la puerta por la que, el día que se le conecte el `healthcheck()` de los módulos, saldrían al
+público el estado de las credenciales y los motivos de degradación de cada fuente.
+
+En el puerto público `/health` devuelve **el mismo 404 que cualquier ruta que no existe**, byte a
+byte y a propósito: un cuerpo distinto confirmaría a quien sondea que esa ruta existe y está tapada.
+El corte está en `src/http/public-app.ts` —y también en el enrutado de Dokploy, que publica solo
+`/v1`—; en el código porque la configuración del panel vive fuera del repositorio y ningún test la
+mira. Detalle completo en [`docs/despliegue.md`](../../docs/despliegue.md).
+
+En desarrollo no cambia nada: `deno task dev` sirve las dos cosas, `/health` en el 8788.
 
 ### La calidad que publica el catálogo (T-14B)
 

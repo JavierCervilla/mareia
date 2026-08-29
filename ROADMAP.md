@@ -116,17 +116,26 @@
 - [ ] T-14 · Metodología pública + QC navegable + dataset con su licencia por puerto declarada
       (el reparto real ya publicado en T-14A) + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario
-      (queda del peldaño 1 del gate de seguridad `actionlint` sobre `.github/workflows/` —es el
-      único que lee los `run:` embebidos—; el `shellcheck -S error` sobre los `.sh` del repo **ya
-      corre desde T-17**, con `hadolint` al lado. Y el healthcheck del API, que queda fuera del
-      enrutado público porque solo se publica `/v1/*`)
       · **La web ya está hecha, en T-17**: `apps/web/Dockerfile` construido y probado con `curl`
       (rutas de directorio, 301 a la barra final, 404 con el cuerpo de `404.html`, y ninguna URL del
       dominio contestando con una página ajena al portal), sirviendo en `0.0.0.0:3000` sin root, sin
       toolchain en la imagen y con las bases fijadas por digest — ver `docs/despliegue.md`, que
-      incluye por qué **no** se escucha además en el 80. Aquí siguen el API con su volumen KV, el
-      rebuild diario que hornea el día, el healthcheck del contenedor, el e2e contra producción y el
-      pase adversario de despliegue.
+      incluye por qué **no** se escucha además en el 80.
+      · **El API ya está hecho**: `apps/api/Dockerfile` (dos etapas, base por digest, 118,5 MiB de
+      los que 104,4 son la base; sin node/npm/pnpm/corepack, sin `node_modules` y sin `__tests__`),
+      permisos acotados como `deno.json` y **escucha comprobada contra el kernel** —`/proc/net/tcp`
+      dentro del contenedor: `0.0.0.0:8787` y `0.0.0.0:8788` en LISTEN, uid 1000— y desde otro
+      contenedor de la misma red, que es lo que hace Traefik. **`/health` fuera del enrutado
+      público**, cortado en el código (dos servidores, el interno en el 8788 sin exponer) *y* en el
+      dominio, con el 404 idéntico al de cualquier ruta inventada. **Volumen de Deno KV** por
+      `MAREIA_KV_PATH`, medido: 288 entradas y **4,1 MiB** tras un ciclo de 153 puertos, estable en
+      los tres siguientes, y la caché sobrevive al reinicio. **Rebuild diario** montado, con escrito
+      de qué depende (sin él la normativa fechada de T-19 no puede degradar). **`actionlint` +
+      `hadolint` sobre los dos Dockerfiles + `shellcheck` arreglado** (SC2046 real en el paso de
+      T-17) y **`corepack` hermético** con hash de integridad. **e2e contra producción** que corre
+      sin navegador y sin haber desplegado.
+      · Quedan **el despliegue en sí** (aplicación en Dokploy, volumen, `AEMET_API_KEY`), lanzar el
+      e2e contra el dominio y el **pase adversario de despliegue**.
 
 ## Fase 2 (rumbo, sin comprometer)
 
