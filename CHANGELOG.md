@@ -2,6 +2,70 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-29 — T-12 · el almanaque funciona sin cobertura, y lo dice
+
+- **Un puerto guardado se abre y *calcula* sin red.** Es la diferencia entre una PWA y un caché de
+  páginas: la copia guardada trae el día que se guardó, pero pedir el **14 de marzo de 2027** en una
+  playa sin cobertura devuelve su tabla, calculada ahí mismo con las constantes armónicas del puerto
+  y **el mismo motor de `@mareia/domain-core` que usa el API** — incluido el mismo redondeo, que
+  ahora se importa de `@mareia/usecases/dto` en vez de reescribirse. Un test lo comprueba en los
+  **doce puertos** contra `getTides`, evento a evento, y otro lo comprueba en la noche en que la
+  hora cambia y el día civil dura 23 h.
+- **Un favorito guarda constantes, no un almanaque.** Medido: **2 535–2 640 B** por puerto (los doce
+  del catálogo, **30,9 kB** en total) frente a los **49 162 B** que ocuparía el almanaque
+  precalculado de **un solo año** de un puerto — **18,6×** más, y caducando en Nochevieja. Con las
+  constantes se calcula cualquier día de la ventana (año del build ±1, **la misma que sirve el
+  API**), y fuera de ella la página **dice por qué no puede** en vez de dar una hora que no sostiene.
+- **Guardar es un acto explícito y la página dice lo que ocupa.** No se precachea nada al instalar el
+  worker ni al navegar: solo lo que se pide con el botón. El sello enseña la medida con su unidad
+  completa —«Ocupa 2,6 kB de constantes armónicas»— en **kB de mil**, nunca en KiB ni en un «KB» que
+  cada cual interprete.
+- **«Sin red» y «el dato no existe» son dos ausencias distintas, y ahora también en la meteo.** Es la
+  lección de A-11 (T-09) y H-6 (T-11) llevada al caso offline. Sin cobertura, el estado del mar se
+  sirve de la copia que guardó el service worker **con la edad real en la cara**: el worker sella
+  cada respuesta con la hora a la que la guardó (`x-mareia-guardado-en`) y la sección suma esa espera
+  a la edad que declaró el backend, así que una copia de hace tres horas se lee «Dato de hace 3 h ·
+  Sin conexión: esto es la última copia que se guardó en este dispositivo». Y **no se confunde** con
+  el `stale` del backend («la fuente no responde»), que es otra avería. Cuando no hay ni copia, la
+  frase es la quinta: «Sin conexión… y no hay ninguna copia guardada aquí. El dato existe; lo que
+  falta es la red». Es un sello **por fuente**: una copia guardada no le cuelga su edad a la otra.
+- **Y la sección «sin cobertura» tiene sus cinco estados**, con el mismo sello de T-11 —que se muda
+  de la meteo al core (`src/sello.ts`) porque ya no es cosa de un módulo—: sin soporte para guardar,
+  con red y sin guardar, **sin red y sin guardar** (no se ofrece un botón que iba a fallar), guardado
+  con red, y guardado sin red. Los cinco dicen además qué de la página depende de la conexión y qué
+  no: las mareas y las efemérides se calcularon en build, el estado del mar no.
+- **Política de actualización decidida y escrita** (`docs/adr/ADR-02`): el HTML va **`network-first`**
+  —con red nunca se sirve una página vieja, aunque el worker sea el de ayer—, los assets con hash van
+  `cache-first` (su URL cambia con su contenido, así que no pueden envejecer), **no** se llama a
+  `skipWaiting` y **no** hay banner de «hay versión nueva». Lo que se pierde está en el ADR: el
+  arranque instantáneo offline-first, y que una pestaña abierta días conserva el worker viejo.
+- **El worker es un `.ts` de verdad**, tipado contra el protocolo y contra el contrato de módulos, y
+  el build lo publica en `/sw.js` quitándole los tipos con el propio Node. **El build se cae** si el
+  fichero acaba con un solo `import` de runtime. **No conoce ni una ruta de meteo**: las políticas
+  salen de la `PrecachePolicy` que cada módulo declara en `AppModule` (T-06), así que dar de baja un
+  módulo se lleva su política por delante.
+- **Instalable**: manifiesto (`minimal-ui`, no `standalone` — quien instala esto sigue queriendo ver
+  la URL) e icono SVG dibujado con la curva de marea y el filete doble del almanaque. Sus dos colores
+  son la conversión sRGB de los tokens `--m-bg` y `--m-navy`, y hay un test que los recalcula desde
+  `tokens.css` para que no se conviertan en una paleta paralela.
+- **El cero-JS del core aguanta, re-apuntado por segunda vez y sin relajarse.** La PWA no es de
+  ningún módulo, así que en vez de ampliar la excepción a ojo se le da al gate la otra mitad de la
+  lista: `src/scripts-de-core.ts`, un registro que declara qué scripts de core existen, por qué no
+  pueden ser HTML y en qué páginas se sirven. La cuenta sigue siendo **exacta** página a página, y la
+  portada, el 404 y los índices geográficos siguen en **cero** JavaScript.
+- **Coste medido en la página de puerto**: el bundle que baja *cualquiera* que abra un puerto sube
+  **13 781 B** (5 123 comprimidos) — el motor de mareas, que son **70 347 B** (29 874 comprimidos),
+  va en un trozo aparte con `import()` dinámico y solo lo baja quien pide otro día o guarda el
+  puerto. Sin ese corte eran 82 916 B para todo el mundo. El `/sw.js` publicado pesa **16 852 B**
+  (5 525 comprimidos), comentarios incluidos: son su documentación y su auditoría. Un favorito ocupa
+  en la Cache API unos **144 kB** el primero (página, hoja de estilos, las dos islas, el motor y sus
+  constantes) y unos **31 kB** cada siguiente, porque los assets se comparten.
+- **Los gates de antes siguen mordiendo con el worker puesto**: los pases adversarios de T-09, T-10 y
+  T-11 quedan en verde sin tocar un solo assert suyo, salvo los dos que contaban scripts, que se
+  re-apuntan al registro de scripts de core. `apps/web` pasa de **114 a 172 tests** y los recorridos
+  Playwright de **25 a 35**, con los 10 nuevos cortando la red de verdad (`context.setOffline` +
+  enrutado de contexto, porque las peticiones del worker no pasan por la página).
+
 ## 2026-08-29 — T-11 · los 7 hallazgos del pase adversario, arreglados
 
 - **El sello de antigüedad ya no se congela.** Era el hallazgo grave: la isla calculaba la edad al

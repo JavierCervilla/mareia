@@ -38,7 +38,12 @@
       contrato `AppModule` (el rating se publica como convención declarada, con su desglose y el
       aviso de que la teoría solunar no tiene respaldo experimental sólido)
 - [ ] T-11 · Módulo weather UI (isla meteo con estados ok/error/stale)
-- [ ] T-12 · PWA offline (almanaque de favoritos sin red)
+- [x] T-12 · PWA offline (almanaque de favoritos sin red): service worker + manifiesto instalable,
+      favoritos en IndexedDB (cero cuentas, cero servidor) y **cálculo de cualquier día en el
+      navegador** con las constantes armónicas del puerto y el motor de `domain-core` — no es un
+      caché de páginas. Un favorito guarda **constantes** (2,6 kB) y no el almanaque del año
+      (49,2 kB): 18,6× menos y sin tope de año. La política de actualización del worker está en
+      `docs/adr/ADR-02` (HTML `network-first`, sin `skipWaiting`, sin banner)
 
 ## Hito 4 — España completa y transparencia
 
