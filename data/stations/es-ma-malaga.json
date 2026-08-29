@@ -315,7 +315,7 @@
     "hw_time_err_p95_min": 42.41,
     "grade": "B",
     "validated_against": "IOC mal3",
-    "grade_reason": "no alcanza A: RMSE normalizado 0.096 > 0.05; y error de hora de extremo p95 42 min > 20 min",
+    "grade_reason": "no alcanza A: RMSE normalizado 0,096 > 0,05; y error de hora de extremo p95 42 min > 20 min",
     "estimated": false,
     "estimated_reason": null,
     "metrics": {

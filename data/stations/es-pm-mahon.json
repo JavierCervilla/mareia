@@ -309,7 +309,7 @@
     "hw_time_err_p95_min": null,
     "grade": "B",
     "validated_against": "IOC maho",
-    "grade_reason": "no alcanza A: la observación no tiene pleamares identificables (el residuo meteorológico genera más extremos que la marea), así que no se puede medir su hora; y RMSE normalizado 0.139 > 0.05",
+    "grade_reason": "no alcanza A: la observación no tiene pleamares identificables (el residuo meteorológico genera más extremos que la marea), así que no se puede medir su hora; y RMSE normalizado 0,139 > 0,05",
     "estimated": false,
     "estimated_reason": null,
     "metrics": {

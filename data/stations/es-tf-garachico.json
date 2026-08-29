@@ -390,7 +390,7 @@
     "validated_against": "IOC gara1",
     "grade_reason": "no alcanza B: error de hora de extremo p95 126 min > 45 min",
     "estimated": true,
-    "estimated_reason": "las constantes armónicas son las del mareógrafo `tenerife3tg-ten-esp-cmems`, a 20.6 km de la dársena: describen la marea de ese punto, no la de este puerto",
+    "estimated_reason": "las constantes armónicas son las del mareógrafo `tenerife3tg-ten-esp-cmems`, a 20,6 km de la dársena: describen la marea de ese punto, no la de este puerto",
     "metrics": {
       "window_start": "2026-07-30T00:00:00Z",
       "window_days": 30.0,

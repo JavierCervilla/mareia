@@ -51,6 +51,27 @@ MAX_GAUGE_DISTANCE_KM = {"A": 5.0, "B": 30.0}
 MAX_TRUNCATION_RMS_M = {"A": 0.01, "B": 0.03}
 
 
+def _cifra(valor: float, decimales: int) -> str:
+    """Formatea un número **para publicarlo**: separador decimal español.
+
+    Los motivos de esta función no se quedan en el JSON: son las dos frases que la página de cada
+    puerto enseña —«las constantes son las del mareógrafo `X`, a 24,8 km de la dársena» y «no
+    alcanza B: RMSE normalizado 0,221 > 0,15»— y son justo las que sostienen la promesa de que un
+    puerto no publica una precisión que no tiene. Escritas con ``f"{km:.1f}"`` salían en formato
+    inglés («24.8») en páginas es-ES donde el punto **sí** separa millares dos bloques más abajo
+    («381.367 km» a la Luna): la misma pantalla le enseñaba al lector dos significados del punto
+    (hallazgo A-19 del pase adversario de T-13, **130 de 153 páginas y 283 ocurrencias**).
+
+    Se arregla aquí, que es donde el número se convierte en texto, y no en la plantilla: la página
+    recibe una frase ya escrita y ahí sólo cabría un reemplazo a ciegas sobre prosa.
+
+    No pone separador de millares porque ninguna de las magnitudes que publica lo alcanza —km hasta
+    decenas, cm hasta unidades, RMSE normalizado por debajo de uno—; el día que alguna lo alcance,
+    éste es el sitio.
+    """
+    return f"{valor:.{decimales}f}".replace(".", ",")
+
+
 @dataclass(frozen=True)
 class GradeResult:
     """El grade concedido y el motivo legible por el que no subió más."""
@@ -77,13 +98,13 @@ def _failures(level: str, metrics: Metrics, epoch_years: float, gauge_distance_k
     unmet: list[str] = []
     if gauge_distance_km > MAX_GAUGE_DISTANCE_KM[level]:
         unmet.append(
-            f"el mareógrafo más cercano está a {gauge_distance_km:.1f} km > "
+            f"el mareógrafo más cercano está a {_cifra(gauge_distance_km, 1)} km > "
             f"{MAX_GAUGE_DISTANCE_KM[level]:.0f} km"
         )
     if metrics.truncation_rms_m > MAX_TRUNCATION_RMS_M[level]:
         unmet.append(
-            f"coste de truncar al catálogo del motor {metrics.truncation_rms_m * 100:.1f} cm RMS > "
-            f"{MAX_TRUNCATION_RMS_M[level] * 100:.0f} cm"
+            f"coste de truncar al catálogo del motor {_cifra(metrics.truncation_rms_m * 100, 1)} cm "
+            f"RMS > {MAX_TRUNCATION_RMS_M[level] * 100:.0f} cm"
         )
     if epoch_years < MIN_EPOCH_YEARS[level]:
         unmet.append(f"registro de {epoch_years:.0f} años < {MIN_EPOCH_YEARS[level]:.0f}")
@@ -91,7 +112,8 @@ def _failures(level: str, metrics: Metrics, epoch_years: float, gauge_distance_k
     if metrics.cross_rmse_m is not None and metrics.cross_rmse_m > MAX_CROSS_RMSE_M[level]:
         unmet.append(
             f"ningún análisis independiente corrobora las constantes "
-            f"(mejor acuerdo {metrics.cross_rmse_m:.3f} m > {MAX_CROSS_RMSE_M[level]:.2f} m)"
+            f"(mejor acuerdo {_cifra(metrics.cross_rmse_m, 3)} m > "
+            f"{_cifra(MAX_CROSS_RMSE_M[level], 2)} m)"
         )
     if metrics.nrmse is None or metrics.hw_time_err_p95_min is None:
         if level == "A":
@@ -105,10 +127,14 @@ def _failures(level: str, metrics: Metrics, epoch_years: float, gauge_distance_k
         elif metrics.cross_rmse_m is None and metrics.nrmse is None:
             unmet.append("sin observaciones ni segunda fuente: no hay con qué validar")
         if metrics.nrmse is not None and metrics.nrmse > MAX_NRMSE[level]:
-            unmet.append(f"RMSE normalizado {metrics.nrmse:.3f} > {MAX_NRMSE[level]:.2f}")
+            unmet.append(
+                f"RMSE normalizado {_cifra(metrics.nrmse, 3)} > {_cifra(MAX_NRMSE[level], 2)}"
+            )
         return unmet
     if metrics.nrmse > MAX_NRMSE[level]:
-        unmet.append(f"RMSE normalizado {metrics.nrmse:.3f} > {MAX_NRMSE[level]:.2f}")
+        unmet.append(
+            f"RMSE normalizado {_cifra(metrics.nrmse, 3)} > {_cifra(MAX_NRMSE[level], 2)}"
+        )
     if metrics.hw_time_err_p95_min > MAX_EXTREME_TIME_P95_MIN[level]:
         unmet.append(
             f"error de hora de extremo p95 {metrics.hw_time_err_p95_min:.0f} min > "
@@ -159,15 +185,15 @@ def estimate(
         return Estimation(
             True,
             f"las constantes armónicas son las del mareógrafo `{gauge_id}`, a "
-            f"{gauge_distance_km:.1f} km de la dársena, y no hay observaciones de este puerto con "
-            "las que comprobar la predicción",
+            f"{_cifra(gauge_distance_km, 1)} km de la dársena, y no hay observaciones de este "
+            "puerto con las que comprobar la predicción",
         )
     if not own_harbour:
         return Estimation(
             True,
             f"las constantes armónicas son las del mareógrafo `{gauge_id}`, a "
-            f"{gauge_distance_km:.1f} km de la dársena: describen la marea de ese punto, no la de "
-            "este puerto",
+            f"{_cifra(gauge_distance_km, 1)} km de la dársena: describen la marea de ese punto, no "
+            "la de este puerto",
         )
     return Estimation(
         True,

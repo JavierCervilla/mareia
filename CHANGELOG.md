@@ -2,6 +2,84 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-29 — T-13 · el pase adversario: tres hallazgos arreglados y un tope que no medía nada
+
+El rol `qa-adversario` atacó lo que el `verificador` y el rol `qa` ya habían dado por bueno y sacó
+**cuatro hallazgos** (informe en `docs/qa/informe-adversario-t13.md`, bundle en
+`docs/qa/bundles/t13-adversario/`). Tres de los cuatro no son del catálogo: son **de los gates que
+T-13 dejó vigilando el catálogo**, que es lo que quedaba sin atacar. Se arreglan aquí y sus
+recorridos se quedan **como gate permanente**, sin envoltorio de trinquete.
+
+- **A-17 · el detector de curva congelada sólo miraba UNA meseta por día.** El gate A-1 preguntaba
+  por la meseta **más larga** del día y sólo medía dentro de ésa, así que cualquier congelación más
+  corta que la meseta natural del puerto le era invisible **por construcción**: la meseta natural
+  hacía de escondite. Con 12 puertos apenas había mesetas; con los 153 de T-13 hay 103, y en **65
+  (42,5 % del catálogo)** cabía una congelación real que el gate no veía — el peor caso, el golfo de
+  Valencia (Valencia, Alboraya, Silla y Sueca): meseta natural de **200 min** escondiendo **190 min**
+  de curva falsa con **62,06 mm** de marea real suprimida, sesenta y dos veces el umbral. Es la
+  tercera vez que este gate cambia de sitio la sonda —puntas → interior → **todos los tramos**— y la
+  lección es la misma cada vez: *la pregunta estaba mal hecha porque su respuesta dependía del tamaño
+  del catálogo*. Ahora recorre **todas** las mesetas (`tramosPlanos`). Ni el umbral ni el sitio donde
+  se mide se han tocado: lo único que cambia es **cuántas veces se mide**. No puede enrojecer sola:
+  los tramos son maximales y disjuntos y dentro de cualquiera de ellos todas las muestras publicadas
+  valen lo mismo, así que sus alturas reales no pueden diferir más que el paso de publicación —
+  medido sobre 8 fechas repartidas por 2026 × 153 puertos (**1 224 días-puerto, 6 526 mesetas**), la
+  excursión máxima de una meseta legítima es **0,993 mm** (Borriana, 2026-10-20, 80 min). Comprobado
+  que muerde: inyectada la congelación de Valencia en la curva real, el gate la caza con **61,8 mm**
+  y el instrumento viejo, con el mismo fraude delante, se queda **verde**.
+- **A-18 · la prueba de sensibilidad del gate se ponía roja por el calendario.** `A-1 bis` —el test
+  que demuestra que A-1 **sabe fallar**— construía su meseta alrededor de **la primera pleamar del
+  día**, y cuando ésa cae cerca de medianoche la ventana se recorta contra el borde del día: **33 de
+  los 365 días de 2026 (9,0 %)** daban menos de las cuatro horas exigidas, con un mínimo de 150 min.
+  No es teórico: era el rojo con el que el adversario se encontró al llegar, con un `dist/` del
+  2026-03-29. Un gate que enrojece por el calendario invita exactamente a lo prohibido —bajar la
+  constante hasta que el día malo pase—, así que **se cambia de ventana, no de umbral**:
+  `pleamarConSitio` elige la pleamar del día con más sitio a los dos lados. Las cuatro horas siguen
+  intactas. Comprobado sobre los **365 días** del año (el propio gate los recorre) y con la suite
+  completa construida en **2026-03-29, 2026-02-27 y 2026-12-20** —tres de los 33 días malos—, verde
+  en los tres; con el instrumento viejo, `A-1 bis` da `la meseta inyectada debería durar horas y dura
+  150 min`. El gate exige además que la elección **siga haciendo falta**: si volver a la primera
+  pleamar dejara de fallar ningún día, avisa de que ya no mide nada.
+- **A-19 · la cifra que justifica la estimación se publicaba en formato inglés.** «las constantes son
+  las del mareógrafo `X`, a **24.8** km de la dársena» y «no alcanza B: RMSE normalizado **0.221** >
+  **0.15**», en páginas es-ES donde el punto **sí** separa millares dos bloques más abajo («381.367
+  km» a la Luna): **130 de las 153 páginas, 283 ocurrencias**. Es la frase que sostiene la promesa de
+  la trayectoria, mal escrita. Arreglado **donde el número se convierte en texto** —`_cifra()` en
+  `data/pipeline/mareia_pipeline/grade.py`— y no en la plantilla, que sobre una frase ya escrita sólo
+  admitiría un reemplazo a ciegas sobre prosa. Las **170 frases** del dataset ya committeado se
+  migraron re-derivándolas con el `grade.py` parcheado: las 153 estaciones reprodujeron su frase
+  **carácter a carácter salvo el separador**, y el grade y el flag `estimated` de ninguna cambió. El
+  gate mira el **HTML publicado de `dist/`**, no la función que lo genera. Y de paso se le tapó un
+  agujero al propio ataque: su excepción de millares, escrita `^\d{1,3}\.\d{3}$`, se tragaba
+  «0.270» y «0.221» —el RMSE normalizado se publica con tres decimales y tiene la forma de un
+  millar—, así que veía el umbral y no la medida; ahora el primer dígito no puede ser cero, porque
+  nadie escribe un millar empezando por cero. `dist/` completo: **0 ofensas**.
+- **A-20 · la procedencia del error medido sigue siendo autodeclarada.** Se queda **abierto y con su
+  trinquete puesto**, a propósito: su arreglo —contrastar las coordenadas del mareógrafo declarado
+  contra lo que el propio dataset dice de él en otro fichero— es de integridad de procedencia y va a
+  revisión del rol `seguridad` en una trayectoria aparte. Hoy los 32 códigos de mareógrafo del
+  dataset son consistentes entre sí y **no hay ningún puerto real afectado**: lo que se documenta es
+  que el gate no puede ver el fraude que existe para impedir.
+
+Y un tope que ya no medía nada, que llegó al mergear `main` (T-12):
+
+- **El presupuesto agregado de las constantes se retira; el de por puerto se queda.**
+  `pwa-construido.test.ts` afirmaba `total <= 12 * TOPES.estacionBytes` bajo el nombre «y los doce
+  juntos siguen siendo poco»; con 153 puertos y **449 370 B** medidos se puso en rojo. Cambiar el 12
+  por 153 sería una constante persiguiendo al dato, y **derivarlo del catálogo lo deja imposible de
+  fallar**: la suma de N medidas que el mismo bucle ya ha comprobado una a una contra el tope nunca
+  puede pasar de N veces el tope. Un gate que no puede fallar es peor que no tenerlo, porque cuenta
+  como cobertura. Lo que aquella aserción quería decir —«el catálogo entero pesa menos que una foto»—
+  lo dice ya el tope **por puerto**, que es el único que no depende de cuántos puertos haya hoy y el
+  que describe lo que de verdad se baja al marcar un favorito: nadie se descarga el catálogo. El test
+  pasa a llamarse «las constantes de cada puerto caben en su presupuesto» y el total medido se
+  imprime como diagnóstico para que la cifra no desaparezca del run.
+
+**Fuera de alcance, anotado**: el informe QC de `data/pipeline/reports/` sigue escribiendo sus
+números con punto (lo genera `report.py`, es un documento interno y no se publica en ninguna página);
+y los dos residuos que el adversario midió sin poder poner en rojo —el 1,1 % de aire del umbral de
+1 mm y el 4,8 % de la cota del sesgo de Brest— no se tocan aquí.
+
 ## 2026-08-29 — T-13 · España completa, y el 78 % del catálogo diciendo que no está medido
 
 - **El portal pasa de 12 puertos a 153**, de Viveiro a El Hierro y de Menorca a La Palma, y con

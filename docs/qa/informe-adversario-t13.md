@@ -11,6 +11,10 @@
   código han salido del contenedor, y no se ha usado ningún modelo externo para revisar nada.
 - **Reproducciones:** `apps/web/src/adversario-t13.test.ts` — 1 premisa en verde + 4 hallazgos con
   trinquete `hallazgoAbierto()`.
+- **Estado (2026-08-29, tras el arreglo):** **A-17, A-18 y A-19 cerrados**, sus recorridos en verde y
+  **sin `hallazgoAbierto()`**: quedan como gate permanente. Cada arreglo se comprobó **en rojo
+  revirtiéndolo** antes de retirar el trinquete; el detalle, en el CHANGELOG y en cada hallazgo.
+  **A-20 sigue abierto** con su trinquete puesto, escalado al rol `seguridad`.
 - **Bundle:** `docs/qa/bundles/t13-adversario/FAILURE.md` (+ `run-sin-test-fail.tap`), nacido del run
   **sin** trinquete, que es donde está la evidencia.
 - **Contexto asimétrico:** se ha leído la **promesa** (`docs/trayectorias/T-13-plan.md`, el schema
@@ -86,6 +90,12 @@ arregló mirando dentro. Lo que queda ahora **no es dónde se mide sino cuántas
 instrumento mide bien un tramo y el día tiene muchos.
 
 - **Repro:** `A-17 · ninguna congelación real de la curva se le escapa al detector`.
+- **Estado:** **CERRADO** (trinquete retirado; el recorrido es gate permanente)
+- **Arreglo:** el detector recorre **todas** las mesetas del día (`tramosPlanos`) en vez de preguntar
+  por la máxima. Ni el umbral ni el sitio donde se mide cambian: cambia **cuántas veces se mide**.
+  Comprobado que muerde: con la congelación de Valencia inyectada en la curva real, el gate la caza
+  con **61,8 mm** y el instrumento viejo, con el mismo fraude delante, se queda verde. Margen medido
+  sobre 1 224 días-puerto y 6 526 mesetas: excursión máxima legítima **0,993 mm**.
 - **Premisa en verde** (deliberadamente sin trinquete): `A-17 premisa · la congelación inyectada se
   dibuja plana en la curva publicada` comprueba, sobre el `<path>` que va al SVG, que el fraude se
   dibujaría de verdad —≥ 4 puntos consecutivos a la misma altura— y no es un espejismo de la
@@ -115,6 +125,12 @@ construye sin `BUILD_DATE`.
   vía por la que un gate deja de medir. *Cuando un test resulta frágil se cambia de instrumento, no de
   constante.*
 - **Repro:** `A-18 · la prueba de sensibilidad del gate A-1 no depende del día en que corra CI`.
+- **Estado:** **CERRADO** (trinquete retirado; el recorrido es gate permanente)
+- **Arreglo:** `pleamarConSitio` elige la pleamar del día con más sitio a los dos lados; **la
+  constante de las cuatro horas no se toca**. Comprobado con la suite completa construida en
+  2026-03-29, 2026-02-27 y 2026-12-20 —tres de los 33 días malos—, verde en los tres; con el
+  instrumento viejo, `A-1 bis` da `la meseta inyectada debería durar horas y dura 150 min`. El gate
+  recorre los 365 días y además exige que la elección **siga haciendo falta**.
 
 ### A-19 · la cifra que justifica la estimación se publica en formato inglés · clase A6 · media
 
@@ -131,6 +147,13 @@ a la Luna como «**381.367** km», donde el punto **sí** es separador de millar
   «381.367 km» no pueden significar cosas distintas en la misma página.
 - **Repro:** `A-19 · ninguna página publica una cifra con el decimal en formato inglés` (descuenta el
   separador de millares español y las versiones de licencia, que no son medidas).
+- **Estado:** **CERRADO** (trinquete retirado; el recorrido es gate permanente)
+- **Arreglo:** `_cifra()` en `data/pipeline/mareia_pipeline/grade.py`, donde el número se convierte en
+  texto. Las 170 frases del dataset committeado se migraron re-derivándolas con el `grade.py`
+  parcheado: las 153 estaciones reprodujeron su frase carácter a carácter salvo el separador, sin
+  cambiar ningún grade ni ningún flag `estimated`. Al ataque se le tapó además un agujero propio: su
+  excepción de millares (`^\d{1,3}\.\d{3}$`) se tragaba «0.270» y «0.221», que es la medida y no el
+  umbral. `dist/` completo: **0 ofensas**.
 
 ### A-20 · la procedencia del error medido sigue siendo autodeclarada · clase A12 · media · **escalado a `seguridad`**
 
@@ -220,7 +243,8 @@ conviene que alguien lo sepa antes de que enrojezcan solas:
 
 ## Recuento
 
-**4 reproducidos · 15 no reproducidos · 3 juicios A12 · 0 gates** (los cuatro siguen abiertos con
-trinquete puesto). Suite completa en verde con los cuatro trinquetes: `pnpm lint`, `pnpm typecheck`,
-`pnpm --filter web check`, `pnpm test` (7 paquetes, 0 fail) y `deno task check && deno task test`
-(20 passed) del API.
+**4 reproducidos · 15 no reproducidos · 3 juicios A12 · 3 gates** (A-17, A-18 y A-19 arreglados y
+con el trinquete retirado; A-20 sigue abierto, escalado al rol `seguridad`). Suite completa en verde,
+antes del arreglo con los cuatro trinquetes y después con tres retirados: `pnpm lint`,
+`pnpm typecheck`, `pnpm --filter web check`, `pnpm test` (7 paquetes, 0 fail) y
+`deno task check && deno task test` (20 passed) del API.

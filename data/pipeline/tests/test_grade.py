@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import re
 
 import pytest
 
@@ -167,7 +168,7 @@ def test_the_reason_names_every_unmet_threshold_not_just_the_first() -> None:
     )
     result = grading.assign(borrowed_and_blind, epoch_years=19.0, gauge_distance_km=46.2)
     assert result.grade == "C"
-    assert "46.2 km" in result.reason
+    assert "46,2 km" in result.reason
     assert "sin observaciones ni segunda fuente" in result.reason
 
 
@@ -178,3 +179,28 @@ def test_a_port_that_fails_two_a_thresholds_names_both() -> None:
     assert result.grade == "B"
     assert "coste de truncar" in result.reason
     assert "error de hora de extremo p95" in result.reason
+
+
+def test_published_figures_use_the_spanish_decimal_separator() -> None:
+    """Las dos frases que van **a la página** se escriben en español, cifras incluidas.
+
+    Salían con el decimal en formato inglés —«a 24.8 km de la dársena», «RMSE normalizado 0.221 >
+    0.15»— en páginas es-ES donde el punto sí separa millares dos bloques más abajo («381.367 km» a
+    la Luna): 130 de las 153 páginas y 283 ocurrencias (hallazgo A-19 del pase adversario de T-13).
+    Es la cifra sobre la que descansa la promesa de que un puerto no publica una precisión que no
+    tiene, así que se comprueba aquí, donde el número se convierte en texto, y no sólo en el HTML.
+    """
+    frases = [
+        grading.assign(_with(nrmse=0.221), epoch_years=19.0, gauge_distance_km=24.8).reason,
+        grading.assign(
+            _with(truncation_rms_m=0.013, hw_time_err_p95_min=25.4), epoch_years=19.0
+        ).reason,
+        grading.assign(_with(cross_rmse_m=0.2, nrmse=None, hw_time_err_p95_min=None), 19.0).reason,
+        grading.estimate(gauge_id="g", gauge_distance_km=24.8, observation_source=None).reason,
+        grading.estimate(gauge_id="g", gauge_distance_km=24.8, observation_source="IOC").reason,
+    ]
+    for frase in frases:
+        assert frase is not None
+        assert not re.search(r"\d\.\d", frase), f"decimal en formato inglés: {frase}"
+    assert "0,221 > 0,15" in frases[0]
+    assert "a 24,8 km de la dársena" in frases[3]

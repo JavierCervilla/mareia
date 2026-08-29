@@ -16,6 +16,13 @@
  * en rojo pidiendo que se le quite el envoltorio, y a partir de ahí es gate permanente. Ninguna
  * aserción se ha escrito «al revés» para que pase.
  *
+ * ESTADO — **A-17, A-18 y A-19 están corregidos y sus recorridos se han quedado como gate
+ * permanente**: se les ha quitado el envoltorio y ahora vigilan de verdad, que es todo el sentido
+ * del trinquete. **A-20 sigue abierto** con el suyo puesto: su arreglo —contrastar las coordenadas
+ * del mareógrafo declarado contra lo que el propio dataset dice de él— está escalado al rol
+ * `seguridad` en una trayectoria aparte, y hasta entonces el hallazgo se queda documentado en rojo
+ * de mentira, no borrado.
+ *
  * Contexto asimétrico: se ha leído la promesa (`docs/trayectorias/T-13-plan.md`, el schema de
  * estación, `contratos_validacion`), el dataset publicado y el `dist/` construido. El código se ha
  * leído para **dirigir** los ataques —de dónde sale la curva, qué mide cada gate—, nunca para
@@ -114,25 +121,44 @@ function fechaDeHoy(): string {
 }
 
 /**
- * El tramo **más largo** del día en el que la curva publicada no se mueve nada.
+ * **Todos** los tramos del día en los que la curva publicada no se mueve nada.
  *
- * Copia literal del instrumento que usa el gate A-1 (`adversario-t09.test.ts`). Está aquí para
- * poder atacarlo, no para reemplazarlo: si allí cambia, este fichero se pone en rojo y hay que
- * releerlo, que es exactamente lo que se quiere de un ataque congelado en la suite.
+ * Copia del instrumento que usa el gate A-1 (`adversario-t09.test.ts`). Está aquí para poder
+ * atacarlo, no para reemplazarlo: si allí cambia, este fichero se pone en rojo y hay que releerlo,
+ * que es exactamente lo que se quiere de un ataque congelado en la suite.
+ *
+ * Cuando se escribió el ataque, la copia devolvía **sólo el tramo más largo**, que era el defecto
+ * A-17. Ahora devuelve la lista entera porque el gate también: la copia sigue el instrumento, y por
+ * eso el día que alguien vuelva a estrecharla a una sola meseta, el gate de abajo se pone rojo.
  */
-function tramoPlanoMasLargo(muestras: readonly Muestra[], inicioUtcMs: number, finUtcMs: number): Tramo {
-  let mejor: Tramo = { minutos: 0, desdeUtcMs: inicioUtcMs, hastaUtcMs: inicioUtcMs };
+function tramosPlanos(muestras: readonly Muestra[], inicioUtcMs: number, finUtcMs: number): readonly Tramo[] {
+  const tramos: Tramo[] = [];
   let inicio = inicioUtcMs;
+  let ultimoIgual: number | undefined;
+  const cerrar = (): void => {
+    if (ultimoIgual === undefined) return;
+    tramos.push({ minutos: (ultimoIgual - inicio) / MINUTO, desdeUtcMs: inicio, hastaUtcMs: ultimoIgual });
+    ultimoIgual = undefined;
+  };
   for (let instante = inicioUtcMs + MINUTO; instante <= finUtcMs; instante += MINUTO) {
     if (Math.abs(alturaEn(muestras, instante) - alturaEn(muestras, instante - MINUTO)) > 1e-9) {
+      cerrar();
       inicio = instante;
       continue;
     }
-    if (instante - inicio > mejor.minutos * MINUTO) {
-      mejor = { minutos: (instante - inicio) / MINUTO, desdeUtcMs: inicio, hastaUtcMs: instante };
-    }
+    ultimoIgual = instante;
   }
-  return mejor;
+  cerrar();
+  return tramos;
+}
+
+/** El tramo plano más largo: la **meseta natural** del puerto, que es lo que hacía de escondite. */
+function tramoPlanoMasLargo(muestras: readonly Muestra[], inicioUtcMs: number, finUtcMs: number): Tramo {
+  const vacio: Tramo = { minutos: 0, desdeUtcMs: inicioUtcMs, hastaUtcMs: inicioUtcMs };
+  return tramosPlanos(muestras, inicioUtcMs, finUtcMs).reduce(
+    (mejor, tramo) => (tramo.minutos > mejor.minutos ? tramo : mejor),
+    vacio,
+  );
 }
 
 /** Cuánto se movió la marea de verdad en los instantes de muestreo que caen dentro del tramo. */
@@ -205,20 +231,29 @@ function congelar(
   );
 }
 
-interface Ceguera {
+interface Ataque {
   readonly slug: string;
   readonly nombre: string;
   readonly mesetaNaturalMin: number;
   readonly congelacionMin: number;
+  /** Marea real que la congelación se traga, en milímetros: el daño del fraude. */
   readonly movimientoSuprimidoMm: number;
+  /** Lo que el gate A-1 mide sobre la curva ya falsificada, en milímetros: lo que llega a verse. */
+  readonly loQueVeElGateMm: number;
 }
 
 /**
- * Recorre el catálogo inyectando en cada puerto la congelación más dañina que sigue siendo más
- * corta que su meseta natural, y devuelve aquellos en los que el gate A-1 **no la ve**.
+ * Recorre el catálogo inyectando en cada puerto **la congelación más dañina que sigue siendo más
+ * corta que su meseta natural** —la que se esconde detrás de ella— y anota, junto al daño, lo que el
+ * gate A-1 alcanza a ver sobre la curva ya falsificada.
+ *
+ * La duración es la de la meseta natural menos un paso de muestreo: la elección más conservadora
+ * posible, porque cualquier ventana más larga sería la nueva meseta más larga del día y el
+ * instrumento viejo también la habría visto. El ataque se queda deliberadamente por debajo de aquel
+ * radar.
  */
-async function puertosConCongelacionInvisible(fechaIso: string): Promise<readonly Ceguera[]> {
-  const ciegos: Ceguera[] = [];
+async function ataquesDeCongelacion(fechaIso: string): Promise<readonly Ataque[]> {
+  const ataques: Ataque[] = [];
   for (const puerto of await deps.ports.list()) {
     const dia = await diaDe(puerto.slug, fechaIso);
     const natural = tramoPlanoMasLargo(dia.muestras, dia.inicioUtcMs, dia.finUtcMs);
@@ -233,23 +268,24 @@ async function puertosConCongelacionInvisible(fechaIso: string): Promise<readonl
     if (fraude === undefined || fraude.movimientoM <= PASO_DE_PUBLICACION_M) continue;
 
     const congelada = congelar(dia.muestras, fraude);
-    const vista = tramoPlanoMasLargo(congelada, dia.inicioUtcMs, dia.finUtcMs);
-    const loQueVeElGate = excursionRealEnElTramo(congelada, dia.estacion, vista);
-    if (loQueVeElGate <= PASO_DE_PUBLICACION_M) {
-      ciegos.push({
-        slug: puerto.slug,
-        nombre: puerto.name,
-        mesetaNaturalMin: natural.minutos,
-        congelacionMin: duracionMin,
-        movimientoSuprimidoMm: fraude.movimientoM * 1000,
-      });
-    }
+    const loQueVeElGate = tramosPlanos(congelada, dia.inicioUtcMs, dia.finUtcMs).reduce(
+      (peor, tramo) => Math.max(peor, excursionRealEnElTramo(congelada, dia.estacion, tramo)),
+      0,
+    );
+    ataques.push({
+      slug: puerto.slug,
+      nombre: puerto.name,
+      mesetaNaturalMin: natural.minutos,
+      congelacionMin: duracionMin,
+      movimientoSuprimidoMm: fraude.movimientoM * 1000,
+      loQueVeElGateMm: loQueVeElGate * 1000,
+    });
   }
-  return ciegos.sort((a, b) => b.movimientoSuprimidoMm - a.movimientoSuprimidoMm);
+  return ataques.sort((a, b) => b.movimientoSuprimidoMm - a.movimientoSuprimidoMm);
 }
 
 // =================================================================================================
-// A-17 · clase A5 (límites 0/1/N) — el gate de curva congelada sólo mira UNA meseta por día
+// A-17 · clase A5 (límites 0/1/N) — el gate de curva congelada sólo miraba UNA meseta por día
 // =================================================================================================
 
 /**
@@ -260,16 +296,16 @@ async function puertosConCongelacionInvisible(fechaIso: string): Promise<readonl
  * y no es un espejismo de la aritmética. Este test lo comprueba sobre el `<path>` que sale de
  * `trazarCurvaMarea`, que es literalmente el que va al HTML, y sobre el `dist/` construido.
  *
- * Si algún día esta premisa deja de cumplirse, el hallazgo de abajo hay que releerlo entero: su
- * trinquete se conforma con que el cuerpo falle, y no distingue «el gate está ciego» de «el ataque
- * ya no construye un fraude».
+ * Si algún día esta premisa deja de cumplirse, el gate de abajo hay que releerlo entero: pasaría a
+ * estar en verde por no tener nada que atacar, que es la manera silenciosa de perder un gate. Por
+ * eso la premisa exige que el fraude **exista** y el gate exige que **se vea**: son las dos mitades.
  */
 test("A-17 premisa · la congelación inyectada se dibuja plana en la curva publicada", async () => {
   const fechaIso = fechaDeHoy();
-  const ciegos = await puertosConCongelacionInvisible(fechaIso);
-  assert.ok(ciegos.length > 0, "sin ningún puerto ciego no hay nada que reproducir: relee el hallazgo");
+  const ataques = await ataquesDeCongelacion(fechaIso);
+  assert.ok(ataques.length > 0, "sin ningún fraude que construir no hay nada que atacar: relee el hallazgo");
 
-  const testigo = ciegos[0];
+  const testigo = ataques[0];
   assert.ok(testigo);
   const dia = await diaDe(testigo.slug, fechaIso);
   const natural = tramoPlanoMasLargo(dia.muestras, dia.inicioUtcMs, dia.finUtcMs);
@@ -314,101 +350,140 @@ test("A-17 premisa · la congelación inyectada se dibuja plana en la curva publ
 });
 
 /**
- * A-17 · **HALLAZGO ABIERTO** — clase A5 (límites 0/1/N).
+ * A-17 · **CORREGIDO, y el recorrido se queda como gate permanente** — clase A5 (límites 0/1/N).
  *
- * El gate A-1 de T-09 («la curva no se congela en ningún puerto del catálogo») pregunta por la
- * meseta **más larga** del día y sólo mide dentro de ésa. Por construcción, cualquier congelación
- * más corta que la meseta natural del puerto le es invisible, por mucha marea que se trague: la
- * meseta natural actúa de escondite.
+ * El gate A-1 de T-09 («la curva no se congela en ningún puerto del catálogo») preguntaba por la
+ * meseta **más larga** del día y sólo medía dentro de ésa. Por construcción, cualquier congelación
+ * más corta que la meseta natural del puerto le era invisible, por mucha marea que se tragara: la
+ * meseta natural hacía de escondite.
  *
- * No es una conjetura sobre un caso raro. Con el catálogo de T-13, la mayoría del Mediterráneo
+ * No era una conjetura sobre un caso raro. Con el catálogo de T-13, la mayoría del Mediterráneo
  * tiene mesetas naturales de decenas o cientos de minutos —son puertos cuya carrera del día es de
- * milímetros y la curva se publica al milímetro—, así que el escondite existe en más de un tercio
+ * milímetros y la curva se publica al milímetro—, así que el escondite existía en más de un tercio
  * del catálogo.
  *
- * Medido el 2026-08-29 sobre los 153 puertos: **103 tienen meseta natural** y en **65** cabe una
- * congelación real invisible. El peor caso es el grupo de Valencia (Valencia, Alboraya, Silla y
- * Sueca): meseta natural de **200 min** que esconde una congelación de **190 min** con
+ * Medido el 2026-08-29 sobre los 153 puertos: **103 tienen meseta natural** y en **65** cabía una
+ * congelación real invisible. El peor caso era el grupo de Valencia (Valencia, Alboraya, Silla y
+ * Sueca): meseta natural de **200 min** que escondía una congelación de **190 min** con
  * **62,06 mm** de movimiento real suprimido — sesenta y dos veces el paso de publicación.
  *
- * Comportamiento correcto que afirma el test: **ningún puerto admite una congelación invisible**.
- * Cuando el detector deje de mirar sólo la meseta más larga, esto pasará a verde solo.
+ * CORREGIDO en `adversario-t09.test.ts`: el detector recorre **todas** las mesetas del día
+ * (`tramosPlanos`) en vez de preguntar por la máxima. No se ha tocado el umbral —sigue siendo el
+ * paso de publicación— ni se ha cambiado dónde se mide: lo que ha cambiado es **cuántas veces se
+ * mide**, que era la pregunta mal hecha (su respuesta dependía del tamaño del catálogo).
+ *
+ * Lo que este gate vigila a partir de ahora: que a **ningún** puerto del catálogo se le pueda
+ * esconder una congelación detrás de su meseta natural. Si alguien vuelve a estrechar el detector a
+ * un solo tramo, aquí salen los 65 puertos.
  */
-hallazgoAbierto("A-17 · ninguna congelación real de la curva se le escapa al detector", async () => {
-  const ciegos = await puertosConCongelacionInvisible(fechaDeHoy());
+test("A-17 · ninguna congelación real de la curva se le escapa al detector", async () => {
+  const ataques = await ataquesDeCongelacion(fechaDeHoy());
+  assert.ok(ataques.length > 0, "sin ningún fraude que construir este gate no mide nada");
+  const invisibles = ataques.filter((ataque) => ataque.loQueVeElGateMm <= PASO_DE_PUBLICACION_M * 1000);
   assert.deepEqual(
-    ciegos.map(
+    invisibles.map(
       (c) =>
         `${c.nombre}: congelación de ${c.congelacionMin} min invisible tras una meseta natural de ` +
-        `${c.mesetaNaturalMin} min · suprime ${c.movimientoSuprimidoMm.toFixed(2)} mm reales`,
+        `${c.mesetaNaturalMin} min · suprime ${c.movimientoSuprimidoMm.toFixed(2)} mm reales y el ` +
+        `gate sólo ve ${c.loQueVeElGateMm.toFixed(2)} mm`,
     ),
     [],
   );
 });
 
 // =================================================================================================
-// A-18 · clase A12 (la promesa vs lo entregado) — la prueba de sensibilidad del gate depende del día
+// A-18 · clase A12 (la promesa vs lo entregado) — la prueba de sensibilidad del gate dependía del día
 // =================================================================================================
 
 /**
- * A-18 · **HALLAZGO ABIERTO** — clase A12.
+ * A-18 · **CORREGIDO, y el recorrido se queda como gate permanente** — clase A12.
  *
  * `A-1 bis` es la pieza que sostiene todo el gate A-1: es el test que demuestra que **el gate sabe
  * fallar**, reconstruyendo la avería original (una pleamar congelada cinco horas en Vigo) y
  * exigiendo que se vea. Sin él, A-1 es una conjetura.
  *
- * Ese instrumento construye la meseta como ±150 min alrededor de **la primera pleamar del día**, y
- * después exige que dure al menos cuatro horas. Cuando la primera pleamar de Vigo cae cerca de la
+ * Ese instrumento construía la meseta como ±150 min alrededor de **la primera pleamar del día**, y
+ * después exigía que durase al menos cuatro horas. Cuando la primera pleamar de Vigo cae cerca de la
  * medianoche, la ventana se recorta contra el borde del día y la meseta no llega a las cuatro
- * horas: el test se pone rojo **sin que nada esté averiado**.
+ * horas: el test se ponía rojo **sin que nada estuviera averiado**.
  *
  * El sitio no tiene «hoy»: publica el día en que se construyó (`FECHA_DE_BUILD`), y CI construye
  * sin `BUILD_DATE`, así que el día que se mide es el día en que corre el pipeline. Medido sobre los
- * 365 días de 2026: **33 días (9,0 %)** dan una meseta de menos de cuatro horas — la peor,
- * **150 min** (2026-02-27, 2026-03-28, 2026-05-25, 2026-10-20, 2026-11-20 y 2026-12-20). Es el rojo
+ * 365 días de 2026: **33 días (9,0 %)** daban una meseta de menos de cuatro horas — la peor,
+ * **150 min** (2026-02-27, 2026-03-28, 2026-05-25, 2026-10-20, 2026-11-20 y 2026-12-20). Era el rojo
  * con el que me encontré al llegar a este worktree, con un `dist/` del 2026-03-29 (220 min).
  *
- * Un gate que se pone rojo por el calendario invita exactamente a lo que este repositorio prohíbe:
- * bajar la constante hasta que el día malo pase. Comportamiento correcto que afirma el test: **el
- * instrumento de sensibilidad construye una meseta suficiente todos los días del año**.
+ * CORREGIDO **cambiando de ventana, no de umbral**: `pleamarConSitio` (en `adversario-t09.test.ts`)
+ * elige la pleamar del día con más sitio a los dos lados en vez de la primera. La constante de las
+ * cuatro horas no se ha tocado, que es exactamente lo que un gate frágil invita a hacer.
+ *
+ * Lo que este gate vigila a partir de ahora, con las dos mitades:
+ *
+ *   1. **Que el escenario se construya los 365 días del año**, incluidos los 33 en los que la
+ *      primera pleamar no daba de sí. Se recorre el año entero, no un día de muestra: el calendario
+ *      es justo la variable que rompía.
+ *   2. **Que la elección de ventana siga siendo necesaria** — se comprueba que el instrumento viejo,
+ *      la primera pleamar del día, seguiría fallando en algún día del año. Sin esta mitad, alguien
+ *      podría volver a la primera pleamar y este gate se quedaría verde en 332 días de cada 365.
  */
-hallazgoAbierto("A-18 · la prueba de sensibilidad del gate A-1 no depende del día en que corra CI", async () => {
+test("A-18 · la prueba de sensibilidad del gate A-1 no depende del día en que corra CI", async () => {
   const SEMIANCHO_MIN = 150;
   const MINIMO_EXIGIDO_MIN = 4 * 60;
   const flojos: string[] = [];
+  const flojosConLaPrimeraPleamar: string[] = [];
   const cursor = new Date(Date.UTC(2026, 0, 1));
   for (let indice = 0; indice < 365; indice += 1) {
     const fechaIso = cursor.toISOString().slice(0, 10);
     const dia = await diaDe("vigo", fechaIso);
-    const pleamar = dia.extremos.find((extremo) => extremo.kind === "high");
-    if (pleamar === undefined) {
-      flojos.push(`${fechaIso}: el día no trae ninguna pleamar`);
+    const margen = (instante: number): number =>
+      Math.min(instante - dia.inicioUtcMs, dia.finUtcMs - instante);
+    const pleamares = dia.extremos.filter((extremo) => extremo.kind === "high");
+    // La misma elección que hace `pleamarConSitio`: la pleamar con más día a los dos lados.
+    const conSitio = [...pleamares]
+      .filter((extremo) => margen(extremo.timeUtcMs) >= SEMIANCHO_MIN * MINUTO)
+      .sort((a, b) => margen(b.timeUtcMs) - margen(a.timeUtcMs))[0];
+    const mesetaDe = (pleamar: { timeUtcMs: number }): number =>
+      tramoPlanoMasLargo(
+        congelar(dia.muestras, {
+          desdeUtcMs: pleamar.timeUtcMs - SEMIANCHO_MIN * MINUTO,
+          hastaUtcMs: pleamar.timeUtcMs + SEMIANCHO_MIN * MINUTO,
+        }),
+        dia.inicioUtcMs,
+        dia.finUtcMs,
+      ).minutos;
+
+    if (conSitio === undefined) {
+      flojos.push(`${fechaIso}: ninguna pleamar del día tiene ${SEMIANCHO_MIN} min a cada lado`);
     } else {
-      const congelada = congelar(dia.muestras, {
-        desdeUtcMs: pleamar.timeUtcMs - SEMIANCHO_MIN * MINUTO,
-        hastaUtcMs: pleamar.timeUtcMs + SEMIANCHO_MIN * MINUTO,
-      });
-      const meseta = tramoPlanoMasLargo(congelada, dia.inicioUtcMs, dia.finUtcMs);
-      if (meseta.minutos < MINIMO_EXIGIDO_MIN) {
-        flojos.push(`${fechaIso}: la meseta inyectada dura ${meseta.minutos} min`);
-      }
+      const minutos = mesetaDe(conSitio);
+      if (minutos < MINIMO_EXIGIDO_MIN) flojos.push(`${fechaIso}: la meseta inyectada dura ${minutos} min`);
+    }
+
+    const primera = pleamares[0];
+    if (primera === undefined || mesetaDe(primera) < MINIMO_EXIGIDO_MIN) {
+      flojosConLaPrimeraPleamar.push(fechaIso);
     }
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
   assert.deepEqual(flojos, []);
+  assert.ok(
+    flojosConLaPrimeraPleamar.length > 0,
+    "con la primera pleamar del día el escenario ya no falla ningún día del año: o el catálogo ha " +
+      "cambiado, o elegir la ventana ha dejado de hacer falta y este gate ya no mide nada",
+  );
 });
 
 // =================================================================================================
-// A-19 · clase A6 (input hostil) — la cifra que justifica la estimación va en formato inglés
+// A-19 · clase A6 (input hostil) — la cifra que justifica la estimación iba en formato inglés
 // =================================================================================================
 
 /**
- * A-19 · **HALLAZGO ABIERTO** — clase A6.
+ * A-19 · **CORREGIDO, y el recorrido se queda como gate permanente** — clase A6.
  *
  * La frase que T-13 existe para publicar —«las constantes armónicas son las del mareógrafo `X`, a
- * 24.8 km de la dársena»— la escribe el pipeline con `f"{km:.1f}"`, que es formato inglés, y la
- * página la pinta **tal cual**. En la misma página, todo lo demás va en español: «0,18 m»,
- * «39,442° N», «3,05 m». Lo mismo le pasa al motivo del grade: «RMSE normalizado 0.221 > 0.15».
+ * 24.8 km de la dársena»— la escribía el pipeline con `f"{km:.1f}"`, que es formato inglés, y la
+ * página la pintaba **tal cual**. En la misma página, todo lo demás va en español: «0,18 m»,
+ * «39,442° N», «3,05 m». Lo mismo le pasaba al motivo del grade: «RMSE normalizado 0.221 > 0.15».
  *
  * No es cosmética menor: es la cifra sobre la que descansa la promesa de la trayectoria, y un
  * lector español lee «24.8» como veinticuatro mil ochocientos si el resto de la página le ha
@@ -417,12 +492,22 @@ hallazgoAbierto("A-18 · la prueba de sensibilidad del gate A-1 no depende del d
  *
  * Medido en el `dist/` del 2026-08-29: **130 de las 153 páginas** de puerto, **283 ocurrencias**.
  *
- * Comportamiento correcto que afirma el test: **ninguna página publica un decimal con punto**. Se
- * excluye del recuento el separador de millares español (punto seguido de exactamente tres cifras)
- * y las versiones de licencia, que no son medidas.
+ * CORREGIDO **donde el número se convierte en texto** —`_cifra()` en
+ * `data/pipeline/mareia_pipeline/grade.py`— y no con un reemplazo en la plantilla, que sobre una
+ * frase ya escrita sería tocar prosa a ciegas. Las 170 frases del dataset ya committeado se
+ * migraron re-derivándolas con el `grade.py` parcheado y comprobando que cada una reproducía la
+ * committeada carácter a carácter salvo el separador.
+ *
+ * Lo que este gate vigila a partir de ahora: **ninguna página publica un decimal con punto**, y lo
+ * mira en el **HTML publicado**, no en la función que lo genera — el sujeto es el artefacto que lee
+ * la gente. Del recuento se excluyen el separador de millares español (punto seguido de exactamente
+ * tres cifras) y las versiones de licencia, que no son medidas.
  */
-hallazgoAbierto("A-19 · ninguna página publica una cifra con el decimal en formato inglés", async () => {
-  if (!HAY_BUILD) throw new SinBuild(SIN_BUILD);
+test("A-19 · ninguna página publica una cifra con el decimal en formato inglés", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
 
   const paginas = (function recorrer(directorio: string): readonly string[] {
     return readdirSync(directorio, { withFileTypes: true }).flatMap((entrada) => {
@@ -433,7 +518,16 @@ hallazgoAbierto("A-19 · ninguna página publica una cifra con el decimal en for
   })(DIST);
 
   const VERSIONES_DE_LICENCIA = /^(3|4)\.0$/;
-  const SEPARADOR_DE_MILLARES = /^\d{1,3}\.\d{3}$/;
+  /**
+   * El punto español de los millares: «381.367 km» a la Luna.
+   *
+   * El primer dígito no puede ser un cero, y no es un detalle. Escrita `^\d{1,3}\.\d{3}$`, esta
+   * excepción se tragaba «0.270» y «0.221» —el RMSE normalizado, que se publica con tres
+   * decimales— porque tienen exactamente la forma de un millar: el gate veía el «0.15» del umbral
+   * y no la medida de al lado, que es la mitad de la frase que importa. Nadie escribe un millar
+   * empezando por cero.
+   */
+  const SEPARADOR_DE_MILLARES = /^[1-9]\d{0,2}\.\d{3}$/;
   const ofensas: string[] = [];
   for (const pagina of paginas) {
     const visible = readFileSync(pagina, "utf8")

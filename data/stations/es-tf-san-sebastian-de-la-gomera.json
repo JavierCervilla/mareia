@@ -323,9 +323,9 @@
     "hw_time_err_p95_min": 18.11,
     "grade": "B",
     "validated_against": "IOC lago",
-    "grade_reason": "no alcanza A: el mareógrafo más cercano está a 14.5 km > 5 km",
+    "grade_reason": "no alcanza A: el mareógrafo más cercano está a 14,5 km > 5 km",
     "estimated": true,
-    "estimated_reason": "las constantes armónicas son las del mareógrafo `gomeratg-gom-esp-cmems`, a 14.5 km de la dársena: describen la marea de ese punto, no la de este puerto",
+    "estimated_reason": "las constantes armónicas son las del mareógrafo `gomeratg-gom-esp-cmems`, a 14,5 km de la dársena: describen la marea de ese punto, no la de este puerto",
     "metrics": {
       "window_start": "2026-07-30T00:00:00Z",
       "window_days": 30.0,

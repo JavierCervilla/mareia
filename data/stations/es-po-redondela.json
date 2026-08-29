@@ -363,7 +363,7 @@
     "validated_against": "sin observación propia: la predicción no se ha comprobado en este puerto",
     "grade_reason": "no alcanza B: sin observaciones ni segunda fuente: no hay con qué validar",
     "estimated": true,
-    "estimated_reason": "las constantes armónicas son las del mareógrafo `vigo-vigo-esp-ieo`, a 11.3 km de la dársena, y no hay observaciones de este puerto con las que comprobar la predicción",
+    "estimated_reason": "las constantes armónicas son las del mareógrafo `vigo-vigo-esp-ieo`, a 11,3 km de la dársena, y no hay observaciones de este puerto con las que comprobar la predicción",
     "metrics": {
       "window_start": "2026-07-30T00:00:00Z",
       "window_days": 30.0,

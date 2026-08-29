@@ -323,7 +323,7 @@
     "hw_time_err_p95_min": null,
     "grade": "C",
     "validated_against": "IOC gand",
-    "grade_reason": "no alcanza B: RMSE normalizado 0.269 > 0.15",
+    "grade_reason": "no alcanza B: RMSE normalizado 0,269 > 0,15",
     "estimated": false,
     "estimated_reason": null,
     "metrics": {

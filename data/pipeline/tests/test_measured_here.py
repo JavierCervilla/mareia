@@ -193,7 +193,7 @@ def test_only_own_gauge_and_own_observation_counts_as_measured() -> None:
 def test_a_borrowed_gauge_without_observation_is_estimated_and_says_both_things() -> None:
     result = grading.estimate(gauge_id="cartagenatg", gauge_distance_km=24.8, observation_source=None)
     assert result.estimated is True
-    assert "24.8 km" in result.reason
+    assert "24,8 km" in result.reason
     assert "no hay observaciones" in result.reason
 
 
@@ -203,7 +203,7 @@ def test_a_borrowed_gauge_with_its_own_observation_is_still_estimated() -> None:
         gauge_id="tenerife-228a", gauge_distance_km=20.6, observation_source="IOC tene"
     )
     assert result.estimated is True
-    assert "20.6 km" in result.reason
+    assert "20,6 km" in result.reason
     assert "no hay observaciones" not in result.reason
 
 
