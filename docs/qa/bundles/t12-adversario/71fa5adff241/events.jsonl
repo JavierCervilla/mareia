@@ -1,0 +1,15 @@
+{"at":10,"kind":"step","text":"guardar el puerto con cobertura"}
+{"at":33,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":46,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":47,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":306,"kind":"step","text":"se acaba la cobertura y se vuelve a la página, que ahora la sirve la copia guardada"}
+{"at":324,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":337,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_INTERNET_DISCONNECTED"}
+{"at":337,"kind":"console","text":"[error] Failed to load resource: net::ERR_INTERNET_DISCONNECTED"}
+{"at":349,"kind":"requestfailed","text":"GET http://127.0.0.1:4321/v1/modules/weather/weather?port=vigo","detail":"net::ERR_FAILED"}
+{"at":349,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":361,"kind":"requestfailed","text":"GET http://127.0.0.1:4321/v1/modules/weather/bulletin?port=vigo","detail":"net::ERR_FAILED"}
+{"at":361,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":385,"kind":"step","text":"el botón que la sección ofrece en ese estado, tal y como lo encuentra quien lee"}
+{"at":399,"kind":"step","text":"un solo toque en «Dejar de guardar Vigo», sin cobertura para deshacerlo"}
+{"at":5434,"kind":"step","text":"comprobar que el almanaque que se estaba leyendo sigue alcanzable"}

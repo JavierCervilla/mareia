@@ -1,0 +1,96 @@
+{
+  "snapshotId": "fe9da3f631b8",
+  "runId": "run-2026-08-29T09-37-15-267Z",
+  "test": {
+    "title": "adversarial/a9-app-instalada-sin-red.spec.ts > A9 · con un puerto guardado, el icono de la pantalla de inicio no abre nada sin cobertura",
+    "file": "/home/user/mareia-t12/tests/e2e/journeys/adversarial/a9-app-instalada-sin-red.spec.ts",
+    "line": 32,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 447,
+  "urlAtFailure": "chrome-error://chromewebdata/",
+  "error": {
+    "message": "Error: el arranque de la app instalada (/) no lleva a ninguna parte sin red\n\nexpect(received).toBeUndefined()\n\nReceived: \"page.goto: net::ERR_FAILED at http://127.0.0.1:4321/\"",
+    "stack": "Error: el arranque de la app instalada (/) no lleva a ninguna parte sin red\n\nexpect(received).toBeUndefined()\n\nReceived: \"page.goto: net::ERR_FAILED at http://127.0.0.1:4321/\"\n    at /home/user/mareia-t12/tests/e2e/journeys/adversarial/a9-app-instalada-sin-red.spec.ts:61:5"
+  },
+  "events": [
+    {
+      "at": 9,
+      "kind": "step",
+      "text": "leer el start_url del manifiesto publicado, que es lo que abre la app instalada"
+    },
+    {
+      "at": 26,
+      "kind": "step",
+      "text": "entrar por / con cobertura y llegar al puerto, como hace cualquiera"
+    },
+    {
+      "at": 47,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/"
+    },
+    {
+      "at": 60,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 61,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "at": 99,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"
+    },
+    {
+      "at": 114,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 114,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "at": 186,
+      "kind": "step",
+      "text": "guardar el puerto: a partir de aquí el almanaque está en el teléfono"
+    },
+    {
+      "at": 368,
+      "kind": "step",
+      "text": "al día siguiente, en la playa y sin cobertura, se toca el icono de la app"
+    },
+    {
+      "at": 384,
+      "kind": "requestfailed",
+      "text": "GET http://127.0.0.1:4321/",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 402,
+      "kind": "step",
+      "text": "comprobar que la app instalada abre algo de Mareia y no el error del navegador"
+    },
+    {
+      "at": 408,
+      "kind": "navigation",
+      "text": "chrome-error://chromewebdata/"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

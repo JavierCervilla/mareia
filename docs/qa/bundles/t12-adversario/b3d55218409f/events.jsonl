@@ -1,0 +1,14 @@
+{"at":8,"kind":"step","text":"abrir el puerto y esperar al worker"}
+{"at":30,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":45,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":45,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":146,"kind":"step","text":"la pestaña lleva abierta desde ayer: el rebuild diario se llevó su hoja de estilos"}
+{"at":147,"kind":"step","text":"guardar el puerto: las constantes bajan, los bytes de la página no"}
+{"at":258,"kind":"step","text":"y quien lee recarga, que es lo primero que hace cualquiera al volver a la página"}
+{"at":274,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":287,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":288,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":288,"kind":"httperror","text":"HTTP 404 GET http://127.0.0.1:4321/_astro/AlmanaqueLayout.CBCOLnoy.css"}
+{"at":289,"kind":"console","text":"[error] Failed to load resource: the server responded with a status of 404 (Not Found)"}
+{"at":289,"kind":"requestfailed","text":"GET http://127.0.0.1:4321/_astro/AlmanaqueLayout.CBCOLnoy.css","detail":"net::ERR_ABORTED"}
+{"at":354,"kind":"step","text":"comprobar que el sello no afirma un offline que no existe"}
