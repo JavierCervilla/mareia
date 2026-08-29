@@ -2,6 +2,55 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-29 — T-14A · la licencia del dataset dice la verdad
+
+El portal promete que cada dato trae «su fuente, su licencia y el código que lo calcula». La carta
+de presentación fallaba justo ahí, en dos afirmaciones que ahora están **medidas** contando los JSON
+publicados uno a uno.
+
+- **El dataset no es CC-BY 4.0: dos tercios son CC-BY-NC.** `README.md` decía que los constituyentes
+  «se publican bajo CC-BY 4.0» y, dos secciones más abajo, que eran CC-BY «en su mayoría; **algunas**
+  estaciones (p. ej. Bilbao y Huelva) llevan CC-BY-NC». Contado sobre `source.primary.license` de las
+  153 estaciones —que es la licencia que gobierna el dato publicado—: **104 `cc-by-nc-4.0` y 49
+  `cc-by-4.0`**. La mayoría es NC y «algunas» eran **el 68 %**. No es una errata de documentación:
+  la gracia del proyecto es que cualquiera se descargue el dataset y corra su propia instancia, y
+  quien lo hiciera leyendo «CC-BY 4.0» heredaba una restricción sin saber que la tenía. El README
+  publica ahora el reparto **con su cifra**, y el arreglo es decir la verdad y no purgar 104 puertos
+  para salvar un titular: `cc-by-nc-4.0` es compatible con publicar, Mareia no es comercial.
+- **Se atribuían dos fuentes de las que no sale ni un dato, y faltaban dos que sí se usan.**
+  `README.md` acreditaba los constituyentes a REDMAR, TICON-4 y FES2022. Medido: **TICON-4 es la
+  primaria de las 153** estaciones, **REDMAR 0 y FES2022 0** (ni como primaria ni como fallback). Y
+  al revés, `openwatersio/tide-database` (agrega y normaliza las constantes, en las 153) y
+  `GeoNames` (nombre y coordenadas de la dársena, en 141) **no aparecían en ninguna atribución del
+  README** aunque cada JSON las acredita. Sobraban dos y faltaban dos, y faltar es la falta grave:
+  es publicar un dato sin decir de quién es. La tabla de fuentes es ahora exactamente el conjunto
+  usado; REDMAR y FES2022 se nombran **con su motivo y fuera de la línea de atribución**, porque una
+  atribución es una afirmación de procedencia, no una lista de cortesía.
+- **El permiso de redistribución filtra ANTES que el rango de fuente.** `_DATASET_RANK` daba a
+  REDMAR la **máxima prioridad**, y las condiciones del banco de datos de Puertos del Estado dicen
+  que «en ningún caso se permite la transferencia de los datos a terceros». Hoy no hay vía de
+  ingesta, así que **ningún dato publicado cambia**; lo que había era que el día que la hubiera, el
+  pipeline la habría elegido la primera y publicado lo que no puede publicarse, sin que nada lo
+  parase. Ahora las candidatas que no se pueden republicar se apartan del conjunto entero —antes
+  incluso de medir cuál es la más cercana, porque si no una fuente impublicable seguiría decidiendo
+  qué otras compiten— y el rango decide **entre las publicables**. Es una lista de licencias
+  **permitidas** con defecto **excluir**: una licencia que nadie ha leído no entra por existir.
+  `cc-by-nc-4.0` está dentro a propósito: prohíbe el uso comercial, no la redistribución. Si un
+  puerto se quedara sin ninguna candidata publicable, **no se publica** y el fallo la nombra: un
+  puerto que falta se ve el mismo día; un dato republicado sin permiso, ya está fuera.
+- **Dos gates, y los cuatro ataques vistos en rojo.** El del README **recomputa** el reparto y el
+  conjunto de fuentes desde `data/stations/*.json` —no lee ningún campo resumen, porque comparar una
+  declaración con otra declaración del mismo autor no comprueba nada— y exige **igualdad exacta**,
+  no ausencia: un gate que sólo prohíbe se satisface callando. Comprobado que muerde: cambiar 104 por
+  100 da «el README dice 100 y los JSON de data/stations dan 104» (y «suma 149 y hay 153»); atribuir
+  `FES2022` da «el README atribuye fuentes que NINGÚN dato del dataset usa»; quitar `GeoNames` da «el
+  dataset usa fuentes que el README NO atribuye … la falta grave de las dos» — **mensajes distintos
+  a propósito**, para que quien lo vea sepa cuál de los dos le ha pasado. El segundo **inyecta** en
+  `reconcile.py` una fuente sin permiso de redistribución con rango 0, la más cercana y con el
+  registro más largo, y exige que pierda, que no aparezca ni como `fallback` y que una licencia sin
+  revisar tampoco entre; con el filtro quitado (el estado de antes) la inyectada gana y acaba dentro
+  del JSON emitido.
+
 ## 2026-08-29 — T-13 · el pase adversario: tres hallazgos arreglados y un tope que no medía nada
 
 El rol `qa-adversario` atacó lo que el `verificador` y el rol `qa` ya habían dado por bueno y sacó

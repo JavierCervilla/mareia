@@ -86,7 +86,20 @@
       recorrido de A-17 medía con una **copia** del detector y no trinqueteaba —estrechar el gate
       real lo dejaba verde—: el detector vive ahora en `apps/web/src/curva-congelada.ts` y lo
       importan los dos ficheros, comprobado en rojo con los 65 puertos)
-- [ ] T-14 · Metodología pública + QC navegable + dataset CC-BY + API pública documentada
+- [x] T-14A · **La licencia del dataset dice la verdad.** El README anunciaba «dataset CC-BY 4.0» y
+      atribuía las constantes a REDMAR, TICON-4 y FES2022. Contado sobre las 153 estaciones: **104
+      son `cc-by-nc-4.0` y 49 `cc-by-4.0`** —la mayoría es NC, no «algunas»— y de REDMAR y FES2022
+      **no sale ni un dato**, mientras que `openwatersio/tide-database` (153) y `GeoNames` (141),
+      que sí se usan, no se acreditaban en ningún sitio. Ahora el reparto va con su cifra, la tabla
+      de fuentes es **exactamente** el conjunto usado y las descartadas se nombran con su motivo
+      fuera de la atribución. Y el permiso de redistribución pasa a ser un **filtro delante del
+      rango** en `reconcile.py`: REDMAR tenía la máxima prioridad de fuente y sus condiciones
+      prohíben transferir los datos a terceros. Ningún dato publicado cambia; lo que cambia es que
+      ya no puede colarse. Dos gates lo sostienen: uno **recomputa** cifra y conjunto desde los JSON
+      y exige igualdad exacta (sobrar y faltar dan mensajes distintos), y otro **inyecta** una
+      fuente impublicable con rango 0 y exige que pierda — los cuatro comprobados en rojo
+- [ ] T-14 · Metodología pública + QC navegable + dataset con su licencia por puerto declarada
+      (el reparto real ya publicado en T-14A) + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario
       (queda del peldaño 1 del gate de seguridad `actionlint` sobre `.github/workflows/` —es el
       único que lee los `run:` embebidos—; el `shellcheck -S error` sobre los `.sh` del repo **ya

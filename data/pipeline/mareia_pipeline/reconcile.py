@@ -2,10 +2,18 @@
 
 La política de selección es determinista y está ordenada así:
 
-1. **Prioridad de fuente** — REDMAR/Puertos del Estado por delante de TICON-4, cuando exista. Hoy no
-   existe: Puertos del Estado no publica constantes armónicas por una vía automatizable (ver el
-   informe QC), así que en el piloto todos los puertos salen de TICON-4 y la rama REDMAR queda
-   escrita pero sin candidatos.
+0. **Permiso de redistribución** — no es un desempate: es un **filtro**, y va delante de todo lo
+   demás. Una fuente cuyas condiciones no autoricen republicar el dato queda **fuera de la
+   elección** con independencia de su prioridad. Un orden de preferencia no es sitio para decidir
+   qué se puede publicar: mientras esto fue sólo preferencia, la fuente con la máxima prioridad
+   (REDMAR) era justo la que no se puede redistribuir, y el día que tuviese vía de ingesta habría
+   ganado la elección y publicado lo que no puede publicarse, sin que nada lo parase (T-14A).
+1. **Prioridad de fuente** — REDMAR/Puertos del Estado por delante de TICON-4, cuando exista y
+   *entre las publicables*. Hoy no existe: Puertos del Estado no publica constantes armónicas por
+   una vía automatizable (ver el informe QC), así que todos los puertos salen de TICON-4 y la rama
+   REDMAR queda escrita pero sin candidatos. Y aunque los tuviera, con las condiciones actuales del
+   banco de datos —«en ningún caso se permite la transferencia de los datos a terceros»— el paso 0
+   la dejaría fuera antes de que su rango contase.
 2. **Licencia** — ``cc-by-4.0`` por delante de ``cc-by-nc-4.0``. La licencia del dataset es **la de
    cada estación**, no una del repositorio: se hereda de la fuente y viaja dentro del propio JSON
    (``source.primary.license`` y ``source.attribution[].license``). Preferir las permisivas es lo que
@@ -40,6 +48,21 @@ _DATASET_RANK = {"redmar": 0, "noaa": 1, "ticon": 2}
 #: Prioridad de licencia: menor es mejor. Una licencia desconocida se ordena la última.
 _LICENSE_RANK = {"cc-by-4.0": 0, "public-domain": 0, "cc-by-nc-4.0": 1}
 
+#: Licencias cuya cláusula de redistribución está leída y **permite republicar** el dato derivado.
+#: Es una lista de **permitidas**, no de prohibidas, y el defecto es **excluir**: una licencia que no
+#: esté aquí deja fuera al candidato. Es asimétrico a propósito, porque los dos errores no cuestan lo
+#: mismo: dejar un puerto sin fuente se ve el mismo día y se arregla añadiendo una entrada; publicar
+#: un dato que no se podía redistribuir ya no tiene arreglo posterior. Añadir una licencia es leerse
+#: sus condiciones, no reconocer su nombre.
+#:
+#: ``cc-by-nc-4.0`` está **dentro** a propósito: prohíbe el uso comercial, no la redistribución, y
+#: Mareia no es comercial — son las 104 estaciones que sostienen dos tercios del catálogo. El caso
+#: contrario es REDMAR/Puertos del Estado, cuyas condiciones («solo autoriza el uso de los datos para
+#: el propósito específico de la descarga, y, en ningún caso, se permite la transferencia de los
+#: datos a terceros») no autorizan republicar: el criterio del filtro es «¿permite redistribuir?», no
+#: «¿es CC-BY?».
+_REDISTRIBUTABLE_LICENSES = frozenset({"cc-by-4.0", "cc-by-nc-4.0", "public-domain"})
+
 #: Nombre del proyecto que agrega y normaliza las constantes, para la atribución.
 _AGGREGATOR_NAME = "openwatersio/tide-database"
 
@@ -58,6 +81,21 @@ class Selection:
     chosen: GaugeRecord
     chosen_distance_km: float
     rejected: list[tuple[float, GaugeRecord]]
+    #: Candidatas que el filtro de licencia dejó fuera de la elección, con su distancia. Van aparte
+    #: de ``rejected`` y **no** se emiten en el JSON publicado: ``source.fallback`` es una lista de
+    #: candidatas que se podrían haber usado, y éstas no se pueden. Se conservan aquí para que la
+    #: exclusión sea inspeccionable —el motivo de que un puerto tenga peor fuente de la que parece—
+    #: sin que el artefacto publicado arrastre datos de una fuente que no autoriza republicarlos.
+    excluded_by_license: list[tuple[float, GaugeRecord]]
+
+
+def is_redistributable(license_type: str) -> bool:
+    """¿Las condiciones de esta licencia permiten republicar el dato derivado?
+
+    Una licencia que no esté en ``_REDISTRIBUTABLE_LICENSES`` devuelve ``False``, incluida cualquiera
+    nueva que aparezca aguas arriba: el criterio es que alguien la haya leído, no que exista.
+    """
+    return license_type in _REDISTRIBUTABLE_LICENSES
 
 
 def _sort_key(distance_km: float, gauge: GaugeRecord) -> tuple[int, int, float, float]:
@@ -79,24 +117,40 @@ def select(port: Port, gauges: list[GaugeRecord]) -> Selection:
     puerto podía acabar con las constantes de un mareógrafo mejor documentado a 54 km teniendo otro
     en su propia bocana —le pasó a Gandía en la primera pasada del catálogo completo—, y eso no es
     elegir mejor análisis: es elegir otro mar.
+
+    Antes que nada de eso corre el **filtro de licencia**: las candidatas que no se pueden
+    redistribuir se apartan del conjunto entero, no del final del orden. Se apartan antes incluso de
+    medir cuál es la más cercana, porque si no una fuente impublicable seguiría decidiendo —al
+    fijar el ancla de «mismo sitio»— qué otras candidatas llegan a competir. Si no queda ninguna
+    publicable, el puerto **no se publica** y el fallo lo dice con nombres: un puerto que falta se
+    ve, un dato que no se podía republicar y ya está publicado, no.
     """
     candidates = candidates_near(gauges, port.lat, port.lon, port.search_radius_km)
     if not candidates:
         raise LookupError(
             f"sin mareógrafos a menos de {port.search_radius_km:g} km de {port.name} ({port.id})"
         )
-    nearest_km = min(distance for distance, _ in candidates)
+    publishable = [item for item in candidates if is_redistributable(item[1].license_type)]
+    excluded = [item for item in candidates if not is_redistributable(item[1].license_type)]
+    if not publishable:
+        motives = ", ".join(f"{gauge.station_id} ({gauge.license_type})" for _, gauge in excluded)
+        raise LookupError(
+            f"ningún mareógrafo redistribuible para {port.name} ({port.id}): "
+            f"las {len(excluded)} candidatas quedaron excluidas por su licencia [{motives}]"
+        )
+    nearest_km = min(distance for distance, _ in publishable)
     same_place = [
-        item for item in candidates if item[0] <= nearest_km + SAME_PLACE_RADIUS_KM
+        item for item in publishable if item[0] <= nearest_km + SAME_PLACE_RADIUS_KM
     ]
     ordered = sorted(same_place, key=lambda item: _sort_key(item[0], item[1]))
     best_distance, best = ordered[0]
-    rest = [item for item in candidates if item[1].station_id != best.station_id]
+    rest = [item for item in publishable if item[1].station_id != best.station_id]
     return Selection(
         port=port,
         chosen=best,
         chosen_distance_km=round(best_distance, 3),
         rejected=sorted(rest, key=lambda item: _sort_key(item[0], item[1])),
+        excluded_by_license=sorted(excluded, key=lambda item: item[0]),
     )
 
 
