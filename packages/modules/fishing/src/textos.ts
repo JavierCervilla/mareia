@@ -69,5 +69,21 @@ export const NOTA_DE_REDONDEO =
   "El total se redondea al entero. 100 y 0 solo salen si la fórmula da exactamente eso: un 99,6 se " +
   "publica como 99, porque un «día perfecto» conseguido redondeando sería una mentira barata.";
 
+/**
+ * Rótulo que dice QUÉ es la cifra grande del marcador.
+ *
+ * Vive aquí y no en la plantilla por lo mismo que los demás —es requisito de producto— y por lo que
+ * costó tenerlo fuera: el pase adversario de T-10 (hallazgo A-16) lo sustituyó por «Hoy pican
+ * seguro» en el `.astro` y las 12 páginas publicaron la promesa de pesca con la suite en verde,
+ * porque la regla de este archivo no alcanzaba a una cadena que no vivía en este archivo.
+ *
+ * Y no dice «Actividad prevista», que es lo que decía: **prever es exactamente lo que el aviso de
+ * más abajo niega** («no una predicción de capturas»), y el rótulo se lee doce párrafos antes que
+ * el aviso. Se nombra lo que el número es —el índice que sale de aplicar la convención a este día,
+ * no un pronóstico de lo que va a ocurrir— y la palabra «actividad» se queda en el título de la
+ * sección, donde no promete nada.
+ */
+export const ROTULO_DEL_RATING = "Índice de la convención solunar";
+
 /** Rótulo del enlace a la metodología. */
 export const ENLACE_METODOLOGIA = "Fórmula, constantes y límites del cálculo";

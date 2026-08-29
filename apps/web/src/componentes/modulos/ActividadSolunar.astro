@@ -42,6 +42,7 @@ import {
   NOTA_DE_REDONDEO,
   QUE_ES_ESTO,
   RATING_ES_CONVENCION,
+  ROTULO_DEL_RATING,
   TITULO_ACTIVIDAD,
   URL_METODOLOGIA_SOLUNAR,
 } from "@mareia/module-fishing";
@@ -72,7 +73,7 @@ const desglose = desgloseDelRating(actividad.rating, formato);
     <span class="solunar__escala">de 100</span>
   </p>
   <p class="solunar__veredicto">
-    <span class="etiqueta">Actividad prevista por la convención</span>
+    <span class="etiqueta">{ROTULO_DEL_RATING}</span>
     <span class="solunar__valoracion">{desglose.etiqueta}</span>
   </p>
 </div>

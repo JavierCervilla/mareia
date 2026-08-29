@@ -20,7 +20,13 @@ import {
   ventanasDeActividad,
 } from "../actividad.ts";
 import { ATRIBUCIONES_FISHING, fishingModule, SECCION_ACTIVIDAD_SOLUNAR } from "../module.ts";
-import { AVISO_SIN_RESPALDO, QUE_ES_ESTO, RATING_ES_CONVENCION } from "../textos.ts";
+import * as textos from "../textos.ts";
+import {
+  AVISO_SIN_RESPALDO,
+  QUE_ES_ESTO,
+  RATING_ES_CONVENCION,
+  ROTULO_DEL_RATING,
+} from "../textos.ts";
 
 const HORA = 3_600_000;
 const INICIO_DIA = Date.parse("2026-08-28T00:00:00Z");
@@ -154,16 +160,39 @@ test("una etiqueta que el módulo no conoce se publica cruda, no se inventa", ()
 });
 
 /**
+ * Lo que la regla prohíbe decir. Creció con el hallazgo A-16 del pase adversario, que publicó «Hoy
+ * pican seguro» en las 12 páginas **sin que la lista se enterara**: prometer pesca no necesita la
+ * palabra «garantizado», basta con el presente de indicativo y un adverbio. Se prohíben las formas
+ * que afirman la captura («pican», «picarán»), las que la aseguran («asegura», «seguro»,
+ * «garantiza») y las que la venden («promete», «infalible»).
+ *
+ * Ojo al escribirla: `RATING_ES_CONVENCION` contiene «cuánto pica hoy» —una pregunta, no una
+ * promesa— y `AVISO_SIN_RESPALDO` contiene «no una predicción de capturas». Prohibir `/pica/` o
+ * `/predicci/` a secas tumbaría los dos textos que sostienen la honestidad de la sección.
+ */
+const PROMESAS_PROHIBIDAS = /garantiz|infalible|pican|picar[áa]|asegura|seguro|promete/i;
+
+/**
  * El requisito de producto de T-10: la sección declara que la teoría no está respaldada y no
  * promete pesca. Aquí se vigila el **texto**; que llegue a las 12 páginas lo vigila el test del
  * `dist/`.
+ *
+ * La lista negra se aplica a **todas** las cadenas exportadas por `textos.ts`, no a tres elegidas a
+ * mano: el hallazgo A-16 fue exactamente eso, un texto de la sección que no estaba en la lista
+ * —porque ni siquiera estaba en el archivo— y al que la regla «aquí no se promete pesca» no
+ * llegaba. Recorriendo el módulo entero, un texto nuevo nace vigilado y no hay que acordarse.
  */
 test("los textos declaran la convención y no prometen capturas", () => {
   assert.match(AVISO_SIN_RESPALDO, /no tiene respaldo experimental sólido/);
   assert.match(RATING_ES_CONVENCION, /una convención, no una medida/);
   assert.match(QUE_ES_ESTO, /Knight/);
+  assert.match(ROTULO_DEL_RATING, /convención/);
 
-  for (const texto of [AVISO_SIN_RESPALDO, RATING_ES_CONVENCION, QUE_ES_ESTO]) {
-    assert.doesNotMatch(texto, /garantiz|infalible|picarán|asegura que/i, `promete: ${texto}`);
+  const publicados = Object.entries(textos).filter(
+    (entrada): entrada is [string, string] => typeof entrada[1] === "string",
+  );
+  assert.ok(publicados.length >= 9, `¿se han perdido textos? solo ${publicados.length}`);
+  for (const [nombre, texto] of publicados) {
+    assert.doesNotMatch(texto, PROMESAS_PROHIBIDAS, `${nombre} promete: ${texto}`);
   }
 });
