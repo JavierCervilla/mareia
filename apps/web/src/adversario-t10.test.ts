@@ -232,6 +232,31 @@ function declaracionDeBanda(css: string, enfasis: string, propiedad: string): st
   return new RegExp(`(?:^|;|\\s)${propiedad}:\\s*([^;}]+)`).exec(regla)?.[1]?.trim();
 }
 
+/**
+ * Cuánto de la trama lleva tinta, de 0 a 1. Una línea continua es 1.
+ *
+ * Existe porque «continuo vs discontinuo» no dice nada por sí solo: `stroke-dasharray: 1 40` es
+ * técnicamente otra trama y deja el filete menor en un punto cada 41 px, o sea en nada. El ciclo de
+ * trabajo es lo que hace que una discontinua se lea **como una línea** y no como una mota.
+ */
+function cicloDeTrabajo(trama: string): { readonly ciclo: number; readonly tinta: number } {
+  if (trama === "continuo") return { ciclo: 1, tinta: Number.POSITIVE_INFINITY };
+  const tramos = trama
+    .split(/[\s,]+/)
+    .filter((trozo) => trozo !== "")
+    .map((trozo) => Number.parseFloat(trozo));
+  assert.ok(
+    tramos.length > 0 && tramos.every((valor) => Number.isFinite(valor) && valor >= 0),
+    `trama ilegible: «${trama}»`,
+  );
+  // Una lista impar se repite para hacerla par (SVG 1.1 §11.4): «5» son 5 de tinta y 5 de hueco.
+  const patron = tramos.length % 2 === 0 ? tramos : [...tramos, ...tramos];
+  const tinta = patron.filter((_, indice) => indice % 2 === 0).reduce((a, b) => a + b, 0);
+  const total = patron.reduce((a, b) => a + b, 0);
+  assert.ok(total > 0, `trama de longitud cero: «${trama}»`);
+  return { ciclo: tinta / total, tinta: Math.min(...patron.filter((_, i) => i % 2 === 0)) };
+}
+
 /** Lo mismo, exigido: una banda sin esta declaración es el ataque otra vez. */
 function exigirDeBanda(css: string, enfasis: string, propiedad: string): string {
   const valor = declaracionDeBanda(css, enfasis, propiedad);
@@ -314,17 +339,34 @@ function lasBandasSeVenYSeDistinguenEntreSi(): void {
     suave: exigirDeBanda(pagina, "suave", "stroke-width"),
   };
 
-  const inicioNoche = tokens.indexOf("@media (prefers-color-scheme: dark)");
+  /*
+   * Los temas se buscan sobre la hoja **sin comentarios**, y esto no es pulcritud: la cabecera de
+   * `tokens.css` cita `@media (prefers-color-scheme: dark)` para explicar cómo funciona el tema, y
+   * esa mención va 3.700 caracteres ANTES del bloque de verdad — antes incluso del `:root` claro.
+   * Buscando a pelo, las dos vueltas del bucle leían los mismos tokens claros y **el trinquete del
+   * tema noche llevaba muerto desde que se escribió**: el verificador ennegreció el `--m-terra` del
+   * bloque dark real hasta hacerlo indistinguible del fondo y el gate siguió verde 4/4. Los
+   * comentarios se sustituyen por espacios de la misma longitud para que los offsets sigan valiendo.
+   */
+  const hoja = tokens.replace(/\/\*[\s\S]*?\*\//g, (bloque) => " ".repeat(bloque.length));
+  const inicioNoche = hoja.indexOf("@media (prefers-color-scheme: dark)");
   assert.ok(inicioNoche > 0, "tokens.css ya no declara el tema noche por preferencia del sistema");
   const temas = [
-    { nombre: "claro", desde: tokens.indexOf(":root {") },
+    { nombre: "claro", desde: hoja.indexOf(":root {") },
     { nombre: "noche", desde: inicioNoche },
   ];
+  // Red de seguridad del ancla: si los dos temas resuelven al mismo color es que se está leyendo dos
+  // veces el mismo bloque, y entonces este cuerpo no está midiendo lo que dice medir.
+  assert.notDeepEqual(
+    tokenOklch(hoja, "--m-bg", temas[0]?.desde ?? 0),
+    tokenOklch(hoja, "--m-bg", temas[1]?.desde ?? 0),
+    "los dos «temas» dan el mismo fondo: el ancla del tema noche no apunta al bloque noche",
+  );
 
   const flojos: string[] = [];
   for (const tema of temas) {
-    const fondo = tokenOklch(tokens, "--m-bg", tema.desde);
-    const terra = tokenOklch(tokens, "--m-terra", tema.desde);
+    const fondo = tokenOklch(hoja, "--m-bg", tema.desde);
+    const terra = tokenOklch(hoja, "--m-terra", tema.desde);
     for (const enfasis of ["fuerte", "suave"] as const) {
       const declarado = grosor[enfasis];
       assert.match(
@@ -367,6 +409,29 @@ function lasBandasSeVenYSeDistinguenEntreSi(): void {
     trama.suave,
     `mayor y menor comparten trama (${trama.fuerte}): quien no distingue tonos no las distingue`,
   );
+
+  /*
+   * Y la trama tiene que seguir siendo una línea. Exigir solo que las dos tramas sean **distintas**
+   * deja pasar `stroke-dasharray: 1 40` —2,4 % de ciclo de trabajo, un punto cada 41 px—: grosores
+   * distintos, tramas distintas, contraste del trazo intacto y la banda menor desaparecida. Lo
+   * encontró el verificador, y es el assert que le faltaba al criterio con el que se mide este
+   * filete: medir la discontinua «donde hay trazo» solo vale si alguien vigila cuánto trazo hay.
+   * El suelo de 0,4 deja sitio a las tramas razonables (la de hoy, `5 4`, da 0,56) y mata las motas;
+   * el de 3 px es para que cada tramo de tinta se vea como raya y no como grano.
+   */
+  for (const enfasis of ["fuerte", "suave"] as const) {
+    const { ciclo, tinta } = cicloDeTrabajo(trama[enfasis]);
+    assert.ok(
+      ciclo >= 0.4,
+      `la trama de «${enfasis}» (${trama[enfasis]}) solo lleva tinta el ${(100 * ciclo).toFixed(1)} % ` +
+        "del recorrido: eso ya no es una línea discontinua, es una banda que desaparece",
+    );
+    assert.ok(
+      tinta >= 3,
+      `los tramos de tinta de «${enfasis}» (${trama[enfasis]}) miden ${tinta} px: se leen como ` +
+        "grano, no como filete",
+    );
+  }
 
   for (const enfasis of ["fuerte", "suave"] as const) {
     const mancha = Number(exigirDeBanda(pagina, enfasis, "fill-opacity"));

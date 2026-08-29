@@ -187,6 +187,31 @@ se publica.
   «continuo» para que igualar las tramas por esa vía no cuele. **Muerden las seis mutaciones**:
   `0.1px`, menor a `1px`, grosor en unidades del lienzo, quitar `non-scaling-stroke`, igualar la
   trama y apagar el filete con `stroke-opacity`.
+- **Y se reforzó otra vez, en la segunda pasada del verificador.** Encontró dos dimensiones que el
+  gate **decía** cubrir y no cubría, ninguna de ellas con daño en el producto:
+  - **El tema noche no se medía.** El ancla era
+    `tokens.indexOf("@media (prefers-color-scheme: dark)")`, y esa cadena aparece **antes en el
+    comentario de cabecera** de `tokens.css` (offset 491) que en el bloque real (4194) — antes
+    incluso del `:root` claro (1936). Como los tokens se leen *a partir de* esa posición, las dos
+    vueltas del bucle leían los mismos valores claros: **el trinquete del tema noche estaba muerto
+    desde que se escribió**, y el `assert.ok(inicioNoche > 0)` pasaba con la mención del comentario.
+    Demostrado ennegreciendo el `--m-terra` del bloque dark real hasta ~1,1:1 sobre su fondo: gate
+    verde 4/4. Ahora los temas se buscan sobre la hoja **sin comentarios** (sustituidos por espacios
+    de la misma longitud, para no mover los offsets) y hay una red de seguridad que exige que los
+    dos temas resuelvan a fondos distintos — el síntoma exacto de leer dos veces el mismo bloque.
+    Con el arreglo, esa mutación sale en rojo: `noche/filete fuerte = 1,10:1 · suave = 1,07:1`.
+  - **El ciclo de trabajo de la trama no lo vigilaba nadie.** El gate solo exigía que las dos tramas
+    fueran *distintas*, así que `stroke-dasharray: 1 40` —2,4 % de tinta, un punto cada 41 px— lo
+    dejaba verde con la banda menor desaparecida. Y es justo el criterio con el que se mide este
+    filete: medir la discontinua «donde hay trazo» solo vale si alguien vigila **cuánto** trazo hay.
+    Ahora se exige ciclo de trabajo ≥ 0,4 (la trama real, `5 4`, da 0,56) y tramos de tinta ≥ 3 px.
+    Rojo con `1 40`, con `2 3` y con `0.5 0.2`.
+
+  **Nota sobre las cifras de noche de la tabla de arriba:** están medidas de verdad —el barrido
+  renderiza con `colorScheme: "dark"` y muestrea píxeles del tema noche— y siguen en pie. Lo que no
+  existía era la **vigilancia**: el barrido es una medición puntual y el gate es lo que la sostiene
+  en el tiempo. Publicar «noche 5,68–5,99:1» con el trinquete del tema noche muerto era exactamente
+  el error contra el que existe este informe.
 - **Severidad:** molestia — información contextual degradada, no dato erróneo
 - **Escalado:** no
 
