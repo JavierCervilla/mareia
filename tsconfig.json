@@ -15,7 +15,12 @@
   "include": [
     "apps/web/src/**/*.ts",
     "packages/*/src/**/*.ts",
-    "packages/modules/*/src/**/*.ts"
+    "packages/modules/*/src/**/*.ts",
+    // Los recorridos Playwright y su servidor estático (T-11). Entran aquí porque son código que
+    // se ejecuta y puede romperse: un locator que ya no existe o un fixture renombrado tienen que
+    // salir en el typecheck y no la primera vez que alguien corre el navegador.
+    "playwright.config.ts",
+    "tests/e2e/**/*.ts"
   ],
   // Ficheros de la web que solo existen dentro del entorno de Astro y que ESTE tsconfig no puede
   // tipar: `lib` se queda en ES2022 a propósito —el dominio no tiene DOM, y así no puede usarlo sin

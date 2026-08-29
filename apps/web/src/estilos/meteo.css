@@ -20,6 +20,14 @@
   gap: 12px;
 }
 
+/* `hidden` tiene que GANARLE a `display: flex`/`grid`. El atributo lo aplica la hoja de la UA con
+   menos especificidad que cualquier clase, así que sin esta regla un contenedor oculto por la isla
+   sigue ocupando su sitio: el hueco de los bloques todavía vacío y —peor— el filete del aviso de
+   carga debajo del dato ya cargado, como si quedara algo por llegar. */
+.meteo [hidden] {
+  display: none;
+}
+
 /* --- El sello de antigüedad ---------------------------------------------- */
 /* Mismo tratamiento que los avisos del puerto (filete a la izquierda, sin caja ni
    sombra): es una advertencia sobre el dato, y en esta página las advertencias se

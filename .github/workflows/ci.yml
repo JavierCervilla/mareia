@@ -137,8 +137,8 @@ jobs:
       - name: Escalera de seguridad (skill security-gate)
         run: bash .claude/skills/security-gate/scripts/security-gate.sh .
 
-  # Rol qa (skill qa-staging). En T-01 la UI es un hello: no hay recorridos Playwright todavía
-  # (llegan en T-09+), así que el job comprueba la PRESENCIA del esqueleto y es informativo.
+  # Rol qa (skill qa-staging). Comprueba la PRESENCIA del esqueleto; los recorridos de verdad los
+  # corre el job `e2e`, que sí es gate duro.
   qa:
     name: Guardián · QA (presencia del esqueleto)
     runs-on: ubuntu-latest
@@ -154,7 +154,37 @@ jobs:
             [ -e "$f" ] || { echo "FALTA $f"; exit 1; }
             echo "  OK $f"
           done
-          echo "T-01: sin recorridos Playwright todavía (T-09+); este job es informativo."
+
+  # Recorridos Playwright (T-11): los estados de la sección meteo contra el sitio CONSTRUIDO, con el
+  # API servido desde los fixtures capturados. **Cero red en el recorrido**: el propio spec cierra la
+  # salida a internet y afirma que los únicos orígenes externos que la página pide son los conocidos.
+  # La descarga del navegador sí usa red — es toolchain, no la aplicación bajo prueba.
+  e2e:
+    name: QA · recorridos Playwright (sección meteo)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Los recorridos atacan `dist/`, no un servidor de desarrollo: hay que construir antes.
+      - run: pnpm --filter web build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      # Las capturas de cada estado son el material del informe del pase adversario. No se
+      # versionan (el .gitignore deja fuera los artefactos de QA); se suben aquí.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: capturas-meteo
+          path: |
+            qa-shots/
+            qa-bundles/
+          if-no-files-found: ignore
 
   # Check de PRESENCIA del pase adversario (skill qa-adversarial): si el PR toca UI, exige informe
   # bien formado en docs/qa/. No juzga agresividad. Escape en el asunto del commit: [skip-adv].

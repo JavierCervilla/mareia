@@ -50,8 +50,8 @@ horas presentado como fresco es peor que no publicarlo, y esa frase es el coraz�
 
 A cambio se aceptan tres costes, todos acotados:
 
-- **JavaScript en la página.** Se acota a la isla del módulo: ~5 KB propios que solo pintan la
-  sección meteo. La tabla de mareas, la curva, el coeficiente y las efemérides siguen siendo HTML
+- **JavaScript en la página.** Se acota a la isla del módulo: **9,3 KB (3,7 KB comprimidos)**
+  —medido sobre el bundle construido— que solo pintan la sección meteo. La tabla de mareas, la curva, el coeficiente y las efemérides siguen siendo HTML
   puro y **se leen igual con JavaScript desactivado**. Es exactamente el hueco que el design brief
   ya dejó abierto (§3: «si una sección necesita hidratación, es una isla de módulo (T-10/T-11) y
   entra por el contrato `AppModule`») y el que el contrato nombra `renderMode: "island"`.

@@ -12,6 +12,7 @@
     "build": "pnpm --filter web build",
     "lint": "eslint .",
     "test": "pnpm -r --if-present test",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

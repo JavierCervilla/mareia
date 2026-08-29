@@ -2,6 +2,69 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-29 — T-11 · la isla meteo, y el primer dato del portal que caduca
+
+- **La sección meteo en la página de puerto**, por el contrato `AppModule`: olas (total, mar de
+  viento y mar de fondo) con altura, dirección y periodo, temperatura del agua, viento y rachas,
+  presión, visibilidad e índice UV. Las direcciones se publican en rosa de 16 rumbos **y** en grados
+  —«de 287° (ONO)»—, y con la preposición delante porque el convenio de Open-Meteo es de
+  procedencia: «287°» a secas se descifra, no se lee.
+- **El dato entra por isla hidratada, no horneado en build** (`docs/adr/ADR-01`). El HTML que se
+  publica **no contiene ni una magnitud meteorológica** —hay un test sobre `dist/` que lo exige— y
+  eso no es una omisión: la meteo caduca en 30 min y el sitio se reconstruye una vez al día, así que
+  un dato horneado envejecería dentro de la página *sin poder decir cuánto*. Un HTML que dice
+  «consultado hace 4 minutos» lo sigue diciendo veinte horas después. Coste medido: **9,3 KB
+  (3,7 KB comprimidos)** de JavaScript, solo en las páginas de puerto; el resto del portal —tabla,
+  curva, coeficiente, sol y luna, índices— sigue en **cero JavaScript** y se lee entero sin él.
+- **Los cuatro estados tienen cara propia y ninguno se parece a otro**: `ok` con la hora de la
+  consulta; **caducado con la antigüedad en la cara** («Dato de hace 3 h 10 min», texto visible, no
+  un icono ni un *tooltip*) y sin dejar de enseñar el dato viejo, que para eso lo guarda el backend;
+  **no disponible con el motivo que da el backend**; y **carga sin datos**, que es literalmente lo
+  que sale de `dist/` y lo que se ve con JavaScript desactivado.
+- **La antigüedad se mide como intervalo, no como instante**: a los `ageSeconds` que declaró el
+  servidor se les suma lo transcurrido desde que llegó la respuesta. Nunca se resta `fetchedAt` del
+  reloj del navegador — un móvil desajustado dos horas convertiría un dato fresco en uno rancio, o
+  al revés. Con el reloj del cliente atrasado el dato **no rejuvenece**.
+- **Un ausente dice cuál es.** En la sección hay cuatro maneras distintas de no tener un número y
+  cada una se escribe distinto: la fuente no respondió (motivo del backend), el modelo no publica ese
+  valor en esa celda («el modelo no publica la altura de esta ola en esta celda»), el navegador no
+  pudo preguntar («al servidor de Mareia», nunca achacado a Open-Meteo) y el dato aún no ha llegado.
+  Es la lección de A-11 en T-09, donde un `null` significaba dos cosas y le colgó a Cádiz un cartel
+  falso. Y un **0 medido es un cero**: la mar de viento en calma se publica como «0,00 m», no como
+  hueco.
+- **Cuando lo que falta es la credencial de AEMET, se dice la causa y no el síntoma.** Un «HTTP 401»
+  a secas no le dice nada a quien lee la página; la sección compone la frase con el estado
+  estructurado de la clave («La credencial de AEMET de esta instancia caducó el 2026-07-20: hasta
+  que se renueve no hay boletín oficial») y conserva detrás el motivo técnico del servidor. Las
+  instrucciones de renovación **no** salen: son para quien opera la instancia, no para quien mira la
+  marea.
+- **El boletín de AEMET se cita, no se reescribe**: párrafos literales con su rótulo (Avisos,
+  Situación, Predicción), su zona y su hora de emisión. Si el documento no trae ninguno de los campos
+  conocidos, la sección lo dice —su esquema sigue sin verificar mientras no haya clave— en lugar de
+  enseñar un trozo adivinado; y si AEMET no declara hora de elaboración, se dice **esa** falta y no
+  otra. La zona sin verificar contra el catálogo se publica advirtiéndolo.
+- **Atribuciones visibles en la propia sección** (Open-Meteo CC-BY 4.0 y AEMET), en HTML estático:
+  se ven aunque la petición no salga y aunque no haya JavaScript.
+- **Dar de baja el módulo sigue siendo borrar una línea** de `apps/web/src/modules.config.ts`: la
+  página vuelve a cero JavaScript y sigue construyendo. Lo vigilan tres tests, incluido uno de
+  arquitectura que comprueba que nadie fuera del mapa de renderizadores nombra el componente.
+- **Cero red en los tests**: los fixtures son **capturas del módulo real montado en Express** —el
+  estado `ok` contra Open-Meteo de verdad, los degradados forzando el mecanismo del backend— y no
+  JSON escritos a mano. 8 capturas, documentadas una a una en `fixtures/README.md`, con su única
+  excepción declarada (el boletín con documento, que necesita una clave que no tenemos).
+- **Recorridos Playwright** contra el sitio construido con el API servido desde esos fixtures: 9
+  recorridos, uno por estado más los cruzados (degradación parcial, hueco del modelo, API caído), con
+  captura de cada uno para el informe del pase adversario. El propio recorrido **cierra la salida a
+  internet** y afirma que los únicos orígenes externos que la página pide son los conocidos: un CDN
+  o una analítica nuevos lo ponen en rojo.
+- El gate «cero JavaScript de cliente» del pase adversario de T-09 se **re-apunta, no se relaja**:
+  ahora exige que todo script servido esté declarado como `renderMode: "island"` en el registry, con
+  `src` y sin código en línea. Una isla que se cuele sin declararse sigue rompiéndolo.
+- Por dentro: el contrato de respuesta y la identidad del módulo salen de `module.ts` a ficheros
+  hoja (`payload.ts`, `meta.ts`, `ui.ts`), para que la UI pueda tipar la respuesta **sin arrastrar
+  Express** —el build de la web es Node con Astro y no lo tiene—. `apps/web` pasa de **41 a 71
+  tests**; los 62 del módulo weather y los 20 de la API siguen en verde sin tocarlos.
+
 ## 2026-08-28 — T-08 · el módulo weather, primer módulo real del registry
 
 - **`GET /v1/modules/weather/weather?port=<slug>`**: estado del mar (olas total/wind/swell con
