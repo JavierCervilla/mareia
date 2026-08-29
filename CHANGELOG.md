@@ -2,6 +2,59 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-29 — T-17 · la web, en pie (adelanto de T-15)
+
+- **`apps/web/Dockerfile`**: imagen de la web en dos etapas. Se construye desde la **raíz** del repo
+  (`docker build -f apps/web/Dockerfile .`) y no desde `apps/web`, porque el sitio no se rellena en
+  el navegador: se **calcula en build** llamando a los casos de uso, y necesita `packages/` y el
+  dataset de `data/`. La imagen final son **94 MB**: la base `nginx:alpine` (94,2 MB) más **528 KB**
+  de HTML. El toolchain —232 MB de Node, pnpm, `node_modules` y el código fuente— se queda en la
+  primera etapa; comprobado sobre la imagen construida: `node`, `npm`, `pnpm` y `corepack` no
+  existen en ella. Lo que no está en la imagen no se puede explotar ni se paga al desplegar.
+- **Existe porque el dominio estaba roto, no porque tocara desplegar**: `mareia.cervilla.es` ya
+  estaba enganchado en Dokploy a dos apps que apuntaban a Dockerfiles inexistentes, así que Traefik
+  contestaba **502**. Un dominio enganchado a un servicio que no arranca no es una URL «que aún no
+  existe», es una URL rota. Esto pone en pie lo que ya estaba terminado, la web; el API, el volumen
+  KV y el rebuild diario siguen en T-15.
+- **Escucha en `0.0.0.0:3000` y lo dice en el log**, leyendo la dirección de su propia
+  configuración en vez de repetirla en el mensaje. Esta es la avería que el proyecto ya conoce: un
+  servidor que bindea al hostname del contenedor arranca sin quejarse, el contenedor queda
+  `running`, el log dice «listo» y Traefik devuelve 502 igualmente. Un mensaje escrito a mano podría
+  decir `0.0.0.0` mientras el servidor escucha en otro sitio; leído de la configuración, es una
+  prueba y no una opinión. La primera línea del arranque publica además **el día que hornea el
+  HTML**, que es como se ve desde fuera si el contenedor es el rebuild de hoy o el de la semana
+  pasada.
+- **Servidor: nginx, elegido midiendo**. `nginx:alpine` (94,2 MB) frente a `caddy:2-alpine`
+  (88,7 MB): el tamaño no decide. Decide la semántica de rutas, y en concreto **que no haya ningún
+  catch-all**. Un `try_files … /index.html` —el patrón de las SPA— devolvería la portada con un
+  **200** ante cualquier URL inventada y le diría a un buscador que todas son páginas reales; este
+  sitio es SSG y su motivo de existir es el SEO, así que el 404 tiene que ser un 404, con el cuerpo
+  de `404.html`. Las otras dos reglas: `index index.html` para los directorios y **301** de
+  `/mareas/…/vigo` a `/mareas/…/vigo/` con **`absolute_redirect off`**, porque un `Location`
+  absoluto se construiría con el **puerto interno** y detrás de Traefik mandaría al visitante a una
+  dirección que desde fuera no existe.
+- **Sin root**: el proceso corre como el usuario `nginx` (el 3000 no necesita privilegio) y el HTML
+  que sirve no le pertenece. Además `server_tokens off`, sin autoindex, fuera el `server` por
+  defecto del puerto 80 y los logs al stdout/stderr del contenedor, que es lo que lee Dokploy.
+- **`BUILD_DATE` es un `ARG` de build, y no puede ser otra cosa**: el día está horneado en el HTML
+  de las 33 páginas, así que una variable de runtime no movería ni una marea, solo mentiría. El
+  rebuild diario de T-15 tendrá que reconstruir la imagen; lo que se ha hecho es que sea barato.
+  Los `ARG` van declarados **después** del `pnpm install`, de modo que un día nuevo invalida la
+  caché solo a partir del `astro build`: **18,3 s** el build desde cero, **8,4 s** el del día
+  siguiente sobre el mismo commit. También hay `SITE_URL` (por defecto el dominio de producción):
+  sin él, el `sitemap.xml` y las canónicas se publicarían apuntando a `localhost`.
+- **La prueba, no el Dockerfile, es el entregable**: imagen construida y levantada de verdad, y las
+  seis preguntas hechas con `curl` — portada 200; `/mareas/galicia/pontevedra/vigo/` 200 con las
+  cuatro mareas del día en la tabla; la misma sin barra final **301** con `Location` relativo;
+  `sitemap.xml` 200 con 32 `<loc>` sobre el dominio de producción; una URL inventada **404** y su
+  cuerpo **byte a byte igual** al `404.html` del `dist/`; y la imagen sin rastro de toolchain. La
+  salida completa está en `docs/despliegue.md`, junto a cómo se configura en Dokploy —incluido el
+  aviso de que la imagen hereda un `EXPOSE 80` de la base que no se puede deshacer, y de que
+  autodetectar ese puerto sería otro 502— y qué queda pendiente de T-15.
+- **`.dockerignore`** en la raíz: fuera dependencias y `dist/` (se reconstruyen dentro; un `dist/`
+  viejo del portátil podría acabar servido en producción sin que nadie lo notara), y fuera `.env` y
+  las capturas de QA, que en una imagen quedarían en una capa legible para siempre.
+
 ## 2026-08-28 — T-08 · el módulo weather, primer módulo real del registry
 
 - **`GET /v1/modules/weather/weather?port=<slug>`**: estado del mar (olas total/wind/swell con

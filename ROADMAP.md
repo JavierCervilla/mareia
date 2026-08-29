@@ -40,6 +40,11 @@
       sobre `.github/workflows/` —es el único que lee los `run:` embebidos— y `shellcheck -S error`
       sobre los 6 `.sh` del repo; y el healthcheck del API, que queda fuera del enrutado público
       porque solo se publica `/v1/*`)
+      · **La web ya está hecha, en T-17**: `apps/web/Dockerfile` construido y probado con `curl`
+      (rutas de directorio, 301 a la barra final, 404 con el cuerpo de `404.html`), sirviendo en
+      `0.0.0.0:3000` sin root y sin toolchain en la imagen — ver `docs/despliegue.md`. Aquí siguen
+      el API con su volumen KV, el rebuild diario que hornea el día, el healthcheck del contenedor,
+      el e2e contra producción y el pase adversario de despliegue.
 
 ## Fase 2 (rumbo, sin comprometer)
 
