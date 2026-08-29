@@ -1,0 +1,38 @@
+# Qué NO viaja al contexto de build de las imágenes.
+#
+# El contexto es la raíz del repo y no `apps/web`, porque el sitio se CALCULA en build llamando a
+# los casos de uso: necesita `packages/` y el dataset de `data/`. Con el contexto entero abierto,
+# lo que hay que recortar a mano es todo lo que ya se reconstruye dentro (dependencias, `dist/`) y
+# todo lo que no debe salir de esta máquina (`.env`, capturas de QA).
+
+# Se reinstalan dentro con el lockfile: mandarlas subiría cientos de MB y, peor, podría meter
+# binarios compilados para otra arquitectura que la de la imagen.
+node_modules/
+**/node_modules/
+
+# Salidas de build: las genera la etapa `build`. Si viajaran, un `dist/` viejo del portátil podría
+# acabar sirviéndose en producción sin que nadie lo notara.
+dist/
+**/dist/
+.astro/
+**/.astro/
+.deno/
+
+# Cachés del pipeline de estaciones y de Python.
+data/pipeline/.cache/
+data/pipeline/.venv/
+**/__pycache__/
+.pytest_cache/
+
+# Secretos: nunca entran en una imagen (quedarían en una capa, legibles para siempre).
+.env
+.env.*
+!.env.example
+
+# Historia y artefactos que la imagen no usa.
+.git/
+.github/
+qa-bundles/
+qa-shots/
+*.log
+.DS_Store
