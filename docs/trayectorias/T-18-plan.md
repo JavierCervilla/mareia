@@ -46,8 +46,13 @@ el borde HTTP.
 
 ## Asunciones
 
-1. `/health` es alcanzable públicamente hoy (sacarlo del enrutado público es deuda declarada de
-   T-15); mientras lo sea, su `detail` es superficie pública y se recorta igual.
+1. ~~`/health` es alcanzable públicamente hoy; mientras lo sea, su `detail` es superficie
+   pública.~~ **Corregida tras la verificación**: la ruta `/health` del API es pública, pero hoy
+   devuelve un cuerpo estático y **nadie llama a `healthcheck()` del módulo en producción**, así que
+   el `detail` con el aviso del operador todavía no sale por ningún sitio. El recorte se mantiene
+   —es el borde por el que saldría en cuanto se conecte, y conectarlo es deuda de T-15— pero se
+   documenta como **prudencia por anticipación, no como fuga cerrada**. Decir que cerramos una fuga
+   que no estaba abierta sería inflar el arreglo.
 2. Ningún consumidor depende de la prosa de `credential.message`: la web pinta estados, no frases.
 3. El día que el aviso al operador cambie de texto, el gate no se entera — por eso el gate busca
    **las señas del canal equivocado** (nombre de la variable, dominio de alta, verbo de instrucción),

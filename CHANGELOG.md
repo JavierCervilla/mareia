@@ -31,6 +31,15 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   sin clave, el motivo decía «falta la variable de entorno AEMET_API_KEY». Ese texto viaja al
   cliente por diseño (`errors.ts`), así que ahora dice el hecho —«no hay credencial con la que pedir
   el boletín»— y deja el nombre del secreto para el canal del operador.
+- **Y el gate obliga a decir algo, no solo prohíbe decir de más.** Una prohibición se satisface
+  callando: con solo el recorrido de arriba, `message: ""` en los cinco estados habría pasado verde,
+  y también una única frase repetida para los cinco. Eso no sería recortar el canal, sería apagarlo,
+  y quien consume el API dejaría de poder decir *por qué* no hay boletín — justo lo que este fix
+  forward prometió conservar. Así que un segundo recorrido exige que cada estado tenga su frase: no
+  vacía, distinta de las otras cuatro y nombrando de qué credencial habla. No congela la prosa
+  (reescribirla no lo rompe); vaciarla o colapsarla en una sola frase, sí. Comprobado mordiendo con
+  las dos mutaciones: vaciar las cinco frases lo pone rojo («no dice nada»), y darles a las cinco la
+  misma frase lo pone rojo nombrando el par que colisiona.
 - **Trinquete al revés**: un test exige que `inspectAemetKey` **siga** produciendo el aviso
   completo, con su URL de alta y su instrucción, para que «arreglar» esto nunca consista en vaciar
   el único aviso que impide que la clave caduque por sorpresa.

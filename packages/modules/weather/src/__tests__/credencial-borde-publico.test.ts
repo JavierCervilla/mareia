@@ -19,7 +19,7 @@ import test from "node:test";
 // @ts-types="@types/express"
 import express from "express";
 
-import { inspectAemetKey, type KeyStatus } from "../aemet-key.ts";
+import { inspectAemetKey, publicCredentialView, type KeyStatus } from "../aemet-key.ts";
 import { createMemoryWeatherCache } from "../cache.ts";
 import {
   createWeatherModule,
@@ -201,4 +201,48 @@ test("el aviso al operador sigue completo: se recorta el canal, no el mensaje", 
 
   // Y sin clave, el aviso sigue diciendo qué falta y cómo se llama.
   assert.ok(inspectAemetKey(undefined, T0).message.includes("AEMET_API_KEY"));
+});
+
+
+/**
+ * La otra mitad del gate. El recorrido de arriba **prohíbe decir de más**, y una prohibición se
+ * satisface callando: `message: ""` pasaría verde los cinco estados, y también pasaría una única
+ * frase repetida para los cinco. Eso no sería recortar el canal, sería apagarlo — y quien consume
+ * el API dejaría de poder decir *por qué* no hay boletín, que es lo que este fix forward prometió
+ * conservar.
+ *
+ * Así que aquí se **obliga a decir algo**, sin congelar la prosa: cada estado tiene su frase, no
+ * vacía, distinta de las otras cuatro y nombrando de qué credencial habla. Reescribir el texto no
+ * lo rompe; vaciarlo o colapsarlo en una sola frase, sí.
+ */
+test("la vista pública dice algo, y dice algo distinto en cada estado", () => {
+  const estados: readonly KeyStatus[] = ["missing", "unreadable", "valid", "expiring", "expired"];
+  const dichas = new Map<string, KeyStatus>();
+
+  for (const estado of estados) {
+    const { message } = publicCredentialView({ status: estado, message: "" });
+
+    assert.ok(
+      message.trim() !== "",
+      `con la credencial '${estado}' la vista pública no dice nada: prohibir decir de más no puede acabar en callar`,
+    );
+    assert.ok(
+      message.includes("AEMET"),
+      `con la credencial '${estado}' la frase pública no dice de qué credencial habla: «${message}»`,
+    );
+    for (const sena of SENAS_DEL_OPERADOR) {
+      assert.ok(
+        !message.includes(sena),
+        `la frase pública de '${estado}' lleva la seña «${sena}» del canal del operador: «${message}»`,
+      );
+    }
+
+    const ya = dichas.get(message);
+    assert.equal(
+      ya,
+      undefined,
+      `'${estado}' y '${ya}' publican la misma frase: una frase para todos los estados no explica ninguno («${message}»)`,
+    );
+    dichas.set(message, estado);
+  }
 });
