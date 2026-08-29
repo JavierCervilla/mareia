@@ -109,6 +109,14 @@
   border-left: 1px solid var(--m-rule-soft);
   padding-left: 14px;
   font-size: var(--m-text-body);
+  /* El texto es AJENO y no se reescribe, así que puede traer una palabra que no quepa: AEMET pone
+     enlaces a su propio boletín en el suyo (84 caracteres sin un espacio). El mínimo de contenido
+     de un hijo flex es su palabra más larga, y sin política de partición esa palabra le imponía el
+     ancho a toda la sección: +170 px de desplazamiento horizontal a 320 px, con la página entera
+     moviéndose de lado en el móvil (hallazgo H-5 del pase adversario).
+     `anywhere` y no `break-word` porque solo `anywhere` BAJA el ancho mínimo de contenido —
+     `break-word` parte al pintar pero sigue midiendo la palabra entera y el desborde se queda. */
+  overflow-wrap: anywhere;
 }
 
 .meteo__cita-rotulo {

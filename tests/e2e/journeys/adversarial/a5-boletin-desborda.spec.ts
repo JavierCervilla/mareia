@@ -49,8 +49,6 @@ for (const ancho of [320, 360]) {
     page,
     qa,
   }) => {
-    test.fail();
-
     qa.step(`ventana de ${ancho} px (el ancho de un móvil pequeño y el de uno normal)`);
     await page.setViewportSize({ width: ancho, height: 800 });
 
