@@ -15,6 +15,12 @@
  * Los límites del campo de fecha son los mismos que respeta el API (año del build ±1). No es una
  * restricción de la interfaz: fuera de esa ventana la predicción armónica pierde garantía, y este
  * portal prefiere no dar una hora a dar una que no puede sostener.
+ *
+ * Los que se construyen aquí son los del build, que es lo correcto **mientras no haya nada
+ * guardado**. En cuanto lo hay mandan las constantes guardadas, que se congelaron el día que se
+ * guardaron: el cliente corrige el campo y el rótulo (`pwa/cliente/otro-dia.ts`). Sin esa
+ * corrección, una página reconstruida en enero con un favorito de diciembre prometía un año que la
+ * calculadora rechazaba, y el campo dejaba elegirlo.
  */
 import { FECHA_DE_BUILD } from "../datos/fecha-build.ts";
 import { fechaLarga } from "../formato.ts";
@@ -35,11 +41,13 @@ const { desde, hasta } = ventanaDeAnos(FECHA_DE_BUILD);
   aria-labelledby="titulo-otro-dia"
   data-otro-dia
   data-otro-dia-slug={slug}
+  data-otro-dia-build={FECHA_DE_BUILD}
 >
   <h2 class="bloque__titulo" id="titulo-otro-dia">Mareas de otro día en {nombre}</h2>
 
   <p class="otro-dia__nota">
-    Esta página publica el {fechaLarga(FECHA_DE_BUILD)}. Cualquier otro día entre {desde} y {hasta} se
+    Esta página publica el {fechaLarga(FECHA_DE_BUILD)}. Cualquier otro día entre <span
+      data-otro-dia-ventana>{desde} y {hasta}</span> se
     calcula <strong>aquí mismo, en tu navegador</strong>, con las constantes armónicas de la estación
     y el mismo motor que usa el servidor — y también <strong>sin cobertura</strong>, si has guardado
     el puerto arriba. Hace falta JavaScript: sin él no aparece el formulario, y la tabla de arriba

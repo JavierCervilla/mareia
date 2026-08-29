@@ -108,8 +108,33 @@ function esEstacion(valor: unknown): boolean {
   );
 }
 
+/** Un rango de años, ambos incluidos. */
+export interface Ventana {
+  readonly desde: number;
+  readonly hasta: number;
+}
+
 /** Los años que esta copia sabe calcular, ambos incluidos. */
-export function ventanaDeAnos(generadoEn: string): { readonly desde: number; readonly hasta: number } {
+export function ventanaDeAnos(generadoEn: string): Ventana {
   const ano = Number(generadoEn.slice(0, 4));
   return { desde: ano - VENTANA_DE_ANOS, hasta: ano + VENTANA_DE_ANOS };
+}
+
+/**
+ * La ventana que de verdad rige en esta pantalla: **la de la copia guardada si la hay**, y si no la
+ * del build de la página.
+ *
+ * Existe para que no la deriven dos sitios por su cuenta, que es exactamente cómo se rompió: la
+ * sección «sin cobertura» la sacaba del build y la calculadora la aplicaba sobre el payload
+ * guardado. Se congelan en instantes distintos —el payload el día que se guardó, la página cada
+ * madrugada— así que con un favorito de diciembre y la página ya de enero la pantalla prometía
+ * «cualquier día entre 2026 y 2028» y la calculadora contestaba «esta copia calcula de 2025 a
+ * 2027», con el campo de fecha dejando elegir el año que luego rechazaba. Manda la copia: es la que
+ * hace el cálculo.
+ */
+export function ventanaVigente(
+  generadoEnGuardado: string | undefined,
+  fechaDeBuild: string,
+): Ventana {
+  return ventanaDeAnos(generadoEnGuardado ?? fechaDeBuild);
 }

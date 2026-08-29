@@ -19,7 +19,12 @@ import { cargarPuertos } from "../datos/catalogo.ts";
 import { deps } from "../datos/deps.ts";
 import { rutaPuerto } from "../rutas.ts";
 import { diaOffline } from "./dia-offline.ts";
-import { ESQUEMA_ESTACION_OFFLINE, esEstacionOffline, ventanaDeAnos } from "./estacion-offline.ts";
+import {
+  ESQUEMA_ESTACION_OFFLINE,
+  esEstacionOffline,
+  ventanaDeAnos,
+  ventanaVigente,
+} from "./estacion-offline.ts";
 import type { EstacionOffline } from "./estacion-offline.ts";
 
 /** Día del que hablan estos tests. Fijo: un test que cambia de respuesta cada mañana no es un gate. */
@@ -150,4 +155,59 @@ test("un payload guardado por otra versión no entra en el motor", async () => {
   for (const roto of rotos) {
     assert.equal(esEstacionOffline(roto), false, `esto no debería pasar la validación: ${String(roto)}`);
   }
+});
+
+// =================================================================================================
+// R-2 · La ventana la manda la copia guardada, no el build de la página.
+//
+// Las dos se congelan en instantes distintos: el payload el día que se guardó, la página cada
+// madrugada. Derivarla por separado en la sección y en la calculadora acabó publicando dos frases
+// que se contradecían en la misma pantalla, con el campo de fecha dejando elegir el año que luego
+// se rechazaba. La regla vive en un solo sitio y aquí se comprueba que dice lo que hace.
+// =================================================================================================
+
+test("con un favorito guardado manda SU ventana, aunque la página sea de otro año", () => {
+  // Favorito guardado el 30 de diciembre; la página, reconstruida el 2 de enero.
+  assert.deepEqual(ventanaVigente("2026-12-30", "2027-01-02"), { desde: 2025, hasta: 2027 });
+  // Y es la misma que aplica el cálculo: la sección no puede prometer un año que esto rechaza.
+  assert.deepEqual(ventanaVigente("2026-12-30", "2027-01-02"), ventanaDeAnos("2026-12-30"));
+});
+
+test("sin nada guardado manda la ventana del build, que es la del fichero que se bajaría", () => {
+  assert.deepEqual(ventanaVigente(undefined, "2027-01-02"), ventanaDeAnos("2027-01-02"));
+});
+
+test("lo que promete la ventana vigente es exactamente lo que el cálculo acepta y rechaza", async () => {
+  const estacion = { ...(await estacionOffline("vigo")), generadoEn: "2026-12-30" };
+  const { desde, hasta } = ventanaVigente(estacion.generadoEn, "2027-01-02");
+
+  assert.ok(diaOffline(estacion, `${desde}-01-01`).ok, "el primer día prometido tiene que calcular");
+  assert.ok(diaOffline(estacion, `${hasta}-12-31`).ok, "el último día prometido tiene que calcular");
+  assert.equal(diaOffline(estacion, `${hasta + 1}-01-01`).ok, false);
+  assert.equal(diaOffline(estacion, `${desde - 1}-12-31`).ok, false);
+});
+
+// =================================================================================================
+// La ventana del día civil viaja en la respuesta, y se afirma DEL LADO OFFLINE.
+//
+// El test del día de 23 h comparaba el intervalo contra el `range` del API, así que sobrevivía a
+// una mutación del cálculo offline a ventana fija de 24 h mientras no cayera ningún extremo en la
+// hora sobrante. Ahora el intervalo lo publica `diaOffline` y se compara el suyo.
+// =================================================================================================
+
+test("el intervalo que publica el cálculo offline es el día civil, no 24 h fijas", async () => {
+  const estacion = await estacionOffline("vigo");
+  const cambioDeHora = "2027-03-28";
+  const dia = diaOffline(estacion, cambioDeHora);
+  assert.ok(dia.ok);
+
+  const { range } = await getTides(deps, { slug: "vigo", from: cambioDeHora, to: cambioDeHora });
+  assert.equal(dia.inicioUtcMs, range.startUtcMs);
+  assert.equal(dia.finUtcMs, range.endUtcMs);
+  assert.equal(dia.finUtcMs - dia.inicioUtcMs, 23 * 3_600_000, "esa noche el día dura 23 h");
+
+  // Y un día normal sigue durando 24: la ventana no se ha quedado corta para todos.
+  const normal = diaOffline(estacion, "2027-03-14");
+  assert.ok(normal.ok);
+  assert.equal(normal.finUtcMs - normal.inicioUtcMs, 24 * 3_600_000);
 });

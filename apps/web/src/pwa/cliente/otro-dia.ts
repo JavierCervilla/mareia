@@ -21,6 +21,7 @@
  * offline lo incluya —si no, el trozo faltaría justo cuando no hay red para pedirlo.
  */
 
+import { ventanaVigente } from "../estacion-offline.ts";
 import type { EstacionOffline } from "../estacion-offline.ts";
 import { fechaLarga, hora, metros } from "../../formato.ts";
 import { leerFavorito } from "./almacen.ts";
@@ -32,7 +33,11 @@ export interface AnclajeOtroDia {
   readonly formulario: HTMLFormElement;
   readonly campo: HTMLInputElement;
   readonly resultado: HTMLElement;
+  /** El «entre 2025 y 2027» del texto, para poder corregirlo cuando manda la copia guardada. */
+  readonly ventana: HTMLElement | undefined;
   readonly slug: string;
+  /** Día que publica esta página: la ventana de reserva mientras no haya nada guardado. */
+  readonly fechaDeBuild: string;
 }
 
 /** Nombre de cada tipo de extremo, igual que en `componentes/TablaDia.astro`. */
@@ -43,15 +48,25 @@ export function anclajeOtroDia(seccion: HTMLElement): AnclajeOtroDia | undefined
   const campo = seccion.querySelector("[data-otro-dia-fecha]");
   const resultado = seccion.querySelector("[data-otro-dia-resultado]");
   const slug = seccion.dataset["otroDiaSlug"];
+  const fechaDeBuild = seccion.dataset["otroDiaBuild"];
   if (
     !(formulario instanceof HTMLFormElement) ||
     !(campo instanceof HTMLInputElement) ||
     !(resultado instanceof HTMLElement) ||
-    !slug
+    !slug ||
+    !fechaDeBuild
   ) {
     return undefined;
   }
-  return { formulario, campo, resultado, slug };
+  const ventana = seccion.querySelector("[data-otro-dia-ventana]");
+  return {
+    formulario,
+    campo,
+    resultado,
+    ventana: ventana instanceof HTMLElement ? ventana : undefined,
+    slug,
+    fechaDeBuild,
+  };
 }
 
 /**
@@ -64,22 +79,39 @@ export function montarOtroDia(anclaje: AnclajeOtroDia): void {
     evento.preventDefault();
     void calcular(anclaje);
   });
+  void ajustarVentana(anclaje);
 }
 
-/** Las constantes de este puerto, de donde las haya. Se recuerdan para no releer en cada consulta. */
-const enMemoria = new Map<string, EstacionOffline>();
+/**
+ * Pone los límites del campo y el rótulo en la ventana de **la copia guardada**.
+ *
+ * El HTML los trae con la ventana del build, que es la correcta mientras no haya nada guardado. En
+ * cuanto lo hay mandan las constantes guardadas: se congelaron el día que se guardaron y la página
+ * se reconstruye a diario, así que en cuanto cruza un año nuevo la página prometería un año que la
+ * calculadora rechaza — con el propio campo dejando elegir la fecha que luego no acepta.
+ */
+async function ajustarVentana(anclaje: AnclajeOtroDia): Promise<void> {
+  const favorito = await leerFavorito(anclaje.slug);
+  const { desde, hasta } = ventanaVigente(favorito?.estacion.generadoEn, anclaje.fechaDeBuild);
+  anclaje.campo.min = `${desde}-01-01`;
+  anclaje.campo.max = `${hasta}-12-31`;
+  if (anclaje.ventana !== undefined) {
+    anclaje.ventana.textContent = `${desde} y ${hasta}`;
+  }
+}
 
+/**
+ * Las constantes de este puerto, de donde las haya: primero la copia guardada (que es lo que hay sin
+ * red) y, si no está, la red.
+ *
+ * **No se memoriza en una variable de módulo.** La copia guardada se pone al día sola cuando hay
+ * cobertura (`cliente/sin-red.ts`), y un `Map` de por vida en la pestaña dejaría el cálculo pegado a
+ * las constantes que se leyeron al abrir — o sea, tapando justo el refresco que se acaba de añadir.
+ * Leer de IndexedDB cuesta milisegundos y se hace una vez por consulta.
+ */
 async function estacionDe(slug: string): Promise<EstacionOffline | undefined> {
-  const recordada = enMemoria.get(slug);
-  if (recordada !== undefined) {
-    return recordada;
-  }
   const favorito = await leerFavorito(slug);
-  const estacion = favorito?.estacion ?? (await estacionDeLaRed(slug));
-  if (estacion !== undefined) {
-    enMemoria.set(slug, estacion);
-  }
-  return estacion;
+  return favorito?.estacion ?? (await estacionDeLaRed(slug));
 }
 
 async function calcular(anclaje: AnclajeOtroDia): Promise<void> {
@@ -99,7 +131,7 @@ async function calcular(anclaje: AnclajeOtroDia): Promise<void> {
     pintarAusencia(anclaje.resultado, dia.motivo);
     return;
   }
-  pintarDia(anclaje.resultado, estacion, dia.fechaIso, dia.eventos);
+  pintarDia(anclaje.resultado, estacion, dia);
 }
 
 /**
@@ -121,13 +153,35 @@ function pintarAusencia(destino: HTMLElement, motivo: string): void {
   destino.replaceChildren(parrafo);
 }
 
+/** Horas que dura un día normal. Las dos noches del cambio de hora no son días normales. */
+const HORAS_DE_UN_DIA = 24;
+const MS_POR_HORA = 3_600_000;
+
+/**
+ * La coletilla de un día que no dura 24 h, o cadena vacía.
+ *
+ * No es un detalle de trivia: en la noche del cambio de hora la tabla tiene una hora de menos (o de
+ * más) que las demás, y quien la compare con otra fuente tiene derecho a saber por qué.
+ */
+function avisoDelDiaCorto(dia: { readonly inicioUtcMs: number; readonly finUtcMs: number }): string {
+  const horas = (dia.finUtcMs - dia.inicioUtcMs) / MS_POR_HORA;
+  return horas === HORAS_DE_UN_DIA
+    ? ""
+    : ` Ese día dura ${horas} h en la hora local del puerto: es la noche en la que cambia la hora.`;
+}
+
 /** La tabla del día pedido, con su procedencia debajo. */
 function pintarDia(
   destino: HTMLElement,
   estacion: EstacionOffline,
-  fechaIso: string,
-  eventos: readonly { timeUtcMs: number; height_m: number; kind: "high" | "low" }[],
+  dia: {
+    readonly fechaIso: string;
+    readonly eventos: readonly { timeUtcMs: number; height_m: number; kind: "high" | "low" }[];
+    readonly inicioUtcMs: number;
+    readonly finUtcMs: number;
+  },
 ): void {
+  const { fechaIso, eventos } = dia;
   const titulo = document.createElement("h3");
   titulo.className = "etiqueta";
   titulo.textContent = `Mareas del ${fechaLarga(fechaIso)}`;
@@ -151,7 +205,7 @@ function pintarDia(
   procedencia.textContent =
     `Calculado en este navegador con las constantes armónicas de ${estacion.estacion.name} ` +
     `(grade ${estacion.grade}), las mismas que usa el servidor. Horas en la hora local de ` +
-    `${estacion.puerto.nombre} (${estacion.puerto.timezone}).`;
+    `${estacion.puerto.nombre} (${estacion.puerto.timezone}).${avisoDelDiaCorto(dia)}`;
 
   destino.replaceChildren(titulo, tabla, procedencia);
 }
