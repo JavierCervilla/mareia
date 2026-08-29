@@ -199,7 +199,14 @@ ambito.addEventListener("fetch", (evento) => {
 async function laPaginaDeLaRedODeLaCopia(peticion: Request): Promise<Response> {
   const cache = await caches.open(PROTOCOLO.cachePaginas);
   try {
-    const respuesta = await fetch(peticion);
+    // `cache: "no-store"` no es ceremonia: **un `fetch` dentro del worker puede contestarse desde la
+    // caché HTTP del navegador**. Con `Last-Modified` y sin `Cache-Control` —que es lo que hoy
+    // describe `docs/despliegue.md` para producción— Chromium aplica caché heurística y serviría
+    // HTML viejo *teniendo red*, que es exactamente lo que ADR-02 promete que no puede pasar. Sin
+    // esto, la garantía del HTML fresco no sería del worker: sería de unas cabeceras que el
+    // despliegue no fija. Lo apuntó el pase adversario sin poder reproducirlo (su servidor no manda
+    // esas cabeceras) y se cierra aquí, que es donde no depende de nadie.
+    const respuesta = await fetch(peticion, { cache: "no-store" });
     if (respuesta.ok && (await cache.match(peticion)) !== undefined) {
       await cache.put(peticion, respuesta.clone());
     }
@@ -305,10 +312,30 @@ interface MensajeCrudo {
   readonly tipo?: unknown;
   readonly slug?: unknown;
   readonly urls?: unknown;
+  readonly favoritos?: unknown;
 }
 
 function listaDeCadenas(valor: unknown): readonly string[] {
   return Array.isArray(valor) ? valor.filter((cada): cada is string => typeof cada === "string") : [];
+}
+
+/**
+ * Las operaciones sobre el registro se hacen **de una en una**.
+ *
+ * Leer-modificar-escribir sin cerrojo es una carrera: dos guardados solapados leen el mismo censo,
+ * el segundo escribe encima del primero y el favorito perdido desaparece del censo — y con él, en la
+ * siguiente poda, sus ficheros. El pase adversario la buscó dos veces y no la supo disparar (`addAll`
+ * domina el tiempo y separa las dos ventanas), pero **estar en el código es suficiente motivo**: una
+ * carrera que hoy no se dispara se dispara el día que `addAll` sea más rápido o la red más lenta.
+ *
+ * La cola es una promesa encadenada, que es todo lo que hace falta en un worker de un solo hilo.
+ */
+let cola: Promise<unknown> = Promise.resolve();
+
+function enCola<T>(tarea: () => Promise<T>): Promise<T> {
+  const resultado = cola.then(tarea, tarea);
+  cola = resultado.catch(() => undefined);
+  return resultado;
 }
 
 ambito.addEventListener("message", (evento) => {
@@ -318,7 +345,7 @@ ambito.addEventListener("message", (evento) => {
   }
   evento.waitUntil(
     (async () => {
-      puerto.postMessage(await atender(evento.data));
+      puerto.postMessage(await enCola(() => atender(evento.data)));
     })(),
   );
 });
@@ -326,12 +353,15 @@ ambito.addEventListener("message", (evento) => {
 /** Ejecuta un verbo y **nunca lanza**: un fallo es una respuesta con su motivo, no una excepción. */
 async function atender(datos: unknown): Promise<{ ok: boolean; motivo?: string; urls: number }> {
   const mensaje: MensajeCrudo = typeof datos === "object" && datos !== null ? datos : {};
-  const urls = listaDeCadenas(mensaje.urls);
-  const slug = typeof mensaje.slug === "string" ? mensaje.slug : "";
-  if (slug === "") {
-    return { ok: false, motivo: "El service worker no sabe de qué puerto le hablan.", urls: 0 };
-  }
   try {
+    if (mensaje.tipo === PROTOCOLO.mensajeCensar) {
+      return await censar(censoDe(mensaje.favoritos));
+    }
+    const slug = typeof mensaje.slug === "string" ? mensaje.slug : "";
+    if (slug === "") {
+      return { ok: false, motivo: "El service worker no sabe de qué puerto le hablan.", urls: 0 };
+    }
+    const urls = listaDeCadenas(mensaje.urls);
     if (mensaje.tipo === PROTOCOLO.mensajeGuardar) {
       return await guardar(slug, urls);
     }
@@ -348,6 +378,24 @@ async function atender(datos: unknown): Promise<{ ok: boolean; motivo?: string; 
   }
 }
 
+/** Lee el censo que manda la página, quedándose solo con lo que tiene la forma esperada. */
+function censoDe(valor: unknown): Censo {
+  if (!Array.isArray(valor)) {
+    return {};
+  }
+  const censo: Censo = {};
+  for (const entrada of valor) {
+    if (typeof entrada !== "object" || entrada === null) {
+      continue;
+    }
+    const { slug, urls } = entrada as { slug?: unknown; urls?: unknown };
+    if (typeof slug === "string" && slug !== "") {
+      censo[slug] = listaDeCadenas(urls);
+    }
+  }
+  return censo;
+}
+
 // =================================================================================================
 // El registro de favoritos
 //
@@ -356,27 +404,31 @@ async function atender(datos: unknown): Promise<{ ok: boolean; motivo?: string; 
 // de esto adivinaba mal: tiraba todo asset que no usara **la página que se estaba guardando**,
 // dando por hecho que «lo demás ya no lo referencia ningún HTML guardado». Es falso en cuanto hay
 // dos favoritos guardados en dos builds distintos, y con el rebuild diario de T-15 eso es el caso
-// normal, no el raro: guardar el segundo puerto dejaba al primero con su página y **cero assets**,
-// o sea abriéndose sin estilos, sin la isla meteo y sin el trozo de la calculadora — la promesa
-// entera de T-12 rota, sin un solo error por ninguna parte.
+// normal: guardar el segundo puerto dejaba al primero con su página y **cero assets**.
 //
-// Con el registro, podar deja de adivinar: se conserva lo que necesita ALGÚN favorito.
+// Con el registro, podar deja de adivinar: se conserva lo que necesita ALGÚN favorito. Pero eso
+// solo vale si el registro es **completo**, y ahí estuvo el segundo error (hallazgo adversario
+// H-2): cuando el registro no se podía leer, se escribía un censo de un puerto indistinguible de
+// uno completo, y la siguiente poda lo trataba como la verdad. La propiedad que hace segura la poda
+// no es «¿legible?» sino «¿completo?», así que ahora **viaja con el dato**.
 // =================================================================================================
 
 /** Qué URL necesita cada puerto guardado, por slug. */
-type Registro = Record<string, readonly string[]>;
+type Censo = Record<string, readonly string[]>;
 
 /**
- * El registro guardado, o **`undefined` si no hay o no se entiende**.
+ * El registro tal y como se guarda: el censo **y si se puede confiar en que están todos**.
  *
- * La distinción entre «no sé qué hay guardado» y «no hay nada guardado» es la que sostiene todo lo
- * de abajo, y colapsarlas en un `{}` es cómo se convierte un fail-safe en una trituradora: un
- * registro ausente o ilegible daría un conjunto de conservados vacío, y podar con eso borra **todo**
- * lo que hay bajo `/_astro/` — o sea, exactamente el fallo que este registro vino a arreglar
- * (favoritos que se abren sin estilos, sin isla y sin calculadora, y sin un error por ninguna
- * parte). Un `{}` de verdad sí es una respuesta: significa que no queda ningún favorito, y entonces
- * borrar sus assets es lo correcto.
+ * `completo: false` significa «esto es lo que he visto pasar, no sé si es todo»: se conserva para no
+ * perder lo que se sabe, pero **no autoriza a podar**. Vuelve a `true` cuando la página manda el
+ * censo entero desde IndexedDB, que es la única que lo conoce.
  */
+interface Registro {
+  readonly completo: boolean;
+  readonly favoritos: Censo;
+}
+
+/** El registro guardado, o **`undefined` si no hay o no se entiende**. */
 async function leerRegistro(cache: Cache): Promise<Registro | undefined> {
   const guardado = await cache.match(PROTOCOLO.claveRegistro);
   if (guardado === undefined) {
@@ -387,11 +439,15 @@ async function leerRegistro(cache: Cache): Promise<Registro | undefined> {
     if (typeof leido !== "object" || leido === null || Array.isArray(leido)) {
       return undefined;
     }
-    const registro: Registro = {};
-    for (const [slug, urls] of Object.entries(leido as Record<string, unknown>)) {
-      registro[slug] = listaDeCadenas(urls);
+    const { completo, favoritos } = leido as { completo?: unknown; favoritos?: unknown };
+    if (typeof completo !== "boolean" || typeof favoritos !== "object" || favoritos === null) {
+      return undefined;
     }
-    return registro;
+    const censo: Censo = {};
+    for (const [slug, urls] of Object.entries(favoritos as Record<string, unknown>)) {
+      censo[slug] = listaDeCadenas(urls);
+    }
+    return { completo, favoritos: censo };
   } catch {
     return undefined;
   }
@@ -412,39 +468,86 @@ async function escribirRegistro(cache: Cache, registro: Registro): Promise<void>
  * tabla y sin las constantes para calcular otro día, y quien la abriese en la playa no tendría
  * forma de saber qué le falta.
  *
- * El orden también es todo o nada: primero se baja, después se anota en el registro. Anotar antes
- * dejaría en el registro un favorito que no está guardado, y ese favorito fantasma protegería de la
- * poda unos assets que no existen.
+ * El orden también es todo o nada: primero se baja, después se anota. Anotar antes dejaría en el
+ * registro un favorito que no está guardado.
+ *
+ * Si el registro anterior no se podía leer, el que se escribe **se declara incompleto**: lo que hay
+ * apuntado es lo que ha pasado por delante, no necesariamente todo, y con eso no se poda.
  */
 async function guardar(slug: string, urls: readonly string[]): Promise<{ ok: boolean; urls: number }> {
   const cache = await caches.open(PROTOCOLO.cachePaginas);
   await cache.addAll([...urls]);
-  // Si el registro no se puede leer, este puerto se guarda igual —lo que se acaba de bajar está
-  // bien— pero NO se poda: no se sabe qué necesitan los demás favoritos y la única respuesta
-  // honesta a esa pregunta es no tocar nada. Lo peor que pasa es que sobre algún asset viejo.
-  const registro = await leerRegistro(cache);
-  const actualizado = { ...(registro ?? {}), [slug]: urls };
-  await escribirRegistro(cache, actualizado);
-  if (registro !== undefined) {
-    await podarAssetsHuerfanos(cache, actualizado);
-  }
+  const previo = await leerRegistro(cache);
+  const registro: Registro = {
+    // Completo si venimos de un registro completo, **o** si esto es el primer favorito de una caché
+    // virgen: entonces lo que se acaba de guardar sí es todo lo que hay, y decir lo contrario
+    // dejaría la poda apagada para siempre en el caso más normal de todos.
+    completo: previo?.completo === true || (previo === undefined && (await esLaPrimeraCopia(cache, urls))),
+    favoritos: { ...(previo?.favoritos ?? {}), [slug]: urls },
+  };
+  await escribirRegistro(cache, registro);
+  await podarSiSePuede(cache, registro);
   return { ok: true, urls: urls.length };
+}
+
+/**
+ * Si en la caché no hay ninguna página guardada que no sea de esta petición.
+ *
+ * Es la comprobación que distingue «no hay registro porque es la primera vez» de «no hay registro
+ * porque se ha roto»: en el primer caso el censo que se acaba de escribir sí es completo. Se miran
+ * las claves que no son assets ni el propio registro, que son las que identifican a un favorito.
+ */
+async function esLaPrimeraCopia(cache: Cache, urls: readonly string[]): Promise<boolean> {
+  const recienGuardadas = new Set(urls);
+  const claves = await cache.keys();
+  return claves.every((clave) => {
+    const camino = new URL(clave.url).pathname;
+    return (
+      camino.startsWith(PREFIJO_ASSETS) ||
+      camino === PROTOCOLO.claveRegistro ||
+      recienGuardadas.has(camino)
+    );
+  });
 }
 
 /** Borra la página y las constantes de un puerto, y con ellas sus assets si no los usa nadie más. */
 async function olvidar(slug: string, urls: readonly string[]): Promise<{ ok: boolean; urls: number }> {
   const cache = await caches.open(PROTOCOLO.cachePaginas);
   const borradas = await Promise.all(urls.map((url) => cache.delete(url)));
-  const registro = await leerRegistro(cache);
+  const previo = await leerRegistro(cache);
   // Sin registro legible se borra lo de este puerto y se para ahí: ni se poda ni se escribe un
   // registro inventado, que dejaría fuera a los favoritos que sí están guardados.
-  if (registro !== undefined) {
-    const { [slug]: borrado, ...resto } = registro;
-    void borrado;
-    await escribirRegistro(cache, resto);
-    await podarAssetsHuerfanos(cache, resto);
+  if (previo !== undefined) {
+    const { [slug]: sobra, ...resto } = previo.favoritos;
+    void sobra;
+    const registro: Registro = { completo: previo.completo, favoritos: resto };
+    await escribirRegistro(cache, registro);
+    await podarSiSePuede(cache, registro);
   }
   return { ok: true, urls: borradas.filter(Boolean).length };
+}
+
+/**
+ * Rehace el censo con todos los favoritos que conoce la página y lo declara **completo**.
+ *
+ * Es lo que devuelve la poda al servicio después de una avería: mientras el registro esté incompleto
+ * la caché crece sin límite, que es un problema menos grave que borrar lo que hace falta, pero un
+ * problema. La página solo manda esto cuando tiene al menos un favorito — una IndexedDB desalojada
+ * no es un censo vacío, es la ausencia de censo.
+ */
+async function censar(favoritos: Censo): Promise<{ ok: boolean; urls: number }> {
+  const cache = await caches.open(PROTOCOLO.cachePaginas);
+  const registro: Registro = { completo: true, favoritos };
+  await escribirRegistro(cache, registro);
+  await podarSiSePuede(cache, registro);
+  return { ok: true, urls: Object.keys(favoritos).length };
+}
+
+/** Poda **solo** con un censo del que se sabe que están todos. La guardia vive en un único sitio. */
+async function podarSiSePuede(cache: Cache, registro: Registro): Promise<void> {
+  if (registro.completo) {
+    await podarAssetsHuerfanos(cache, registro.favoritos);
+  }
 }
 
 /**
@@ -452,16 +555,16 @@ async function olvidar(slug: string, urls: readonly string[]): Promise<{ ok: boo
  *
  * Sin poda la caché crecería una hoja de estilos y tres bundles por despliegue —un asset con hash
  * nunca se pisa, cambia de nombre— hasta que el navegador desalojara el origen entero, favoritos
- * incluidos. Con poda, y con el registro delante, se conserva exactamente la unión de lo que piden
- * los favoritos que hay: los assets del build de ayer se van cuando se va el último favorito que
- * los usaba, y ni un minuto antes.
+ * incluidos. Con poda, y con un censo completo delante, se conserva exactamente la unión de lo que
+ * piden los favoritos que hay: los assets del build de ayer se van cuando se va el último favorito
+ * que los usaba, y ni un minuto antes.
  *
- * **Solo se llama con un registro que se ha podido leer.** No lleva guardia propia a propósito: la
- * decisión de podar o no es de quien sabe si el registro es de fiar, y repartirla entre dos sitios
- * es cómo una de las dos mitades se queda sin ella en el siguiente refactor.
+ * **Solo se llama desde `podarSiSePuede`.** No lleva guardia propia a propósito: repartir una
+ * guardia entre dos sitios es cómo una de las dos mitades se queda sin ella en el siguiente
+ * refactor, que es exactamente lo que ya pasó una vez en esta trayectoria.
  */
-async function podarAssetsHuerfanos(cache: Cache, registro: Registro): Promise<void> {
-  const conservar = new Set(Object.values(registro).flat());
+async function podarAssetsHuerfanos(cache: Cache, favoritos: Censo): Promise<void> {
+  const conservar = new Set(Object.values(favoritos).flat());
   const claves = await cache.keys();
   await Promise.all(
     claves

@@ -29,6 +29,15 @@ export interface Favorito {
   /** Bytes del JSON de constantes tal y como llegó. **Medido**, no estimado. */
   readonly bytes: number;
   readonly estacion: EstacionOffline;
+  /**
+   * Las URL que este favorito necesita, tal y como se le pidieron al worker.
+   *
+   * Se guardan aquí porque la página es **la única que conoce el censo completo** de favoritos, y el
+   * worker lo necesita para poder volver a podar después de una avería en su registro (hallazgo
+   * adversario H-2). Sin esto, la página sabría qué puertos hay guardados pero no qué ficheros les
+   * pertenecen, y un censo sin URL no sirve para decidir qué sobra.
+   */
+  readonly urls: readonly string[];
 }
 
 /** Abre (o crea) la base. `undefined` si este navegador no deja. */
@@ -154,6 +163,10 @@ function esFavorito(valor: unknown): valor is Favorito {
     typeof registro["guardadoEnMs"] === "number" &&
     typeof registro["bytes"] === "number" &&
     typeof registro["estacion"] === "object" &&
-    registro["estacion"] !== null
+    registro["estacion"] !== null &&
+    // Un favorito escrito por una versión anterior no trae `urls`; se descarta en vez de tratarlo
+    // como censo, que es lo que haría que el worker podase con información incompleta creyéndola
+    // completa. Quien lo tenga vuelve a guardar con un clic, y la sección se lo dice.
+    Array.isArray(registro["urls"])
   );
 }

@@ -72,6 +72,17 @@ export const RUTA_SW = "/sw.js";
 export const RUTA_MANIFEST = "/manifest.webmanifest";
 
 /**
+ * La portada, que es el `start_url` del manifiesto y por tanto **la única puerta de entrada de la
+ * app instalada**: quien instala Mareia se queda sin barra de direcciones y sin historial a mano.
+ *
+ * Está aquí, y no solo en `marca.ts`, porque quien tiene que guardarla es el favorito (hallazgo
+ * adversario H-3): el manifiesto prometía una app instalable y su puerta no estaba en la lista de lo
+ * que se guarda, así que el icono de la pantalla de inicio abría el error de red del navegador con
+ * el almanaque intacto a un toque de distancia.
+ */
+export const RUTA_PORTADA = "/";
+
+/**
  * Clave con la que el worker guarda **su registro de favoritos** dentro de la caché de páginas: qué
  * puertos hay guardados y qué URL necesita cada uno.
  *
@@ -105,6 +116,16 @@ export const EVENTO_COPIA_CAMBIADA = "mareia:copia-cambiada";
 export const MENSAJE_GUARDAR = "mareia:guardar-puerto";
 export const MENSAJE_OLVIDAR = "mareia:olvidar-puerto";
 
+/**
+ * Tercer verbo (T-12, hallazgo adversario H-2): **el censo completo**, que solo la página puede dar.
+ *
+ * El worker sabe qué guardó en cada petición, pero no puede saber si lo que tiene apuntado son
+ * todos los favoritos o los que le han pasado por delante desde que su registro se rompió. Quien sí
+ * lo sabe es la página, que tiene la lista entera en IndexedDB. Con este mensaje se la pasa, el
+ * registro vuelve a declararse completo y la poda puede volver a actuar.
+ */
+export const MENSAJE_CENSAR = "mareia:censar-favoritos";
+
 /** Petición de guardar un puerto: su slug y **las URL exactas** que hacen falta para verlo sin red. */
 export interface PeticionGuardar {
   readonly tipo: typeof MENSAJE_GUARDAR;
@@ -126,7 +147,25 @@ export interface PeticionOlvidar {
   readonly urls: readonly string[];
 }
 
-export type PeticionAlWorker = PeticionGuardar | PeticionOlvidar;
+/** Un favorito visto por el censo: quién es y qué URL le pertenecen. */
+export interface FavoritoDelCenso {
+  readonly slug: string;
+  readonly urls: readonly string[];
+}
+
+/**
+ * Petición de rehacer el censo con **todos** los favoritos que la página conoce.
+ *
+ * Solo se manda cuando la página tiene al menos uno: una IndexedDB desalojada no es un censo vacío,
+ * es la ausencia de censo, y tratarla como «no hay favoritos» podaría los ficheros de una copia que
+ * sigue entera en la caché.
+ */
+export interface PeticionCensar {
+  readonly tipo: typeof MENSAJE_CENSAR;
+  readonly favoritos: readonly FavoritoDelCenso[];
+}
+
+export type PeticionAlWorker = PeticionGuardar | PeticionOlvidar | PeticionCensar;
 
 /** Lo que el worker contesta por el puerto del `MessageChannel` de la petición. */
 export interface RespuestaDelWorker {
@@ -146,6 +185,7 @@ export interface Protocolo {
   readonly cabeceraGuardado: string;
   readonly mensajeGuardar: string;
   readonly mensajeOlvidar: string;
+  readonly mensajeCensar: string;
   readonly claveRegistro: string;
 }
 
@@ -158,5 +198,6 @@ export const PROTOCOLO: Protocolo = {
   cabeceraGuardado: CABECERA_GUARDADO,
   mensajeGuardar: MENSAJE_GUARDAR,
   mensajeOlvidar: MENSAJE_OLVIDAR,
+  mensajeCensar: MENSAJE_CENSAR,
   claveRegistro: CLAVE_REGISTRO,
 };
