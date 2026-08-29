@@ -430,7 +430,18 @@
    opacidades del mismo tono separadas por 1,14:1 —quien no distingue tonos no
    distinguía nada, y a pleno sol nadie los distingue—. La leyenda del pie del
    gráfico nombra las dos tramas (`GraficoMarea.astro`): una trama que no se
-   explica tampoco distingue. */
+   explica tampoco distingue.
+
+   Los grosores no son de gusto, son el suelo del contraste. Un filete de w px
+   centrado en el borde del `<rect>` cubre w px repartidos entre dos columnas de
+   píxel; en la peor alineación la mejor columna se queda en w/2 de cobertura, y
+   ahí es donde se mide de verdad el objeto gráfico. Para 3:1 hacen falta 0,679
+   de cobertura en claro (0,634 en noche), o sea **1,36 px de grosor**. De ahí
+   2 px para el mayor (cobertura plena en cualquier alineación: 5,40:1 / 5,69:1)
+   y 1,6 px para el menor (3,75:1 / 4,07:1 en el peor caso). El menor estuvo un
+   commit en 1 px, que da 2,18:1 en la peor alineación: el verificador lo midió
+   sobre el SVG servido y lo encontró por debajo de 3:1 en 8 de 10 anchos de
+   presentación. Por eso el gate mide ahora el grosor y no solo el color. */
 .grafico__banda {
   fill: var(--m-terra);
   stroke: var(--m-terra);
@@ -442,11 +453,11 @@
 
 .grafico__banda[data-enfasis="fuerte"] {
   fill-opacity: 0.18;
-  stroke-width: 1.8px;
+  stroke-width: 2px;
 }
 
 .grafico__banda[data-enfasis="suave"] {
   fill-opacity: 0.09;
-  stroke-width: 1px;
+  stroke-width: 1.6px;
   stroke-dasharray: 5 4;
 }

@@ -264,9 +264,22 @@ function exigirDeBanda(css: string, enfasis: string, propiedad: string): string 
  * **no cromático**— y este cuerpo pasa a medir lo que ahora porta la información:
  *
  * 1. **El filete** (`stroke: var(--m-terra)`, opacidad 1) es el objeto gráfico que WCAG mide de una
- *    región sombreada: se exige que llegue a 3:1 sobre el fondo en los dos temas.
+ *    región sombreada: se exige que llegue a 3:1 sobre el fondo en los dos temas — **contando el
+ *    grosor**, que es lo que decide si ese color llega a algún píxel. La primera versión de este
+ *    cuerpo medía solo el token y dos desigualdades declarativas, y el verificador la tumbó con la
+ *    mutación más obvia: bajando el filete a `0.1px` el gate seguía verde 4/4 y las bandas
+ *    renderizadas volvían a 1,38:1 y 1,16:1, los números del hallazgo original. Un trinquete que
+ *    deja reintroducir su propio fallo no es un trinquete. El modelo que se usa ahora es geometría
+ *    de rasterizado: un filete de w px centrado en el borde del `<rect>` reparte su cobertura entre
+ *    dos columnas de píxel y en la peor alineación la mejor columna se queda en **w/2**, así que se
+ *    mide el color compuesto a esa cobertura. Es una **cota inferior**, no una estimación: el
+ *    renderizador real puede quedar por encima, nunca por debajo. Y por eso se exige también
+ *    `vector-effect: non-scaling-stroke`: sin él, el grosor escala con el ancho de presentación
+ *    —el lienzo son 620 unidades servidas a 340 px en un móvil— y ninguna cuenta hecha en px vale.
  * 2. **La distinción mayor↔menor no es de color**: se exige que difieran en grosor y en trama
  *    (continuo vs discontinuo), que es lo que ve quien no distingue dos tonos del mismo naranja.
+ *    Comprobado en escala de grises por el verificador: el mayor deja trazo en 40/40 filas y el
+ *    menor en 23–27/40.
  * 3. **La mancha sigue siendo contexto**: se exige que su opacidad siga siendo tenue, porque subirla
  *    hasta el 3:1 (haría falta 0,70) taparía la curva y rompería la regla del brief de una sola
  *    mancha de color. Que el contraste lo ponga el filete es la decisión, y aquí queda anclada.
@@ -288,7 +301,18 @@ function lasBandasSeVenYSeDistinguenEntreSi(): void {
     /stroke:\s*var\(--m-terra\)/,
     "la banda ya no lleva filete del token: es el filete lo que la hace visible, vuelve a medir",
   );
-  const alfaFilete = Number(/(?:^|;|\s)stroke-opacity:\s*([\d.]+)/.exec(base)?.[1] ?? "1");
+  assert.match(
+    base,
+    /vector-effect:\s*non-scaling-stroke/,
+    "sin non-scaling-stroke el grosor del filete escala con el ancho de presentación y la cuenta " +
+      "en píxeles de este gate deja de valer: vuelve a medir sobre el SVG servido",
+  );
+  const alfaDeclarada = Number(/(?:^|;|\s)stroke-opacity:\s*([\d.]+)/.exec(base)?.[1] ?? "1");
+
+  const grosor = {
+    fuerte: exigirDeBanda(pagina, "fuerte", "stroke-width"),
+    suave: exigirDeBanda(pagina, "suave", "stroke-width"),
+  };
 
   const inicioNoche = tokens.indexOf("@media (prefers-color-scheme: dark)");
   assert.ok(inicioNoche > 0, "tokens.css ya no declara el tema noche por preferencia del sistema");
@@ -301,25 +325,38 @@ function lasBandasSeVenYSeDistinguenEntreSi(): void {
   for (const tema of temas) {
     const fondo = tokenOklch(tokens, "--m-bg", tema.desde);
     const terra = tokenOklch(tokens, "--m-terra", tema.desde);
-    const razon = contraste(componer(terra, fondo, alfaFilete), fondo);
-    if (razon < CONTRASTE_MINIMO_OBJETO_GRAFICO) {
-      flojos.push(`${tema.nombre}/filete vs fondo = ${razon.toFixed(2)}:1`);
+    for (const enfasis of ["fuerte", "suave"] as const) {
+      const declarado = grosor[enfasis];
+      assert.match(
+        declarado,
+        /^[\d.]+px$/,
+        `el grosor del filete «${enfasis}» es «${declarado}»: en unidades del lienzo escala con el ` +
+          "ancho de presentación, así que tiene que ir en px",
+      );
+      // Peor alineación: el trazo se parte entre dos columnas y la mejor se queda en w/2.
+      const cobertura = Math.min(1, Number.parseFloat(declarado) / 2) * alfaDeclarada;
+      const razon = contraste(componer(terra, fondo, cobertura), fondo);
+      if (razon < CONTRASTE_MINIMO_OBJETO_GRAFICO) {
+        flojos.push(
+          `${tema.nombre}/filete ${enfasis} (${declarado}, cobertura ${cobertura.toFixed(2)}) = ` +
+            `${razon.toFixed(2)}:1`,
+        );
+      }
     }
   }
   assert.ok(
     flojos.length === 0,
-    `el filete de la banda no llega a ${CONTRASTE_MINIMO_OBJETO_GRAFICO}:1 (WCAG 1.4.11): ` +
-      flojos.join(" · "),
+    `el filete de la banda no llega a ${CONTRASTE_MINIMO_OBJETO_GRAFICO}:1 en la peor alineación ` +
+      `de píxel (WCAG 1.4.11): ${flojos.join(" · ")}`,
   );
 
-  const grosor = {
-    fuerte: exigirDeBanda(pagina, "fuerte", "stroke-width"),
-    suave: exigirDeBanda(pagina, "suave", "stroke-width"),
+  // `stroke-dasharray: none` y no declararlo dibujan la misma línea continua: se normalizan, o
+  // igualar las tramas escribiendo `none` en una de las dos pasaría el gate sin cambiar el dibujo.
+  const tramaDe = (enfasis: string): string => {
+    const declarada = declaracionDeBanda(pagina, enfasis, "stroke-dasharray");
+    return declarada === undefined || declarada === "none" ? "continuo" : declarada;
   };
-  const trama = {
-    fuerte: declaracionDeBanda(pagina, "fuerte", "stroke-dasharray") ?? "continuo",
-    suave: declaracionDeBanda(pagina, "suave", "stroke-dasharray") ?? "continuo",
-  };
+  const trama = { fuerte: tramaDe("fuerte"), suave: tramaDe("suave") };
   assert.notEqual(
     grosor.fuerte,
     grosor.suave,
