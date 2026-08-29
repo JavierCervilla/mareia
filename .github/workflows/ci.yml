@@ -38,6 +38,21 @@ jobs:
           bash .claude/skills/frontend-anti-slop/scripts/audit-anti-slop.sh packages/ui/src
           bash .claude/skills/frontend-anti-slop/scripts/audit-anti-slop.sh apps/web/src
 
+      # Shell y Dockerfile (T-17). El repo tiene desde ahora un `.sh` que corre como PID 1 en una
+      # imagen de producción y un Dockerfile que construye lo que se sirve en el dominio, y hasta
+      # aquí lo único que los había mirado era una persona, una vez. Eso no es un gate.
+      # Las dos herramientas van por imagen FIJADA para que local y CI corran exactamente lo mismo;
+      # comprobado que saben fallar (un `[ "$1" = ]` y un `FROM alpine:latest` los ponen en rojo).
+      - name: Shell · shellcheck -S error
+        run: |
+          docker run --rm -v "$PWD:/repo" -w /repo koalaman/shellcheck:v0.10.0 \
+            -S error $(git ls-files '*.sh')
+
+      # Umbral por defecto de hadolint (falla desde `info`). Nuestro Dockerfile pasa limpio, entre
+      # otras cosas porque fija las bases por digest.
+      - name: Dockerfile · hadolint
+        run: docker run --rm -i hadolint/hadolint:v2.12.0-alpine hadolint - < apps/web/Dockerfile
+
   web:
     name: Web · build Astro + astro check + typecheck + tests
     runs-on: ubuntu-latest
