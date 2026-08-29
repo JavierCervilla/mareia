@@ -46,29 +46,9 @@
         "phase_deg": 39.806
       },
       {
-        "name": "2MS6",
-        "amplitude_m": 0.000679,
-        "phase_deg": 345.0052
-      },
-      {
-        "name": "MA2",
-        "amplitude_m": 0.000607,
-        "phase_deg": 11.4972
-      },
-      {
-        "name": "MB2",
-        "amplitude_m": 0.000449,
-        "phase_deg": 244.4481
-      },
-      {
         "name": "S3",
         "amplitude_m": 0.000427,
         "phase_deg": 312.879
-      },
-      {
-        "name": "EP2",
-        "amplitude_m": 0.000411,
-        "phase_deg": 5.7258
       },
       {
         "name": "N4",
@@ -86,11 +66,6 @@
         "phase_deg": 175.7845
       },
       {
-        "name": "MKS2",
-        "amplitude_m": 0.000212,
-        "phase_deg": 356.8917
-      },
-      {
         "name": "2MO5",
         "amplitude_m": 0.000183,
         "phase_deg": 169.2669
@@ -106,7 +81,7 @@
         "phase_deg": 352.8087
       }
     ],
-    "derived_at": "2026-08-28T02:27:59Z",
+    "derived_at": "2026-08-29T08:00:28Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -237,6 +212,11 @@
       "phase_deg": 131.3784
     },
     {
+      "name": "EP2",
+      "amplitude_m": 0.000411,
+      "phase_deg": 5.7258
+    },
+    {
       "name": "M3",
       "amplitude_m": 0.002106,
       "phase_deg": 178.7385
@@ -267,6 +247,11 @@
       "phase_deg": 227.1735
     },
     {
+      "name": "MKS2",
+      "amplitude_m": 0.000212,
+      "phase_deg": 356.8917
+    },
+    {
       "name": "M6",
       "amplitude_m": 0.000625,
       "phase_deg": 276.7765
@@ -287,6 +272,16 @@
       "phase_deg": 194.8651
     },
     {
+      "name": "MA2",
+      "amplitude_m": 0.000607,
+      "phase_deg": 11.4972
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.000449,
+      "phase_deg": 244.4481
+    },
+    {
       "name": "RHO",
       "amplitude_m": 0.000514,
       "phase_deg": 72.8471
@@ -295,55 +290,57 @@
       "name": "2SM2",
       "amplitude_m": 0.000412,
       "phase_deg": 114.4133
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 0.000679,
+      "phase_deg": 345.0052
     }
   ],
   "quality": {
-    "rmse_m": 0.0429,
+    "rmse_m": null,
     "hw_time_err_p95_min": null,
     "grade": "C",
-    "validated_against": "IOC carg1",
-    "grade_reason": "no alcanza B: RMSE normalizado 0.188 > 0.15",
+    "validated_against": "sin observación propia: la predicción no se ha comprobado en este puerto",
+    "grade_reason": "no alcanza B: sin observaciones ni segunda fuente: no hay con qué validar",
+    "estimated": true,
+    "estimated_reason": "las constantes armónicas son las del mareógrafo `cartagenatg-car-esp-cmems`, a 27.3 km de la dársena, y no hay observaciones de este puerto con las que comprobar la predicción",
     "metrics": {
-      "window_start": "2026-07-29T00:00:00Z",
+      "window_start": "2026-07-30T00:00:00Z",
       "window_days": 30.0,
-      "samples": 150000,
-      "predicted_range_m": 0.2284,
-      "rmse_m": 0.0429,
-      "nrmse": 0.18775,
-      "r2": 0.53143,
+      "samples": 0,
+      "predicted_range_m": 0.2295,
+      "rmse_m": null,
+      "nrmse": null,
+      "r2": null,
       "hw_time_err_p95_min": null,
       "hw_height_err_p95_m": null,
       "matched_extremes": 0,
       "predicted_extremes": 104,
-      "predicted_extremes_in_window": 34,
-      "observed_extremes": 197,
+      "predicted_extremes_in_window": 0,
+      "observed_extremes": 0,
       "extremes_usable": false,
       "cross_rmse_m": null,
       "cross_source": null,
       "cross_rmse_worst_m": null,
       "cross_source_worst": null,
-      "truncation_rms_m": 0.00289,
-      "dropped_amplitude_m": 0.00966,
-      "dropped_amplitude_fraction": 0.030796,
+      "truncation_rms_m": 0.00288,
+      "dropped_amplitude_m": 0.00731,
+      "dropped_amplitude_fraction": 0.023285,
       "dropped_constituents": [
         "MSQM",
         "MTM",
         "T3",
         "R3",
-        "2MS6",
-        "MA2",
-        "MB2",
         "S3",
-        "EP2",
         "N4",
         "3L2",
         "SGM",
-        "MKS2",
         "2MO5",
         "2MK5",
         "3N2"
       ],
-      "observation_source": "IOC carg1"
+      "observation_source": null
     }
   }
 }

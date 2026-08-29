@@ -10,8 +10,8 @@
  * los avisos del puerto (marea de centímetros, estación sin observación con la que validar), tabla
  * del día, curva, sol y luna, tabla del mes y, al final, la calidad del dato y sus fuentes.
  */
+import AvisoEstimado from "../../../../../componentes/AvisoEstimado.astro";
 import AvisoMicromareal from "../../../../../componentes/AvisoMicromareal.astro";
-import AvisoSinObservacion from "../../../../../componentes/AvisoSinObservacion.astro";
 import Coeficiente from "../../../../../componentes/Coeficiente.astro";
 import GraficoMarea from "../../../../../componentes/GraficoMarea.astro";
 import Migas from "../../../../../componentes/Migas.astro";
@@ -124,16 +124,21 @@ const jsonLd = grafo([
   </header>
 
   {/* Los dos avisos son independientes: uno habla de la marea del puerto (su carrera real) y el
-      otro de nuestra validación (si hubo observación con la que medir el error). Confundirlos fue
-      el hallazgo A-8 del pase adversario. */}
+      otro de nuestra medida (si la predicción se ha comprobado aquí). Confundirlos fue el hallazgo
+      A-8 del pase adversario. Desde T-13 el segundo cubre también al puerto que hereda las
+      constantes del mareógrafo de al lado, que es la mayoría del catálogo. */}
   {
     datos.micromareal && (
       <AvisoMicromareal puerto={port.name} carreraMensualM={datos.carreraMensualM} />
     )
   }
   {
-    datos.sinObservacion && (
-      <AvisoSinObservacion puerto={port.name} carreraMensualM={datos.carreraMensualM} />
+    datos.estimado && (
+      <AvisoEstimado
+        puerto={port.name}
+        carreraMensualM={datos.carreraMensualM}
+        motivo={datos.motivoEstimado}
+      />
     )
   }
 

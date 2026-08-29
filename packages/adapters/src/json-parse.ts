@@ -84,6 +84,21 @@ export class JsonReader {
     return this.number(source, key, path);
   }
 
+  /**
+   * Campo booleano **obligatorio**: ni ausente ni `null` valen.
+   *
+   * No tiene versión tolerante a propósito. El único booleano del contrato es `quality.estimated`,
+   * y un `undefined` colándose como «falso» convertiría un puerto sin medir en un puerto medido,
+   * que es justo el fallo que ese campo existe para impedir.
+   */
+  flag(source: Record<string, unknown>, key: string, path: string): boolean {
+    const value = source[key];
+    if (typeof value !== "boolean") {
+      this.fail(`${path}.${key} debería ser un booleano`);
+    }
+    return value;
+  }
+
   /** Campo textual opcional: ausente y `null` se publican igual, como `null`. */
   nullableString(source: Record<string, unknown>, key: string, path: string): string | null {
     const value = source[key];

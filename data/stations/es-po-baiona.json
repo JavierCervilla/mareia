@@ -1,0 +1,418 @@
+{
+  "schema": "station/v1",
+  "id": "es-po-baiona",
+  "name": "Baiona",
+  "lat": 42.1196,
+  "lon": -8.8455,
+  "timezone": "Europe/Madrid",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 1.966
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "vigo-208a-esp-uhslc_rq",
+      "station_name": "Vigo",
+      "lat": 42.233,
+      "lon": -8.733,
+      "distance_km": 15.651,
+      "analysis_epoch": {
+        "start": "1971-12-31",
+        "end": "1990-12-31"
+      },
+      "license": "cc-by-4.0"
+    },
+    "fallback": [
+      {
+        "dataset": "TICON-4",
+        "station_id": "vigo-vigo-esp-ieo",
+        "station_name": "Vigo",
+        "lat": 42.238,
+        "lon": -8.73,
+        "distance_km": 16.245,
+        "analysis_epoch": {
+          "start": "1997-12-31",
+          "end": "2016-12-31"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "vigotg-vig-esp-cmems",
+        "station_name": "Vigo",
+        "lat": 42.243,
+        "lon": -8.726,
+        "distance_km": 16.889,
+        "analysis_epoch": {
+          "start": "2006-06-30",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "villagarciatg-vil-esp-cmems",
+        "station_name": "Villagarcia",
+        "lat": 42.601002,
+        "lon": -8.770001,
+        "distance_km": 53.888,
+        "analysis_epoch": {
+          "start": "2006-06-30",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "marintg-mar-esp-cmems",
+        "station_name": "Marin",
+        "lat": 42.406101,
+        "lon": -8.6911,
+        "distance_km": 34.298,
+        "analysis_epoch": {
+          "start": "2010-01-01",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "vianadocastelotg-via-prt-cmems",
+        "station_name": "Viana Do Castelo",
+        "lat": 41.685001,
+        "lon": -8.8396,
+        "distance_km": 48.328,
+        "analysis_epoch": {
+          "start": "2012-08-01",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      }
+    ],
+    "dropped_constituents": [
+      {
+        "name": "3L2",
+        "amplitude_m": 0.003907,
+        "phase_deg": 211.0629
+      },
+      {
+        "name": "SGM",
+        "amplitude_m": 0.003776,
+        "phase_deg": 34.7625
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.002734,
+        "phase_deg": 227.7173
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.00216,
+        "phase_deg": 38.481
+      },
+      {
+        "name": "MTM",
+        "amplitude_m": 0.001614,
+        "phase_deg": 32.6103
+      },
+      {
+        "name": "3N2",
+        "amplitude_m": 0.001436,
+        "phase_deg": 272.1292
+      },
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.00124,
+        "phase_deg": 230.1349
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.000729,
+        "phase_deg": 71.7281
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.000591,
+        "phase_deg": 139.234
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 0.000278,
+        "phase_deg": 208.0762
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 0.000203,
+        "phase_deg": 308.0859
+      }
+    ],
+    "derived_at": "2026-08-29T08:00:28Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "constantes armónicas"
+      },
+      {
+        "name": "openwatersio/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      },
+      {
+        "name": "GeoNames",
+        "url": "https://www.geonames.org/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "catálogo de puertos: nombre del municipio y coordenadas de la dársena · huella sha256 del volcado e2aa4fa9e6801568…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 1.090554,
+      "phase_deg": 47.8106
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.231523,
+      "phase_deg": 29.7939
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.382726,
+      "phase_deg": 75.2458
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.108521,
+      "phase_deg": 72.9641
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.032911,
+      "phase_deg": 12.4159
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.004884,
+      "phase_deg": 35.4945
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.071876,
+      "phase_deg": 46.6832
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.023487,
+      "phase_deg": 37.6135
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.06407,
+      "phase_deg": 305.234
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.019328,
+      "phase_deg": 254.949
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.003131,
+      "phase_deg": 280.8247
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.006284,
+      "phase_deg": 164.4992
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.001697,
+      "phase_deg": 111.9592
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.005406,
+      "phase_deg": 181.2891
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.048099,
+      "phase_deg": 270.3193
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.016065,
+      "phase_deg": 90.5588
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.021793,
+      "phase_deg": 64.9568
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.002349,
+      "phase_deg": 74.8407
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.024361,
+      "phase_deg": 62.178
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.004749,
+      "phase_deg": 99.7209
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.003882,
+      "phase_deg": 206.5015
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.002684,
+      "phase_deg": 96.7347
+    },
+    {
+      "name": "EP2",
+      "amplitude_m": 0.009223,
+      "phase_deg": 340.9707
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.006516,
+      "phase_deg": 256.1677
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.039901,
+      "phase_deg": 4.4099
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.042645,
+      "phase_deg": 33.4142
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.004831,
+      "phase_deg": 56.0808
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.002787,
+      "phase_deg": 117.96
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.003752,
+      "phase_deg": 285.8418
+    },
+    {
+      "name": "MKS2",
+      "amplitude_m": 0.004441,
+      "phase_deg": 46.295
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 0.002229,
+      "phase_deg": 60.666
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 0.00038,
+      "phase_deg": 144.5098
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 0.000843,
+      "phase_deg": 6.4291
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.001115,
+      "phase_deg": 180.751
+    },
+    {
+      "name": "MA2",
+      "amplitude_m": 0.007833,
+      "phase_deg": 27.4869
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.001741,
+      "phase_deg": 314.8547
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.003648,
+      "phase_deg": 257.4484
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.000662,
+      "phase_deg": 326.9543
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 0.002617,
+      "phase_deg": 118.4569
+    }
+  ],
+  "quality": {
+    "rmse_m": null,
+    "hw_time_err_p95_min": null,
+    "grade": "C",
+    "validated_against": "sin observación propia: la predicción no se ha comprobado en este puerto",
+    "grade_reason": "no alcanza B: sin observaciones ni segunda fuente: no hay con qué validar",
+    "estimated": true,
+    "estimated_reason": "las constantes armónicas son las del mareógrafo `vigo-208a-esp-uhslc_rq`, a 15.7 km de la dársena, y no hay observaciones de este puerto con las que comprobar la predicción",
+    "metrics": {
+      "window_start": "2026-07-30T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 0,
+      "predicted_range_m": 3.5957,
+      "rmse_m": null,
+      "nrmse": null,
+      "r2": null,
+      "hw_time_err_p95_min": null,
+      "hw_height_err_p95_m": null,
+      "matched_extremes": 0,
+      "predicted_extremes": 116,
+      "predicted_extremes_in_window": 0,
+      "observed_extremes": 0,
+      "extremes_usable": false,
+      "cross_rmse_m": null,
+      "cross_source": null,
+      "cross_rmse_worst_m": null,
+      "cross_source_worst": null,
+      "truncation_rms_m": 0.00376,
+      "dropped_amplitude_m": 0.01867,
+      "dropped_amplitude_fraction": 0.008032,
+      "dropped_constituents": [
+        "3L2",
+        "SGM",
+        "R3",
+        "T3",
+        "MTM",
+        "3N2",
+        "MSQM",
+        "N4",
+        "S3",
+        "2MK5",
+        "2MO5"
+      ],
+      "observation_source": null
+    }
+  }
+}

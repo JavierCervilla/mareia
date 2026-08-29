@@ -81,12 +81,18 @@ export interface DatosDePuerto {
    */
   readonly micromareal: boolean;
   /**
-   * Estación **sin observación**: el QC no tuvo mareógrafo con el que contrastar la predicción
-   * (`rmse_m: null`), así que no hay error medido que publicar. No es un defecto de la marea del
-   * puerto —Cádiz sube y baja casi tres metros—, es un hueco de nuestra validación, y la página lo
-   * dice con esas palabras en vez de confundirlo con el caso micromareal.
+   * Puerto con la marea **estimada**: o las constantes vienen de un mareógrafo que no está en su
+   * dársena, o no hay observaciones suyas con las que contrastar la predicción (o las dos cosas).
+   * No es un defecto de la marea del puerto —Cádiz sube y baja casi tres metros—, es un hueco de
+   * nuestra medida, y la página lo dice con esas palabras en vez de confundirlo con el caso
+   * micromareal.
+   *
+   * Sale del dataset (`quality.estimated`) y no se recalcula aquí: el umbral que lo decide es el
+   * mismo que usa el grade, y tenerlo en dos sitios sería tenerlo en ninguno.
    */
-  readonly sinObservacion: boolean;
+  readonly estimado: boolean;
+  /** Por qué es estimada, tal y como lo escribe el pipeline. `null` si no lo es. */
+  readonly motivoEstimado: string | null;
 }
 
 /** Agrupa los extremos de un rango por día civil del puerto. */
@@ -183,6 +189,7 @@ export async function cargarDatosDePuerto(
     astro,
     carreraMensualM,
     micromareal: carreraMensualM < CARRERA_MICROMAREAL_M,
-    sinObservacion: station.quality.rmse_m === null,
+    estimado: station.quality.estimated,
+    motivoEstimado: station.quality.estimated_reason,
   };
 }

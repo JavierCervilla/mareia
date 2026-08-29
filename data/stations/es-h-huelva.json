@@ -26,34 +26,14 @@
     "fallback": [],
     "dropped_constituents": [
       {
-        "name": "EP2",
-        "amplitude_m": 0.008974,
-        "phase_deg": 359.4787
-      },
-      {
-        "name": "MB2",
-        "amplitude_m": 0.004501,
-        "phase_deg": 67.0792
-      },
-      {
         "name": "SGM",
         "amplitude_m": 0.003666,
         "phase_deg": 44.7786
       },
       {
-        "name": "MKS2",
-        "amplitude_m": 0.002933,
-        "phase_deg": 59.1818
-      },
-      {
         "name": "3L2",
         "amplitude_m": 0.002777,
         "phase_deg": 212.7716
-      },
-      {
-        "name": "MA2",
-        "amplitude_m": 0.002727,
-        "phase_deg": 295.5936
       },
       {
         "name": "R3",
@@ -74,11 +54,6 @@
         "name": "MSQM",
         "amplitude_m": 0.002259,
         "phase_deg": 295.9969
-      },
-      {
-        "name": "2MS6",
-        "amplitude_m": 0.002176,
-        "phase_deg": 208.6527
       },
       {
         "name": "N4",
@@ -106,7 +81,7 @@
         "phase_deg": 185.707
       }
     ],
-    "derived_at": "2026-08-28T02:27:59Z",
+    "derived_at": "2026-08-29T08:00:28Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -237,6 +212,11 @@
       "phase_deg": 201.2662
     },
     {
+      "name": "EP2",
+      "amplitude_m": 0.008974,
+      "phase_deg": 359.4787
+    },
+    {
       "name": "M3",
       "amplitude_m": 0.004879,
       "phase_deg": 248.6095
@@ -267,6 +247,11 @@
       "phase_deg": 240.0445
     },
     {
+      "name": "MKS2",
+      "amplitude_m": 0.002933,
+      "phase_deg": 59.1818
+    },
+    {
       "name": "M6",
       "amplitude_m": 0.002413,
       "phase_deg": 53.5954
@@ -287,6 +272,16 @@
       "phase_deg": 179.0319
     },
     {
+      "name": "MA2",
+      "amplitude_m": 0.002727,
+      "phase_deg": 295.5936
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.004501,
+      "phase_deg": 67.0792
+    },
+    {
       "name": "RHO",
       "amplitude_m": 0.003321,
       "phase_deg": 263.7408
@@ -295,24 +290,31 @@
       "name": "2SM2",
       "amplitude_m": 0.002894,
       "phase_deg": 232.8599
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 0.002176,
+      "phase_deg": 208.6527
     }
   ],
   "quality": {
-    "rmse_m": 0.0394,
-    "hw_time_err_p95_min": 22.91,
+    "rmse_m": 0.0412,
+    "hw_time_err_p95_min": 23.66,
     "grade": "B",
     "validated_against": "IOC huel",
-    "grade_reason": "no alcanza A: error de hora de extremo p95 23 min > 20 min",
+    "grade_reason": "no alcanza A: error de hora de extremo p95 24 min > 20 min",
+    "estimated": false,
+    "estimated_reason": null,
     "metrics": {
-      "window_start": "2026-07-29T00:00:00Z",
+      "window_start": "2026-07-30T00:00:00Z",
       "window_days": 30.0,
-      "samples": 42985,
-      "predicted_range_m": 3.4232,
-      "rmse_m": 0.0394,
-      "nrmse": 0.0115,
-      "r2": 0.99747,
-      "hw_time_err_p95_min": 22.91,
-      "hw_height_err_p95_m": 0.064,
+      "samples": 42984,
+      "predicted_range_m": 3.4465,
+      "rmse_m": 0.0412,
+      "nrmse": 0.01195,
+      "r2": 0.99728,
+      "hw_time_err_p95_min": 23.66,
+      "hw_height_err_p95_m": 0.0717,
       "matched_extremes": 115,
       "predicted_extremes": 116,
       "predicted_extremes_in_window": 115,
@@ -322,21 +324,16 @@
       "cross_source": null,
       "cross_rmse_worst_m": null,
       "cross_source_worst": null,
-      "truncation_rms_m": 0.00808,
-      "dropped_amplitude_m": 0.04349,
-      "dropped_amplitude_fraction": 0.018933,
+      "truncation_rms_m": 0.00479,
+      "dropped_amplitude_m": 0.02218,
+      "dropped_amplitude_fraction": 0.009655,
       "dropped_constituents": [
-        "EP2",
-        "MB2",
         "SGM",
-        "MKS2",
         "3L2",
-        "MA2",
         "R3",
         "MTM",
         "T3",
         "MSQM",
-        "2MS6",
         "N4",
         "S3",
         "2MK5",

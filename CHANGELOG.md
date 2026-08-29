@@ -2,6 +2,92 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-29 — T-13 · España completa, y el 78 % del catálogo diciendo que no está medido
+
+- **El portal pasa de 12 puertos a 153**, de Viveiro a El Hierro y de Menorca a La Palma, y con
+  ellos el sitio de **32 a 191 páginas** sin tocar `getStaticPaths`: la web se generó sola desde
+  `data/geo/ports.json`, que es lo que T-09 prometió que pasaría. Medido: **build de 11,9 s** (13 s
+  de reloj) y **`dist/` de 4 614 156 B (4,40 MiB)**, frente a los 1,8 s y 417 794 B (0,40 MiB) de
+  `main`. Casi seis veces más páginas por once veces más peso, porque lo que se multiplica son las
+  páginas de puerto (~26 KB) y no los índices (~4 KB). El pipeline entero tarda **4,3 min desde
+  cero** (258 s, con las descargas) y **24 s** con la caché caliente.
+- **Y 120 de esos 153 puertos dicen en su página que su marea es una estimación.** Es el resultado
+  que da sentido a la trayectoria. Un puerto sólo se publica como medido si se dan las dos cosas a
+  la vez: mareógrafo en su propia dársena (el mismo umbral de 5 km que exige el grade A) y
+  observaciones **suyas** con las que contrastar la predicción. El reparto medido: **8 grade A · 15
+  grade B · 130 grade C**, 35 puertos con error medido y 120 marcados `quality.estimated`. Un
+  catálogo que hubiera publicado 153 páginas con la misma pinta de exactitud que las 12 de T-05
+  habría sido exactamente el fraude que este proyecto existe para no cometer.
+- **Se retiró el atajo que lo hacía posible.** Hasta ahora, un puerto sin mareógrafo del IOC en la
+  dársena se validaba contra la observación del mareógrafo que le presta las constantes, y ese RMSE
+  se publicaba como suyo: Cabo de Palos enseñaba el error medido en Cartagena, a 24,8 km. Con doce
+  puertos era una nota al pie; con ciento cincuenta es la mentira de fondo. Ahora, sin observación
+  propia, `rmse_m` y `hw_time_err_p95_min` salen `null` y el puerto explica por qué en
+  `quality.estimated_reason` —una frase distinta según herede las constantes de lejos, le falte la
+  observación, o las dos—, que la página imprime literalmente en un aviso sobre la tabla y en la
+  nota de calidad («¿Está medida aquí esta marea?»). El aviso de «estación sin observación» de T-09
+  desaparece absorbido por este, del que era un subconjunto.
+- **El catálogo ya no se escribe a mano, y esa es la decisión gorda.** Doce coordenadas se teclean;
+  doscientas de memoria serían doscientos números que nadie ha medido. Los puertos derivados salen
+  del volcado público de **GeoNames** (CC-BY 4.0, un fichero de 3,3 MB): la coordenada es la de una
+  instalación portuaria real, el nombre es el del municipio oficial —con sus acentos— y la jerarquía
+  región/provincia sigue siendo editorial, en una tabla de 24 provincias dentro del pipeline, porque
+  las etiquetas de la fuente vienen en inglés y mezcladas. **Tercera licencia en el dataset**, y
+  como las otras dos viaja dentro de cada JSON al que obliga, no en un README. Se evaluó y descartó
+  Overpass/OSM: la política de egreso del entorno corta toda consulta que tarde más de unos
+  segundos.
+- **Qué se descartó, con nombre y motivo**: 185 candidatos. 121 segundas dársenas del mismo
+  municipio (que son el mismo puerto a efectos de marea), 24 instalaciones tierra adentro por encima
+  de 20 m de altitud, 17 que ya eran del piloto con otro nombre, 4 dentro de la laguna del Mar Menor
+  —casi cerrada: allí el nivel lo manda el viento— y **19 sin mareógrafo a menos de 60 km**, el
+  doble del umbral de grade B. Esos 19 son toda la Costa Brava y el norte de Castellón, y se listan
+  uno a uno en el informe QC para que el hueco del portal sea un dato y no un olvido.
+- **La horquilla del plan (200-300 puertos) no se alcanza: son 153, y el techo lo pone la fuente.**
+  GeoNames documenta pocas instalaciones portuarias en la cornisa cantábrica —Asturias sale con 2
+  puertos, Cantabria con 3, Lugo con 2, Gipuzkoa con 2, cuando tienen decenas—. Subir de ahí pide
+  una segunda fuente de topónimos portuarios; relajar el filtro sólo produciría puertos llamados
+  «Barrio de la Concepción» y clubes náuticos de embalse.
+- **El dataset se regenera con los 42 constituyentes**, la deuda que T-04 dejó anotada y que llevaba
+  desde entonces truncando el dataset a 37. La predicción del QC de T-05 —«esto es lo que impide
+  llegar a grade A a Vigo, Santander y Brest»— **se cumplió a medias, y comprobarlo destapó un fallo
+  del propio informe**. El coste del truncado bajó del umbral de A en los tres, como estaba
+  previsto: Vigo 1,30 → 0,69 cm RMS, Santander 1,06 → 0,50, Brest 2,23 → 0,47. Pero sólo **Santander
+  y Brest** subieron a A: **Vigo sigue en B** porque incumple otro umbral, el error de hora de
+  pleamar (26,8 min sobre 20)… que **ya incumplía en T-05 con 25,4 min**. El motivo del grade se
+  paraba en el primer umbral que fallaba y nunca llegó a nombrarlo, así que el informe invitó a
+  predecir que quitando ese bastaba. Arreglado: `grade.assign` enumera ahora **todos** los umbrales
+  incumplidos.
+- **El golden del coeficiente se puso en rojo, como T-04 avisó, y se resolvió midiendo.** Añadir los
+  cinco constituyentes mueve el coeficiente de Brest: el sesgo contra los 32 valores publicados por
+  el SHOM pasa de **+0,91 a +1,38** y el error máximo de 2 a 3. Quitar del cálculo la modulación
+  radiacional (MA2, MB2) —la salida que T-04 dejaba abierta— no lo arregla: deja el sesgo en +1,19.
+  El desacuerdo no viene de qué constituyentes entran sino de comparar dos análisis armónicos
+  distintos del mismo puerto. Se ensancha el acuerdo exigido a ±3 con la medida escrita en el
+  fixture, porque el dataset nuevo predice **mejor la marea de verdad** (contra el IOC, Brest sube a
+  grade A) mientras se aleja un pelo del otro oráculo. Hay dos oráculos y sólo uno es el mar.
+- **La política de selección de mareógrafo tenía un fallo que sólo la escala destapó.** Al ensanchar
+  el radio de búsqueda a 60 km, Gandía se llevó las constantes del mareógrafo de Valencia —mejor
+  licencia y registro más largo, a 53,8 km— teniendo uno en su propia bocana. La licencia y los años
+  de registro deciden ahora **dentro del mismo sitio** (5 km del más cercano) y nunca entre sitios
+  distintos. Con su test, que reproduce el caso.
+- **El informe QC se vuelve navegable**: resumen con el reparto de grades, cobertura por región, los
+  15 peores medidos, la tabla de descartes con su motivo, y el detalle por región separado en dos
+  tablas —**medidos** y **estimados**— porque son dos poblaciones distintas y mezclarlas es lo que
+  hace que un número prestado parezca propio.
+- **Los invariantes siguen mordiendo a escala.** El test de coherencia catálogo↔dataset (T-07) ya no
+  cuenta doce puertos sino que exige que ninguno publique un número que no se haya medido en él y
+  que ningún estimado alcance grade A; `python run.py check` repite la comprobación sin red antes de
+  CI; el golden de Vigo sigue siendo golden; y el gate adversario A-1 («la curva no se congela») se
+  re-apuntó con la medida delante: 17 puertos daban mesetas de más de una hora y ninguno es la
+  avería original —son puertos de 2 a 11 cm de carrera diaria publicada al milímetro—, así que el
+  umbral de una hora se mantiene donde puede significar algo y donde no, se exige que la curva no se
+  pase el día quieta.
+- **Lo que se queda abierto**: las zonas marítimas de AEMET siguen mapeadas sólo para los 12 puertos
+  del piloto (el módulo degrada solo y ahora hay un test que cuenta la cobertura en vez de
+  callarla); la portada sigue enseñando los 153 puertos de golpe —35,6 KB de HTML, más que una
+  página de puerto— y sustituirla por el índice de regiones es una decisión de producto, no una
+  consecuencia de este cambio.
+
 ## 2026-08-29 — T-11 · los 7 hallazgos del pase adversario, arreglados
 
 - **El sello de antigüedad ya no se congela.** Era el hallazgo grave: la isla calculaba la edad al

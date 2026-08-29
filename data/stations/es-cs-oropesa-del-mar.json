@@ -1,0 +1,353 @@
+{
+  "schema": "station/v1",
+  "id": "es-cs-oropesa-del-mar",
+  "name": "Oropesa del Mar",
+  "lat": 40.076,
+  "lon": 0.1342,
+  "timezone": "Europe/Madrid",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 0.173
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "saguntotg-sag-esp-cmems",
+      "station_name": "Sagunto",
+      "lat": 39.633999,
+      "lon": -0.206,
+      "distance_km": 57.086,
+      "analysis_epoch": {
+        "start": "2007-09-01",
+        "end": "2025-06-30"
+      },
+      "license": "cc-by-nc-4.0"
+    },
+    "fallback": [],
+    "dropped_constituents": [
+      {
+        "name": "MTM",
+        "amplitude_m": 0.003716,
+        "phase_deg": 194.9082
+      },
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.001661,
+        "phase_deg": 23.1901
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.001062,
+        "phase_deg": 198.3005
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.000916,
+        "phase_deg": 25.0528
+      },
+      {
+        "name": "SGM",
+        "amplitude_m": 0.000401,
+        "phase_deg": 170.9831
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.000219,
+        "phase_deg": 275.3521
+      },
+      {
+        "name": "3N2",
+        "amplitude_m": 0.000209,
+        "phase_deg": 135.8304
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.000172,
+        "phase_deg": 349.215
+      },
+      {
+        "name": "3L2",
+        "amplitude_m": 0.000101,
+        "phase_deg": 114.8749
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 6.9e-05,
+        "phase_deg": 102.6774
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 4.3e-05,
+        "phase_deg": 343.1492
+      }
+    ],
+    "derived_at": "2026-08-29T08:00:28Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-nc-4.0",
+        "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+        "role": "constantes armónicas",
+        "notes": "Upstream GESLA data provider restricts commercial use. See https://gesla787883612.wordpress.com/license/"
+      },
+      {
+        "name": "openwatersio/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      },
+      {
+        "name": "GeoNames",
+        "url": "https://www.geonames.org/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "catálogo de puertos: nombre del municipio y coordenadas de la dársena · huella sha256 del volcado e2aa4fa9e6801568…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 0.0185,
+      "phase_deg": 196.3403
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.004507,
+      "phase_deg": 187.5912
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.004587,
+      "phase_deg": 207.7588
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.001782,
+      "phase_deg": 213.7441
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.000792,
+      "phase_deg": 178.2968
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.006749,
+      "phase_deg": 62.974
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.037643,
+      "phase_deg": 162.078
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.012396,
+      "phase_deg": 158.4586
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.024982,
+      "phase_deg": 105.9902
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.003147,
+      "phase_deg": 65.9165
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.00147,
+      "phase_deg": 46.266
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.002627,
+      "phase_deg": 3.4473
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.001868,
+      "phase_deg": 115.6236
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.00406,
+      "phase_deg": 161.7595
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.068873,
+      "phase_deg": 172.875
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.02961,
+      "phase_deg": 84.5947
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.000506,
+      "phase_deg": 164.1905
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.001357,
+      "phase_deg": 176.3997
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.000477,
+      "phase_deg": 214.2017
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.000476,
+      "phase_deg": 309.3008
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.000178,
+      "phase_deg": 57.6193
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.000677,
+      "phase_deg": 176.9168
+    },
+    {
+      "name": "EP2",
+      "amplitude_m": 0.000254,
+      "phase_deg": 157.9506
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.001757,
+      "phase_deg": 161.9326
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.000687,
+      "phase_deg": 159.5829
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.000834,
+      "phase_deg": 196.3082
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.000257,
+      "phase_deg": 220.4668
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.001085,
+      "phase_deg": 320.1276
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.001514,
+      "phase_deg": 69.9429
+    },
+    {
+      "name": "MKS2",
+      "amplitude_m": 7.7e-05,
+      "phase_deg": 83.3954
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 0.000364,
+      "phase_deg": 242.7813
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 0.000124,
+      "phase_deg": 36.7281
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 6.6e-05,
+      "phase_deg": 175.3291
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.000368,
+      "phase_deg": 175.7737
+    },
+    {
+      "name": "MA2",
+      "amplitude_m": 0.000138,
+      "phase_deg": 338.2727
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.000135,
+      "phase_deg": 241.755
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.000649,
+      "phase_deg": 93.4278
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.000325,
+      "phase_deg": 97.1053
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 0.000467,
+      "phase_deg": 313.7333
+    }
+  ],
+  "quality": {
+    "rmse_m": null,
+    "hw_time_err_p95_min": null,
+    "grade": "C",
+    "validated_against": "sin observación propia: la predicción no se ha comprobado en este puerto",
+    "grade_reason": "no alcanza B: el mareógrafo más cercano está a 57.1 km > 30 km",
+    "estimated": true,
+    "estimated_reason": "las constantes armónicas son las del mareógrafo `saguntotg-sag-esp-cmems`, a 57.1 km de la dársena, y no hay observaciones de este puerto con las que comprobar la predicción",
+    "metrics": {
+      "window_start": "2026-07-30T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 0,
+      "predicted_range_m": 0.1852,
+      "rmse_m": null,
+      "nrmse": null,
+      "r2": null,
+      "hw_time_err_p95_min": null,
+      "hw_height_err_p95_m": null,
+      "matched_extremes": 0,
+      "predicted_extremes": 70,
+      "predicted_extremes_in_window": 0,
+      "observed_extremes": 0,
+      "extremes_usable": false,
+      "cross_rmse_m": null,
+      "cross_source": null,
+      "cross_rmse_worst_m": null,
+      "cross_source_worst": null,
+      "truncation_rms_m": 0.00411,
+      "dropped_amplitude_m": 0.00857,
+      "dropped_amplitude_fraction": 0.034987,
+      "dropped_constituents": [
+        "MTM",
+        "MSQM",
+        "T3",
+        "R3",
+        "SGM",
+        "N4",
+        "3N2",
+        "S3",
+        "3L2",
+        "2MO5",
+        "2MK5"
+      ],
+      "observation_source": null
+    }
+  }
+}

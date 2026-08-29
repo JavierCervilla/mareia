@@ -118,13 +118,13 @@ test("la hoja publicada trae los estilos de la sección y de las bandas", (t) =>
   }
 });
 
-test("el aviso de que la teoría no está respaldada está en las 12 páginas", async (t) => {
+test("el aviso de que la teoría no está respaldada está en todas las páginas de puerto", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
   }
   const paginas = await paginasDePuerto();
-  assert.equal(paginas.length, 12, "el catálogo piloto son 12 puertos");
+  assert.ok(paginas.length >= 120, `el catálogo se ha encogido a ${paginas.length} puertos`);
 
   const sinAviso = paginas.filter((pagina) => !pagina.html.includes(AVISO_SIN_RESPALDO));
   assert.deepEqual(sinAviso.map((pagina) => pagina.slug), [], "páginas que publican el rating sin el aviso");
@@ -202,7 +202,7 @@ test("la tabla y el nombre accesible del gráfico traen las horas locales del do
 
 /**
  * El caso que busca el pase adversario: una ventana que empieza el día anterior o acaba el
- * siguiente **se recorta**. Se comprueba en las 12 páginas porque cuál de ellas tiene un periodo a
+ * siguiente **se recorta**. Se comprueba en todas las páginas porque cuál de ellas tiene un periodo a
  * caballo de la medianoche depende del día que se construya.
  */
 test("ninguna banda se sale del lienzo en ninguna página", async (t) => {
@@ -239,7 +239,7 @@ test("las bandas se emiten bajo la curva: primero el sombreado, después el traz
  * es la de los factores, y los estados terminales (100 y 0) solo aparecen si la fórmula llega ahí.
  * Un `toFixed` de más en la plantilla se vería aquí.
  */
-test("el rating y su desglose son los que calcula el dominio, en las 12 páginas", async (t) => {
+test("el rating y su desglose son los que calcula el dominio, en todas las páginas", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;

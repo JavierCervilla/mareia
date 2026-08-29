@@ -7,6 +7,7 @@ import pathlib
 
 import pytest
 
+from mareia_pipeline import catalog
 from mareia_pipeline import grade as grading
 from mareia_pipeline import validate
 from mareia_pipeline.geo import haversine_km
@@ -76,8 +77,24 @@ def test_longer_record_wins_when_the_license_ties() -> None:
 def test_redmar_would_outrank_ticon_even_if_restricted() -> None:
     """La rama REDMAR está escrita aunque hoy no tenga candidatos: cuando los tenga, manda."""
     ticon = _gauge("ticon", lat=PORT.lat, lon=PORT.lon)
-    redmar = _gauge("redmar", dataset="redmar", license_type="cc-by-nc-4.0", lat=PORT.lat + 0.05, lon=PORT.lon)
+    redmar = _gauge("redmar", dataset="redmar", license_type="cc-by-nc-4.0", lat=PORT.lat + 0.02, lon=PORT.lon)
     assert select(PORT, [ticon, redmar]).chosen.station_id == "redmar"
+
+
+def test_the_nearest_darsena_wins_before_the_license_and_the_record() -> None:
+    """Licencia y años de registro deciden **dentro** del mismo sitio, nunca entre sitios distintos.
+
+    Es el fallo que destapó el primer catálogo completo de T-13: con el radio de búsqueda ensanchado
+    a 60 km, Gandía se llevó las constantes del mareógrafo de Valencia (mejor licencia y registro
+    más largo, a 54 km) teniendo uno en su propia bocana. Elegir mejor análisis a 54 km no es elegir
+    mejor: es describir otro mar.
+    """
+    in_the_harbour = _gauge("bocana", license_type="cc-by-nc-4.0", start="2015-01-01",
+                            lat=PORT.lat, lon=PORT.lon)
+    far_but_better = _gauge("lejos", lat=PORT.lat + 0.15, lon=PORT.lon)
+    selection = select(PORT, [in_the_harbour, far_but_better])
+    assert selection.chosen.station_id == "bocana"
+    assert [g.station_id for _, g in selection.rejected] == ["lejos"]
 
 
 def test_rejected_candidates_are_kept_for_the_audit_trail() -> None:
@@ -123,8 +140,13 @@ def test_chosen_gauge_is_actually_near_the_port(path) -> None:
     primary = document["source"]["primary"]
     measured = haversine_km(document["lat"], document["lon"], primary["lat"], primary["lon"])
     assert measured == pytest.approx(primary["distance_km"], abs=0.01)
-    port = next(p for p in PILOT_PORTS if p.id == document["id"])
-    assert measured <= port.search_radius_km
+    # Los puertos derivados del catálogo (T-13) no están en `PILOT_PORTS`, así que su cota es la
+    # general: ningún puerto del dataset toma prestadas constantes de más lejos de `MAX_BORROW_KM`,
+    # y los del piloto siguen atados además a su radio propio, más estrecho.
+    assert measured <= catalog.MAX_BORROW_KM
+    pilot = next((p for p in PILOT_PORTS if p.id == document["id"]), None)
+    if pilot is not None:
+        assert measured <= pilot.search_radius_km
 
 
 @pytest.mark.parametrize("path", station_files(), ids=lambda p: p.name)

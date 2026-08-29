@@ -52,6 +52,18 @@ export interface StationQuality {
   readonly hw_time_err_p95_min: number | null;
   readonly grade_reason: string | null;
   readonly validated_against: string | null;
+  /**
+   * El puerto publica una marea **estimada**: sus constantes armónicas vienen de un mareógrafo que
+   * no está en su dársena, o no hay observaciones suyas con las que comprobar la predicción.
+   *
+   * Viaja hasta la superficie porque es lo único que separa un puerto medido de uno que hereda la
+   * marea del de al lado, y esa diferencia no se ve en la tabla de pleamares: las dos tienen la
+   * misma pinta de exactitud. Con doce puertos casi todos eran medidos; desde T-13 la mayoría no lo
+   * son, y una página que no lo diga está prometiendo una precisión que no tiene.
+   */
+  readonly estimated: boolean;
+  /** Por qué es estimada, en una frase publicable. `null` cuando no lo es. */
+  readonly estimated_reason: string | null;
 }
 
 /** Atribución de una fuente del dataset. Viaja en las respuestas porque su licencia lo exige. */

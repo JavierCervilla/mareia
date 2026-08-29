@@ -40,26 +40,6 @@
     ],
     "dropped_constituents": [
       {
-        "name": "2MS6",
-        "amplitude_m": 0.008909,
-        "phase_deg": 229.8571
-      },
-      {
-        "name": "EP2",
-        "amplitude_m": 0.008644,
-        "phase_deg": 41.3007
-      },
-      {
-        "name": "MB2",
-        "amplitude_m": 0.008436,
-        "phase_deg": 86.7886
-      },
-      {
-        "name": "MA2",
-        "amplitude_m": 0.005838,
-        "phase_deg": 22.8963
-      },
-      {
         "name": "3L2",
         "amplitude_m": 0.005253,
         "phase_deg": 264.016
@@ -95,11 +75,6 @@
         "phase_deg": 191.6438
       },
       {
-        "name": "MKS2",
-        "amplitude_m": 0.001884,
-        "phase_deg": 87.8821
-      },
-      {
         "name": "MSQM",
         "amplitude_m": 0.001123,
         "phase_deg": 299.8633
@@ -120,7 +95,7 @@
         "phase_deg": 63.6125
       }
     ],
-    "derived_at": "2026-08-28T02:27:59Z",
+    "derived_at": "2026-08-29T08:00:28Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -250,6 +225,11 @@
       "phase_deg": 102.5075
     },
     {
+      "name": "EP2",
+      "amplitude_m": 0.008644,
+      "phase_deg": 41.3007
+    },
+    {
       "name": "M3",
       "amplitude_m": 0.012795,
       "phase_deg": 331.7289
@@ -280,6 +260,11 @@
       "phase_deg": 47.716
     },
     {
+      "name": "MKS2",
+      "amplitude_m": 0.001884,
+      "phase_deg": 87.8821
+    },
+    {
       "name": "M6",
       "amplitude_m": 0.008447,
       "phase_deg": 187.9728
@@ -300,6 +285,16 @@
       "phase_deg": 217.7124
     },
     {
+      "name": "MA2",
+      "amplitude_m": 0.005838,
+      "phase_deg": 22.8963
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.008436,
+      "phase_deg": 86.7886
+    },
+    {
       "name": "RHO",
       "amplitude_m": 0.003865,
       "phase_deg": 281.2008
@@ -308,41 +303,44 @@
       "name": "2SM2",
       "amplitude_m": 0.003321,
       "phase_deg": 312.6118
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 0.008909,
+      "phase_deg": 229.8571
     }
   ],
   "quality": {
-    "rmse_m": 0.0581,
-    "hw_time_err_p95_min": 13.45,
-    "grade": "B",
+    "rmse_m": 0.0587,
+    "hw_time_err_p95_min": 12.19,
+    "grade": "A",
     "validated_against": "IOC san2",
-    "grade_reason": "no alcanza A: coste de truncar al catálogo del motor 1.1 cm RMS > 1 cm",
+    "grade_reason": "cumple todos los umbrales de grade A",
+    "estimated": false,
+    "estimated_reason": null,
     "metrics": {
-      "window_start": "2026-07-29T00:00:00Z",
+      "window_start": "2026-07-30T00:00:00Z",
       "window_days": 30.0,
-      "samples": 42140,
-      "predicted_range_m": 4.2151,
-      "rmse_m": 0.0581,
-      "nrmse": 0.01378,
-      "r2": 0.9965,
-      "hw_time_err_p95_min": 13.45,
-      "hw_height_err_p95_m": 0.1074,
-      "matched_extremes": 115,
+      "samples": 42916,
+      "predicted_range_m": 4.2143,
+      "rmse_m": 0.0587,
+      "nrmse": 0.01393,
+      "r2": 0.99651,
+      "hw_time_err_p95_min": 12.19,
+      "hw_height_err_p95_m": 0.097,
+      "matched_extremes": 114,
       "predicted_extremes": 116,
-      "predicted_extremes_in_window": 116,
-      "observed_extremes": 117,
+      "predicted_extremes_in_window": 114,
+      "observed_extremes": 116,
       "extremes_usable": true,
-      "cross_rmse_m": 0.0102,
+      "cross_rmse_m": 0.0125,
       "cross_source": "santandertg-san-esp-cmems",
-      "cross_rmse_worst_m": 0.0102,
+      "cross_rmse_worst_m": 0.0125,
       "cross_source_worst": "santandertg-san-esp-cmems",
-      "truncation_rms_m": 0.01059,
-      "dropped_amplitude_m": 0.06256,
-      "dropped_amplitude_fraction": 0.022436,
+      "truncation_rms_m": 0.00499,
+      "dropped_amplitude_m": 0.02884,
+      "dropped_amplitude_fraction": 0.010345,
       "dropped_constituents": [
-        "2MS6",
-        "EP2",
-        "MB2",
-        "MA2",
         "3L2",
         "R3",
         "SGM",
@@ -350,7 +348,6 @@
         "N4",
         "MTM",
         "3N2",
-        "MKS2",
         "MSQM",
         "2MO5",
         "S3",

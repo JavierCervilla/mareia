@@ -1,0 +1,392 @@
+{
+  "schema": "station/v1",
+  "id": "es-ca-conil-de-la-frontera",
+  "name": "Conil de la Frontera",
+  "lat": 36.295,
+  "lon": -6.1367,
+  "timezone": "Europe/Madrid",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 1.945
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "cadiz-cadi-esp-ieo",
+      "station_name": "Cadiz",
+      "lat": 36.54,
+      "lon": -6.283,
+      "distance_km": 30.225,
+      "analysis_epoch": {
+        "start": "1997-12-31",
+        "end": "2016-12-31"
+      },
+      "license": "cc-by-4.0"
+    },
+    "fallback": [
+      {
+        "dataset": "TICON-4",
+        "station_id": "tarifa-tari-esp-ieo",
+        "station_name": "Tarifa",
+        "lat": 36.0086,
+        "lon": -5.6026,
+        "distance_km": 57.565,
+        "analysis_epoch": {
+          "start": "1997-12-31",
+          "end": "2016-12-31"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "bonanzatg-bon-esp-cmems",
+        "station_name": "Bonanza",
+        "lat": 36.799999,
+        "lon": -6.34,
+        "distance_km": 59.017,
+        "analysis_epoch": {
+          "start": "2006-06-30",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "tarifatg-tar-esp-cmems",
+        "station_name": "Tarifa",
+        "lat": 36.006401,
+        "lon": -5.60361,
+        "distance_km": 57.626,
+        "analysis_epoch": {
+          "start": "2009-07-17",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      }
+    ],
+    "dropped_constituents": [
+      {
+        "name": "SGM",
+        "amplitude_m": 0.003582,
+        "phase_deg": 35.1885
+      },
+      {
+        "name": "3L2",
+        "amplitude_m": 0.003147,
+        "phase_deg": 199.6629
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.002708,
+        "phase_deg": 67.2375
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.002584,
+        "phase_deg": 251.1124
+      },
+      {
+        "name": "MTM",
+        "amplitude_m": 0.002424,
+        "phase_deg": 161.6733
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.00194,
+        "phase_deg": 52.8648
+      },
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.001768,
+        "phase_deg": 301.1185
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.001401,
+        "phase_deg": 284.9586
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 0.001397,
+        "phase_deg": 241.9315
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 0.001012,
+        "phase_deg": 313.7842
+      },
+      {
+        "name": "3N2",
+        "amplitude_m": 0.000924,
+        "phase_deg": 45.5514
+      }
+    ],
+    "derived_at": "2026-08-29T08:00:28Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "constantes armónicas"
+      },
+      {
+        "name": "openwatersio/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      },
+      {
+        "name": "GeoNames",
+        "url": "https://www.geonames.org/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "catálogo de puertos: nombre del municipio y coordenadas de la dársena · huella sha256 del volcado e2aa4fa9e6801568…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 1.030988,
+      "phase_deg": 57.552
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.21824,
+      "phase_deg": 41.2283
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.372498,
+      "phase_deg": 83.7167
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.105511,
+      "phase_deg": 80.8296
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.031782,
+      "phase_deg": 24.6203
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.006623,
+      "phase_deg": 71.3103
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.067086,
+      "phase_deg": 42.9034
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.022383,
+      "phase_deg": 35.6002
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.068786,
+      "phase_deg": 301.25
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.020327,
+      "phase_deg": 252.9452
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.001011,
+      "phase_deg": 316.3436
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.02453,
+      "phase_deg": 159.8508
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.002014,
+      "phase_deg": 240.6511
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.003226,
+      "phase_deg": 213.9498
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.050423,
+      "phase_deg": 168.5634
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.021655,
+      "phase_deg": 75.7558
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.020916,
+      "phase_deg": 68.6492
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.001991,
+      "phase_deg": 74.5559
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.022562,
+      "phase_deg": 66.0437
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.00357,
+      "phase_deg": 158.1294
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.003458,
+      "phase_deg": 201.211
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.003551,
+      "phase_deg": 117.8039
+    },
+    {
+      "name": "EP2",
+      "amplitude_m": 0.008216,
+      "phase_deg": 355.1896
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.004705,
+      "phase_deg": 248.8229
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.037748,
+      "phase_deg": 18.4444
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.041473,
+      "phase_deg": 43.6878
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.005976,
+      "phase_deg": 44.0347
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.011324,
+      "phase_deg": 115.2776
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.008748,
+      "phase_deg": 239.2416
+    },
+    {
+      "name": "MKS2",
+      "amplitude_m": 0.003551,
+      "phase_deg": 102.5336
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 0.004904,
+      "phase_deg": 79.8498
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 0.000856,
+      "phase_deg": 11.635
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 0.002247,
+      "phase_deg": 18.7008
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.001105,
+      "phase_deg": 181.8892
+    },
+    {
+      "name": "MA2",
+      "amplitude_m": 0.009201,
+      "phase_deg": 37.5567
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.007307,
+      "phase_deg": 305.7615
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.004301,
+      "phase_deg": 260.7729
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.00174,
+      "phase_deg": 193.7202
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 0.004438,
+      "phase_deg": 159.1984
+    }
+  ],
+  "quality": {
+    "rmse_m": null,
+    "hw_time_err_p95_min": null,
+    "grade": "C",
+    "validated_against": "sin observación propia: la predicción no se ha comprobado en este puerto",
+    "grade_reason": "no alcanza B: el mareógrafo más cercano está a 30.2 km > 30 km",
+    "estimated": true,
+    "estimated_reason": "las constantes armónicas son las del mareógrafo `cadiz-cadi-esp-ieo`, a 30.2 km de la dársena, y no hay observaciones de este puerto con las que comprobar la predicción",
+    "metrics": {
+      "window_start": "2026-07-30T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 0,
+      "predicted_range_m": 3.4307,
+      "rmse_m": null,
+      "nrmse": null,
+      "r2": null,
+      "hw_time_err_p95_min": null,
+      "hw_height_err_p95_m": null,
+      "matched_extremes": 0,
+      "predicted_extremes": 116,
+      "predicted_extremes_in_window": 0,
+      "observed_extremes": 0,
+      "extremes_usable": false,
+      "cross_rmse_m": null,
+      "cross_source": null,
+      "cross_rmse_worst_m": null,
+      "cross_source_worst": null,
+      "truncation_rms_m": 0.00475,
+      "dropped_amplitude_m": 0.02289,
+      "dropped_amplitude_fraction": 0.010021,
+      "dropped_constituents": [
+        "SGM",
+        "3L2",
+        "N4",
+        "R3",
+        "MTM",
+        "T3",
+        "MSQM",
+        "S3",
+        "2MK5",
+        "2MO5",
+        "3N2"
+      ],
+      "observation_source": null
+    }
+  }
+}

@@ -49,9 +49,22 @@ def _series_url(code: str, days: int) -> str:
     return f"https://www.ioc-sealevelmonitoring.org/bgraph.php?code={code}&output=tab&period={days}"
 
 
+#: El catálogo del IOC son 2,4 MB de JSON y a partir de T-13 se consulta una vez por puerto, no
+#: doce veces en total: se parsea una sola vez por ejecución. La caché de disco seguía sirviendo el
+#: cuerpo, pero volver a parsearlo doscientas veces era medio minuto de nada.
+_STATION_LIST: list[dict] | None = None
+
+
+def _station_list(*, refresh: bool) -> list[dict]:
+    global _STATION_LIST  # noqa: PLW0603
+    if _STATION_LIST is None or refresh:
+        _STATION_LIST = json.loads(cache.fetch(STATION_LIST_URL, suffix=".json", refresh=refresh))
+    return _STATION_LIST
+
+
 def nearby_codes(lat: float, lon: float, *, max_km: float, refresh: bool = False) -> list[tuple[float, str, str]]:
     """``(distancia_km, código, nombre)`` de los mareógrafos IOC cercanos, de más cerca a más lejos."""
-    stations = json.loads(cache.fetch(STATION_LIST_URL, suffix=".json", refresh=refresh))
+    stations = _station_list(refresh=refresh)
     found: list[tuple[float, str, str]] = []
     for station in stations:
         if station.get("Lat") is None or station.get("Lon") is None:

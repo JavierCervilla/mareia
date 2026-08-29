@@ -73,24 +73,9 @@
         "phase_deg": 39.5068
       },
       {
-        "name": "2MS6",
-        "amplitude_m": 0.000423,
-        "phase_deg": 311.4931
-      },
-      {
         "name": "S3",
         "amplitude_m": 0.000365,
         "phase_deg": 314.6531
-      },
-      {
-        "name": "EP2",
-        "amplitude_m": 0.000361,
-        "phase_deg": 119.4617
-      },
-      {
-        "name": "MA2",
-        "amplitude_m": 0.000316,
-        "phase_deg": 47.9542
       },
       {
         "name": "SGM",
@@ -108,11 +93,6 @@
         "phase_deg": 69.4831
       },
       {
-        "name": "MKS2",
-        "amplitude_m": 0.00014,
-        "phase_deg": 49.7498
-      },
-      {
         "name": "2MO5",
         "amplitude_m": 0.00013,
         "phase_deg": 174.2433
@@ -126,14 +106,9 @@
         "name": "3N2",
         "amplitude_m": 0.000117,
         "phase_deg": 148.5176
-      },
-      {
-        "name": "MB2",
-        "amplitude_m": 9.2e-05,
-        "phase_deg": 149.9247
       }
     ],
-    "derived_at": "2026-08-28T02:27:59Z",
+    "derived_at": "2026-08-29T08:00:28Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -263,6 +238,11 @@
       "phase_deg": 155.7315
     },
     {
+      "name": "EP2",
+      "amplitude_m": 0.000361,
+      "phase_deg": 119.4617
+    },
+    {
       "name": "M3",
       "amplitude_m": 0.001471,
       "phase_deg": 167.8663
@@ -293,6 +273,11 @@
       "phase_deg": 29.5986
     },
     {
+      "name": "MKS2",
+      "amplitude_m": 0.00014,
+      "phase_deg": 49.7498
+    },
+    {
       "name": "M6",
       "amplitude_m": 0.000349,
       "phase_deg": 242.4227
@@ -313,6 +298,16 @@
       "phase_deg": 241.2488
     },
     {
+      "name": "MA2",
+      "amplitude_m": 0.000316,
+      "phase_deg": 47.9542
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 9.2e-05,
+      "phase_deg": 149.9247
+    },
+    {
       "name": "RHO",
       "amplitude_m": 0.000576,
       "phase_deg": 104.6645
@@ -321,53 +316,55 @@
       "name": "2SM2",
       "amplitude_m": 0.000363,
       "phase_deg": 57.588
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 0.000423,
+      "phase_deg": 311.4931
     }
   ],
   "quality": {
-    "rmse_m": 0.049,
+    "rmse_m": 0.0527,
     "hw_time_err_p95_min": null,
     "grade": "C",
     "validated_against": "IOC palm",
-    "grade_reason": "no alcanza B: RMSE normalizado 0.243 > 0.15",
+    "grade_reason": "no alcanza B: RMSE normalizado 0.265 > 0.15",
+    "estimated": false,
+    "estimated_reason": null,
     "metrics": {
-      "window_start": "2026-07-29T00:00:00Z",
+      "window_start": "2026-07-30T00:00:00Z",
       "window_days": 30.0,
-      "samples": 33656,
-      "predicted_range_m": 0.202,
-      "rmse_m": 0.049,
-      "nrmse": 0.24275,
-      "r2": 0.43495,
+      "samples": 33653,
+      "predicted_range_m": 0.1991,
+      "rmse_m": 0.0527,
+      "nrmse": 0.26478,
+      "r2": 0.38802,
       "hw_time_err_p95_min": null,
       "hw_height_err_p95_m": null,
       "matched_extremes": 0,
-      "predicted_extremes": 86,
-      "predicted_extremes_in_window": 86,
-      "observed_extremes": 887,
+      "predicted_extremes": 90,
+      "predicted_extremes_in_window": 90,
+      "observed_extremes": 920,
       "extremes_usable": false,
-      "cross_rmse_m": 0.0072,
+      "cross_rmse_m": 0.0068,
       "cross_source": "palmademallorcatg-pal-esp-cmems",
-      "cross_rmse_worst_m": 0.0072,
+      "cross_rmse_worst_m": 0.0068,
       "cross_source_worst": "palmademallorcatg-pal-esp-cmems",
-      "truncation_rms_m": 0.00784,
-      "dropped_amplitude_m": 0.01505,
-      "dropped_amplitude_fraction": 0.053206,
+      "truncation_rms_m": 0.00815,
+      "dropped_amplitude_m": 0.01372,
+      "dropped_amplitude_fraction": 0.048502,
       "dropped_constituents": [
         "MTM",
         "MSQM",
         "T3",
         "R3",
-        "2MS6",
         "S3",
-        "EP2",
-        "MA2",
         "SGM",
         "N4",
         "2MK5",
-        "MKS2",
         "2MO5",
         "3L2",
-        "3N2",
-        "MB2"
+        "3N2"
       ],
       "observation_source": "IOC palm"
     }

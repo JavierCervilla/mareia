@@ -65,7 +65,7 @@
 
 /* --- Avisos del puerto: la marea aquí no es lo que manda, o no está medida --- */
 .aviso-micromareal,
-.aviso-sin-observacion {
+.aviso-estimado {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -75,7 +75,7 @@
 }
 
 .aviso-micromareal__titulo,
-.aviso-sin-observacion__titulo {
+.aviso-estimado__titulo {
   font-weight: 600;
   color: var(--m-terra);
 }

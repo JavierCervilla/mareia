@@ -30,6 +30,14 @@ const calidad = station.quality;
 const SIN_OBSERVACION = calidad.rmse_m === null;
 const NO_MEDIBLE = "no hay observación de este puerto con la que medirlo";
 
+/**
+ * Desde T-13 la mayoría del catálogo hereda las constantes del mareógrafo más cercano. El grade ya
+ * lo penaliza, pero el grade es una letra y aquí hace falta la frase: la escribe el pipeline en
+ * `quality.estimated_reason` y se pinta tal cual, con el mismo criterio que el resto de la sección
+ * —lo que se publica es lo que el QC midió, no una interpretación de la página—.
+ */
+const ESTIMADA = calidad.estimated;
+
 /** Qué significa cada grade del QC, en una frase. */
 const SIGNIFICADO: Readonly<Record<string, string>> = {
   A: "predicción validada contra observación con error muy bajo",
@@ -52,6 +60,22 @@ const significado = SIN_OBSERVACION
       {calidad.grade_reason && <> {calidad.grade_reason}.</>}
     </p>
   </div>
+
+  <p class="datos__fila" data-estimado={String(ESTIMADA)}>
+    <span>¿Está medida aquí esta marea?</span>
+    <span class="datos__valor">
+      {
+        ESTIMADA ? (
+          <>
+            <strong>No: es una estimación.</strong>{" "}
+            {calidad.estimated_reason ?? "no se ha comprobado la predicción en este puerto"}
+          </>
+        ) : (
+          <>Sí: mareógrafo en la propia dársena y predicción contrastada contra su observación</>
+        )
+      }
+    </span>
+  </p>
 
   <div class="datos">
     <p class="datos__fila">

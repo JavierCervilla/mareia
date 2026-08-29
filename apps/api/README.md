@@ -17,7 +17,7 @@ deno task test    # contract tests contra el dataset real de ../../data
 |---|---|
 | `GET /health` | Salud del servicio |
 | `GET /v1/modules` | Módulos activos y sus atribuciones |
-| `GET /v1/ports` | Catálogo: los 12 puertos con su jerarquía región/provincia |
+| `GET /v1/ports` | Catálogo: los puertos de la costa española con su jerarquía región/provincia |
 | `GET /v1/ports/:slug` | Ficha del puerto + estación, datum, calidad y atribuciones |
 | `GET /v1/ports/:slug/tides?from&to[&step]` | Pleamares y bajamares + curva muestreada |
 | `GET /v1/ports/:slug/almanac/:year` | El año entero de extremos, agrupado por día civil |

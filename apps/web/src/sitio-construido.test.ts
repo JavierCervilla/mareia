@@ -62,7 +62,7 @@ test("el build genera una página por puerto y por escalón de la jerarquía", a
     return;
   }
   const puertos = await cargarPuertos();
-  assert.equal(puertos.length, 12, "el catálogo piloto son 12 puertos");
+  assert.ok(puertos.length >= 120, `el catálogo se ha encogido a ${puertos.length} puertos`);
 
   const faltan = (await rutasEsperadas()).filter(
     (ruta) => !existsSync(join(DIST, ruta, "index.html")),
@@ -155,29 +155,37 @@ test("cada aviso de la cabecera aparece solo en los puertos que le tocan", async
   const fechaIso = fechaDelBuild();
   const conAviso: string[] = [];
   const esperados: string[] = [];
-  const conAvisoSinObservacion: string[] = [];
-  const esperadosSinObservacion: string[] = [];
+  const conAvisoEstimado: string[] = [];
+  const esperadosEstimados: string[] = [];
   for (const puerto of await cargarPuertos()) {
     const datos = await cargarDatosDePuerto(puerto.slug, fechaIso);
     const html = paginaDe(rutaPuerto(puerto));
     if (datos.micromareal) esperados.push(puerto.slug);
     if (html.includes("aviso-micromareal")) conAviso.push(puerto.slug);
-    if (datos.sinObservacion) esperadosSinObservacion.push(puerto.slug);
-    if (html.includes("aviso-sin-observacion")) conAvisoSinObservacion.push(puerto.slug);
+    if (datos.estimado) esperadosEstimados.push(puerto.slug);
+    if (html.includes("aviso-estimado")) conAvisoEstimado.push(puerto.slug);
   }
 
   assert.deepEqual(conAviso.sort(), esperados.sort());
-  assert.deepEqual(
-    esperados.sort(),
-    ["cabo-de-palos", "la-manga-del-mar-menor", "palma-de-mallorca"],
-    "la carrera de marea del dataset piloto ha cambiado: revisa las constantes de T-04",
-  );
+  // Con 12 puertos la lista de micromareales se podía congelar entera; con 150 se congelan los del
+  // piloto, que son los que atan las constantes de T-04, y el resto lo sostiene la igualdad de
+  // arriba: el aviso sale exactamente donde el dato dice, ni uno más ni uno menos.
+  for (const slug of ["cabo-de-palos", "la-manga-del-mar-menor", "palma-de-mallorca"]) {
+    assert.ok(
+      esperados.includes(slug),
+      `${slug} ha dejado de ser micromareal: revisa las constantes de T-04`,
+    );
+  }
 
-  assert.deepEqual(conAvisoSinObservacion.sort(), esperadosSinObservacion.sort());
-  assert.deepEqual(
-    esperadosSinObservacion.sort(),
-    ["cadiz"],
-    "las estaciones sin observación del dataset piloto han cambiado: revisa el QC de T-05",
+  assert.deepEqual(conAvisoEstimado.sort(), esperadosEstimados.sort());
+  assert.ok(
+    esperadosEstimados.includes("cadiz"),
+    "Cádiz tiene mareógrafo en la dársena pero ninguna observación con la que validar: sigue "
+      + "siendo estimado mientras el QC no consiga serie del IOC",
+  );
+  assert.ok(
+    !esperadosEstimados.includes("vigo"),
+    "Vigo tiene mareógrafo propio y observación: si sale estimado, el criterio se ha roto",
   );
 });
 
@@ -276,10 +284,22 @@ const TEXTO_ESTATICO_DE_METEO = [
   "llegue a la orilla. No apto para navegación.",
 ].join(" ");
 
-/** Texto visible de un fragmento de HTML, con los espacios normalizados. */
+/**
+ * Texto visible de un fragmento de HTML, con las entidades deshechas y los espacios normalizados.
+ *
+ * Las entidades importan desde T-13: el catálogo pasó de doce puertos a toda la costa y con ella
+ * llegaron los apóstrofos (`Canet d'En Berenguer`, `l'Ampolla`, `l'Escala`). Astro los escapa —bien
+ * escapados, que es lo que exige el gate A-4—, así que comparar el texto sin deshacerlos hacía
+ * fallar este gate por la ortografía de un topónimo en vez de por un dato horneado.
+ */
 function textoDe(html: string): string {
   return html
     .replaceAll(/<[^>]+>/gu, " ")
+    .replaceAll(/&#(\d+);/gu, (_, code: string) => String.fromCodePoint(Number(code)))
+    .replaceAll("&quot;", '"')
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&amp;", "&")
     .replaceAll(/\s+/gu, " ")
     .trim();
 }

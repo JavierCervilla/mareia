@@ -1,0 +1,49 @@
+---
+/**
+ * Aviso de puerto con la marea **estimada**: las horas de abajo no se han medido aquí.
+ *
+ * Es la consecuencia visible de T-13. Con doce puertos casi todos tenían mareógrafo propio y una
+ * validación contra treinta días de nivel del mar observado; con ciento cincuenta, la mayoría toma
+ * prestadas las constantes armónicas del mareógrafo más cercano —que describe la marea de *ese*
+ * punto— y nadie ha comprobado aquí cuánto se equivoca. Las dos tablas tienen exactamente la misma
+ * pinta de exactitud, y esa es justo la razón de este aviso: sin él, escalar el catálogo sería
+ * multiplicar por doce la promesa de precisión sin multiplicar la precisión.
+ *
+ * El motivo concreto lo escribe el pipeline (`quality.estimated_reason`) y esta plantilla lo pinta
+ * tal cual: distingue el puerto que hereda constantes de lejos del que las tiene en su dársena pero
+ * sin observación con la que contrastarlas, y son dos cosas distintas. Sustituye al aviso de
+ * «estación sin observación» de T-09, cuyo criterio (`rmse_m: null`) era un subconjunto de este.
+ */
+import { metros } from "../formato.ts";
+
+interface Props {
+  puerto: string;
+  /** Carrera de marea del mes publicado, en metros: lo que sí sabemos de este puerto. */
+  carreraMensualM: number;
+  /** La frase del dataset que explica por qué es estimada. */
+  motivo: string | null;
+}
+
+const { puerto, carreraMensualM, motivo } = Astro.props;
+---
+
+<aside class="aviso-estimado">
+  <p class="aviso-estimado__titulo">La marea de {puerto} es una estimación, no una medida</p>
+  <p>
+    Las horas y alturas de abajo son una predicción astronómica calculada con constantes armónicas
+    reales, igual que en el resto de puertos. Lo que no tenemos es una <strong
+      >comprobación hecha aquí</strong
+    >: {motivo ?? "no hay observaciones de este puerto con las que contrastar la predicción"}. Por
+    eso en este puerto no publicamos ni el error medio frente a la observación ni el error de hora de
+    la pleamar: no los hemos medido.
+  </p>
+  <p>
+    Lo que falta no es marea, es medida nuestra: el cálculo dice que este mes hay {
+      metros(carreraMensualM)
+    } entre la bajamar más baja y la pleamar más alta, y no tenemos con qué comprobarlo. Úsala como
+    lo que es, una estimación, y contrasta con la tabla oficial de tu autoridad hidrográfica antes de
+    una salida. El detalle de qué se validó y con qué está en la <a href="#transparencia"
+      >nota de calidad del dato</a
+    >.
+  </p>
+</aside>

@@ -78,23 +78,36 @@ Deno.test("GET /v1/ports sirve el catálogo cacheable, sin filtrar dónde vive e
     assertEquals(cacheControl, CACHE_CONTROL);
 
     const ports = body["ports"] as readonly Record<string, unknown>[];
-    assertEquals(ports.length, 12);
+    assertEquals(
+      ports.length >= 120,
+      true,
+      `el catálogo se ha encogido a ${ports.length} puertos`,
+    );
     // El orden es parte del contrato: región, provincia y puerto, alfabético en español. Quien
     // pinte el catálogo (la web, un cliente) no tiene que volver a ordenarlo ni ponerse de acuerdo.
-    assertEquals(ports.map((port) => port["slug"]), [
-      "cadiz",
-      "huelva",
-      "malaga",
-      "las-palmas-de-gran-canaria",
-      "santa-cruz-de-tenerife",
-      "santander",
-      "a-coruna",
-      "vigo",
-      "palma-de-mallorca",
-      "bilbao",
-      "cabo-de-palos",
-      "la-manga-del-mar-menor",
-    ]);
+    // Con doce puertos la lista se congelaba entera; con ciento y pico se comprueba el orden, que
+    // es lo que era el contrato, y no la lista, que era su instantánea.
+    const collator = new Intl.Collator("es");
+    const key = (port: Record<string, unknown>): readonly string[] => [
+      (port["region"] as Record<string, string>)["slug"] ?? "",
+      (port["province"] as Record<string, string>)["slug"] ?? "",
+      port["name"] as string,
+    ];
+    for (let index = 1; index < ports.length; index++) {
+      const previous = key(ports[index - 1] as Record<string, unknown>);
+      const current = key(ports[index] as Record<string, unknown>);
+      const order = previous.reduce(
+        (decided: number, value, position) =>
+          decided !== 0 ? decided : collator.compare(value, current[position] ?? ""),
+        0,
+      );
+      assertEquals(
+        order <= 0,
+        true,
+        `el catálogo no viene ordenado: ${previous.join("/")} antes que ${current.join("/")}`,
+      );
+    }
+    assertEquals(ports[0]?.["region"] !== undefined, true);
     const vigo = ports.find((port) => port["slug"] === "vigo");
     assertEquals(vigo?.["name"], "Vigo");
     assertEquals(vigo?.["timezone"], "Europe/Madrid");
@@ -157,7 +170,10 @@ Deno.test("GET tides devuelve extremos y curva dentro del día civil del puerto"
     // La procedencia viaja con el dato: quien publique la marea puede citar su fuente.
     const station = body["station"] as Record<string, unknown>;
     assertEquals((station["quality"] as Quality).grade, "B");
-    assertEquals(station["constituents"], 34);
+    // 39 constituyentes: los 34 de T-05 más los cinco que T-04 añadió al motor y T-13 regeneró en
+    // el dataset. Es el número que TICON-4 publica para Vigo dentro del catálogo del motor, no un
+    // tope: si baja, alguien ha vuelto a truncar de más.
+    assertEquals(station["constituents"], 39);
   });
 });
 

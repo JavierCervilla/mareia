@@ -26,34 +26,9 @@
     "fallback": [],
     "dropped_constituents": [
       {
-        "name": "MA2",
-        "amplitude_m": 0.009201,
-        "phase_deg": 37.5567
-      },
-      {
-        "name": "EP2",
-        "amplitude_m": 0.008216,
-        "phase_deg": 355.1896
-      },
-      {
-        "name": "MB2",
-        "amplitude_m": 0.007307,
-        "phase_deg": 305.7615
-      },
-      {
-        "name": "2MS6",
-        "amplitude_m": 0.004438,
-        "phase_deg": 159.1984
-      },
-      {
         "name": "SGM",
         "amplitude_m": 0.003582,
         "phase_deg": 35.1885
-      },
-      {
-        "name": "MKS2",
-        "amplitude_m": 0.003551,
-        "phase_deg": 102.5336
       },
       {
         "name": "3L2",
@@ -106,7 +81,7 @@
         "phase_deg": 45.5514
       }
     ],
-    "derived_at": "2026-08-28T02:27:59Z",
+    "derived_at": "2026-08-29T08:00:28Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -236,6 +211,11 @@
       "phase_deg": 117.8039
     },
     {
+      "name": "EP2",
+      "amplitude_m": 0.008216,
+      "phase_deg": 355.1896
+    },
+    {
       "name": "M3",
       "amplitude_m": 0.004705,
       "phase_deg": 248.8229
@@ -266,6 +246,11 @@
       "phase_deg": 239.2416
     },
     {
+      "name": "MKS2",
+      "amplitude_m": 0.003551,
+      "phase_deg": 102.5336
+    },
+    {
       "name": "M6",
       "amplitude_m": 0.004904,
       "phase_deg": 79.8498
@@ -286,6 +271,16 @@
       "phase_deg": 181.8892
     },
     {
+      "name": "MA2",
+      "amplitude_m": 0.009201,
+      "phase_deg": 37.5567
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.007307,
+      "phase_deg": 305.7615
+    },
+    {
       "name": "RHO",
       "amplitude_m": 0.004301,
       "phase_deg": 260.7729
@@ -294,19 +289,26 @@
       "name": "2SM2",
       "amplitude_m": 0.00174,
       "phase_deg": 193.7202
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 0.004438,
+      "phase_deg": 159.1984
     }
   ],
   "quality": {
     "rmse_m": null,
     "hw_time_err_p95_min": null,
     "grade": "C",
-    "validated_against": "contraste cruzado entre fuentes (sin observaciones)",
+    "validated_against": "sin observación propia: la predicción no se ha comprobado en este puerto",
     "grade_reason": "no alcanza B: sin observaciones ni segunda fuente: no hay con qué validar",
+    "estimated": true,
+    "estimated_reason": "no hay observaciones de este puerto con las que comprobar la predicción: las constantes son las de `cadiz-cadi-esp-ieo`, en la propia dársena, pero nadie las ha contrastado aquí",
     "metrics": {
-      "window_start": "2026-07-29T00:00:00Z",
+      "window_start": "2026-07-30T00:00:00Z",
       "window_days": 30.0,
       "samples": 0,
-      "predicted_range_m": 3.424,
+      "predicted_range_m": 3.4307,
       "rmse_m": null,
       "nrmse": null,
       "r2": null,
@@ -321,16 +323,11 @@
       "cross_source": null,
       "cross_rmse_worst_m": null,
       "cross_source_worst": null,
-      "truncation_rms_m": 0.01661,
-      "dropped_amplitude_m": 0.0556,
-      "dropped_amplitude_fraction": 0.024345,
+      "truncation_rms_m": 0.00475,
+      "dropped_amplitude_m": 0.02289,
+      "dropped_amplitude_fraction": 0.010021,
       "dropped_constituents": [
-        "MA2",
-        "EP2",
-        "MB2",
-        "2MS6",
         "SGM",
-        "MKS2",
         "3L2",
         "N4",
         "R3",

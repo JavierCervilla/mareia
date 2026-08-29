@@ -30,9 +30,35 @@ function stationFilesOnDisk(): readonly string[] {
     .sort();
 }
 
-test("el catálogo tiene los 12 puertos del piloto, con slugs únicos y en forma de URL", async () => {
+/**
+ * Los doce puertos que T-05 escribió a mano y T-13 no toca. El catálogo creció a toda la costa
+ * derivándolo del volcado de GeoNames, pero estos siguen siendo dato editorial: sus coordenadas de
+ * dársena, sus identificadores y sus URL están publicados y moverlos rompe enlaces de verdad.
+ */
+const PILOTO = [
+  "a-coruna",
+  "bilbao",
+  "cabo-de-palos",
+  "cadiz",
+  "huelva",
+  "la-manga-del-mar-menor",
+  "las-palmas-de-gran-canaria",
+  "malaga",
+  "palma-de-mallorca",
+  "santa-cruz-de-tenerife",
+  "santander",
+  "vigo",
+] as const;
+
+/** Cota inferior del catálogo publicado: T-13 lo llevó de 12 a ciento y pico. */
+const MINIMO_DE_PUERTOS = 120;
+
+test("el catálogo cubre la costa española, con slugs únicos y en forma de URL", async () => {
   const catalogue = await ports.list();
-  assert.equal(catalogue.length, 12);
+  assert.ok(
+    catalogue.length >= MINIMO_DE_PUERTOS,
+    `el catálogo se ha encogido a ${catalogue.length} puertos: si es a propósito, baja la cota`,
+  );
 
   const slugs = catalogue.map((port) => port.slug);
   assert.equal(new Set(slugs).size, slugs.length, "hay slugs repetidos");
@@ -40,6 +66,14 @@ test("el catálogo tiene los 12 puertos del piloto, con slugs únicos y en forma
     for (const slug of [port.slug, port.province.slug, port.region.slug]) {
       assert.match(slug, SLUG_PATTERN);
     }
+  }
+});
+
+test("los doce puertos del piloto siguen en el catálogo con su URL intacta", async () => {
+  const catalogue = await ports.list();
+  const bySlug = new Map(catalogue.map((port) => [port.slug, port]));
+  for (const slug of PILOTO) {
+    assert.ok(bySlug.get(slug) !== undefined, `el piloto '${slug}' ha desaparecido del catálogo`);
   }
 });
 
@@ -77,10 +111,52 @@ test("toda estación referenciada trae su calidad, y la de un grade C viaja con 
     assert.ok(attributions.length > 0, `${port.slug} sin atribuciones`);
   }
 
-  // Cabo de Palos es micromareal: no hay pleamares identificables en la observación, así que el
-  // error de hora se publica como `null` y el grade explica por qué no llega a B.
-  const microtidal = await stations.load("es-mu-cabo-de-palos.json");
-  assert.equal(microtidal.quality.grade, "C");
-  assert.equal(microtidal.quality.hw_time_err_p95_min, null);
-  assert.equal(typeof microtidal.quality.grade_reason, "string");
+  // Cabo de Palos toma las constantes de Cartagena, a 24,8 km, y no tiene observación propia: ni
+  // RMSE ni error de hora que publicar, y el grade explica por qué no llega a B.
+  const borrowed = await stations.load("es-mu-cabo-de-palos.json");
+  assert.equal(borrowed.quality.grade, "C");
+  assert.equal(borrowed.quality.hw_time_err_p95_min, null);
+  assert.equal(typeof borrowed.quality.grade_reason, "string");
+});
+
+/**
+ * El invariante que T-13 añade y que vale más que cualquier recuento: **ningún puerto publica un
+ * número que no se haya medido en él**.
+ *
+ * Un puerto no estimado tiene mareógrafo en su dársena y observación con la que contrastarlo, así
+ * que tiene error medido. Uno estimado puede tener error (si la observación existe pero las
+ * constantes vienen de otro sitio) o no tenerlo, pero **nunca** al revés: publicar RMSE sin ser
+ * medible es exactamente el fraude que este dataset existe para no cometer, y con 150 puertos
+ * dejarlo a la vista de una revisión humana es dejarlo pasar.
+ */
+test("ningún puerto publica una precisión que no tiene", async () => {
+  const incoherentes: string[] = [];
+  for (const port of await ports.list()) {
+    const { quality } = await stations.load(port.stationFile);
+    if (!quality.estimated && quality.rmse_m === null) {
+      incoherentes.push(`${port.slug}: no estimado y sin RMSE medido`);
+    }
+    if (!quality.estimated && quality.grade === "C" && quality.grade_reason === null) {
+      incoherentes.push(`${port.slug}: grade C sin motivo`);
+    }
+    if (quality.estimated && quality.estimated_reason === null) {
+      incoherentes.push(`${port.slug}: estimado sin decir por qué`);
+    }
+    if (quality.rmse_m === null && quality.hw_time_err_p95_min !== null) {
+      incoherentes.push(`${port.slug}: error de hora sin observación con la que medirlo`);
+    }
+  }
+  assert.deepEqual(incoherentes, []);
+});
+
+/** Un puerto que hereda las constantes de lejos no puede heredar también el grade de quien se las presta. */
+test("ningún puerto estimado alcanza el grade A", async () => {
+  const impostores: string[] = [];
+  for (const port of await ports.list()) {
+    const { quality } = await stations.load(port.stationFile);
+    if (quality.estimated && quality.grade === "A") {
+      impostores.push(port.slug);
+    }
+  }
+  assert.deepEqual(impostores, []);
 });

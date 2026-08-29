@@ -1,0 +1,432 @@
+{
+  "schema": "station/v1",
+  "id": "es-tf-garachico",
+  "name": "Garachico",
+  "lat": 28.3734,
+  "lon": -16.7545,
+  "timezone": "Atlantic/Canary",
+  "datum": {
+    "reference": "LAT",
+    "msl_offset_m": 1.28
+  },
+  "source": {
+    "primary": {
+      "dataset": "TICON-4",
+      "station_id": "tenerife3tg-ten-esp-cmems",
+      "station_name": "Tenerife",
+      "lat": 28.418301,
+      "lon": -16.550501,
+      "distance_km": 20.57,
+      "analysis_epoch": {
+        "start": "2019-11-02",
+        "end": "2025-06-30"
+      },
+      "license": "cc-by-nc-4.0"
+    },
+    "fallback": [
+      {
+        "dataset": "TICON-4",
+        "station_id": "tenerife-228a-esp-uhslc_rq",
+        "station_name": "Tenerife",
+        "lat": 28.478,
+        "lon": -16.24,
+        "distance_km": 51.639,
+        "analysis_epoch": {
+          "start": "2000-07-18",
+          "end": "2019-07-18"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "tenerife-ten-esp-da_mm",
+        "station_name": "Tenerife",
+        "lat": 28.48,
+        "lon": -16.24,
+        "distance_km": 51.689,
+        "analysis_epoch": {
+          "start": "1994-01-22",
+          "end": "2012-12-29"
+        },
+        "license": "cc-by-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "tenerifetg-ten-esp-cmems",
+        "station_name": "Tenerife",
+        "lat": 28.48,
+        "lon": -16.24,
+        "distance_km": 51.689,
+        "analysis_epoch": {
+          "start": "2006-06-30",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "gomeratg-gom-esp-cmems",
+        "station_name": "Gomera",
+        "lat": 28.0,
+        "lon": -17.0,
+        "distance_km": 47.988,
+        "analysis_epoch": {
+          "start": "2007-01-01",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "tenerife4tg-ten-esp-cmems",
+        "station_name": "Tenerife",
+        "lat": 28.04694,
+        "lon": -16.71805,
+        "distance_km": 36.476,
+        "analysis_epoch": {
+          "start": "2019-11-01",
+          "end": "2025-03-10"
+        },
+        "license": "cc-by-nc-4.0"
+      },
+      {
+        "dataset": "TICON-4",
+        "station_id": "tenerife2tg-ten-esp-cmems",
+        "station_name": "Tenerife",
+        "lat": 28.477209,
+        "lon": -16.241131,
+        "distance_km": 51.512,
+        "analysis_epoch": {
+          "start": "2019-11-01",
+          "end": "2025-06-30"
+        },
+        "license": "cc-by-nc-4.0"
+      }
+    ],
+    "dropped_constituents": [
+      {
+        "name": "3N2",
+        "amplitude_m": 0.017433,
+        "phase_deg": 95.3981
+      },
+      {
+        "name": "3L2",
+        "amplitude_m": 0.007882,
+        "phase_deg": 222.2217
+      },
+      {
+        "name": "MTM",
+        "amplitude_m": 0.007434,
+        "phase_deg": 31.4051
+      },
+      {
+        "name": "MSQM",
+        "amplitude_m": 0.007065,
+        "phase_deg": 173.1756
+      },
+      {
+        "name": "S3",
+        "amplitude_m": 0.004969,
+        "phase_deg": 182.7801
+      },
+      {
+        "name": "SGM",
+        "amplitude_m": 0.004303,
+        "phase_deg": 306.688
+      },
+      {
+        "name": "T3",
+        "amplitude_m": 0.003318,
+        "phase_deg": 250.8507
+      },
+      {
+        "name": "R3",
+        "amplitude_m": 0.002449,
+        "phase_deg": 61.3274
+      },
+      {
+        "name": "2MO5",
+        "amplitude_m": 0.002164,
+        "phase_deg": 307.8748
+      },
+      {
+        "name": "N4",
+        "amplitude_m": 0.002062,
+        "phase_deg": 343.1911
+      },
+      {
+        "name": "2MK5",
+        "amplitude_m": 0.00157,
+        "phase_deg": 220.4566
+      }
+    ],
+    "derived_at": "2026-08-29T08:00:28Z",
+    "attribution": [
+      {
+        "name": "TICON-4",
+        "url": "https://www.seanoe.org/data/00980/109129/",
+        "license": "cc-by-nc-4.0",
+        "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+        "role": "constantes armónicas",
+        "notes": "Upstream GESLA data provider restricts commercial use. See https://gesla787883612.wordpress.com/license/"
+      },
+      {
+        "name": "openwatersio/tide-database",
+        "url": "https://github.com/openwatersio/tide-database",
+        "license": "MIT (código) · licencia de origen por estación (datos)",
+        "license_url": "https://github.com/openwatersio/tide-database/blob/main/LICENSE",
+        "role": "agregación y normalización · huella sha256 del contenido 2bbba2f45b8b4408…"
+      },
+      {
+        "name": "GeoNames",
+        "url": "https://www.geonames.org/",
+        "license": "cc-by-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "role": "catálogo de puertos: nombre del municipio y coordenadas de la dársena · huella sha256 del volcado e2aa4fa9e6801568…"
+      }
+    ]
+  },
+  "constituents": [
+    {
+      "name": "M2",
+      "amplitude_m": 0.650326,
+      "phase_deg": 29.4159
+    },
+    {
+      "name": "N2",
+      "amplitude_m": 0.123658,
+      "phase_deg": 21.4212
+    },
+    {
+      "name": "S2",
+      "amplitude_m": 0.267394,
+      "phase_deg": 53.6015
+    },
+    {
+      "name": "K2",
+      "amplitude_m": 0.074347,
+      "phase_deg": 45.7699
+    },
+    {
+      "name": "2N2",
+      "amplitude_m": 0.022384,
+      "phase_deg": 4.3086
+    },
+    {
+      "name": "S1",
+      "amplitude_m": 0.047932,
+      "phase_deg": 69.498
+    },
+    {
+      "name": "K1",
+      "amplitude_m": 0.068566,
+      "phase_deg": 30.8039
+    },
+    {
+      "name": "P1",
+      "amplitude_m": 0.01373,
+      "phase_deg": 36.7264
+    },
+    {
+      "name": "O1",
+      "amplitude_m": 0.043274,
+      "phase_deg": 293.5457
+    },
+    {
+      "name": "Q1",
+      "amplitude_m": 0.018826,
+      "phase_deg": 212.5773
+    },
+    {
+      "name": "M1",
+      "amplitude_m": 0.016342,
+      "phase_deg": 239.433
+    },
+    {
+      "name": "M4",
+      "amplitude_m": 0.008754,
+      "phase_deg": 74.0367
+    },
+    {
+      "name": "MM",
+      "amplitude_m": 0.017028,
+      "phase_deg": 354.1767
+    },
+    {
+      "name": "MF",
+      "amplitude_m": 0.01544,
+      "phase_deg": 37.0791
+    },
+    {
+      "name": "SA",
+      "amplitude_m": 0.036938,
+      "phase_deg": 229.8264
+    },
+    {
+      "name": "SSA",
+      "amplitude_m": 0.008575,
+      "phase_deg": 279.4492
+    },
+    {
+      "name": "T2",
+      "amplitude_m": 0.016082,
+      "phase_deg": 34.8768
+    },
+    {
+      "name": "J1",
+      "amplitude_m": 0.00116,
+      "phase_deg": 76.4402
+    },
+    {
+      "name": "L2",
+      "amplitude_m": 0.023609,
+      "phase_deg": 22.6194
+    },
+    {
+      "name": "R2",
+      "amplitude_m": 0.012668,
+      "phase_deg": 43.1678
+    },
+    {
+      "name": "2Q1",
+      "amplitude_m": 0.005526,
+      "phase_deg": 285.2959
+    },
+    {
+      "name": "MSF",
+      "amplitude_m": 0.002178,
+      "phase_deg": 351.1922
+    },
+    {
+      "name": "EP2",
+      "amplitude_m": 0.003423,
+      "phase_deg": 350.4096
+    },
+    {
+      "name": "M3",
+      "amplitude_m": 0.004892,
+      "phase_deg": 168.9311
+    },
+    {
+      "name": "MU2",
+      "amplitude_m": 0.026354,
+      "phase_deg": 356.344
+    },
+    {
+      "name": "NU2",
+      "amplitude_m": 0.031393,
+      "phase_deg": 5.5416
+    },
+    {
+      "name": "LAM2",
+      "amplitude_m": 0.001044,
+      "phase_deg": 293.1947
+    },
+    {
+      "name": "MN4",
+      "amplitude_m": 0.003005,
+      "phase_deg": 354.9502
+    },
+    {
+      "name": "MS4",
+      "amplitude_m": 0.001444,
+      "phase_deg": 95.8743
+    },
+    {
+      "name": "MKS2",
+      "amplitude_m": 0.008374,
+      "phase_deg": 36.3031
+    },
+    {
+      "name": "M6",
+      "amplitude_m": 0.001934,
+      "phase_deg": 280.9856
+    },
+    {
+      "name": "M8",
+      "amplitude_m": 0.002252,
+      "phase_deg": 34.0891
+    },
+    {
+      "name": "S4",
+      "amplitude_m": 0.004982,
+      "phase_deg": 226.9512
+    },
+    {
+      "name": "OO1",
+      "amplitude_m": 0.003838,
+      "phase_deg": 269.3599
+    },
+    {
+      "name": "MA2",
+      "amplitude_m": 0.003868,
+      "phase_deg": 302.4206
+    },
+    {
+      "name": "MB2",
+      "amplitude_m": 0.010522,
+      "phase_deg": 232.0993
+    },
+    {
+      "name": "RHO",
+      "amplitude_m": 0.013396,
+      "phase_deg": 294.6934
+    },
+    {
+      "name": "2SM2",
+      "amplitude_m": 0.004565,
+      "phase_deg": 237.4753
+    },
+    {
+      "name": "2MS6",
+      "amplitude_m": 0.002738,
+      "phase_deg": 355.0083
+    }
+  ],
+  "quality": {
+    "rmse_m": 0.1695,
+    "hw_time_err_p95_min": 126.07,
+    "grade": "C",
+    "validated_against": "IOC gara1",
+    "grade_reason": "no alcanza B: error de hora de extremo p95 126 min > 45 min",
+    "estimated": true,
+    "estimated_reason": "las constantes armónicas son las del mareógrafo `tenerife3tg-ten-esp-cmems`, a 20.6 km de la dársena: describen la marea de ese punto, no la de este puerto",
+    "metrics": {
+      "window_start": "2026-07-30T00:00:00Z",
+      "window_days": 30.0,
+      "samples": 150000,
+      "predicted_range_m": 2.3149,
+      "rmse_m": 0.1695,
+      "nrmse": 0.07322,
+      "r2": 0.80138,
+      "hw_time_err_p95_min": 126.07,
+      "hw_height_err_p95_m": 0.3607,
+      "matched_extremes": 50,
+      "predicted_extremes": 116,
+      "predicted_extremes_in_window": 50,
+      "observed_extremes": 75,
+      "extremes_usable": true,
+      "cross_rmse_m": null,
+      "cross_source": null,
+      "cross_rmse_worst_m": null,
+      "cross_source_worst": null,
+      "truncation_rms_m": 0.01156,
+      "dropped_amplitude_m": 0.06065,
+      "dropped_amplitude_fraction": 0.036026,
+      "dropped_constituents": [
+        "3N2",
+        "3L2",
+        "MTM",
+        "MSQM",
+        "S3",
+        "SGM",
+        "T3",
+        "R3",
+        "2MO5",
+        "N4",
+        "2MK5"
+      ],
+      "observation_source": "IOC gara1"
+    }
+  }
+}

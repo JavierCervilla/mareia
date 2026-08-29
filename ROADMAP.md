@@ -43,7 +43,12 @@
 
 ## Hito 4 — España completa y transparencia
 
-- [ ] T-13 · ~200–300 puertos con grade ≥ B o flag «estimado»
+- [x] T-13 · **153 puertos** con grade ≥ B o flag «estimado» (8 A · 15 B · 130 C; 120 estimados)
+      · La horquilla de 200-300 **no se alcanza y es un hecho medido, no un recorte**: el catálogo
+      se deriva del volcado público de GeoNames y la cornisa cantábrica está poco documentada ahí
+      (Asturias 2 puertos, Cantabria 3, Lugo 2, Gipuzkoa 2). 19 candidatos más se descartan por no
+      tener mareógrafo a menos de 60 km —toda la Costa Brava—, con su lista en el informe QC.
+      Subir de ahí pide una segunda fuente de topónimos portuarios, no relajar el filtro.
 - [ ] T-14 · Metodología pública + QC navegable + dataset CC-BY + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario
       (queda del peldaño 1 del gate de seguridad `actionlint` sobre `.github/workflows/` —es el

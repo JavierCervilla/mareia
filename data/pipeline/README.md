@@ -1,8 +1,14 @@
 # data/pipeline — constantes armónicas → dataset canónico
 
 Pipeline Python offline que convierte constantes armónicas públicas en el dataset canónico de
-Mareia: `data/stations/<id>.json` (schema `station/v1`) para los doce puertos piloto, más
-`data/brest/constituents.json`, que es la referencia del coeficiente de mareas (T-04).
+Mareia: `data/stations/<id>.json` (schema `station/v1`) para los puertos de la costa española, el
+catálogo público `data/geo/ports.json` (schema `ports/v1`) y `data/brest/constituents.json`, que es
+la referencia del coeficiente de mareas (T-04).
+
+Desde T-13 el catálogo **se deriva**, no se teclea: doce puertos se escriben a mano, doscientos no.
+La lista de puertos sale del volcado público de GeoNames (instalación portuaria real para las
+coordenadas, municipio oficial para el nombre) y la política de curación, con su registro de
+descartes, vive en `catalog.py`.
 
 Genera además el informe QC de `reports/`, que es donde vive la parte incómoda: qué mareógrafo se
 eligió y por qué, cuánto se equivoca la predicción contra el mar de verdad y qué grade se ganó.
@@ -13,6 +19,9 @@ eligió y por qué, cuánto se equivoca la predicción contra el mar de verdad y
 cd data/pipeline
 make all            # entorno + dataset + informe QC + tests
 ```
+
+Medido en T-13 sobre 154 estaciones: **3,6 min desde cero** (con las descargas) y **23 s** con la
+caché caliente.
 
 Paso a paso, si se prefiere:
 
@@ -34,11 +43,18 @@ reproducible es el **dataset**: las constantes salen de un commit fijado
 (`sources/tide_database.PINNED_COMMIT`), y cada JSON lleva la huella sha256 del contenido del que
 se derivó.
 
+El volcado de GeoNames no tiene commit que fijar —no publica versiones—, así que su pin es su huella
+sha256, citada en el informe QC, y el artefacto congelado es `data/geo/ports.json`, que se commitea.
+`make build` **reescribe** ese catálogo y **borra** las estaciones que ya no cuelgan de él: el
+dataset y el catálogo se describen el uno al otro o no se publican, y `make check` lo comprueba sin
+red.
+
 ## De dónde salen los datos
 
 | Fuente | Qué aporta | Licencia | ¿Se commitea? |
 |---|---|---|---|
 | [TICON-4](https://www.seanoe.org/data/00980/109129/) vía [`openwatersio/tide-database`](https://github.com/openwatersio/tide-database) | Constantes armónicas por mareógrafo | CC-BY 4.0 o CC-BY-NC 4.0 **según estación** | Sí, con su atribución dentro del JSON |
+| [GeoNames](https://www.geonames.org/) (volcado `ES.zip`) | Catálogo de puertos: instalaciones portuarias, núcleos de población y municipios | CC-BY 4.0 | Sí (derivado), con su atribución dentro de cada JSON derivado |
 | [IOC Sea Level Monitoring](https://www.ioc-sealevelmonitoring.org/) | Nivel del mar observado, para medir el error | Sólo validación interna | **No**: se queda en la caché |
 | REDMAR / Puertos del Estado | — | — | No viable hoy (ver informe QC) |
 
@@ -52,11 +68,13 @@ no contaminar el dataset más de lo necesario.
 
 ```
 mareia_pipeline/
-  ports.py             los 11 puertos objetivo y su identidad canónica
+  ports.py             los puertos escritos a mano (los doce del piloto) y su identidad canónica
+  catalog.py           deriva el resto de la costa del volcado de GeoNames, con su registro de descartes
   geo.py               distancia de círculo máximo
   sources/
     cache.py           descarga HTTP con caché en .cache (ignorada por git)
     tide_database.py   constantes armónicas, fijadas a un commit
+    geonames.py        volcado de topónimos de España (catálogo de puertos)
     ioc.py             observaciones de nivel del mar (sólo validación)
   tides/
     constituents.py    catálogo de Doodson
@@ -65,11 +83,27 @@ mareia_pipeline/
   engine_contract.py   qué constituyentes acepta el motor de producción (truncado)
   reconcile.py         política de selección de mareógrafo → documento station/v1
   validate.py          métricas: RMSE, extremos, contraste entre fuentes, truncado
-  grade.py             umbrales A/B/C
-  report.py            informe QC en markdown
+  grade.py             umbrales A/B/C y el criterio de «marea estimada»
+  report.py            informe QC en markdown, agregado y navegable
   schema.py            validación contra data/stations/station.v1.schema.json
 run.py                 CLI: fetch | build | check
 ```
+
+### Medido o estimado
+
+La regla que gobierna el pipeline: **un puerto no publica una precisión que no tiene.**
+
+Un puerto es **medido** sólo si se dan las dos cosas a la vez: sus constantes salen de un mareógrafo
+que está en su propia dársena (el mismo umbral de 5 km que exige el grade A) y hemos podido comparar
+la predicción contra observaciones **de ese puerto**. Cualquier otra combinación es una estimación,
+se marca con `quality.estimated: true`, se explica en `quality.estimated_reason` y sale escrito en la
+página del puerto, no sólo en el JSON.
+
+Hasta T-05, un puerto sin mareógrafo del IOC en la dársena se validaba contra la observación de allí
+donde estuviera el mareógrafo que le presta las constantes, y ese RMSE se publicaba como suyo. Con
+doce puertos era una nota al pie; con ciento cincuenta es la mentira que el proyecto existe para no
+cometer, porque un número medido a 25 km no es la precisión de este sitio. Ese camino se retiró: sin
+observación propia, `rmse_m` y `hw_time_err_p95_min` salen `null`.
 
 ### El motor de predicción
 
@@ -93,12 +127,13 @@ observaciones reales, el antes y el después en Brest fue de 0,375 m a 0,077 m d
 
 ### El truncado al motor de producción
 
-TICON-4 publica hasta 50 constantes por estación; el motor de `packages/domain-core` implementa el
-juego estándar de **37** de NOAA y lanza `UnsupportedConstituentError` ante cualquier otra. El
-dataset se trunca a ese juego **antes de emitirse** —un contrato que el consumidor no puede cumplir
-no es un contrato— y lo descartado se conserva en `source.dropped_constituents` de cada JSON con su
-amplitud y su fase. El coste medido de ese truncado aparece en el informe QC y **influye en el
-grade**: en Brest son 2,2 cm RMS, suficiente para que no llegue a A.
+TICON-4 publica hasta 50 constantes por estación; el motor de `packages/domain-core` implementa
+**42** —el juego estándar de 37 de NOAA más los cinco que le añadió T-04— y lanza
+`UnsupportedConstituentError` ante cualquier otra. El dataset se trunca a ese juego **antes de
+emitirse** —un contrato que el consumidor no puede cumplir no es un contrato— y lo descartado se
+conserva en `source.dropped_constituents` de cada JSON con su amplitud y su fase. El coste medido de
+ese truncado aparece en el informe QC y **influye en el grade**: al regenerar con los 42 en T-13
+bajó en Brest de 2,2 a 0,5 cm RMS y con él subió a grade A.
 
 ### El grade
 
@@ -128,11 +163,16 @@ Dos cosas que el grade **no** puede medir y por eso las declara en vez de invent
 
 ## Añadir un puerto
 
-Añádelo a `PILOT_PORTS` en `ports.py` con su `id` canónico, sus coordenadas de dársena y su zona
-horaria, y ejecuta `make build`. Si no hay mareógrafo a menos de 25 km, el pipeline falla en voz
-alta en vez de emitir un JSON inventado.
+Lo normal es **no tener que añadirlo**: si GeoNames documenta su instalación portuaria y hay
+mareógrafo a menos de `catalog.MAX_BORROW_KM`, entra solo en el siguiente `make build`. Si no entra,
+el informe QC dice por qué en «Qué se descartó y por qué», y ese motivo es la respuesta.
+
+Para añadirlo **a mano** —porque su identidad es editorial, como los doce del piloto—, añádelo a
+`PILOT_PORTS` en `ports.py` con su `id` canónico, sus coordenadas de dársena, su zona horaria, su
+`slug` y su `province_code`. Si no hay mareógrafo dentro de su radio, el pipeline falla en voz alta
+en vez de emitir un JSON inventado.
 
 Si el puerto de verdad no tiene mareógrafo cerca, se le puede ampliar el radio con
 `search_radius_km=` —así entran Cabo de Palos y La Manga, que dependen del de Cartagena a 25 y
-27 km—, pero eso no es gratis: la distancia es un umbral del grade y ninguno de los dos puede pasar
-de B por ese solo hecho.
+27 km—, pero eso no es gratis: la distancia es un umbral del grade, ninguno de los dos puede pasar
+de B por ese solo hecho, y además salen marcados como **estimados**.
