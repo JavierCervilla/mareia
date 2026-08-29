@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime as dt
 import json
 import pathlib
 
@@ -11,7 +12,7 @@ from mareia_pipeline import catalog, validate
 from mareia_pipeline import grade as grading
 from mareia_pipeline.geo import haversine_km
 from mareia_pipeline.ports import PILOT_PORTS
-from mareia_pipeline.reconcile import select
+from mareia_pipeline.reconcile import is_redistributable, select, to_station_v1
 from mareia_pipeline.schema import station_files, validation_errors
 from mareia_pipeline.sources.tide_database import GaugeRecord
 
@@ -74,12 +75,97 @@ def test_longer_record_wins_when_the_license_ties() -> None:
 
 
 def test_redmar_would_outrank_ticon_even_if_restricted() -> None:
-    """La rama REDMAR está escrita aunque hoy no tenga candidatos: cuando los tenga, manda."""
+    """La rama REDMAR está escrita aunque hoy no tenga candidatos: cuando los tenga, manda.
+
+    «Restringida» aquí es no comercial, que **sí** se puede redistribuir: el rango sigue decidiendo
+    entre las publicables, que es justo lo que el filtro de T-14A no toca. La otra mitad de la
+    frase —una fuente que no se puede republicar no gana ni con el mejor rango— es el gate de
+    inyección de más abajo.
+    """
     ticon = _gauge("ticon", lat=PORT.lat, lon=PORT.lon)
     redmar = _gauge(
         "redmar", dataset="redmar", license_type="cc-by-nc-4.0", lat=PORT.lat + 0.02, lon=PORT.lon
     )
     assert select(PORT, [ticon, redmar]).chosen.station_id == "redmar"
+
+
+# --- Gate de inyección (T-14A): el permiso de redistribución filtra ANTES de que el rango ordene ---
+#
+# La mina que esto desactiva: `_DATASET_RANK` daba a REDMAR la máxima prioridad de fuente, y las
+# condiciones del banco de datos de Puertos del Estado dicen «en ningún caso se permite la
+# transferencia de los datos a terceros». Hoy no hay vía de ingesta y ninguna estación viene de ahí,
+# así que no hay incidente: lo que había era que el día que la hubiera, el pipeline la habría
+# elegido la primera y publicado lo que no puede publicarse. Estos recorridos **inyectan** esa
+# fuente en la elección —el mejor rango, la más cercana y el registro más largo— y exigen que pierda.
+
+#: Una licencia que no autoriza republicar. No es «no comercial» (esas sí valen y son 104 estaciones
+#: del catálogo): es la cláusula de no transferencia a terceros.
+NO_REDISTRIBUTION = "puertos-del-estado-banco-de-datos"
+
+
+def test_a_source_that_cannot_be_redistributed_loses_despite_the_best_rank() -> None:
+    """Inyectada con rango 0, en la propia dársena y con el registro más largo: no gana."""
+    injected = _gauge(
+        "redmar-inyectada",
+        dataset="redmar",
+        license_type=NO_REDISTRIBUTION,
+        start="1990-01-01",
+        lat=PORT.lat,
+        lon=PORT.lon,
+    )
+    publishable = _gauge("ticon", start="2010-01-01", lat=PORT.lat + 0.02, lon=PORT.lon)
+    selection = select(PORT, [injected, publishable])
+    assert selection.chosen.station_id == "ticon"
+    assert [g.station_id for _, g in selection.excluded_by_license] == ["redmar-inyectada"]
+    assert [g.station_id for _, g in selection.rejected] == []
+
+
+def test_an_excluded_source_does_not_even_reach_the_published_json() -> None:
+    """Ni elegida ni como `fallback`: el artefacto publicado no la menciona en ningún sitio."""
+    injected = _gauge(
+        "redmar-inyectada", dataset="redmar", license_type=NO_REDISTRIBUTION,
+        lat=PORT.lat, lon=PORT.lon,
+    )
+    selection = select(PORT, [injected, _gauge("ticon", lat=PORT.lat + 0.02, lon=PORT.lon)])
+    document = to_station_v1(
+        selection,
+        quality={},
+        derived_at=dt.datetime(2026, 1, 1, tzinfo=dt.UTC),
+        tarball_sha256="0" * 64,
+    )
+    assert "redmar-inyectada" not in json.dumps(document)
+    assert NO_REDISTRIBUTION not in json.dumps(document)
+
+
+def test_a_license_nobody_has_read_is_excluded_by_default() -> None:
+    """El defecto es excluir: una licencia nueva no entra por el hecho de existir."""
+    assert not is_redistributable("licencia-nueva-de-la-fuente-de-aguas-arriba")
+    unknown = _gauge(
+        "sin-revisar", license_type="licencia-nueva-de-la-fuente-de-aguas-arriba",
+        start="1990-01-01", lat=PORT.lat, lon=PORT.lon,
+    )
+    known = _gauge("ticon", start="2010-01-01", lat=PORT.lat + 0.02, lon=PORT.lon)
+    assert select(PORT, [unknown, known]).chosen.station_id == "ticon"
+
+
+def test_the_licenses_of_the_committed_dataset_are_all_redistributable() -> None:
+    """Lo publicado cumple el filtro: si algún día no lo cumpliera, no habría que descubrirlo fuera."""
+    for path in station_files():
+        document = json.loads(path.read_text(encoding="utf-8"))
+        license_type = document["source"]["primary"]["license"]
+        assert is_redistributable(license_type), f"{path.name} publica {license_type}"
+
+
+def test_a_port_whose_only_gauge_cannot_be_redistributed_is_not_published() -> None:
+    """Sin candidata publicable no se publica el puerto, y el fallo nombra a la excluida.
+
+    La alternativa —elegirla igualmente y avisar— es la que no tiene arreglo posterior: un puerto
+    que falta se ve el mismo día; un dato republicado sin permiso, ya está fuera.
+    """
+    only = _gauge("redmar-inyectada", dataset="redmar", license_type=NO_REDISTRIBUTION,
+                  lat=PORT.lat, lon=PORT.lon)
+    with pytest.raises(LookupError, match="redmar-inyectada"):
+        select(PORT, [only])
 
 
 def test_the_nearest_darsena_wins_before_the_license_and_the_record() -> None:

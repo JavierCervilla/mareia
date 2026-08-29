@@ -11,14 +11,17 @@ sino la referencia del coeficiente de mareas francés (T-04).
 
 El dataset es derivado y **la licencia depende de la estación**, no del repositorio:
 
-- La mayoría de los puertos vienen de mareógrafos publicados como **CC-BY 4.0**.
 - Donde el único mareógrafo disponible llega vía CMEMS, la licencia de origen es **CC-BY-NC 4.0**
-  (restricción del proveedor GESLA aguas arriba). Mareia es no comercial, así que el uso es
+  (restricción del proveedor GESLA aguas arriba), y esos puertos **son la mayoría del catálogo** —
+  el reparto exacto, con su cifra recomputada desde estos mismos ficheros, está en el
+  [README del repositorio](../../README.md#licencia). Mareia es no comercial, así que el uso es
   conforme, pero **el dataset no se puede redistribuir entero como CC-BY 4.0**: quien lo reutilice
-  comercialmente debe excluir esas estaciones.
+  comercialmente debe excluir esas estaciones, y no son cuatro.
 
 La licencia de cada puerto está en su propio JSON, en `source.primary.license` y en
-`source.attribution[].license`. La política de reconciliación prefiere CC-BY 4.0 cuando hay elección.
+`source.attribution[].license`. La política de reconciliación **excluye** las fuentes cuya licencia
+no permite redistribuir (antes de mirar ninguna otra cosa) y, entre las que quedan, prefiere
+CC-BY 4.0 cuando hay elección.
 
 ## Qué mirar dentro de cada fichero
 
