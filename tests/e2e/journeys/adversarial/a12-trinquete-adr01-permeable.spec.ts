@@ -106,8 +106,6 @@ for (const carga of CARGAS) {
   test(`A12 · el gate de ADR-01 tiene que ver una magnitud escondida en ${carga.clase}`, async ({
     qa,
   }) => {
-    test.fail();
-
     const original = readFileSync(PAGINA_DEL_DIST, "utf8");
     expect(original, "el ancla de inyección ya no existe en el dist").toContain(ANCLA);
 

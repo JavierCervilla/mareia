@@ -294,6 +294,30 @@ const MAGNITUDES_DE_METEO =
   /\d[\d,]*\s*(km\/h|hPa|°C|kt|nudos)\b|\bfetchedAt\b|\bageSeconds\b|Índice UV|Mar de fondo|Mar de viento|Temperatura del agua|consultado hace|Dato de hace/u;
 
 /**
+ * Los atributos de un fragmento de HTML, leídos **etiqueta a etiqueta** y con el nombre entero.
+ *
+ * Se parsea así —primero la etiqueta, después sus atributos— y no con un barrido de la sección
+ * entera porque un barrido tiene que exigir comillas para no confundir el texto con atributos, y
+ * ahí se colaban tres de las cuatro puertas del hallazgo H-4 del pase adversario: HTML5 permite el
+ * valor **sin comillas** (`data-ola=1,68m`) y el nombre admite `_` y `:` (`data_ola=`, `x:ola=`),
+ * que la lista `[a-zA-Z0-9-]` no veía. El nombre es aquí «todo menos espacio, `=`, `/`, `>` y
+ * comillas», que es exactamente lo que dice la especificación, así que el gate ya no depende de la
+ * FORMA del atributo: cualquier cosa que el navegador lea con `getAttribute()` pasa por la tabla.
+ *
+ * Un atributo booleano (`hidden`, `data-meteo-bloques`) no tiene valor y entra con la cadena vacía:
+ * también hay que declararlo, porque su sola presencia es información.
+ */
+function atributosDe(html: string): readonly (readonly [string, string])[] {
+  const etiquetas = html.matchAll(/<[a-zA-Z][^\s/>]*((?:"[^"]*"|'[^']*'|[^>"'])*)>/gu);
+  return [...etiquetas].flatMap((etiqueta) =>
+    [...(etiqueta[1] ?? "").matchAll(/([^\s=/>"']+)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s"'=<>]+))?/gu)].map(
+      (atributo) =>
+        [atributo[1] ?? "", (atributo[2] ?? "").replace(/^["']|["']$/gu, "")] as const,
+    ),
+  );
+}
+
+/**
  * Atributos de la sección que no son los esperados — cada uno es un sitio donde esconder un dato.
  *
  * La clave está en **no tirar el nombre del atributo**. Una primera versión se quedaba solo con el
@@ -316,16 +340,36 @@ function atributosInesperados(seccion: string, slug: string, zona: string): read
     type: (valor) => valor === "module",
     "data-meteo-puerto": (valor) => valor === slug,
     "data-meteo-zona": (valor) => valor === zona,
+    // El origen del API viaja al HTML como atributo (`api.ts`): vacío = mismo origen que la página.
+    "data-meteo-api": (valor) => valor === "" || URL.canParse(valor),
+    // Los anclajes de la isla y el `hidden` del contenedor de bloques son atributos booleanos.
+    "data-meteo-aviso": (valor) => valor === "",
+    "data-meteo-bloques": (valor) => valor === "",
+    "data-meteo-anuncio": (valor) => valor === "",
+    hidden: (valor) => valor === "",
+    // La región viva que anuncia el cambio de estado a un lector de pantalla (H-7).
+    role: (valor) => valor === "status",
+    "aria-live": (valor) => valor === "polite",
     href: (valor) => valor === "https://open-meteo.com/" || valor === "https://www.aemet.es/es/nota_legal",
     src: (valor) => /^\/_astro\/Meteo\.astro[\w.]*\.js$/u.test(valor),
   };
 
-  // Nombres con dígitos (`data-ola1`) y valores entre comillas simples entran en el barrido: si no,
-  // bastaba renombrar el atributo para saltarse el gate.
-  return [...seccion.matchAll(/\s([a-zA-Z0-9-]+)=("([^"]*)"|'([^']*)')/gu)]
-    .map((encontrado) => [encontrado[1] ?? "", encontrado[3] ?? encontrado[4] ?? ""] as const)
+  // Nombres con dígitos (`data-ola1`), con `_` o con `:`, y valores con comillas, con comillas
+  // simples o SIN comillas: todos entran en el barrido. Si no, bastaba renombrar el atributo —o
+  // quitarle las comillas al valor— para saltarse el gate.
+  return atributosDe(seccion)
     .filter(([nombre, valor]) => !(esperado[nombre]?.(valor) ?? false))
     .map(([nombre, valor]) => `${nombre}="${valor}"`);
+}
+
+/**
+ * Comentarios HTML dentro de la sección. Es el cuarto agujero de H-4 y va aparte porque no es un
+ * atributo ni texto visible: `textoDe` borra un comentario igual que borra una etiqueta, así que
+ * `<!-- ola 1,68 m -->` no dejaba rastro que comparar con la lista blanca. Y es el sitio clásico
+ * donde un framework deja su carga de hidratación, que es exactamente lo que ADR-01 prohíbe.
+ */
+function comentariosDe(html: string): readonly string[] {
+  return [...html.matchAll(/<!--[\s\S]*?-->/gu)].map((encontrado) => encontrado[0]);
 }
 
 test("el HTML construido no lleva NI UNA magnitud meteorológica dentro (ADR-01)", async (t) => {
@@ -355,6 +399,14 @@ test("el HTML construido no lleva NI UNA magnitud meteorológica dentro (ADR-01)
       atributosInesperados(seccion, puerto.slug, puerto.timezone),
       [],
       `${puerto.slug}: la sección meteo esconde algo en un atributo`,
+    );
+
+    // Y ni un comentario: lo que no se ve en el texto ni en un atributo se esconde aquí.
+    assert.deepEqual(
+      comentariosDe(seccion),
+      [],
+      `${puerto.slug}: la sección meteo lleva un comentario HTML, que es donde cabe una carga de
+       hidratación con la meteo dentro`,
     );
 
     // Y el perímetro: fuera de la sección tampoco puede haber magnitudes. Sin esto, la lista
