@@ -90,5 +90,6 @@ Es decir: la mayoría de los puertos van con `cc-by-nc-4.0`, heredada de los mar
 vía CMEMS/GESLA. Mareia es un proyecto no comercial, así que su propio uso es conforme; **quien
 reutilice el dataset hereda esa restricción en la mayor parte del catálogo**, y por eso lo que hay
 que mirar es la licencia puerto a puerto (ver `data/stations/README.md`) y no un titular. Las cifras
-de la tabla no se escriben a mano: las recomputa el mismo gate desde los JSON, y si el reparto
-cambia y la tabla no, CI se pone en rojo.
+de la tabla sí se escriben a mano, pero no se sostienen solas: un gate las recomputa desde los JSON
+en cada CI y las compara con lo que dice esta tabla, así que si el reparto cambia y la tabla no, CI
+se pone en rojo.
