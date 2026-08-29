@@ -233,3 +233,30 @@ esperado), `pnpm lint` y `pnpm typecheck` limpios. Los tres recorridos cierran l
 de fuentes externa del `<head>` y el ataque moría **de reloj** en vez de morir del assert, que es la
 forma más tonta de perder un hallazgo — y con `test.fail()` puesto habría quedado «verde» por el
 motivo equivocado.
+
+---
+
+## Cierre del pase — el arreglo (añadido por el `implementador`, no por el adversario)
+
+Este apartado se añade **después** del informe y no lo toca: lo de arriba es el testimonio del pase,
+con fecha, y se queda como se escribió. Aquí solo se anota qué pasó con cada hallazgo.
+
+| Hallazgo | Estado | Dónde se ve |
+|---|---|---|
+| **H-1** · la señal en una lista de tres | **Corregido** | `pages/mareas/[region]/index.astro` y `.../[region]/[provincia]/index.astro` pasan `estimada` al mismo `Indice.astro` de la portada. Cubre las **12** páginas de región y las **24** de provincia: 306 entradas que decían «medida» o «estimada». El **filtro no baja** con la señal, con el porqué medido en `design-brief.md` §7 quater. |
+| **H-2** · el `null` con el motivo equivocado | **Corregido** | `apps/api/README.md` publica los tres casos en tabla, cada uno con la frase de la ficha y su cifra recontada del dataset: 118 sin observación, 13 micromareales medidos, 22 medidos con pleamares. |
+| **H-3** · el mando no ordena por error | **Abierto, por decisión** | Es juicio de producto y lo decide el humano; no se toca. |
+| **R-1** · el filtro sin hoja de estilos | **Anotado, no se arregla** | «Una funcionalidad hecha solo con CSS deja de funcionar sin CSS» es una tautología. |
+
+Los **tres recorridos** pierden su `test.fail()` y se quedan como **gate permanente**. Y como el
+apunte de método del informe pedía que lo que se volviera a gatear fuera el **significado** y no la
+presencia, el de H-2 no comprueba que el campo esté: lee las cifras de la tabla del contrato y las
+**recalcula desde el dataset**, y clasifica las 153 fichas construidas por lo que dicen sus filas
+exigiendo el mismo reparto puerto a puerto. El tercer extremo —que la clasificación del cuerpo HTTP
+cuadre con `metrics.samples`, un contador del QC que no viaja por el API— lo ata el gate hermano de
+`apps/api/src/http/core_test.ts`.
+
+Comprobado que muerden: falsear un puerto (Alicante con error de hora y sin observación) deja
+**verdes** los dos gates de presencia de T-14B y pone rojo el del significado; quitarle la señal a
+un solo puerto (Vigo) pone rojo el gate del sitio construido y los dos recorridos del picker,
+nombrándolo.

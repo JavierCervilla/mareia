@@ -193,10 +193,48 @@ presentar los 153 puertos como si valieran lo mismo.
 - **En papel se imprime lo que se ve**, con la opción activa marcada por su filete. No se esconde el
   control al imprimir: un papel que lista 33 puertos sin decir que están filtrados miente sobre el
   catálogo, y ese es justo el pecado que esta trayectoria vino a corregir.
-- **Queda fuera** (deliberado, no olvido): los índices de región y provincia siguen sin la marca.
-  T-14B corrige los dos sitios donde el proyecto declaró que se elige puerto —la portada y
-  `/v1/ports`—; extenderlo a los índices es una línea más el día que se decida, no un cambio de
-  criterio.
+- **Quedaba fuera** —y duró lo que tardó el pase adversario en medirlo—: los índices de región y
+  provincia se dejaron sin la marca porque T-14B corregía «los dos sitios donde el proyecto declaró
+  que se elige puerto». Resultaron ser cuatro superficies, y la §7 quater cuenta el arreglo.
+
+## 7 quater. Arreglo de T-14B — la señal en las tres listas de puertos, y por qué el filtro no
+
+El pase adversario midió lo que costaba dejarlo fuera: la clase `indice__calidad` aparecía en **una
+sola página del sitio**, y las otras dos familias de listas —12 de región y 24 de provincia, que
+son la ruta que la propia portada llama canónica («Ver todas las regiones»)— presentaban los 153
+puertos planos. **306 entradas mudas**, y el último clic antes de la ficha dado a ciegas: en
+`/mareas/galicia/pontevedra/`, Vigo (medida) y Baiona (estimada) idénticos.
+
+- **La misma señal, el mismo componente, la misma palabra.** Las dos páginas pasan `estimada` al
+  `Indice.astro` que ya existía; ni una regla de CSS nueva, ni un segundo vocabulario. Decir «sin
+  contrastar» aquí y «estimada» allí serían dos cosas distintas para quien lee, aunque sean el
+  mismo `quality.estimated`.
+- **En provincia la señal comparte meta con la zona horaria** («Europe/Madrid · estimada»), con el
+  mismo punto medio que la portada usa para la provincia. La jerarquía de §1 no cambia: la meta
+  sigue siendo *contextual* y la marca es lo último que se lee de la entrada.
+- **El filtro NO baja a estas 36 páginas** (decisión, no olvido), por tres razones medidas:
+  1. **Lo que habría que descartar no lo pide.** El filtro es un mando para una lista que no cabe
+     de un vistazo: en la portada descarta 120 de 153. La región mediana tiene **17** puertos (la
+     mayor, Andalucía, 32; dos tienen **1**) y la provincia mediana **5** (la mayor, 17). El mando
+     cuesta tres radios más su nota de 63 palabras: en una provincia de 5 puertos, el control pesa
+     más que la lista que filtra.
+  2. **En 7 de las 24 provincias «Solo los medidos» dejaría la página vacía** (Alicante 11/0,
+     Barcelona 9/0, Castellón 3/0, Lugo 2/0, Gipuzkoa 2/0, Sevilla 1/0, Ceuta 1/0). Un mando cuyo
+     resultado más probable en un tercio de las páginas es «no hay nada» no es un filtro: es un
+     callejón sin salida con etiqueta (§A9 del pase adversario).
+  3. **Quien quiere filtrar quiere el catálogo entero**, y ése está en la portada, a un toque desde
+     la cabecera de cualquier página. Un filtro por página parcela el descarte y multiplica por 37
+     la superficie de un mando que, además, tiene **una pregunta de producto abierta**: ordena por
+     procedencia y no por error (H-3 del informe adversario, sin resolver). Replicarlo antes de esa
+     decisión sería 36 copias de algo que puede cambiar.
+- **La señal, en cambio, no está en revisión: es la promesa.** Por eso va donde haya una lista de
+  puertos, y el gate lo comprueba **puerto a puerto y página a página**
+  (`sitio-construido.test.ts`, y los dos recorridos adversarios convertidos en gate permanente).
+- **Lo que pesa, medido.** Las 12 páginas de región pasan de 58.545 a 73.812 B de HTML (+26 %) y
+  las 24 de provincia de 93.717 a 104.394 B (+11 %); comprimidas, la mayor (Andalucía) pasa de
+  1.965 a 2.078 B (+5,7 %) y Pontevedra de 1.351 a 1.402 B (+3,8 %). La señal es texto que se
+  repite, que es lo que gzip hace mejor. Ni un byte de JavaScript: estas páginas conservan su
+  cero-JS.
 
 ## 8. Cómo se audita
 

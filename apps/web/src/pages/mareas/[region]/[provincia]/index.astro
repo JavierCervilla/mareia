@@ -3,7 +3,14 @@
  * Índice de una provincia: `/mareas/<región>/<provincia>/`.
  *
  * El último escalón antes del puerto. Cada entrada lleva la zona horaria como meta porque en
- * Canarias es la primera pregunta que se hace quien mira una hora de pleamar desde la Península.
+ * Canarias es la primera pregunta que se hace quien mira una hora de pleamar desde la Península, y
+ * desde el arreglo de T-14B lleva también si su marea está **medida** ahí o es una **estimación**:
+ * éste es literalmente el último clic antes de la ficha, y darlo a ciegas era el hallazgo H-1 del
+ * pase adversario —en Pontevedra, Vigo (medida) y Baiona (estimada) se presentaban idénticos—.
+ *
+ * La misma palabra y el mismo componente que la portada: dos formas de decir lo mismo serían dos
+ * cosas distintas para quien lee. El filtro no baja aquí (la provincia mediana tiene 5 puertos y en
+ * 7 de las 24 «solo los medidos» dejaría la página vacía); ver `apps/web/design-brief.md` §7 quater.
  */
 import Indice from "../../../../componentes/Indice.astro";
 import Migas from "../../../../componentes/Migas.astro";
@@ -65,6 +72,7 @@ const migas = migasDeProvincia(
       nombre: puerto.name,
       ruta: rutaPuerto(puerto),
       meta: puerto.timezone,
+      estimada: puerto.quality.estimated,
     }))}
   />
 </AlmanaqueLayout>

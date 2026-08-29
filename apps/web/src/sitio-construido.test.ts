@@ -39,10 +39,13 @@ function paginaDe(ruta: string): string {
 }
 
 /**
- * La entrada de un puerto en el índice de la portada, tal cual salió al HTML: del `<li>` que abre
+ * La entrada de un puerto en un índice construido, tal cual salió al HTML: del `<li>` que abre
  * hasta el `</li>` que cierra. Se localiza por su enlace, que es único en la página.
+ *
+ * Sirve para las tres listas de puertos del portal —portada, región y provincia—, que desde el
+ * arreglo de T-14B publican la misma señal con el mismo componente.
  */
-function entradaDeLaPortada(html: string, ruta: string): string | undefined {
+function entradaDelIndice(html: string, ruta: string): string | undefined {
   const enlace = html.indexOf(`href="${ruta}"`);
   if (enlace === -1) {
     return undefined;
@@ -567,7 +570,7 @@ test("la portada dice de TODOS los puertos si su marea está medida o estimada",
   const html = readFileSync(PORTADA, "utf8");
   const fallos: string[] = [];
   for (const puerto of await cargarPuertos()) {
-    const entrada = entradaDeLaPortada(html, rutaPuerto(puerto));
+    const entrada = entradaDelIndice(html, rutaPuerto(puerto));
     if (entrada === undefined) {
       fallos.push(`${puerto.slug}: no tiene entrada en la portada`);
       continue;
@@ -583,6 +586,51 @@ test("la portada dice de TODOS los puertos si su marea está medida o estimada",
     }
   }
   assert.deepEqual(fallos, [], "puertos sin la calidad publicada en la portada");
+});
+
+/**
+ * **El gate del arreglo de H-1: las otras dos listas de puertos del portal.**
+ *
+ * El pase adversario de T-14B midió que la señal existía en **una sola página del sitio**: la
+ * portada. Las otras dos familias de listas —las 12 de región y las 24 de provincia, que son la
+ * ruta que la propia portada llama canónica— presentaban los 153 puertos planos, así que el último
+ * clic antes de la ficha se daba a ciegas (en Pontevedra, Vigo y Baiona idénticos).
+ *
+ * Se comprueba puerto a puerto y en las **dos** páginas donde aparece cada uno, con el rojo
+ * nombrando el puerto y la página: la forma de fallar de esto no es que la señal desaparezca, es
+ * que se quede fuera de una familia de páginas —o de una provincia— y nadie lo note.
+ *
+ * No se exige aquí el `data-estimado`: en estas páginas no hay filtro al que sirva de asidero (ver
+ * `design-brief.md` §7 quater), y gatear un atributo que no gobierna nada sería gatear la forma en
+ * vez de la promesa. Lo que se exige es la **palabra**, que es lo que se lee al elegir.
+ */
+test("los índices de región y de provincia dicen de TODOS los puertos si su marea está medida", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  const fallos: string[] = [];
+  for (const region of await cargarCatalogo()) {
+    const paginas = new Map([[rutaRegion(region.slug), paginaDe(rutaRegion(region.slug))]]);
+    for (const provincia of region.provincias) {
+      const ruta = rutaProvincia(region.slug, provincia.slug);
+      paginas.set(ruta, paginaDe(ruta));
+    }
+    for (const provincia of region.provincias) {
+      for (const puerto of provincia.puertos) {
+        const palabra = puerto.quality.estimated ? "estimada" : "medida";
+        for (const ruta of [rutaRegion(region.slug), rutaProvincia(region.slug, provincia.slug)]) {
+          const entrada = entradaDelIndice(paginas.get(ruta) ?? "", rutaPuerto(puerto));
+          if (entrada === undefined) {
+            fallos.push(`${puerto.slug}: no tiene entrada en ${ruta}`);
+          } else if (!entrada.includes(`<span class="indice__calidad">${palabra}</span>`)) {
+            fallos.push(`${puerto.slug}: su entrada de ${ruta} no dice «${palabra}»`);
+          }
+        }
+      }
+    }
+  }
+  assert.deepEqual(fallos, [], "puertos que se siguen eligiendo a ciegas en los índices geográficos");
 });
 
 /**

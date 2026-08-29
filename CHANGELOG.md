@@ -2,6 +2,67 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-29 — T-14B (arreglo del pase adversario) · la señal llega a las tres listas, y el `null` se explica por su motivo
+
+El pase adversario de T-14B reprodujo en rojo dos cosas que la trayectoria había dejado a medias.
+Ninguna era un fallo de lo implementado —lo implementado funcionaba—: eran una superficie que se
+quedó fuera y una frase que explicaba un dato con el motivo de otro.
+
+- **La calidad se dice en las tres listas de puertos, no en una.** El portal tiene tres —la portada,
+  las **12** páginas de región y las **24** de provincia— y las dos últimas son la ruta que la propia
+  portada llama canónica («Ver todas las regiones»). La señal aparecía en **una sola página del
+  sitio**: medido, **306 entradas mudas**, con el resultado de que el último clic antes de la ficha
+  se daba a ciegas —en `/mareas/galicia/pontevedra/`, Vigo (medida) y Baiona (estimada) se
+  presentaban idénticos—. Ahora las dos familias pasan `estimada` al mismo componente
+  (`Indice.astro`) con **la misma palabra** que la portada: «medida» / «estimada», en la meta de la
+  entrada («Europe/Madrid · estimada» en provincia). Ni una regla de CSS nueva, ni un segundo
+  vocabulario, ni un byte de JavaScript: estas páginas conservan su cero-JS.
+- **Lo que pesa, medido.** Las 12 páginas de región pasan de **58.545 a 73.812 B** de HTML
+  (**+26,1 %**) y las 24 de provincia de **93.717 a 104.394 B** (**+11,4 %**). Por página, la mayor
+  (Andalucía, 32 puertos) 8.936 → 12.129 B y Pontevedra 4.570 → 5.266 B; **comprimidas**, que es
+  como viajan, 1.965 → 2.078 B (**+5,7 %**) y 1.351 → 1.402 B (**+3,8 %**): la señal es texto que se
+  repite, y eso es lo que gzip hace mejor.
+- **El filtro no baja con la señal, y se dice por qué.** Es un mando para descartar en una lista que
+  no cabe de un vistazo —en la portada quita 120 de 153—, y aquí la región mediana tiene **17**
+  puertos y la provincia mediana **5**: el control y su nota de 63 palabras pesarían más que la
+  lista que filtran. Además, en **7 de las 24 provincias** «Solo los medidos» dejaría la página
+  vacía (Alicante 11/0, Barcelona 9/0, Castellón 3/0, Lugo 2/0, Gipuzkoa 2/0, Sevilla 1/0, Ceuta
+  1/0). Quien quiera filtrar tiene el catálogo entero en la portada, a un toque. El razonamiento
+  completo, en `apps/web/design-brief.md` §7 quater.
+- **El `null` del error de hora se documenta por su motivo real, con las dos cifras.** El contrato
+  estrenado por T-14B explicaba los `null` de `hw_time_err_p95_min` con un solo motivo —«la
+  observación existe pero no tiene pleamares identificables»— y eso es cierto en **13** puertos y
+  falso en **118**: en esos 118 no hay observación ninguna (`rmse_m: null`), y su propia ficha lo
+  venía diciendo con otras palabras desde T-09. Dos superficies publicadas del mismo portal
+  afirmando hechos contrarios sobre el mismo `null`. `apps/api/README.md` publica ahora los tres
+  casos en una tabla, cada uno con la frase con la que la ficha lo cuenta y con su cifra contada del
+  dataset: **118 de 153** sin observación, **13 de 153** micromareales medidos y **22 de 153**
+  medidos con pleamares (131 `null` en total). Y se dice que **no hay un cuarto caso**: un error de
+  hora medido contra una observación que no existe es imposible por construcción.
+- **Los gates atan el significado, no la presencia** — que es exactamente por lo que esto reapareció:
+  T-09 ya había arreglado la misma confusión en la ficha, y volvió cuando el dato estrenó una
+  superficie nueva porque lo único gateado era que el campo **estuviera**. Ahora: `/v1/ports`
+  clasifica cada puerto en su caso y lo compara con `metrics.samples` y `matched_extremes`, dos
+  contadores del QC que **no viajan por el API** y que nadie puede ajustar «para que pase»; y el
+  recorrido adversario recalcula las cifras de la tabla del contrato desde el dataset y clasifica las
+  **153 fichas construidas** por lo que dicen sus filas, exigiendo el mismo reparto puerto a puerto.
+- **Comprobados mordiendo, los cuatro.** Poner un error de hora a un puerto sin observación
+  (Alicante) deja **verdes los dos gates de presencia de T-14B** y pone rojo el nuevo: «alicante:
+  /v1/ports lo publica como «imposible» (rmse_m null, hw_time_err_p95_min 12.3) y el QC del dataset
+  dice «sin observación» (0 muestras de observación, 0 pleamares casadas)». Bajar la cifra del
+  contrato de 118 a 117 da «las cifras de la tabla del contrato no son las del dataset». Reescribir
+  el motivo con la frase vieja da «el contrato explica el null «sin observación» con otras palabras
+  que la ficha del puerto». Y quitarle la señal a **un solo puerto** —la forma real de romperse
+  esto— da «vigo: su entrada de /mareas/galicia/ no dice «medida»» y «vigo: su entrada de
+  /mareas/galicia/pontevedra/ no dice «medida»», con los dos recorridos adversarios en rojo
+  nombrándolo también.
+- **Los tres recorridos adversarios se quedan como gate permanente**: se les ha quitado el
+  `test.fail()` con el que afirmaban el defecto y ahora vigilan el arreglo. Suite: `pnpm test`
+  519/0, Playwright 48/48, Deno 23/0 y 7/0, `pnpm lint` y el anti-slop de UI **LIMPIO**.
+- **Sigue abierto, a propósito**: H-3 (el filtro ordena por procedencia y no por error: Puerto del
+  Rosario, «medida», RMSE 1,3424 m, sobrevive al filtro; San Sebastián de la Gomera, «estimada»,
+  grade B, 0,0364 m, se esconde) es una decisión de producto y la toma el humano, no este PR.
+
 ## 2026-08-29 — T-14B · la calidad deja de ser un dato que hay que ir a buscar
 
 El proyecto sabía de cada puerto si su predicción está medida y con cuánto error, y lo decía bien

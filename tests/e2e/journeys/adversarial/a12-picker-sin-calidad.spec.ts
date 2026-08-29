@@ -4,18 +4,23 @@
  * La promesa que se ataca, en una línea: *en los sitios donde alguien **elige** un puerto, la
  * calidad de su predicción está a la vista*.
  *
- * T-14B la cumple en la portada y en `GET /v1/ports`. Pero el portal tiene **tres** listas de
+ * T-14B la cumplía en la portada y en `GET /v1/ports`. Pero el portal tiene **tres** listas de
  * puertos, no una, y las otras dos son las de la ruta que la propia portada llama canónica: su
  * primer enlace es «Ver todas las regiones» → `/mareas/` → `/mareas/<region>/` (que lista los
  * puertos de la región, agrupados por provincia) → `/mareas/<region>/<provincia>/` (que los lista
- * otra vez). En esas dos, los 153 puertos vuelven a presentarse planos: sin «medida», sin
- * «estimada» y sin `data-estimado`.
+ * otra vez). En esas dos los 153 puertos se presentaban planos: sin «medida», sin «estimada». O
+ * sea, el último clic antes de elegir puerto se seguía dando a ciegas, que es exactamente el
+ * problema que la trayectoria vino a quitar. Por eso el ataque afirma **el comportamiento
+ * correcto** (la misma señal, en cualquier lista de puertos) y no el síntoma.
  *
- * O sea, el último clic antes de elegir puerto —el que se da en la página de la provincia— se sigue
- * dando a ciegas, que es exactamente el problema que la trayectoria vino a quitar. No es un fallo
- * de implementación de lo que se implementó: es alcance que se quedó fuera, y por eso el ataque
- * afirma **el comportamiento correcto** (la misma señal, en cualquier lista de puertos) y no el
- * síntoma.
+ * **CORREGIDO** (H-1, arreglo de T-14B): las dos páginas construyen sus entradas con
+ * `estimada: puerto.quality.estimated`, o sea con el mismo componente (`Indice.astro`) y el mismo
+ * vocabulario que la portada. El filtro no baja con la señal, y el porqué está medido en
+ * `apps/web/design-brief.md` §7 quater.
+ *
+ * **TRINQUETE**: el `test.fail()` se ha quitado y estos dos recorridos se quedan como **gate
+ * permanente**. Un recorrido adversario arreglado no se borra: se queda vigilando, y lo que vigila
+ * es que la señal no se quede otra vez en una sola de las tres listas.
  *
  * Se ataca con el motor de JavaScript apagado y contra el HTML de `dist/`, que es el artefacto que
  * se publica.
@@ -69,9 +74,8 @@ test("A12 · la lista de puertos de una región dice la calidad de cada uno, com
   page,
   qa,
 }) => {
-  test.fail(); // hallazgo ABIERTO (ledger 2026-08-29). Quitar cuando la señal alcance estas listas.
   // Doce navegaciones a páginas estáticas: sobra tiempo, pero el reloj por defecto (30 s) se queda
-  // corto y un test adversario que caduca es un `test.fail()` en verde por el motivo equivocado.
+  // corto y un gate que caduca es un rojo que no habla del sitio, sino del reloj.
   test.setTimeout(120_000);
 
   const puertos = catalogo();
@@ -113,8 +117,6 @@ test("A12 · el último clic antes del puerto —la página de la provincia— t
   page,
   qa,
 }) => {
-  test.fail(); // hallazgo ABIERTO (ledger 2026-08-29).
-
   const puertos = catalogo();
 
   await cerrarLaSalidaAInternet(page);

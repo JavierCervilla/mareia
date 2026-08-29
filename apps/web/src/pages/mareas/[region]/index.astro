@@ -4,6 +4,17 @@
  *
  * Enseña las provincias **y sus puertos** en el mismo golpe de vista: en una región con dos o tres
  * provincias, obligar a un toque más para ver cuatro puertos sería burocracia de navegación.
+ *
+ * Cada puerto dice si su marea está **medida** ahí o es una **estimación**, con la misma palabra y
+ * el mismo componente que la portada. T-14B dio la señal a la portada y la dejó fuera de aquí, y el
+ * pase adversario midió lo que eso costaba: 153 de 153 puertos mudos en estas doce páginas, que son
+ * las de la ruta que la propia portada llama canónica («Ver todas las regiones»). Una señal que
+ * solo está en una de las tres listas de puertos del portal no quita la omisión en el punto de
+ * decisión: la mueve un clic más abajo.
+ *
+ * Lo que **no** baja aquí es el filtro por calidad: es un mando para descartar en una lista que no
+ * cabe de un vistazo (153 en la portada), y la región mediana tiene 17 puertos. El razonamiento
+ * completo, con las cifras, en `apps/web/design-brief.md` §7 quater.
  */
 import Indice from "../../../componentes/Indice.astro";
 import Migas from "../../../componentes/Migas.astro";
@@ -62,6 +73,7 @@ const migas = migasDeRegion({ slug: region.slug, name: region.nombre });
           entradas={provincia.puertos.map((puerto) => ({
             nombre: puerto.name,
             ruta: rutaPuerto(puerto),
+            estimada: puerto.quality.estimated,
           }))}
         />
       </section>

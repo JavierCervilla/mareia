@@ -204,6 +204,101 @@ Deno.test("el catálogo se puede filtrar por calidad con una sola petición", as
   });
 });
 
+/**
+ * **El gate del significado del `null`** (arreglo de H-2 del pase adversario de T-14B).
+ *
+ * Lo que T-14B gateó fue que el `null` **estuviera** —`in` y no `!== undefined`—, y eso lo hizo
+ * bien. Lo que se le escapó es lo que el `null` **quiere decir**: el contrato explicaba los 131
+ * `null` de `hw_time_err_p95_min` con el motivo de 13 de ellos («la observación existe pero no
+ * tiene pleamares identificables») cuando en 118 no hay observación ninguna. Un `null` presente y
+ * explicado con el motivo equivocado afirma algo falso con más autoridad que un hueco.
+ *
+ * Así que este test no cuenta campos: clasifica cada `null` **del cuerpo servido** en uno de los
+ * dos casos que documenta `apps/api/README.md` y comprueba la clasificación contra un campo
+ * **independiente** del dataset, `metrics.samples` —cuántas muestras de observación hubo—, que no
+ * viaja por el API y que por tanto nadie puede ajustar «para que pase». El día que un puerto
+ * publique un error de hora medido contra una observación que no existe, o un `rmse_m: null` con
+ * 38.000 muestras, sale en rojo **con su slug**.
+ */
+interface MetricasDelQc {
+  readonly samples: number;
+  readonly matched_extremes: number;
+}
+
+/** Los casos del `null` que documenta el contrato, con su nombre. `imposible` no existe: por eso está. */
+type CasoDelNull = "sin observación" | "micromareal medido" | "medido con pleamares" | "imposible";
+
+async function metricasDelDataset(stationFile: string): Promise<MetricasDelQc> {
+  const station = JSON.parse(await Deno.readTextFile(`${DATA_DIR}/stations/${stationFile}`)) as {
+    quality: { metrics: MetricasDelQc };
+  };
+  return station.quality.metrics;
+}
+
+/** En qué caso cae un puerto **según lo que se sirve**: los dos campos y nada más. */
+function casoServido(calidad: CatalogQuality): CasoDelNull {
+  if (calidad.rmse_m === null) {
+    // Un error de hora medido contra una observación que no existe: el caso que no puede darse.
+    return calidad.hw_time_err_p95_min === null ? "sin observación" : "imposible";
+  }
+  return calidad.hw_time_err_p95_min === null ? "micromareal medido" : "medido con pleamares";
+}
+
+/** En qué caso cae **según el dataset**, con los dos contadores del QC que no viajan por el API. */
+function casoMedido(metricas: MetricasDelQc): CasoDelNull {
+  if (metricas.samples === 0) return "sin observación";
+  return metricas.matched_extremes === 0 ? "micromareal medido" : "medido con pleamares";
+}
+
+Deno.test("cada `null` de /v1/ports significa lo que el contrato dice que significa", async () => {
+  const puertos = await testDeps().ports.list();
+  await withApi(async (baseUrl) => {
+    const { body } = await get(baseUrl, "/v1/ports");
+    const servidos = new Map(
+      (body["ports"] as readonly { slug: string; quality: CatalogQuality }[]).map((port) => [
+        port.slug,
+        port.quality,
+      ]),
+    );
+
+    const problemas: string[] = [];
+    const cuenta = new Map<CasoDelNull, number>();
+    for (const puerto of puertos) {
+      const calidad = servidos.get(puerto.slug);
+      if (calidad === undefined) {
+        problemas.push(`${puerto.slug}: no está en /v1/ports`);
+        continue;
+      }
+      const metricas = await metricasDelDataset(puerto.stationFile);
+      const servido = casoServido(calidad);
+      const medido = casoMedido(metricas);
+      cuenta.set(medido, (cuenta.get(medido) ?? 0) + 1);
+      if (servido !== medido) {
+        problemas.push(
+          `${puerto.slug}: /v1/ports lo publica como «${servido}» (rmse_m ${calidad.rmse_m}, ` +
+            `hw_time_err_p95_min ${calidad.hw_time_err_p95_min}) y el QC del dataset dice ` +
+            `«${medido}» (${metricas.samples} muestras de observación, ` +
+            `${metricas.matched_extremes} pleamares casadas)`,
+        );
+      }
+    }
+
+    assertEquals(
+      problemas,
+      [],
+      "puertos cuyo null no significa lo que documenta apps/api/README.md",
+    );
+    // Los dos motivos tienen que existir de verdad: si uno se vaciara, el contrato estaría
+    // documentando un caso que ya no le pasa a ningún puerto, que es como empezó H-2.
+    assert(
+      (cuenta.get("sin observación") ?? 0) > 0 && (cuenta.get("micromareal medido") ?? 0) > 0,
+      `el contrato documenta dos motivos para el mismo null y el catálogo solo tiene uno: ` +
+        `${cuenta.get("sin observación") ?? 0} sin observación, ` +
+        `${cuenta.get("micromareal medido") ?? 0} micromareales medidos`,
+    );
+  });
+});
+
 Deno.test("la ficha de un puerto micromareal publica su grade C con el p95 en null", async () => {
   await withApi(async (baseUrl) => {
     const { status, cacheControl, body } = await get(baseUrl, "/v1/ports/cabo-de-palos");
