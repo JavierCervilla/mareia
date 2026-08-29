@@ -46,6 +46,26 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
 - Los tres fixtures de boletín de la web se **re-proyectaron con la función real**, no a mano: son
   capturas de lo que sirve el módulo y tenían congelada la frase vieja (una de ellas, la del
   «Renuévala», es la que el recorrido Playwright sirve como respuesta del API).
+- **Pase adversario (rol `qa-adversario`): 4 hallazgos reproducidos en rojo, abiertos con
+  trinquete.** El gate de arriba prohíbe decir de más; el pase preguntó si lo que sí se dice es
+  verdad. (a) La frase «neutra» no es neutra: afirma «no publica el boletín oficial», y la misma
+  respuesta publica el boletín en cuanto la caché sirve con el secreto ya borrado o caducado. (b) La
+  **tercera copia** de la fuga la escribe AEMET: su `descripcion` en un 401 viaja literal al `reason`
+  público y de ahí **a la pantalla**, sin pasar por el criterio que se aplicó a las dos copias
+  propias. (c) Un `exp` finito fuera del rango de `Date` lanza `RangeError` dentro de
+  `inspectAemetKey`: `/bulletin` devuelve **500** y el healthcheck revienta, que es la promesa
+  incumplida por el lado contrario — no se filtra nada porque no se publica nada. (d) `daysLeft`
+  cuenta un día entero de más desde el primer milisegundo y no cuadra con el `expiresAt` que viaja a
+  su lado (ya visible en un fixture commiteado: `-40` con 39 días transcurridos). Los cuatro viven en
+  la suite gate con `hallazgoAbierto()`, así que **CI sigue verde** y el día que se arreglen lo dice.
+  Informe: `docs/qa/informe-adversario-t18.md`; bundle: `docs/qa/bundles/t18-adversario/FAILURE.md`.
+- **Y el punto ciego que dejó la verificación, cerrado con gate y sin hallazgo**: el recorrido nunca
+  ejercitaba la URL por defecto (todos los escenarios inyectan `urls.aemet`, y `AEMET_BASE_URL` lleva
+  la seña `opendata.aemet.es`). Atacado con la forma de error **medida** del runtime de producción
+  —Deno 2.9.6: `fetch failed` con la URL en la `cause`, no en el `message`— más el timeout, la
+  segunda llamada sin envolver y el sobre que apunta a otro origen: cero señas. Quedan cuatro gates
+  nuevos vigilando, uno de ellos para que nadie vuelva a inyectar `urls.aemet` y lo apague en
+  silencio.
 
 ## 2026-08-29 — T-12 · el almanaque funciona sin cobertura, y lo dice
 
