@@ -42,8 +42,12 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   renderizadores, y la sección se publicaba **sin estilos con todo el CI en verde**. La hoja pasa a
   importarse desde el layout (que es la regla del brief) y **un test comprueba que las reglas
   siguen en la hoja publicada**.
-- **Coste medido**: la página de puerto pasa de 21.343 a 26.226 bytes (+4,9 kB, +23 %) y la hoja
-  compartida de 10.121 a 11.759 (+1,6 kB). **25 tests nuevos** (9 del módulo, 5 del recorte de
+- **Coste medido**: la hoja compartida pasa de **9.988 a 11.759 bytes** (+1.771, y esa cifra no
+  depende de la fecha del build: sale idéntica el 28-08, el 29-08 y el 01-12). La página de puerto
+  crece entre **+4.786 y +4.929 bytes** —de media +4.861, un 24 %—, medido sobre los 12 puertos en
+  esas tres fechas contra el mismo `main` construido a la par. Se publica el incremento y no un
+  tamaño absoluto porque el absoluto se mueve con el día que se construye: la página de Vigo del
+  28-08 son 24.572 bytes y la del 01-12, 24.485. **25 tests nuevos** (9 del módulo, 5 del recorte de
   bandas, 3 del registro de ventanas, 7 sobre el `dist/` construido y 1 del registry): la suite de
   la web pasa de 41 a 57 y el repositorio queda en 344 en verde.
 

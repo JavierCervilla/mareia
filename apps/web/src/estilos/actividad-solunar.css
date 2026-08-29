@@ -6,7 +6,7 @@
  * gate anti-slop escanea `.css` y no `.astro`). Se intentó que viajara con el
  * módulo —importada desde su componente— y **Astro no la incluye en el bundle**
  * cuando el componente llega por el mapa de renderizadores: la sección se
- * publicaba sin estilos y en verde. Así que viaja siempre; son 1,6 kB medidos de
+ * publicaba sin estilos y en verde. Así que viaja siempre; son 1.771 bytes medidos de
  * CSS que sobran si `fishing` se da de baja, y lo vigila un test del `dist/`.
  *
  * Ni un literal de color ni de fuente: todo sale de los tokens. La sección es
