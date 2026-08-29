@@ -35,7 +35,6 @@ test("A11 · sin red, un toque destruye la única copia del almanaque sin pregun
   context,
   qa,
 }) => {
-  test.fail(); // Hallazgo ABIERTO (bundle 71fa5adff241). Quítalo cuando un toque deje de ser definitivo.
   const arnes = await montarArnes(context);
 
   qa.step("guardar el puerto con cobertura");

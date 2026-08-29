@@ -183,11 +183,16 @@ test("el worker NO llama a skipWaiting: no le cambia el motor a una pestaña que
 });
 
 test("las navegaciones van a la red antes que a la copia: nunca una página vieja con cobertura", () => {
+  // Y van a la RED, no a la caché HTTP del navegador: un `fetch` dentro del worker puede
+  // contestarse desde ella, y entonces la garantía de ADR-02 dependería de unas cabeceras que el
+  // despliegue no fija (lo señaló el pase adversario sin poder reproducirlo).
+  assert.match(FUENTE, /fetch\(peticion, \{ cache: "no-store" \}\)/u);
+
   // La copia solo se consulta en el `catch` del `fetch`, es decir, cuando la red ha fallado.
   const cuerpo = /async function laPaginaDeLaRedODeLaCopia[\s\S]*?\n\}/u.exec(FUENTE)?.[0];
   assert.ok(cuerpo, "no encuentro la estrategia de navegación en el worker");
 
-  const posicionFetch = cuerpo.indexOf("await fetch(peticion)");
+  const posicionFetch = cuerpo.indexOf("await fetch(peticion,");
   const posicionCopia = cuerpo.indexOf("cache.match(peticion)");
   assert.ok(posicionFetch >= 0 && posicionCopia >= 0);
   assert.ok(

@@ -42,7 +42,11 @@
       navegador** con las constantes armónicas del puerto y el motor de `domain-core` — no es un
       caché de páginas. Un favorito guarda **constantes** (2,6 kB) y no el almanaque del año
       (49,2 kB): 18,6× menos y sin tope de año. La política de actualización del worker está en
-      `docs/adr/ADR-02` (HTML `network-first`, sin `skipWaiting`, sin banner)
+      `docs/adr/ADR-02` (HTML `network-first` con `cache: "no-store"`, sin `skipWaiting`, sin banner)
+      (pase adversario cerrado: los 4 hallazgos arreglados y sus 6 ataques como gate permanente — el
+      sello mira los dos almacenes y ya no promete una copia que no está, la poda exige un censo
+      completo, la app instalada guarda su puerta de entrada y sin cobertura no se ofrece borrar el
+      almanaque que se está leyendo; ver `docs/qa/informe-adversario-t12.md`)
 
 ## Hito 4 — España completa y transparencia
 

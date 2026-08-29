@@ -92,20 +92,55 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   pueden ser HTML y en qué páginas se sirven. La cuenta sigue siendo **exacta** página a página, y la
   portada, el 404 y los índices geográficos siguen en **cero** JavaScript.
 - **Coste medido en la página de puerto**: el bundle que baja *cualquiera* que abra un puerto sube
-  **14 764 B** (5 414 comprimidos) — el motor de mareas, que son **70 372 B**, va en un trozo aparte
+  **16 639 B** (5 970 comprimidos) — el motor de mareas, que son **70 372 B**, va en un trozo aparte
   con `import()` dinámico y solo lo baja quien pide otro día o guarda el puerto. Sin ese corte serían
   **83 980 B** para todo el mundo (medido haciendo estático el `import()` y reconstruyendo). El
-  `/sw.js` publicado pesa **22 585 B** (7 397 comprimidos), comentarios incluidos: son su
-  documentación y su auditoría. Un favorito ocupa en la Cache API **147 211 B** el primero —página
-  28 778, hoja de estilos 15 883, isla meteo 13 234, bundle de la PWA 14 764, su trozo común 1 643,
-  motor 70 372 y constantes 2 537— y **31 315 B** cada siguiente (su página, 28 778, más sus
-  constantes, 2 537), porque los assets se comparten. Todas las cifras en bytes y kB de mil, medidas
-  sobre el `dist/` de este commit, y las comprimidas con `zlib.gzipSync(datos, { level: 9 })`.
+  `/sw.js` publicado pesa **27 329 B** (8 771 comprimidos), comentarios incluidos: son su
+  documentación y su auditoría. Un favorito ocupa en la Cache API **164 547 B** el primero —página
+  28 906, hoja de estilos 15 883, isla meteo 13 234, bundle de la PWA 16 639, su trozo común 1 698,
+  motor 70 372, constantes 2 537 y el camino desde la portada 15 278— y **36 804 B** cada siguiente
+  (su página, sus constantes y los dos índices que no comparte), porque el resto ya está. Todas las
+  cifras en bytes y kB de mil, medidas sobre el `dist/` de este commit, y las comprimidas con
+  `zlib.gzipSync(datos, { level: 9 })`.
+- **El sello mira los dos almacenes, no uno.** Prometía los bytes de la caché del worker
+  componiéndose **solo** con IndexedDB, y los dos se separan por caminos nada exóticos: un `addAll`
+  que falla porque un fichero con hash ya no está en el servidor, el barrido de un cambio de esquema,
+  un desalojo del navegador. La pantalla llegaba a decir «Guardado en este dispositivo… La página se
+  guarda con su hoja de estilos» con la caché **vacía**, y quien lo leía se iba a la playa creyendo
+  que llevaba el almanaque encima. Hay dos estados nuevos para los dos lados de esa separación —«La
+  copia de esta página ya no está en este dispositivo» y «Guardado en este dispositivo, pero sin sus
+  constantes»— y el invariante «el sello afirma que hay copia si y solo si la hay» se comprueba en
+  las ocho combinaciones sin navegador y en tres recorridos con él.
+- **La app instalada abre sin red.** El manifiesto invita a instalar Mareia y quien acepta se queda
+  sin barra de direcciones: su única puerta es el `start_url`, que es `/` y **no se guardaba nunca**,
+  así que el icono de la pantalla de inicio abría el error de red del navegador con el almanaque
+  intacto a un toque. Un favorito guarda ahora **el camino hasta él** —portada, índice de mareas, su
+  región y su provincia: **15 278 B** los cuatro, compartidos entre favoritos— y hay un test que lee
+  el `start_url` del manifiesto **publicado** y exige que esté entre lo que se guarda.
+- **Sin cobertura no se ofrece borrar el almanaque que se está leyendo.** Era la única acción
+  destructiva de la sección, pegada al sello que se lee justo para comprobar la copia, sin
+  confirmación y sin deshacer — y sin red no se podía rehacer, cosa que la propia página decía dos
+  estados más arriba. Ahora se dice y se ofrece cuando hay cobertura, igual que ya pasaba con guardar.
+- **La poda exige un censo completo, no solo legible.** El fail-safe anterior no evitaba el borrado:
+  lo aplazaba un paso. Con el registro ilegible se escribía un censo de un puerto indistinguible de
+  uno completo, y el siguiente «dejar de guardar» lo trataba como la verdad y borraba los ficheros
+  del otro favorito. El registro lleva ahora si es completo, y **la página le manda el censo entero**
+  desde IndexedDB para repararlo (tercer verbo del protocolo).
+- **Y dos cosas que el pase señaló sin poder reproducir, cerradas igual.** El `fetch` de las
+  navegaciones va con `cache: "no-store"`: un `fetch` dentro del worker puede contestarse desde la
+  caché HTTP del navegador, y entonces el `network-first` de ADR-02 dependería de unas cabeceras que
+  el despliegue no fija — si la garantía depende de eso, no existe. Y las operaciones sobre el
+  registro se serializan en una cola: la carrera estaba en el código aunque no se supiera disparar.
 - **Los gates de antes siguen mordiendo con el worker puesto**: los pases adversarios de T-09, T-10 y
   T-11 quedan en verde sin tocar un solo assert suyo, salvo los dos que contaban scripts, que se
-  re-apuntan al registro de scripts de core. `apps/web` pasa de **114 a 172 tests** y los recorridos
-  Playwright de **25 a 35**, con los 10 nuevos cortando la red de verdad (`context.setOffline` +
-  enrutado de contexto, porque las peticiones del worker no pasan por la página).
+  re-apuntan al registro de scripts de core. `apps/web` pasa de **114 a 193 tests** y los recorridos
+  Playwright de **25 a 44**, cortando la red de verdad (`context.setOffline` + enrutado de contexto,
+  porque las peticiones del worker no pasan por la página).
+- **Pase adversario cerrado**: los 4 hallazgos arreglados y sus 6 recorridos **como gate permanente**,
+  cada uno comprobado en rojo revirtiendo su arreglo antes de retirar el trinquete. Ver
+  `docs/qa/informe-adversario-t12.md`. Los dos juicios de producto que dejó abiertos —el «segundo
+  día» y el orden de lectura del sello cuando la copia es vieja— quedan anotados como trabajo, no
+  parcheados al final de la trayectoria.
 
 ## 2026-08-29 — T-11 · los 7 hallazgos del pase adversario, arreglados
 

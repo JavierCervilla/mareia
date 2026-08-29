@@ -50,7 +50,6 @@ test("A4 · el registro que escribe el fail-safe deja al otro favorito sin un so
   context,
   qa,
 }) => {
-  test.fail(); // Hallazgo ABIERTO (bundle bb2e9b141d2e). Quítalo cuando la poda exija un censo completo.
   const arnes = await montarArnes(context);
 
   qa.step("guardar Vigo con cobertura: es el favorito que hay que proteger");

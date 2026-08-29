@@ -52,6 +52,16 @@ En concreto:
    página de ayer a quien solo tiene un 3G lento, y una tabla de mareas de ayer con cara de hoy es
    el fallo que este portal no se puede permitir. Sin cobertura el `fetch` falla en milisegundos y
    la copia entra sola.
+5 bis. **Y ese `fetch` va con `cache: "no-store"`, que es lo que hace que el punto 5 sea una
+   garantía del worker y no del servidor.** Un `fetch` hecho dentro de un service worker **puede
+   contestarse desde la caché HTTP del navegador**: con `Last-Modified` y sin `Cache-Control` —que es
+   lo que `docs/despliegue.md` describe hoy para producción— Chromium aplica caché heurística y
+   serviría HTML viejo *teniendo red*, que es exactamente lo que este documento promete que no puede
+   pasar. Lo señaló el pase adversario de T-12 sin poder reproducirlo (el servidor del arnés no manda
+   esas cabeceras, y montar uno que sí lo hiciera habría medido el andamio). Se cierra aquí en vez de
+   dejarlo en manos del despliegue: **si la garantía depende de una cabecera que el despliegue no
+   fija, la garantía no existe**. Fijar bien las cabeceras en producción sigue siendo buena idea; ya
+   no es la condición de nada.
 6. **Los assets con hash van `cache-first`**, y ahí es seguro: `/_astro/AlmanaqueLayout.<hash>.css`
    cambia de URL cuando cambia de contenido, así que una copia guardada no puede ser la versión
    vieja de nada.
@@ -123,7 +133,10 @@ Tres cosas, y conviene tenerlas escritas:
 - `apps/web/src/pwa-construido.test.ts` — el `/sw.js` del `dist/` es exactamente el que genera el
   fuente de este commit.
 - `tests/e2e/journeys/offline.spec.ts` — con cobertura, la navegación pasa por el worker **y
-  transfiere bytes**: la sirvió la red, no la caché. Y dos favoritos guardados en dos builds
+  transfiere bytes**: la sirvió la red, no la caché.
+- `tests/e2e/journeys/adversarial/` — los seis recorridos del pase adversario de T-12, ya en verde y
+  como gate permanente: el sello no promete una copia que no está, la poda no borra lo que no sabe
+  que sobra, la app instalada abre sin red y un toque sin cobertura no destruye el almanaque. Y dos favoritos guardados en dos builds
   distintos conservan cada uno sus ficheros, que es la parte del punto 7 que se comprobaba sola.
 
 ## Apéndice — por qué el worker lleva un registro de favoritos

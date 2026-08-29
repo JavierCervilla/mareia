@@ -78,7 +78,6 @@ test("A3 · un fichero que ya no está deja el favorito sin página, y la recarg
   context,
   qa,
 }) => {
-  test.fail(); // Hallazgo ABIERTO (bundle b3d55218409f). Quítalo cuando el sello mire la caché.
   await montarArnes(context);
 
   qa.step("abrir el puerto y esperar al worker");
@@ -92,10 +91,15 @@ test("A3 · un fichero que ya no está deja el favorito sin página, y la recarg
 
   qa.step("guardar el puerto: las constantes bajan, los bytes de la página no");
   await page.locator(`${SECCION_SIN_RED} [data-sin-red-accion]`).click();
-  await expect(page.locator(`${SECCION_SIN_RED} .sin-red__titular`)).toContainText(
-    /^Guardado en este dispositivo hace /u,
-    { timeout: 20_000 },
-  );
+  // ESPERA CORREGIDA AL ARREGLAR (no es el assert; el assert es `elSelloYLaCacheDicenLoMismo`).
+  // Esperaba a «Guardado en este dispositivo hace …», que era el síntoma del hallazgo: con el
+  // defecto puesto, el sello afirmaba eso mismo. Arreglado, el sello dice la verdad y esa espera se
+  // agotaba, o sea que el recorrido se quedaba en rojo **por el arreglo**. Se espera ahora al hecho
+  // que el propio ataque describe —«la página lo dice: una nota debajo del botón»—, que ocurre igual
+  // se arregle por donde se arregle. Misma corrección que el pase hizo en A11 y por el mismo motivo.
+  await expect(page.locator(`${SECCION_SIN_RED} [data-sin-red-nota]`)).toBeVisible({
+    timeout: 20_000,
+  });
 
   qa.step("y quien lee recarga, que es lo primero que hace cualquiera al volver a la página");
   await page.reload();
@@ -110,7 +114,6 @@ test("A3 · con la caché de páginas barrida, el sello sigue prometiendo la cop
   context,
   qa,
 }) => {
-  test.fail(); // Hallazgo ABIERTO (bundle e5174ab760e4).
   await montarArnes(context);
 
   qa.step("guardar el puerto con cobertura");
@@ -133,7 +136,6 @@ test("A3 · con IndexedDB desalojada, el sello niega una copia que el worker sí
   context,
   qa,
 }) => {
-  test.fail(); // Hallazgo ABIERTO (bundle a6345d9e9ceb).
   await montarArnes(context);
 
   qa.step("guardar el puerto con cobertura");

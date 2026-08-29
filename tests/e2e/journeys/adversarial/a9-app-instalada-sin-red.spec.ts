@@ -34,7 +34,6 @@ test("A9 · con un puerto guardado, el icono de la pantalla de inicio no abre na
   context,
   qa,
 }) => {
-  test.fail(); // Hallazgo ABIERTO (bundle fe9da3f631b8). Quítalo cuando el arranque abra sin red.
   const arnes = await montarArnes(context);
 
   qa.step("leer el start_url del manifiesto publicado, que es lo que abre la app instalada");
