@@ -90,7 +90,9 @@ Y lo que el `verificador` rechazó de todo lo anterior, arreglado aquí mismo:
   excepción contextual, **A-19 en rojo** (`mareas/cataluna/tarragona/tarragona/index.html: «2.902»`);
   con la de forma, **verde con el defecto delante**. Y el recorrido nuevo `A-19 sensibilidad` deja
   eso como gate: coge cada cifra española publicada con forma de millar, le devuelve el punto y
-  exige que el detector la denuncie — con la excepción por forma salen **301** sin denunciar.
+  exige que el detector la denuncie — con la excepción por forma salen **352** sin denunciar,
+  que son las mismas 352 de arriba: la cifra que este renglón publicaba antes (301) no la reproduce
+  ninguna de las dos mutaciones de la excepción, y la midió el `verificador` en su segundo rechazo.
 
 Y un tope que ya no medía nada, que llegó al mergear `main` (T-12):
 

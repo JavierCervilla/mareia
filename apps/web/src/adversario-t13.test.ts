@@ -336,9 +336,16 @@ test("A-17 premisa · la congelación inyectada se dibuja plana en la curva publ
  * detector real a una sola meseta dejaba a A-17 en verde, ciego a los 65 puertos que dice vigilar
  * (lo reprodujo el `verificador` sobre el commit e682097 y por eso lo rechazó).
  *
- * Comprobado con el defecto puesto otra vez, ahora sobre el módulo compartido
- * (`tramosPlanos` → `return [tramoPlanoMasLargo(dia)]`): **A-17 se pone en rojo con los 65 puertos**
- * y el gate A-1 sigue verde, que es exactamente el agujero que este ataque existe para tapar.
+ * Comprobado con el defecto puesto otra vez, ahora sobre el módulo compartido: haciendo que
+ * `congelacionesDeLaCurva` recorra sólo `tramoPlanoMasLargo(dia)` en vez de todos los tramos,
+ * **A-17 se pone en rojo con los 65 puertos** y el gate A-1 sigue verde, que es exactamente el
+ * agujero que este ataque existe para tapar.
+ *
+ * La receta importa: no vale escribirla como «sustituir `tramosPlanos` por `tramoPlanoMasLargo`»,
+ * porque la segunda está definida en términos de la primera y esa sustitución es recursión infinita
+ * —revienta con desbordamiento de pila en vez de dar el rojo que se promete—. Lo dice quien tuvo
+ * que aplicarla al pie de la letra: este fichero ya fue rechazado una vez por documentar una
+ * garantía que no se cumplía, y una receta que no reproduce es la misma falta con otra cara.
  */
 test("A-17 · ninguna congelación real de la curva se le escapa al detector", async () => {
   const ataques = await ataquesDeCongelacion(fechaDeHoy());
