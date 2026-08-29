@@ -162,7 +162,16 @@ interface RGB {
   readonly b: number;
 }
 
-/** OKLCH (L en 0-1, C, H en grados) → sRGB con codificación gamma, en 0-1. */
+/**
+ * OKLCH (L en 0-1, C, H en grados) → sRGB con codificación gamma, en 0-1.
+ *
+ * El linter anti-slop de UI busca funciones de color literales y el nombre de ésta acaba en las tres
+ * letras de una de ellas seguidas del paréntesis, así que la caza: es un falso positivo. Aquí no se
+ * escribe ningún color —los que se miden salen de `tokens.css` en tiempo de test—, se convierten.
+ * Se exime la línea en vez de renombrarla a `oklchASRGB`: renombrar sería escribir para el grep, y
+ * la excepción se ve en el diff y muere con el fichero.
+ */
+// anti-slop-allow: `rgb(` aquí es el nombre de la conversión OKLCH→sRGB, no un color literal
 function oklchASrgb(L: number, C: number, H: number): RGB {
   const h = (H * Math.PI) / 180;
   const a = C * Math.cos(h);
@@ -210,6 +219,7 @@ function tokenOklch(css: string, nombre: string, desde: number): RGB {
   const encontrado = patron.exec(css);
   assert.ok(encontrado, `no se encontró el token ${nombre} a partir del carácter ${desde}`);
   const [, l = "0", c = "0", h = "0"] = encontrado;
+  // anti-slop-allow: `rgb(` es el nombre de la conversión OKLCH→sRGB; el color lo pone tokens.css
   return oklchASrgb(Number(l) / 100, Number(c), Number(h));
 }
 
