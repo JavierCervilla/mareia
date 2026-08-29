@@ -189,6 +189,46 @@ test("cada aviso de la cabecera aparece solo en los puertos que le tocan", async
   );
 });
 
+/**
+ * Que el aviso y la nota de calidad de la misma página no se contradigan.
+ *
+ * El aviso de puerto estimado heredó su prosa del criterio viejo (`rmse_m === null`) y afirmaba
+ * para **todos** los estimados que «no publicamos ni el error medio frente a la observación ni el
+ * error de hora de la pleamar: no los hemos medido». Con el criterio nuevo (`estimated`) eso dejó
+ * de ser equivalente: Garachico y San Sebastián de la Gomera tienen mareógrafo del IOC en la
+ * dársena y constantes prestadas de veinte kilómetros, así que su error **sí** está medido y la
+ * sección de transparencia lo publica veinte líneas más abajo, en la misma página. Negar un número
+ * propio es el reverso exacto del pecado que T-13 vino a corregir, y lo encontró una lectura
+ * humana; a partir de aquí lo encuentra el CI.
+ */
+test("ninguna página niega un error que ella misma publica", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  const NIEGA = "no publicamos ni el error medio frente a la observación";
+  const AFIRMA = "sí hemos podido comparar la predicción con un mareógrafo de este puerto";
+  const fechaIso = fechaDelBuild();
+  const contradicciones: string[] = [];
+  for (const puerto of await cargarPuertos()) {
+    const { station } = await cargarDatosDePuerto(puerto.slug, fechaIso);
+    const html = textoDe(paginaDe(rutaPuerto(puerto)));
+    const medido = station.quality.rmse_m !== null;
+    if (medido && html.includes(NIEGA)) {
+      contradicciones.push(
+        `${puerto.slug}: niega el error medido y publica ${station.quality.rmse_m} m`,
+      );
+    }
+    if (station.quality.estimated && medido && !html.includes(AFIRMA)) {
+      contradicciones.push(`${puerto.slug}: estimado con error medido y no lo dice`);
+    }
+    if (station.quality.estimated && !medido && !html.includes(NIEGA)) {
+      contradicciones.push(`${puerto.slug}: estimado sin medir y no lo dice`);
+    }
+  }
+  assert.deepEqual(contradicciones, []);
+});
+
 test("el sitemap lista todas las páginas construidas y ninguna más", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);

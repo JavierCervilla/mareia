@@ -59,108 +59,61 @@ class GradeResult:
     reason: str
 
 
-def _first_failure(
-    level: str, metrics: Metrics, epoch_years: float, gauge_distance_km: float
-) -> str | None:
-    """Primer umbral de ``level`` que el puerto incumple, o ``None`` si los cumple todos."""
+def _failures(level: str, metrics: Metrics, epoch_years: float, gauge_distance_km: float) -> list[str]:
+    """**Todos** los umbrales de ``level`` que el puerto incumple, en el orden en que se comprueban.
+
+    La diferencia con devolver sólo el primero no es cosmética. En T-05 el informe decía que a Vigo
+    lo que le impedía llegar a A era el coste de truncar el dataset, y de ahí salió la predicción de
+    que añadir los cinco constituyentes que faltaban lo subiría a A. El coste bajó como estaba
+    previsto —de 1,30 a 0,69 cm RMS— y Vigo siguió en B, porque también incumplía el error de hora
+    de pleamar (25,4 min sobre un umbral de 20) y el motivo, que se paraba en el primer fallo, nunca
+    lo dijo. Un informe que sólo nombra un obstáculo invita a predecir que quitarlo basta.
+
+    El primer intento de arreglo dejó fuera justo las ramas de «sin observaciones», que son las
+    mayoritarias desde que T-13 amplió el catálogo: 39 puertos publicaban un motivo que sólo culpaba
+    a la distancia al mareógrafo y callaba que tampoco había con qué validar. Por eso ahora hay una
+    sola función, la que evalúa, y no dos listas que puedan desincronizarse.
+    """
+    unmet: list[str] = []
     if gauge_distance_km > MAX_GAUGE_DISTANCE_KM[level]:
-        return (
+        unmet.append(
             f"el mareógrafo más cercano está a {gauge_distance_km:.1f} km > "
             f"{MAX_GAUGE_DISTANCE_KM[level]:.0f} km"
         )
     if metrics.truncation_rms_m > MAX_TRUNCATION_RMS_M[level]:
-        return (
+        unmet.append(
             f"coste de truncar al catálogo del motor {metrics.truncation_rms_m * 100:.1f} cm RMS > "
             f"{MAX_TRUNCATION_RMS_M[level] * 100:.0f} cm"
         )
     if epoch_years < MIN_EPOCH_YEARS[level]:
-        return f"registro de {epoch_years:.0f} años < {MIN_EPOCH_YEARS[level]:.0f}"
+        unmet.append(f"registro de {epoch_years:.0f} años < {MIN_EPOCH_YEARS[level]:.0f}")
     # El contraste entre fuentes veta cuando existe y desmiente.
     if metrics.cross_rmse_m is not None and metrics.cross_rmse_m > MAX_CROSS_RMSE_M[level]:
-        return (
+        unmet.append(
             f"ningún análisis independiente corrobora las constantes "
             f"(mejor acuerdo {metrics.cross_rmse_m:.3f} m > {MAX_CROSS_RMSE_M[level]:.2f} m)"
         )
     if metrics.nrmse is None or metrics.hw_time_err_p95_min is None:
         if level == "A":
             if metrics.nrmse is not None and not metrics.extremes_usable:
-                return (
+                unmet.append(
                     "la observación no tiene pleamares identificables (el residuo meteorológico "
                     "genera más extremos que la marea), así que no se puede medir su hora"
                 )
-            return "sin observaciones con las que medir la predicción"
-        if metrics.cross_rmse_m is None and metrics.nrmse is None:
-            return "sin observaciones ni segunda fuente: no hay con qué validar"
+            else:
+                unmet.append("sin observaciones con las que medir la predicción")
+        elif metrics.cross_rmse_m is None and metrics.nrmse is None:
+            unmet.append("sin observaciones ni segunda fuente: no hay con qué validar")
         if metrics.nrmse is not None and metrics.nrmse > MAX_NRMSE[level]:
-            return f"RMSE normalizado {metrics.nrmse:.3f} > {MAX_NRMSE[level]:.2f}"
-        return None
+            unmet.append(f"RMSE normalizado {metrics.nrmse:.3f} > {MAX_NRMSE[level]:.2f}")
+        return unmet
     if metrics.nrmse > MAX_NRMSE[level]:
-        return f"RMSE normalizado {metrics.nrmse:.3f} > {MAX_NRMSE[level]:.2f}"
+        unmet.append(f"RMSE normalizado {metrics.nrmse:.3f} > {MAX_NRMSE[level]:.2f}")
     if metrics.hw_time_err_p95_min > MAX_EXTREME_TIME_P95_MIN[level]:
-        return (
+        unmet.append(
             f"error de hora de extremo p95 {metrics.hw_time_err_p95_min:.0f} min > "
             f"{MAX_EXTREME_TIME_P95_MIN[level]:.0f} min"
         )
-    return None
-
-
-def _failures(level: str, metrics: Metrics, epoch_years: float, gauge_distance_km: float) -> list[str]:
-    """**Todos** los umbrales de ``level`` que el puerto incumple, no sólo el primero.
-
-    La diferencia no es cosmética. En T-05 el informe decía que a Vigo lo que le impedía llegar a A
-    era el coste de truncar el dataset, y de ahí salió la predicción de que añadir los cinco
-    constituyentes que faltaban lo subiría a A. El coste bajó como estaba previsto —de 1,30 a
-    0,69 cm RMS— y Vigo siguió en B, porque también incumplía el error de hora de pleamar (25,4 min
-    sobre un umbral de 20) y el motivo, que se paraba en el primer fallo, nunca lo dijo. Un informe
-    que sólo nombra un obstáculo invita a predecir que quitarlo basta.
-    """
-    unmet: list[str] = []
-    remaining = metrics
-    failure = _first_failure(level, remaining, epoch_years, gauge_distance_km)
-    if failure is not None:
-        unmet.append(failure)
-    # El resto de umbrales se comprueban aparte porque `_first_failure` corta en el primero: aquí se
-    # repasan todos los que se pueden evaluar de forma independiente.
-    checks: list[tuple[bool, str]] = [
-        (
-            gauge_distance_km > MAX_GAUGE_DISTANCE_KM[level],
-            f"el mareógrafo más cercano está a {gauge_distance_km:.1f} km > "
-            f"{MAX_GAUGE_DISTANCE_KM[level]:.0f} km",
-        ),
-        (
-            metrics.truncation_rms_m > MAX_TRUNCATION_RMS_M[level],
-            f"coste de truncar al catálogo del motor {metrics.truncation_rms_m * 100:.1f} cm RMS > "
-            f"{MAX_TRUNCATION_RMS_M[level] * 100:.0f} cm",
-        ),
-        (
-            epoch_years < MIN_EPOCH_YEARS[level],
-            f"registro de {epoch_years:.0f} años < {MIN_EPOCH_YEARS[level]:.0f}",
-        ),
-        (
-            metrics.cross_rmse_m is not None and metrics.cross_rmse_m > MAX_CROSS_RMSE_M[level],
-            f"ningún análisis independiente corrobora las constantes "
-            f"(mejor acuerdo {metrics.cross_rmse_m:.3f} m > {MAX_CROSS_RMSE_M[level]:.2f} m)"
-            if metrics.cross_rmse_m is not None
-            else "",
-        ),
-        (
-            metrics.nrmse is not None and metrics.nrmse > MAX_NRMSE[level],
-            f"RMSE normalizado {metrics.nrmse:.3f} > {MAX_NRMSE[level]:.2f}"
-            if metrics.nrmse is not None
-            else "",
-        ),
-        (
-            metrics.hw_time_err_p95_min is not None
-            and metrics.hw_time_err_p95_min > MAX_EXTREME_TIME_P95_MIN[level],
-            f"error de hora de extremo p95 {metrics.hw_time_err_p95_min:.0f} min > "
-            f"{MAX_EXTREME_TIME_P95_MIN[level]:.0f} min"
-            if metrics.hw_time_err_p95_min is not None
-            else "",
-        ),
-    ]
-    for failed, message in checks:
-        if failed and message and message not in unmet:
-            unmet.append(message)
     return unmet
 
 

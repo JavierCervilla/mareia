@@ -17,7 +17,7 @@ eligió y por qué, cuánto se equivoca la predicción contra el mar de verdad y
 
 ```sh
 cd data/pipeline
-make all            # entorno + dataset + informe QC + tests
+make all            # entorno + dataset + informe QC + linter + tests
 ```
 
 Medido en T-13 sobre 154 estaciones: **3,6 min desde cero** (con las descargas) y **23 s** con la

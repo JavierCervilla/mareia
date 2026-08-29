@@ -108,7 +108,7 @@
         "phase_deg": 148.5176
       }
     ],
-    "derived_at": "2026-08-29T08:00:28Z",
+    "derived_at": "2026-08-29T09:28:00Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -366,7 +366,9 @@
         "3L2",
         "3N2"
       ],
-      "observation_source": "IOC palm"
+      "observation_source": "IOC palm",
+      "observation_code": "palm",
+      "observation_distance_km": 0.79
     }
   }
 }

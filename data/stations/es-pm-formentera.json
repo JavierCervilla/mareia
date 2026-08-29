@@ -95,7 +95,7 @@
         "phase_deg": 201.6109
       }
     ],
-    "derived_at": "2026-08-29T08:00:28Z",
+    "derived_at": "2026-08-29T09:28:00Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -361,7 +361,9 @@
         "3N2",
         "N4"
       ],
-      "observation_source": "IOC form"
+      "observation_source": "IOC form",
+      "observation_code": "form",
+      "observation_distance_km": 0.377
     }
   }
 }

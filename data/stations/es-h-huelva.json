@@ -81,7 +81,7 @@
         "phase_deg": 185.707
       }
     ],
-    "derived_at": "2026-08-29T08:00:28Z",
+    "derived_at": "2026-08-29T09:28:00Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -340,7 +340,9 @@
         "2MO5",
         "3N2"
       ],
-      "observation_source": "IOC huel"
+      "observation_source": "IOC huel",
+      "observation_code": "huel",
+      "observation_distance_km": 0.226
     }
   }
 }

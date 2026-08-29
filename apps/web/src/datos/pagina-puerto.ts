@@ -93,6 +93,13 @@ export interface DatosDePuerto {
   readonly estimado: boolean;
   /** Por qué es estimada, tal y como lo escribe el pipeline. `null` si no lo es. */
   readonly motivoEstimado: string | null;
+  /**
+   * Un puerto estimado **puede** tener error medido: dos del catálogo lo tienen (Garachico y San
+   * Sebastián de la Gomera, con mareógrafo del IOC en la dársena y constantes prestadas de 20,6 y
+   * 14,5 km). El aviso necesita saberlo porque decirles «no lo hemos medido» sería negar un número
+   * que la propia página publica veinte líneas más abajo — el reverso exacto del pecado de T-05.
+   */
+  readonly errorMedido: boolean;
 }
 
 /** Agrupa los extremos de un rango por día civil del puerto. */
@@ -191,5 +198,6 @@ export async function cargarDatosDePuerto(
     micromareal: carreraMensualM < CARRERA_MICROMAREAL_M,
     estimado: station.quality.estimated,
     motivoEstimado: station.quality.estimated_reason,
+    errorMedido: station.quality.rmse_m !== null,
   };
 }

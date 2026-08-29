@@ -68,7 +68,10 @@ def test_obliquity_is_time_dependent_and_matches_reference() -> None:
     assert obliquity_deg(centuries) == pytest.approx(GOLDEN["astro"]["omega"], abs=1e-4)
 
 
-@pytest.mark.parametrize(("attribute", "key", "tolerance"), [("inclination_deg", "I", 1e-3), ("xi_deg", "xi", 1e-3), ("nu_deg", "nu", 1e-3)])
+@pytest.mark.parametrize(
+    ("attribute", "key", "tolerance"),
+    [("inclination_deg", "I", 1e-3), ("xi_deg", "xi", 1e-3), ("nu_deg", "nu", 1e-3)],
+)
 def test_nodal_auxiliary_angles_match_reference(attribute: str, key: str, tolerance: float) -> None:
     state = NodalState(REFERENCE_TIME)
     assert _wrap(getattr(state, attribute) - GOLDEN["astro"][key]) == pytest.approx(0.0, abs=tolerance)

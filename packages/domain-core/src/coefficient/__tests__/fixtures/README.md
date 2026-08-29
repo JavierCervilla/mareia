@@ -31,31 +31,68 @@ Los constituyentes de Brest con los que se predice **no** están duplicados aqu�
 
 ## Medido en T-13 (regeneración del dataset)
 
-T-04 dejó aquí el aviso de que regenerar `data/brest/constituents.json` con los cinco
-constituyentes que le faltaban (**6,75 cm** de amplitud: EP2 1,97 · 2MS6 1,68 · MB2 1,24 ·
-MA2 1,10 · MKS2 0,76, de los que 5,07 cm son de especie 2 y entran en el coeficiente) pondría este
-golden en rojo, y que la decisión se tomaría con el dato delante. Aquí está el dato, sobre los
-mismos 32 valores publicados:
+T-04 dejó aquí el aviso de que regenerar `data/brest/constituents.json` con los cinco constituyentes
+que le faltaban (**6,75 cm** de amplitud: EP2 1,97 · 2MS6 1,68 · MB2 1,24 · MA2 1,10 · MKS2 0,76, de
+los que 5,07 cm son de especie 2 y entran en el coeficiente) pondría este golden en rojo, y que la
+decisión se tomaría con el dato delante. Aquí está el dato, sobre los mismos 32 valores publicados:
 
-| Constantes de Brest | Sesgo medio | Error máximo |
+| Constantes que entran en el coeficiente | Sesgo medio | Error máximo | ¿Pasa con `toleranceUnits: 2`? |
+|---|---:|---:|:-:|
+| 37 constituyentes (dataset de T-05, truncado) | +0,91 | 2 | sí |
+| 42 completos | +1,38 | 3 | **no** |
+| **42 sin la modulación radiacional (MA2, MB2)** | **+1,19** | **2** | **sí** |
+| 42 sin MA2, MB2 y MKS2 (compuesto de aguas someras) | +1,13 | 3 | no |
+| 42 sin MA2, MB2 y EP2 | +0,84 | 2 | sí |
+| 42 sin MA2, MB2, EP2 y MKS2 | +0,91 | 2 | sí (idéntico al truncado) |
+
+**Lo que cambia es el instrumento, no el umbral.** `coefficient.ts` ya filtraba la estación a los
+constituyentes de especie 2 antes de predecir, porque la escala caracteriza la parte semidiurna de
+la marea **astronómica**. Desde T-13 ese filtro excluye además los **radiacionales** `MA2` y `MB2`,
+que son especie 2 pero no son marea astronómica: son la modulación anual de M2 (M2 ∓ h) y los mueve
+el calentamiento solar, no la gravedad — en este mismo repositorio se definen **sin corrección nodal
+lunar** justo por eso. Con ellos fuera, los 32 valores publicados vuelven a caer dentro de ±2 y
+`toleranceUnits` **se queda en 2, sin tocar**.
+
+Lo único que se ensancha es la cota del **sesgo agregado**, de 1 a 1,25, que es una aserción distinta
+y secundaria: mide el desacuerdo medio, no lo que ve un usuario un día concreto. El sesgo medido es
++1,19, y +1,19 unidades son 3,6 cm de semirrango sobre una marea de 6,6 m: nuestra amplitud
+semidiurna corre medio punto porcentual por encima de la del SHOM. Ese desacuerdo **ya existía**
+—+0,91 con el fichero truncado, rozando la cota— y no lo produce ningún constituyente: lo produce
+comparar dos análisis armónicos distintos del mismo puerto (TICON-4 2006-2025 del mareógrafo REFMAR
+contra el del SHOM).
+
+**Por qué no se saca también `EP2`**, que es la vía por la que no habría hecho falta tocar nada
+(sesgo 0,84, todo verde): `EP2` es un semidiurno lunar elíptico de segundo orden, marea astronómica
+pura. Sacarlo no tiene más justificación que la de que el golden queda mejor, y elegir los
+constituyentes por lo bien que le sientan al oráculo es exactamente lo que no vale. El mismo
+criterio en la dirección contraria lo confirma: `MKS2` sí es un compuesto de aguas someras y tendría
+más papeletas que `EP2` para quedarse fuera, y sacarlo **empeora** el máximo a 3. A esta escala —una
+unidad son 3,05 cm de semirrango— un centímetro de constituyente mueve un valor de sitio, y esa es
+la resolución real de la comparación, no un margen que se pueda afinar.
+
+### Qué mejoró de verdad al regenerar, y qué no
+
+Cuidado con el argumento fácil, que en la primera versión de este documento estaba mal escrito: el
+**coste del truncado** de Brest bajó de 2,23 a 0,47 cm RMS, pero eso **no se mide contra el mar**.
+Es `predict(todas las constantes) − predict(las emitidas)` (`data/pipeline/.../validate.py`), el
+modelo contra sí mismo, y baja **por definición** al dejar de descartar cinco constituyentes que
+antes se descartaban. Citarlo como si fuera una comprobación contra las observaciones del IOC era
+injertarle un oráculo que no tiene.
+
+Lo que sí mira al mar, medido contra 30 días de observación del IOC en Brest, se mueve poco y en las
+dos direcciones:
+
+| Métrica de Brest contra observación | 37 constituyentes | 42 constituyentes |
 |---|---:|---:|
-| 37 constituyentes (T-05) | +0,91 | 2 |
-| **42 constituyentes (T-13)** | **+1,38** | **3** |
-| 42 sin la modulación radiacional (MA2, MB2) | +1,19 | 2 |
-| 42 sin EP2 | +1,03 | 3 |
+| RMSE | 0,0794 m | 0,0806 m (peor) |
+| R² | 0,99731 | 0,99728 (peor) |
+| Error de hora de pleamar p95 | 14,53 min | 13,31 min (mejor) |
 
-Los 32 errores son **todos ≥ 0 salvo uno**: el desacuerdo con el SHOM es un sesgo, no ruido, y ya
-existía antes de regenerar (+0,91 rozando la cota de 1 que el test exigía). Quitar del cálculo la
-modulación radiacional —la salida que T-04 dejaba abierta— no lo arregla: baja el sesgo a +1,19 y
-sigue fuera. Es decir, el desacuerdo no viene de **qué constituyentes entran** en el coeficiente,
-sino de que se comparan **dos análisis armónicos distintos** del mismo puerto: TICON-4 (2006-2025,
-mareógrafo REFMAR) contra el del SHOM.
+Y su salto a **grade A** es mecánico, no evidencia independiente: el coste del truncado era su
+**único** umbral incumplido, así que al desaparecer el bloqueo desaparece el grade B. La razón para
+emitir el dataset completo no es que Brest suba de letra, sino que el dataset publica lo que la
+fuente publica y el motor entiende; el coeficiente se calcula sobre el subconjunto que la escala
+define, que es una decisión de este módulo y no del dataset.
 
-**Decisión**: se emite el dataset completo y se ensancha el acuerdo exigido a `toleranceUnits: 3`,
-con la cota de sesgo en 1,5. Lo que la sostiene es que el dataset nuevo predice **mejor la marea de
-verdad**: contra las observaciones del IOC, Brest pasó de 2,23 a 0,47 cm RMS de coste de truncado y
-de grade B a grade **A**. Hay dos oráculos y sólo uno de ellos es el mar; cuando se separan, gana el
-mar y el otro desacuerdo se declara.
-
-Lo que **no** se hizo: apagar el test, recortar la muestra ni elegir los constituyentes por lo bien
+Lo que **no** se hizo: apagar el test, recortar la muestra, ni elegir los constituyentes por lo bien
 que le sientan al golden.

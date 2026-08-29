@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-
 #: Radio por defecto en el que se busca mareógrafo para un puerto: lo que recorre una onda de marea
 #: en costa abierta sin cambiar apreciablemente de forma.
 DEFAULT_SEARCH_RADIUS_KM = 25.0

@@ -81,7 +81,7 @@
         "phase_deg": 57.9585
       }
     ],
-    "derived_at": "2026-08-29T08:00:28Z",
+    "derived_at": "2026-08-29T09:28:00Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -347,7 +347,9 @@
         "SGM",
         "2MK5"
       ],
-      "observation_source": "IOC motr"
+      "observation_source": "IOC motr",
+      "observation_code": "motr",
+      "observation_distance_km": 0.346
     }
   }
 }

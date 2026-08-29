@@ -5,12 +5,13 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
 ## 2026-08-29 — T-13 · España completa, y el 78 % del catálogo diciendo que no está medido
 
 - **El portal pasa de 12 puertos a 153**, de Viveiro a El Hierro y de Menorca a La Palma, y con
-  ellos el sitio de **32 a 191 páginas** sin tocar `getStaticPaths`: la web se generó sola desde
-  `data/geo/ports.json`, que es lo que T-09 prometió que pasaría. Medido: **build de 11,9 s** (13 s
-  de reloj) y **`dist/` de 4 614 156 B (4,40 MiB)**, frente a los 1,8 s y 417 794 B (0,40 MiB) de
-  `main`. Casi seis veces más páginas por once veces más peso, porque lo que se multiplica son las
-  páginas de puerto (~26 KB) y no los índices (~4 KB). El pipeline entero tarda **4,3 min desde
-  cero** (258 s, con las descargas) y **24 s** con la caché caliente.
+  ellos el sitio de **33 a 192 páginas HTML** (191 `index.html` más el 404) sin tocar
+  `getStaticPaths`: la web se generó sola desde `data/geo/ports.json`, que es lo que T-09 prometió
+  que pasaría. Medido: **build de 11,9 s** (13 s de reloj) y **`dist/` de 4 613 414 B (4,40 MiB)**,
+  frente a los 1,8 s y 417 794 B (0,40 MiB) de `main`. Casi seis veces más páginas por once veces
+  más peso, porque lo que se multiplica son las páginas de puerto (~26 KB) y no los índices (~4 KB).
+  El pipeline entero tarda **4,3 min desde cero** (258 s, con las descargas) y **24 s** con la caché
+  caliente.
 - **Y 120 de esos 153 puertos dicen en su página que su marea es una estimación.** Es el resultado
   que da sentido a la trayectoria. Un puerto sólo se publica como medido si se dan las dos cosas a
   la vez: mareógrafo en su propia dársena (el mismo umbral de 5 km que exige el grade A) y
@@ -57,14 +58,29 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   paraba en el primer umbral que fallaba y nunca llegó a nombrarlo, así que el informe invitó a
   predecir que quitando ese bastaba. Arreglado: `grade.assign` enumera ahora **todos** los umbrales
   incumplidos.
-- **El golden del coeficiente se puso en rojo, como T-04 avisó, y se resolvió midiendo.** Añadir los
-  cinco constituyentes mueve el coeficiente de Brest: el sesgo contra los 32 valores publicados por
-  el SHOM pasa de **+0,91 a +1,38** y el error máximo de 2 a 3. Quitar del cálculo la modulación
-  radiacional (MA2, MB2) —la salida que T-04 dejaba abierta— no lo arregla: deja el sesgo en +1,19.
-  El desacuerdo no viene de qué constituyentes entran sino de comparar dos análisis armónicos
-  distintos del mismo puerto. Se ensancha el acuerdo exigido a ±3 con la medida escrita en el
-  fixture, porque el dataset nuevo predice **mejor la marea de verdad** (contra el IOC, Brest sube a
-  grade A) mientras se aleja un pelo del otro oráculo. Hay dos oráculos y sólo uno es el mar.
+- **El golden del coeficiente se puso en rojo, como T-04 avisó, y lo que cambia es el instrumento,
+  no el umbral.** Los cinco constituyentes nuevos mueven el coeficiente de Brest y el error máximo
+  contra los 32 valores publicados por el SHOM pasaba de 2 a 3. La primera versión de este cambio
+  ensanchó la tolerancia a ±3 con un argumento que no se sostenía —«quitar la modulación radiacional
+  no lo arregla», que es falso para esa aserción—, así que se ha revertido: **`toleranceUnits` sigue
+  en 2, sin tocar**. Lo que se corrige es el cálculo: `MA2` y `MB2` son la modulación
+  **radiacional** de M2 —las mueve el calentamiento solar, no la gravedad, y por eso este
+  repositorio ya las definía sin corrección nodal lunar— y la escala del SHOM describe la marea
+  astronómica, así que salen del coeficiente (no del dataset, que las sigue publicando). Con ellas
+  fuera: sesgo +1,19, máximo 2, los 32 valores dentro de ±2. Lo único que se ensancha es la cota del
+  **sesgo agregado**, de 1 a 1,25, que es una aserción secundaria y mide un desacuerdo que ya
+  existía (+0,91 con el dataset truncado): 3,6 cm de semirrango sobre 6,6 m de marea, es decir, dos
+  análisis armónicos distintos del mismo puerto. Sacar además `EP2` habría dejado el sesgo en 0,84
+  sin tocar nada, y **no se ha hecho**: `EP2` es marea astronómica pura y elegir constituyentes por
+  lo bien que le sientan al golden es el mismo pecado con otro traje. La tabla completa está en
+  `fixtures/README.md`.
+- **Y se corrige el pilar con el que se había justificado todo eso.** Aquel README decía que «contra
+  las observaciones del IOC, Brest pasó de 2,23 a 0,47 cm RMS de coste de truncado». El coste de
+  truncado **no se mide contra el IOC**: es `predict(todas) − predict(las emitidas)`, el modelo
+  contra sí mismo, y baja por definición al dejar de descartar constituyentes. Lo que sí mira al mar
+  se mueve poco y en las dos direcciones: RMSE 0,0794 → 0,0806 m y R² 0,99731 → 0,99728 (peor),
+  error de hora p95 14,53 → 13,31 min (mejor). Y el salto de Brest a grade A es **mecánico**: el
+  truncado era su único umbral incumplido.
 - **La política de selección de mareógrafo tenía un fallo que sólo la escala destapó.** Al ensanchar
   el radio de búsqueda a 60 km, Gandía se llevó las constantes del mareógrafo de Valencia —mejor
   licencia y registro más largo, a 53,8 km— teniendo uno en su propia bocana. La licencia y los años
@@ -74,14 +90,34 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   15 peores medidos, la tabla de descartes con su motivo, y el detalle por región separado en dos
   tablas —**medidos** y **estimados**— porque son dos poblaciones distintas y mezclarlas es lo que
   hace que un número prestado parezca propio.
-- **Los invariantes siguen mordiendo a escala.** El test de coherencia catálogo↔dataset (T-07) ya no
-  cuenta doce puertos sino que exige que ninguno publique un número que no se haya medido en él y
-  que ningún estimado alcance grade A; `python run.py check` repite la comprobación sin red antes de
-  CI; el golden de Vigo sigue siendo golden; y el gate adversario A-1 («la curva no se congela») se
-  re-apuntó con la medida delante: 17 puertos daban mesetas de más de una hora y ninguno es la
-  avería original —son puertos de 2 a 11 cm de carrera diaria publicada al milímetro—, así que el
-  umbral de una hora se mantiene donde puede significar algo y donde no, se exige que la curva no se
-  pase el día quieta.
+- **Los invariantes muerden a escala, y el arreglo tiene trinquete.** Retirar el atajo de T-05 en el
+  dato no bastaba: se pudo volver a inyectar a mano en un JSON el RMSE de un mareógrafo a 46 km y
+  toda la suite siguió verde, porque lo único que cazaba el caso era una aserción clavada a Cabo de
+  Palos. Ahora el dataset **publica la procedencia del número** —con qué mareógrafo del IOC se midió
+  y a qué distancia de la dársena estaba (`observation_code`, `observation_distance_km`)— y hay un
+  invariante, en Python y en TypeScript, que exige que todo puerto con RMSE lo haya medido a menos
+  de 5 km de su dársena. Reproducida la inyección en sus tres formas (sólo el RMSE; con la fuente;
+  con la fuente y la distancia real), las tres salen en rojo. Se añaden además las cuatro ramas de
+  `grade.estimate()` y un test que fija que la observación se busca **una sola vez y en el puerto**,
+  que es donde vive el arreglo. `python run.py check` repite la coherencia catálogo↔dataset sin red;
+  el golden de Vigo sigue siendo golden.
+- **El gate adversario A-1 se re-apunta sin ningún número inventado.** La primera versión cambió una
+  constante por otras dos igual de arbitrarias, y las dos estaban mal: el corte de carrera (0,15 m)
+  dejaba fuera mesetas de 80 min con 0,178 m, y el tope del 60 % del día dejaba pasar una
+  congelación real de catorce horas. Lo que se comprueba ahora no es cuánto dura la meseta sino **si
+  la marea se movió durante ella**: se pregunta al motor la altura sin redondear en los dos extremos
+  del tramo plano y se exige que la diferencia quepa en el paso de publicación (1 mm, que es lo que
+  `toHeight` redondea). El umbral no se elige, es la resolución. Medido sobre 153 puertos × 15 días
+  (500 mesetas de más de una hora): el movimiento real máximo dentro de una meseta publicada es
+  **0,983 mm**.
+- **El motivo del grade nombra todos los umbrales, también los que faltaban.** El primer arreglo
+  dejaba fuera las ramas de «sin observaciones» y 39 puertos publicaban un motivo que sólo culpaba a
+  la distancia al mareógrafo; ahora hay una sola función que evalúa y enumera, y quedan 1, que es el
+  único al que de verdad le sobra un solo obstáculo (San Sebastián de la Gomera).
+- **Y CI empieza a lintear Python.** T-13 añadió ~1.200 líneas de Python mientras el TypeScript
+  pasaba por dos linters y el pipeline por ninguno. Se instala `ruff` pinneado con su `ruff.toml`
+  (`make lint`, y un paso en el job de datos). El primer pase encontró una variable muerta en
+  `validate.py` y dos `int()` redundantes.
 - **Lo que se queda abierto**: las zonas marítimas de AEMET siguen mapeadas sólo para los 12 puertos
   del piloto (el módulo degrada solo y ahora hay un test que cuenta la cobertura en vez de
   callarla); la portada sigue enseñando los 153 puertos de golpe —35,6 KB de HTML, más que una

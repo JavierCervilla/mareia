@@ -33,9 +33,12 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { heightAt, prepareStation } from "@mareia/domain-core";
+
 import { activeModules } from "./modules.config.ts";
 import { cargarPuertos } from "./datos/catalogo.ts";
 import { cargarDatosDePuerto } from "./datos/pagina-puerto.ts";
+import { deps } from "./datos/deps.ts";
 import { escaparMarcado } from "./escapar-marcado.ts";
 import { alturaEn, trazarCurvaMarea } from "./grafico-marea.ts";
 import { rutaPuerto } from "./rutas.ts";
@@ -129,10 +132,13 @@ function distanciaAlTrazo(punto: Punto, trazo: readonly Punto[]): number {
   return mejor;
 }
 
-/** Duración, en minutos, del tramo más largo del día en el que la marea no se mueve nada. */
-function tramoPlanoMasLargo(dia: EntradaCurva): { minutos: number; desdeUtcMs: number } {
-  let mejor = 0;
-  let mejorDesde = dia.inicioUtcMs;
+/** El tramo más largo del día en el que la curva **publicada** no se mueve nada. */
+function tramoPlanoMasLargo(dia: EntradaCurva): {
+  minutos: number;
+  desdeUtcMs: number;
+  hastaUtcMs: number;
+} {
+  let mejor = { minutos: 0, desdeUtcMs: dia.inicioUtcMs, hastaUtcMs: dia.inicioUtcMs };
   let inicio = dia.inicioUtcMs;
   for (let instante = dia.inicioUtcMs + MINUTO; instante <= dia.finUtcMs; instante += MINUTO) {
     const anterior = alturaEn(dia.muestras, instante - MINUTO);
@@ -140,12 +146,11 @@ function tramoPlanoMasLargo(dia: EntradaCurva): { minutos: number; desdeUtcMs: n
       inicio = instante;
       continue;
     }
-    if (instante - inicio > mejor * MINUTO) {
-      mejor = (instante - inicio) / MINUTO;
-      mejorDesde = inicio;
+    if (instante - inicio > mejor.minutos * MINUTO) {
+      mejor = { minutos: (instante - inicio) / MINUTO, desdeUtcMs: inicio, hastaUtcMs: instante };
     }
   }
-  return { minutos: mejor, desdeUtcMs: mejorDesde };
+  return mejor;
 }
 
 // =================================================================================================
@@ -161,52 +166,56 @@ function tramoPlanoMasLargo(dia: EntradaCurva): { minutos: number; desdeUtcMs: n
  * «menos preciso», era falso, y nada en la página avisaba.
  *
  * CORREGIDO Y SUPERADO: la página ya no reconstruye nada. Dibuja la curva **predicha** por el motor
- * armónico (`sampleCurve`, 145 puntos del día) con los extremos insertados. El gate se re-apunta al
- * mecanismo nuevo y se amplía a TODO el catálogo, incluidos los micromareales, donde la marea es de
- * centímetros y aplanarse sería aún más fácil de no notar.
+ * armónico (`sampleCurve`, 145 puntos del día) con los extremos insertados.
  *
- * **Re-apuntado en T-13, con la medida delante.** Al escalar a 153 puertos, 17 dieron tramos planos
- * de más de una hora —Calvià 280 min, los cuatro del golfo de Valencia 200— y ninguno es la avería
- * de A-1: son puertos cuya carrera del día entero es de **2 a 11 cm** y la curva se publica al
- * milímetro, así que muestras contiguas empatan en el último dígito. Eso no es una marea congelada,
- * es la resolución de publicación tocando el tamaño real de la marea. La avería original —una
- * meseta de cinco horas en un puerto de metros— sigue cazada por el umbral de una hora, que se
- * mantiene intacto donde puede significar algo; donde la carrera del día no llega a
- * `CARRERA_MINIMA_PARA_EXIGIR_MOVIMIENTO_M` sólo se exige que la curva no se pase el día quieta.
+ * **Re-apuntado en T-13, y esta vez sin ningún número inventado.** Al escalar a 153 puertos, la
+ * versión anterior de este gate —«ninguna meseta de más de una hora»— se puso en rojo en 17 puertos
+ * y ninguno era la avería: son puertos cuya carrera del día es de milímetros a centímetros, y la
+ * curva se publica al **milímetro** (`toHeight`, 3 decimales), así que muestras contiguas empatan
+ * en el último dígito. El primer intento de arreglo cambió una constante por otras dos igual de
+ * arbitrarias, y las dos estaban mal: el corte de carrera dejaba fuera mesetas de 80 min con 0,178 m
+ * de carrera, y el tope del 60 % del día dejaba pasar una congelación real de catorce horas.
  *
- * Comportamiento correcto: en un puerto con marea de verdad, ninguna ventana de una hora es
- * constante; en uno de centímetros, la curva se mueve en algún momento del día.
+ * Lo que se comprueba ahora no es cuánto dura la meseta, sino **si la marea se movió durante ella**:
+ * se pregunta al motor la altura sin redondear en los dos extremos del tramo plano y se exige que la
+ * diferencia quepa en el paso de publicación. Si cabe, la meseta es resolución —lo que se dibuja es
+ * lo que se puede dibujar—; si no cabe, la curva publicada está quieta mientras la marea se mueve, y
+ * eso es exactamente la avería de A-1, que en un puerto de metros movía decenas de centímetros
+ * durante sus cinco horas de meseta. El umbral no se elige: **es el paso de publicación**.
+ *
+ * Medido sobre 153 puertos × 15 días (2 295 días-puerto, 500 mesetas de más de una hora): el
+ * movimiento real máximo dentro de una meseta publicada es de **0,983 mm**, justo por debajo del
+ * milímetro que el redondeo permite. La meseta más larga son 380 min, en Calvià, con 6 mm de
+ * carrera en todo el día.
  */
 
 /**
- * Carrera del día por debajo de la cual un tramo plano lo explica el redondeo al milímetro y no un
- * fallo de la curva. Medido en T-13: el puerto con meseta larga y más carrera es Alboraya, con
- * 10,7 cm; el primero que aguanta el umbral de una hora tiene 12,9 cm.
+ * Paso de publicación de las alturas, en metros: `toHeight` redondea a 3 decimales. Dos muestras
+ * que difieran menos que esto se publican iguales, y ninguna curva puede enseñar un movimiento más
+ * pequeño por mucho que la marea se mueva.
  */
-const CARRERA_MINIMA_PARA_EXIGIR_MOVIMIENTO_M = 0.15;
-
-/** Fracción del día que ni la marea más pequeña puede pasarse quieta sin que sea una avería. */
-const FRACCION_MAXIMA_DEL_DIA_QUIETA = 0.6;
+const PASO_DE_PUBLICACION_M = 0.001;
 
 test("A-1 · la curva no se congela en ningún puerto del catálogo", async () => {
   const fechaIso = HAY_BUILD ? fechaDelBuild() : new Date().toISOString().slice(0, 10);
-  for (const puerto of await cargarPuertos()) {
+  const congelados: string[] = [];
+  for (const puerto of await deps.ports.list()) {
     const dia = await curvaDe(puerto.slug, fechaIso);
     const plano = tramoPlanoMasLargo(dia);
-    const alturas = dia.muestras.map((muestra) => muestra.height_m);
-    const carrera = Math.max(...alturas) - Math.min(...alturas);
-    const minutosDelDia = (dia.finUtcMs - dia.inicioUtcMs) / MINUTO;
-    const limite =
-      carrera >= CARRERA_MINIMA_PARA_EXIGIR_MOVIMIENTO_M
-        ? 60
-        : minutosDelDia * FRACCION_MAXIMA_DEL_DIA_QUIETA;
-    assert.ok(
-      plano.minutos < limite,
-      `${puerto.name}: la marea se queda quieta ${plano.minutos} min desde ` +
-        `${new Date(plano.desdeUtcMs).toISOString()} con una carrera del día de ` +
-        `${carrera.toFixed(3)} m`,
+    if (plano.minutos === 0) continue;
+    const estacion = prepareStation(await deps.stations.load(puerto.stationFile));
+    const movimiento = Math.abs(
+      heightAt(estacion, plano.hastaUtcMs) - heightAt(estacion, plano.desdeUtcMs),
     );
+    if (movimiento >= PASO_DE_PUBLICACION_M) {
+      congelados.push(
+        `${puerto.name}: la curva se queda quieta ${plano.minutos} min desde ` +
+          `${new Date(plano.desdeUtcMs).toISOString()} mientras la marea se mueve ` +
+          `${(movimiento * 1000).toFixed(1)} mm`,
+      );
+    }
   }
+  assert.deepEqual(congelados, []);
 });
 
 /**

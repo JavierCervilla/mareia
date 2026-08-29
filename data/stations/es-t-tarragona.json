@@ -81,7 +81,7 @@
         "phase_deg": 1.7518
       }
     ],
-    "derived_at": "2026-08-29T08:00:28Z",
+    "derived_at": "2026-08-29T09:28:00Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -347,7 +347,9 @@
         "2MK5",
         "2MO5"
       ],
-      "observation_source": "IOC tarr"
+      "observation_source": "IOC tarr",
+      "observation_code": "tarr",
+      "observation_distance_km": 4.585
     }
   }
 }

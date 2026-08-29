@@ -95,7 +95,7 @@
         "phase_deg": 343.1492
       }
     ],
-    "derived_at": "2026-08-29T08:00:28Z",
+    "derived_at": "2026-08-29T09:28:00Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -361,7 +361,9 @@
         "2MO5",
         "2MK5"
       ],
-      "observation_source": "IOC sagu"
+      "observation_source": "IOC sagu",
+      "observation_code": "sagu",
+      "observation_distance_km": 4.437
     }
   }
 }

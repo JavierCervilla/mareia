@@ -199,7 +199,7 @@
         "phase_deg": 270.5514
       }
     ],
-    "derived_at": "2026-08-29T08:00:28Z",
+    "derived_at": "2026-08-29T09:28:00Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -464,7 +464,9 @@
         "3N2",
         "S3"
       ],
-      "observation_source": "IOC tari"
+      "observation_source": "IOC tari",
+      "observation_code": "tari",
+      "observation_distance_km": 0.424
     }
   }
 }

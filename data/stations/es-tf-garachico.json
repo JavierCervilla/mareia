@@ -160,7 +160,7 @@
         "phase_deg": 220.4566
       }
     ],
-    "derived_at": "2026-08-29T08:00:28Z",
+    "derived_at": "2026-08-29T09:28:00Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -426,7 +426,9 @@
         "N4",
         "2MK5"
       ],
-      "observation_source": "IOC gara1"
+      "observation_source": "IOC gara1",
+      "observation_code": "gara1",
+      "observation_distance_km": 0.159
     }
   }
 }

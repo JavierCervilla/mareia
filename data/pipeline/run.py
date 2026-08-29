@@ -17,9 +17,8 @@ import sys
 import time
 from pathlib import Path
 
-from mareia_pipeline import catalog
+from mareia_pipeline import catalog, report, schema
 from mareia_pipeline import grade as grading
-from mareia_pipeline import report, schema
 from mareia_pipeline.ports import PILOT_PORTS, Port
 from mareia_pipeline.reconcile import Selection, select, to_station_v1
 from mareia_pipeline.sources import geonames, ioc
@@ -370,7 +369,9 @@ def _check_catalogue() -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument(
         "--refresh", action="store_true", help="ignora la caché y vuelve a descargar todo"
     )

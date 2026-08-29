@@ -81,7 +81,7 @@
         "phase_deg": 10.8915
       }
     ],
-    "derived_at": "2026-08-29T08:00:28Z",
+    "derived_at": "2026-08-29T09:28:00Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -347,7 +347,9 @@
         "2MK5",
         "S3"
       ],
-      "observation_source": "IOC meli"
+      "observation_source": "IOC meli",
+      "observation_code": "meli",
+      "observation_distance_km": 0.6
     }
   }
 }

@@ -134,7 +134,7 @@
         "phase_deg": 283.1466
       }
     ],
-    "derived_at": "2026-08-29T08:00:28Z",
+    "derived_at": "2026-08-29T09:28:00Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -400,7 +400,9 @@
         "2MO5",
         "2MK5"
       ],
-      "observation_source": "IOC alcu"
+      "observation_source": "IOC alcu",
+      "observation_code": "alcu",
+      "observation_distance_km": 0.599
     }
   }
 }

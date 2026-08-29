@@ -46,24 +46,34 @@ describe("coeficiente · golden contra los valores publicados de Brest 2026", ()
   /**
    * El sesgo es la parte del desacuerdo que no se arregla mirando un día concreto: nuestras
    * constantes de Brest son TICON-4 (análisis 2006-2025 del mareógrafo REFMAR) y las del oráculo
-   * son las del SHOM, así que las dos predicciones son parientes y no gemelas.
+   * son las del SHOM, así que las dos predicciones son parientes y no gemelas. Un sesgo de +1,19
+   * unidades son 3,6 cm de semirrango sobre una marea de 6,6 m: nuestra amplitud semidiurna corre
+   * medio punto porcentual por encima de la del SHOM, y eso no lo arregla ninguna elección de
+   * constituyentes, porque no es un constituyente: es el análisis armónico.
    *
-   * **Medido en T-13**, al regenerar el dataset con los 42 constituyentes del motor: sesgo +1,38
-   * unidades y error máximo 3 sobre los 32 valores publicados, frente al +0,91 y máximo 2 que daba
-   * el fichero truncado a 37. La cota sube de 1 a 1,5 con ese dato delante y no antes. Lo que la
-   * justifica es que el dataset nuevo predice **mejor** la marea real —contra las observaciones del
-   * IOC, Brest pasó de 2,23 a 0,47 cm RMS de coste de truncado y de grade B a grade A— mientras se
-   * aleja un pelo del coeficiente del SHOM: son dos oráculos distintos y sólo uno de ellos es el
-   * mar. Quitar del cálculo la modulación radiacional (MA2 y MB2) tampoco lo arregla: deja el sesgo
-   * en +1,19, así que el desacuerdo no viene de qué constituyentes entran sino de qué análisis
-   * armónico se compara con cuál.
+   * **La cota sube de 1 a 1,25 en T-13, con la medida delante y sólo aquí.** La aserción principal
+   * —los ±2 unidades día a día, que es lo que un usuario ve— se queda **intacta**: con el dataset
+   * regenerado a 42 constituyentes y la modulación radiacional fuera del cálculo, los 32 valores
+   * publicados caen dentro de ±2. El sesgo agregado se queda en 1,19, contra el 0,91 que daba el
+   * fichero truncado a 37 (histogramas y alternativas medidas en `fixtures/README.md`), y 1,25 es
+   * la cota más ajustada que lo admite.
+   *
+   * Lo que **no** se hizo, y merece decirse porque era la vía corta: sacar también `EP2` del
+   * cálculo deja el sesgo en 0,84 y no habría hecho falta tocar nada. Pero `EP2` es un semidiurno
+   * lunar elíptico, marea astronómica pura —a diferencia de `MA2` y `MB2`, que son radiacionales—,
+   * y quitarlo sería elegir los constituyentes por lo bien que le sientan al golden. El mismo
+   * criterio en la otra dirección lo confirma: si además de los radiacionales se sacara `MKS2`, que
+   * es un compuesto de aguas someras, el error máximo subiría a 3. A esta escala —una unidad son
+   * 3,05 cm de semirrango— un centímetro de constituyente cambia un valor de sitio, y esa es la
+   * resolución real de la comparación.
    */
   it("no arrastra un sesgo sistemático sobre el conjunto de la muestra", () => {
     const bias = errors.reduce((total, error) => total + error, 0) / errors.length;
     const maxAbs = Math.max(...errors.map(Math.abs));
     console.log(`  ${errors.length} coeficientes · sesgo ${bias.toFixed(2)} · máx ${maxAbs}`);
     assert.ok(errors.length >= 30, `la muestra debe cubrir los tres meses del fixture (${errors.length})`);
-    assert.ok(Math.abs(bias) <= 1.5, `sesgo medio de ${bias.toFixed(2)} unidades`);
+    assert.ok(Math.abs(bias) <= 1.25, `sesgo medio de ${bias.toFixed(2)} unidades`);
+    assert.ok(maxAbs <= fixture.toleranceUnits, `error máximo de ${maxAbs} unidades`);
   });
 
   /**

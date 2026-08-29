@@ -134,7 +134,7 @@
         "phase_deg": 282.3986
       }
     ],
-    "derived_at": "2026-08-29T08:00:28Z",
+    "derived_at": "2026-08-29T09:28:00Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -399,7 +399,9 @@
         "2MK5",
         "2MO5"
       ],
-      "observation_source": "IOC arre"
+      "observation_source": "IOC arre",
+      "observation_code": "arre",
+      "observation_distance_km": 0.122
     }
   }
 }

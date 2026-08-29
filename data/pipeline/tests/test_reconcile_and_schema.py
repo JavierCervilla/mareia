@@ -7,9 +7,8 @@ import pathlib
 
 import pytest
 
-from mareia_pipeline import catalog
+from mareia_pipeline import catalog, validate
 from mareia_pipeline import grade as grading
-from mareia_pipeline import validate
 from mareia_pipeline.geo import haversine_km
 from mareia_pipeline.ports import PILOT_PORTS
 from mareia_pipeline.reconcile import select
@@ -77,7 +76,9 @@ def test_longer_record_wins_when_the_license_ties() -> None:
 def test_redmar_would_outrank_ticon_even_if_restricted() -> None:
     """La rama REDMAR está escrita aunque hoy no tenga candidatos: cuando los tenga, manda."""
     ticon = _gauge("ticon", lat=PORT.lat, lon=PORT.lon)
-    redmar = _gauge("redmar", dataset="redmar", license_type="cc-by-nc-4.0", lat=PORT.lat + 0.02, lon=PORT.lon)
+    redmar = _gauge(
+        "redmar", dataset="redmar", license_type="cc-by-nc-4.0", lat=PORT.lat + 0.02, lon=PORT.lon
+    )
     assert select(PORT, [ticon, redmar]).chosen.station_id == "redmar"
 
 

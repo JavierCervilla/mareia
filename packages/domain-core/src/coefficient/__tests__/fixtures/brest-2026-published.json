@@ -3,7 +3,7 @@
   "port": "Brest",
   "timeZone": "Europe/Paris",
   "unitHeight_m": 3.05,
-  "toleranceUnits": 3,
+  "toleranceUnits": 2,
   "days": [
     { "dateIso": "2026-03-01", "coefficients": [70, 78] },
     { "dateIso": "2026-03-04", "coefficients": [99, 99] },

@@ -56,13 +56,15 @@ _STATION_LIST: list[dict] | None = None
 
 
 def _station_list(*, refresh: bool) -> list[dict]:
-    global _STATION_LIST  # noqa: PLW0603
+    global _STATION_LIST
     if _STATION_LIST is None or refresh:
         _STATION_LIST = json.loads(cache.fetch(STATION_LIST_URL, suffix=".json", refresh=refresh))
     return _STATION_LIST
 
 
-def nearby_codes(lat: float, lon: float, *, max_km: float, refresh: bool = False) -> list[tuple[float, str, str]]:
+def nearby_codes(
+    lat: float, lon: float, *, max_km: float, refresh: bool = False
+) -> list[tuple[float, str, str]]:
     """``(distancia_km, código, nombre)`` de los mareógrafos IOC cercanos, de más cerca a más lejos."""
     stations = _station_list(refresh=refresh)
     found: list[tuple[float, str, str]] = []

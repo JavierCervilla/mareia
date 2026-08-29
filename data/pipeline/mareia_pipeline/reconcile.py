@@ -32,7 +32,7 @@ from typing import Any
 
 from mareia_pipeline.engine_contract import ENGINE_CONSTITUENTS
 from mareia_pipeline.ports import Port
-from mareia_pipeline.sources.tide_database import GaugeRecord, REPOSITORY_URL, candidates_near
+from mareia_pipeline.sources.tide_database import REPOSITORY_URL, GaugeRecord, candidates_near
 
 #: Prioridad de conjunto de datos: menor es mejor.
 _DATASET_RANK = {"redmar": 0, "noaa": 1, "ticon": 2}

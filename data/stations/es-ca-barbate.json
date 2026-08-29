@@ -173,7 +173,7 @@
         "phase_deg": 270.5514
       }
     ],
-    "derived_at": "2026-08-29T08:00:28Z",
+    "derived_at": "2026-08-29T09:28:00Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -400,7 +400,7 @@
     "hw_time_err_p95_min": null,
     "grade": "C",
     "validated_against": "sin observación propia: la predicción no se ha comprobado en este puerto",
-    "grade_reason": "no alcanza B: el mareógrafo más cercano está a 35.4 km > 30 km",
+    "grade_reason": "no alcanza B: el mareógrafo más cercano está a 35.4 km > 30 km; y sin observaciones ni segunda fuente: no hay con qué validar",
     "estimated": true,
     "estimated_reason": "las constantes armónicas son las del mareógrafo `tarifa-tari-esp-ieo`, a 35.4 km de la dársena, y no hay observaciones de este puerto con las que comprobar la predicción",
     "metrics": {
@@ -438,7 +438,9 @@
         "3N2",
         "S3"
       ],
-      "observation_source": null
+      "observation_source": null,
+      "observation_code": null,
+      "observation_distance_km": null
     }
   }
 }

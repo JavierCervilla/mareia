@@ -7,10 +7,10 @@ VENV := .venv
 BIN := $(VENV)/bin
 export PYTHONPATH := $(CURDIR)
 
-.PHONY: all venv fetch build check test clean clean-cache
+.PHONY: all venv fetch build check lint test clean clean-cache
 
-## all: entorno + dataset + informe QC + tests (el camino completo desde cero)
-all: build test
+## all: entorno + dataset + informe QC + linter + tests (el camino completo desde cero)
+all: build lint test
 
 ## venv: crea el entorno virtual con las dependencias pinneadas
 venv: $(VENV)/.installed
@@ -32,6 +32,10 @@ build: venv
 ## check: valida contra el schema station/v1 los JSON ya commiteados (no necesita red)
 check: venv
 	$(BIN)/python run.py check
+
+## lint: gate anti-slop del pipeline (ruff, reglas en ruff.toml). No necesita red.
+lint: venv
+	$(BIN)/ruff check .
 
 ## test: suite de tests (no necesita red)
 test: venv

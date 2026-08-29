@@ -113,6 +113,12 @@ jobs:
           cache: pip
           cache-dependency-path: data/pipeline/requirements.txt
       - run: pip install --requirement requirements.txt
+      # Gate anti-slop del lado Python (skill code-anti-slop, reglas en data/pipeline/ruff.toml).
+      # Va aquí y no en el job `anti-slop` porque ese instala Node y no Python, y porque el linter
+      # del pipeline se pinnea en el mismo `requirements.txt` que el resto de sus dependencias.
+      # T-13 lo añadió tras meter ~1.200 líneas de Python que ningún linter miraba mientras el
+      # TypeScript pasaba por dos.
+      - run: ruff check .
       - run: python -m pytest tests -q
       - run: python run.py check
 

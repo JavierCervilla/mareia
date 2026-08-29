@@ -59,7 +59,7 @@ def nodal_factors(harmonics: list[Harmonic], centre: dt.datetime) -> dict[str, t
 
 def time_grid(start: dt.datetime, days: float, step_minutes: float) -> np.ndarray:
     """Rejilla de instantes UTC como horas desde la época de Schureman."""
-    count = int(round(days * 24 * 60 / step_minutes)) + 1
+    count = round(days * 24 * 60 / step_minutes) + 1
     base = hours_since_epoch(start)
     return base + np.arange(count) * (step_minutes / 60.0)
 

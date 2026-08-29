@@ -15,13 +15,11 @@ import statistics
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 
-from mareia_pipeline import catalog
+from mareia_pipeline import catalog, validate
 from mareia_pipeline import grade as grading
-from mareia_pipeline import validate
 from mareia_pipeline.engine_contract import ENGINE_CONSTITUENTS
 from mareia_pipeline.reconcile import Selection
 from mareia_pipeline.validate import Metrics
-
 
 #: Rango de marea por debajo del cual el residuo meteorológico domina sobre la marea astronómica.
 MICRO_TIDAL_RANGE_M = 0.50

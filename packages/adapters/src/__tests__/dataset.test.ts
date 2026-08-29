@@ -7,7 +7,7 @@
  * rojo en vez de servir mareas del sitio equivocado.
  */
 
-import { readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -111,39 +111,75 @@ test("toda estación referenciada trae su calidad, y la de un grade C viaja con 
     assert.ok(attributions.length > 0, `${port.slug} sin atribuciones`);
   }
 
-  // Cabo de Palos toma las constantes de Cartagena, a 24,8 km, y no tiene observación propia: ni
-  // RMSE ni error de hora que publicar, y el grade explica por qué no llega a B.
+  // Cabo de Palos es el ejemplo con nombre del invariante de más abajo, no el invariante: toma las
+  // constantes de Cartagena, a 24,8 km, y no tiene observación propia, así que no publica ni RMSE
+  // ni error de hora. Si algún día los tuviera —porque le pongan un mareógrafo— este caso se cae y
+  // el invariante sigue en pie, que es como debe ser.
   const borrowed = await stations.load("es-mu-cabo-de-palos.json");
-  assert.equal(borrowed.quality.grade, "C");
+  assert.equal(borrowed.quality.estimated, true);
+  assert.equal(borrowed.quality.rmse_m, null);
   assert.equal(borrowed.quality.hw_time_err_p95_min, null);
   assert.equal(typeof borrowed.quality.grade_reason, "string");
 });
 
 /**
+ * Radio, en km, dentro del cual una observación es «de este puerto». Es el mismo umbral con el que
+ * el pipeline concede el grade A por cercanía del mareógrafo: dos varas de medir serían ninguna.
+ */
+const RADIO_DE_LA_DARSENA_KM = 5;
+
+/** El `quality.metrics` crudo del JSON: el DTO no lo expone y aquí hace falta la procedencia. */
+function metricsDe(stationFile: string): Record<string, unknown> {
+  const documento = JSON.parse(readFileSync(`${STATIONS_DIR}/${stationFile}`, "utf8")) as {
+    quality: { metrics: Record<string, unknown> };
+  };
+  return documento.quality.metrics;
+}
+
+/**
  * El invariante que T-13 añade y que vale más que cualquier recuento: **ningún puerto publica un
  * número que no se haya medido en él**.
  *
- * Un puerto no estimado tiene mareógrafo en su dársena y observación con la que contrastarlo, así
- * que tiene error medido. Uno estimado puede tener error (si la observación existe pero las
- * constantes vienen de otro sitio) o no tenerlo, pero **nunca** al revés: publicar RMSE sin ser
- * medible es exactamente el fraude que este dataset existe para no cometer, y con 150 puertos
- * dejarlo a la vista de una revisión humana es dejarlo pasar.
+ * No basta con que los campos sean coherentes entre sí —lo eran cuando el RMSE de Cartagena se
+ * publicaba como el de Cabo de Palos—: hay que comprobar la **procedencia** del número, y para eso
+ * el dataset publica con qué mareógrafo del IOC se midió y **a qué distancia de la dársena estaba**.
+ * Un puerto puede estar marcado como estimado y aun así tener error medido (mareógrafo del IOC
+ * propio, constantes prestadas de lejos: es el caso de Garachico), pero lo que no puede es publicar
+ * un error medido a treinta kilómetros como si fuera suyo.
  */
 test("ningún puerto publica una precisión que no tiene", async () => {
   const incoherentes: string[] = [];
   for (const port of await ports.list()) {
     const { quality } = await stations.load(port.stationFile);
+    const metrics = metricsDe(port.stationFile);
+    const distancia = metrics["observation_distance_km"];
+    if (quality.rmse_m === null) {
+      if (metrics["observation_source"] !== null) {
+        incoherentes.push(`${port.slug}: hay observación y no publica su RMSE`);
+      }
+      if (quality.hw_time_err_p95_min !== null) {
+        incoherentes.push(`${port.slug}: error de hora sin observación con la que medirlo`);
+      }
+    } else {
+      if (typeof distancia !== "number") {
+        incoherentes.push(`${port.slug}: publica RMSE sin decir a qué distancia se midió`);
+      } else if (distancia > RADIO_DE_LA_DARSENA_KM) {
+        incoherentes.push(
+          `${port.slug}: publica como suyo un error medido a ${distancia} km de su dársena`,
+        );
+      }
+      if (metrics["observation_source"] === null) {
+        incoherentes.push(`${port.slug}: publica RMSE sin decir contra qué se midió`);
+      }
+    }
     if (!quality.estimated && quality.rmse_m === null) {
       incoherentes.push(`${port.slug}: no estimado y sin RMSE medido`);
     }
-    if (!quality.estimated && quality.grade === "C" && quality.grade_reason === null) {
-      incoherentes.push(`${port.slug}: grade C sin motivo`);
+    if (quality.estimated !== (quality.estimated_reason !== null)) {
+      incoherentes.push(`${port.slug}: el flag de estimado y su motivo no dicen lo mismo`);
     }
-    if (quality.estimated && quality.estimated_reason === null) {
-      incoherentes.push(`${port.slug}: estimado sin decir por qué`);
-    }
-    if (quality.rmse_m === null && quality.hw_time_err_p95_min !== null) {
-      incoherentes.push(`${port.slug}: error de hora sin observación con la que medirlo`);
+    if (quality.grade !== "A" && quality.grade_reason === null) {
+      incoherentes.push(`${port.slug}: no llega a A y no dice por qué`);
     }
   }
   assert.deepEqual(incoherentes, []);

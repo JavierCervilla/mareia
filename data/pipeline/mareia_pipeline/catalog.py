@@ -221,7 +221,11 @@ class _Candidate:
         de un fondeadero en un cabo: en Alicante, «Marina Alicante» (junto a la ciudad) y «Port la
         Caleta» (en Tabarca, 19 km mar adentro) son las dos del mismo municipio.
         """
-        return (-self.settlement.population, HARBOUR_CODES.index(self.harbour.feature_code), self.harbour.name)
+        return (
+            -self.settlement.population,
+            HARBOUR_CODES.index(self.harbour.feature_code),
+            self.harbour.name,
+        )
 
 
 def _harbours(entries: list[GeoName]) -> list[GeoName]:
