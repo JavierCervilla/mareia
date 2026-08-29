@@ -8,7 +8,7 @@
  * Open-Meteo de verdad. Se pide a un módulo idéntico con las fuentes dobladas.
  */
 
-import { assertEquals, assertStringIncludes } from "@std/assert";
+import { assertEquals, assertNotMatch, assertStringIncludes } from "@std/assert";
 import {
   createMemoryWeatherCache,
   createWeatherModule,
@@ -117,14 +117,14 @@ Deno.test("un puerto desconocido en el módulo es 404, no 500", async () => {
   });
 });
 
-Deno.test("sin AEMET_API_KEY, /bulletin degrada con 200 y estado explícito", async () => {
+Deno.test("sin clave de AEMET, /bulletin degrada con 200 y estado explícito", async () => {
   await withServer([weatherUnderTest()], async (baseUrl) => {
     const response = await fetch(`${baseUrl}/v1/modules/weather/bulletin?port=vigo`);
     assertEquals(response.status, 200);
 
     const body = await response.json();
     assertEquals(body.status, "unavailable");
-    assertStringIncludes(body.reason, "AEMET_API_KEY");
+    assertStringIncludes(body.reason, "no está configurada");
     assertEquals(body.zone.code, "36");
   });
 });
@@ -133,7 +133,8 @@ Deno.test("el core puede consultar la salud del módulo sin salir a la red", asy
   const api = weatherUnderTest().api?.({});
   const health = await api?.healthcheck();
   assertEquals(health?.status, "degraded");
-  // El detalle lo redacta el inspector de la credencial (T-08): además de decir que falta, ese
-  // mismo texto es el que avisa de una clave a punto de caducar, así que el core lo publica tal cual.
-  assertStringIncludes(health?.detail ?? "", "AEMET_API_KEY");
+  // El detalle sale por `/health`, que es superficie pública: lleva la vista pública de la
+  // credencial —el hecho— y no el aviso al operador, que nombra el secreto y dónde renovarlo (T-18).
+  assertStringIncludes(health?.detail ?? "", "no tiene credencial de AEMET");
+  assertNotMatch(health?.detail ?? "", /AEMET_API_KEY/u);
 });

@@ -14,7 +14,7 @@
 
 import type { Attribution } from "@mareia/module-contract";
 
-import type { AemetKeyState } from "./aemet-key.ts";
+import type { PublicCredentialView } from "./aemet-key.ts";
 import type { Cell } from "./cell.ts";
 import type { ForecastConditions, MarineConditions } from "./open-meteo.ts";
 import type { SourceReport } from "./source.ts";
@@ -65,10 +65,13 @@ export type BulletinPayload = {
   readonly attributions: readonly Attribution[];
   /**
    * Estado de la credencial de AEMET. Viaja siempre, también cuando el boletín sale bien: quien
-   * opera la instancia se entera de que la clave muere **antes** de que empiece a fallar, y quien
    * consume el API puede decir por qué dejó de haber boletín.
+   *
+   * Es la **vista pública** (T-18), no el estado entero: el aviso que dice qué variable de entorno
+   * falta y dónde se pide una clave nueva está escrito para quien administra la instancia, y ése
+   * tiene su propio canal (el workflow `aemet-key.yml`). Aquí sale el hecho.
    */
-  readonly credential: AemetKeyState;
+  readonly credential: PublicCredentialView;
 } & (
   | {
       readonly status: "ok";

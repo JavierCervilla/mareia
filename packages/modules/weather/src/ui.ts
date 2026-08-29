@@ -107,7 +107,17 @@ export type {
   PortLocation,
   WeatherPayload,
 } from "./payload.ts";
-export type { AemetKeyState, ExpirySource, KeyStatus } from "./aemet-key.ts";
+export type {
+  AemetKeyState,
+  ExpirySource,
+  KeyStatus,
+  PublicCredentialView,
+} from "./aemet-key.ts";
+
+// Las tres funciones que vivían aquí con un «no la usa la sección» en su comentario —
+// `inspectAemetKey`, `publicCredentialView` y `reasonFrom`— se han ido a `./testing.ts`, con su
+// propio subpath: lo que las traía era el gate de la web, no la sección, y esa intención vive mejor
+// en la estructura que en la prosa. Este fichero vuelve a ser sólo lo que la página pinta.
 export type { Cell } from "./cell.ts";
 export type { ForecastConditions, MarineConditions } from "./open-meteo.ts";
 export type { SourceReport } from "./source.ts";

@@ -16,8 +16,8 @@
   ],
   "credential": {
     "status": "missing",
-    "message": "AEMET no está configurada en esta instancia (falta AEMET_API_KEY): el boletín oficial no se publica"
+    "message": "Esta instancia no tiene credencial de AEMET"
   },
   "status": "unavailable",
-  "reason": "AEMET no está configurada en esta instancia: falta la variable de entorno AEMET_API_KEY"
+  "reason": "AEMET no está configurada en esta instancia: no hay credencial con la que pedir el boletín"
 }

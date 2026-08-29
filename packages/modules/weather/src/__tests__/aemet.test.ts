@@ -41,14 +41,17 @@ function aemetSpy(document: unknown = DOCUMENT) {
   });
 }
 
-test("sin AEMET_API_KEY no se sale a la red y el motivo lo dice", async () => {
+test("sin clave de AEMET no se sale a la red y el motivo lo dice sin nombrar el secreto", async () => {
   const spy = aemetSpy();
 
   await assert.rejects(
     () => fetchCoastalBulletin({ fetch: spy.fetch, baseUrl: BASE }, ZONE),
     (error: unknown) => {
       assert.ok(error instanceof WeatherSourceError);
-      assert.match(error.message, /AEMET_API_KEY/u);
+      assert.match(error.message, /no está configurada/u);
+      // Este motivo acaba en el `reason` de la respuesta pública, así que no nombra la variable
+      // de entorno: eso es del canal del operador (T-18).
+      assert.doesNotMatch(error.message, /AEMET_API_KEY/u);
       return true;
     },
   );
