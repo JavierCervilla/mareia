@@ -14,23 +14,26 @@
  * mitad de la promesa — **que lo publicado se pueda ver, se pueda nombrar y no prometa lo que el
  * aviso jura no prometer**:
  *
- * - **A-13** · la sección que aporta el módulo es la única de la página sin nombre accesible.
- * - **A-14** · las bandas se dibujan a 1,30:1 y 1,14:1 sobre el fondo; mayor y menor se distinguen
- *   por 1,14:1, en los dos temas.
- * - **A-15** · el pie visible del gráfico no dice qué son esas manchas; el `aria-label` sí.
- * - **A-16** · el rótulo que califica la cifra vive fuera de los textos auditados, así que la regla
- *   «aquí no se promete pesca» no lo alcanza.
+ * - **A-13** · la sección que aporta el módulo era la única de la página sin nombre accesible.
+ * - **A-14** · las bandas se dibujaban a 1,30:1 y 1,14:1 sobre el fondo; mayor y menor se
+ *   distinguían por 1,14:1, en los dos temas.
+ * - **A-15** · el pie visible del gráfico no decía qué son esas manchas; el `aria-label` sí.
+ * - **A-16** · el rótulo que califica la cifra vivía fuera de los textos auditados, así que la regla
+ *   «aquí no se promete pesca» no lo alcanzaba.
  *
  * Informe: `docs/qa/informe-adversario-t10.md` (promesa, clases atacadas, hallazgos, no
  * reproducidos y bundle).
  *
- * TRINQUETE — `test.fail()` es de Playwright y aquí el arnés es `node --test`; el equivalente es
- * `hallazgoAbierto()`, que estrenó el pase de T-09 y mantiene la misma tabla de verdad: el cuerpo
- * afirma **el comportamiento correcto**, CI se queda verde mientras el hallazgo esté abierto
- * (imprimiendo el motivo como diagnóstico en cada ejecución) y se pone **rojo el día que alguien lo
- * arregle**, pidiendo que se retire el trinquete para que el ataque quede como gate permanente.
- * Mismo caveat que documenta la skill: se conforma con que el cuerpo falle **por cualquier motivo**,
- * así que cada assert es específico y el motivo se imprime en cada run — un selector podrido se ve.
+ * **ESTADO: los cuatro corregidos en el mismo PR (#12) y el trinquete retirado.** El envoltorio
+ * `hallazgoAbierto()` —el `test.fail()` de Playwright traducido a `node --test`— mantenía CI en
+ * verde mientras el hallazgo estaba abierto y se puso rojo en cuanto los cuerpos empezaron a pasar,
+ * que es exactamente lo que pedía. Cumplido su trabajo, los cuatro ataques son ya gates duros
+ * (`gatePermanente`): el día que alguien deshaga uno de los arreglos, esto se pone rojo.
+ *
+ * El cuerpo de **A-14** se reescribió al cerrarlo, como avisaba su propio caveat: la vara original
+ * medía tres contrastes de la mancha y era insatisfacible con la paleta del brief (ver la
+ * demostración sobre su función); ahora mide el filete, que es lo que porta la información, y exige
+ * que la distinción mayor↔menor no sea cromática. Los otros tres cuerpos están **intactos**.
  */
 
 import test from "node:test";
@@ -72,17 +75,19 @@ async function paginasDePuerto(): Promise<readonly { slug: string; html: string 
 }
 
 /**
- * TRINQUETE. Envuelve un cuerpo que afirma el comportamiento CORRECTO de un hallazgo **abierto**.
+ * GATE PERMANENTE — el último paso del trinquete.
  *
- * | Estado del hallazgo | Resultado del run | CI |
- * |---|---|---|
- * | abierto | el cuerpo falla → se imprime el motivo como diagnóstico | 🟢 |
- * | arreglado | el cuerpo pasa → este test **falla** pidiendo retirar el trinquete | 🔴 |
- * | arreglado y trinquete retirado | el cuerpo pasa | 🟢 gate permanente |
+ * Los cuatro cuerpos nacieron envueltos en `hallazgoAbierto()`, que invertía el resultado mientras
+ * el hallazgo estaba abierto y se ponía rojo el día que alguien lo arreglara. Ese día llegó: los
+ * cuatro se corrigieron en este mismo PR, el envoltorio gritó «YA NO FALLA» y se retiró. A partir
+ * de aquí los ataques son gates duros y corrientes: si alguien deshace uno de los arreglos, esto se
+ * pone rojo por el motivo que sea, no por un diagnóstico que nadie lee.
+ *
+ * Lo único que sobrevive del envoltorio es la traducción de `SinDatos` a `skip`: sin `dist/` no hay
+ * artefacto que juzgar, y un gate que se pone rojo por falta de build no dice nada del sitio.
  */
-function hallazgoAbierto(nombre: string, cuerpo: () => Promise<void> | void): void {
-  test(`${nombre} · TRINQUETE (hallazgo abierto)`, async (t: TestContext) => {
-    let motivo: string | undefined;
+function gatePermanente(nombre: string, cuerpo: () => Promise<void> | void): void {
+  test(nombre, async (t: TestContext) => {
     try {
       await cuerpo();
     } catch (error) {
@@ -90,14 +95,8 @@ function hallazgoAbierto(nombre: string, cuerpo: () => Promise<void> | void): vo
         t.skip(error.message);
         return;
       }
-      motivo = error instanceof Error ? error.message : String(error);
+      throw error;
     }
-    assert.ok(
-      motivo !== undefined,
-      `«${nombre}» YA NO FALLA: si el hallazgo está corregido, quita el trinquete ` +
-        "(`hallazgoAbierto` → `test`) y deja el cuerpo como gate permanente.",
-    );
-    t.diagnostic(`${nombre} sigue abierto — ${motivo}`);
   });
 }
 
@@ -223,13 +222,21 @@ function tokenOklch(css: string, nombre: string, desde: number): RGB {
   return oklchASrgb(Number(l) / 100, Number(c), Number(h));
 }
 
-/** La opacidad con la que el CSS pinta una banda de cada énfasis. */
-function opacidadDeBanda(css: string, enfasis: string): number {
-  const encontrado = new RegExp(
-    `\\.grafico__banda\\[data-enfasis="${enfasis}"\\]\\s*\\{[^}]*opacity:\\s*([\\d.]+)`,
-  ).exec(css);
-  assert.ok(encontrado, `el CSS no declara la opacidad de la banda «${enfasis}»`);
-  return Number(encontrado[1]);
+/** Lo que el CSS declara para una banda de cada énfasis, o `undefined` si no lo declara. */
+function declaracionDeBanda(css: string, enfasis: string, propiedad: string): string | undefined {
+  const regla = new RegExp(`\\.grafico__banda\\[data-enfasis="${enfasis}"\\]\\s*\\{([^}]*)\\}`).exec(
+    css,
+  )?.[1];
+  assert.ok(regla, `el CSS no declara la banda «${enfasis}»`);
+  // El prefijo evita que preguntar por `opacity` conteste `fill-opacity`, que es otra cosa.
+  return new RegExp(`(?:^|;|\\s)${propiedad}:\\s*([^;}]+)`).exec(regla)?.[1]?.trim();
+}
+
+/** Lo mismo, exigido: una banda sin esta declaración es el ataque otra vez. */
+function exigirDeBanda(css: string, enfasis: string, propiedad: string): string {
+  const valor = declaracionDeBanda(css, enfasis, propiedad);
+  assert.ok(valor, `la banda «${enfasis}» no declara ${propiedad}`);
+  return valor;
 }
 
 /**
@@ -237,29 +244,51 @@ function opacidadDeBanda(css: string, enfasis: string): number {
  * periodo solunar. El brief exige 4,5:1 para el texto «porque esta página se lee al sol» y WCAG
  * 1.4.11 pide 3:1 a los objetos gráficos que portan información.
  *
- * Medido sobre los tokens publicados y confirmado leyendo los píxeles renderizados por Chromium en
- * los dos temas: la banda fuerte queda en 1,30:1 (claro) / 1,27:1 (noche) y la suave en 1,14:1 /
- * 1,11:1. Y la distinción mayor↔menor —lo único que dice cuál de las cuatro manchas es la que la
- * convención considera buena— viaja entera en un 1,14:1 de opacidad, un canal exclusivamente de
- * color.
+ * Cuando se escribió el ataque, la banda entera era una mancha: `fill: var(--m-terra)` a opacidad
+ * 0,18 (mayor) y 0,09 (menor), medidas 1,30:1 y 1,14:1 sobre el fondo y **1,14:1 entre sí** en los
+ * dos temas — la importancia de una ventana viajaba entera en un canal cromático por debajo de
+ * cualquier umbral de percepción a plena luz.
  *
- * Comportamiento correcto: una banda se distingue de su fondo y una banda mayor se distingue de una
- * menor, en los dos temas, por encima del umbral de objeto gráfico.
+ * ─── REESCRITO AL CERRAR EL HALLAZGO (el caveat del trinquete decía que había que hacerlo) ───
  *
- * Caveat del trinquete: si algún día la distinción se resuelve con un canal no cromático (trama,
- * filete, rótulo) en vez de subiendo el contraste, este cuerpo hay que reescribirlo — no basta con
- * retirarlo.
+ * El cuerpo original medía **tres** contrastes de la mancha: mayor vs fondo, menor vs fondo y mayor
+ * vs menor, los tres ≥ 3:1. Con `fill: var(--m-terra)` esos tres NO pueden darse a la vez, y no es
+ * cuestión de afinar la opacidad: si el menor da 3:1 contra el fondo y el mayor da 3:1 contra el
+ * menor, el mayor tiene que dar 9:1 contra el fondo, y `--m-terra` **a opacidad 1** da 5,40:1
+ * (claro) y 5,69:1 (noche). Barrido exhaustivo de las dos opacidades en pasos de 0,01: el mejor
+ * mínimo alcanzable es 2,31:1 en claro y 2,37:1 en noche. La vara era insatisfacible con la
+ * paleta del brief, que no se toca porque su peor par (5,4:1) es lo que hace legible la página al
+ * sol.
+ *
+ * Así que el arreglo hace lo que el propio caveat contemplaba —resolver la distinción con un canal
+ * **no cromático**— y este cuerpo pasa a medir lo que ahora porta la información:
+ *
+ * 1. **El filete** (`stroke: var(--m-terra)`, opacidad 1) es el objeto gráfico que WCAG mide de una
+ *    región sombreada: se exige que llegue a 3:1 sobre el fondo en los dos temas.
+ * 2. **La distinción mayor↔menor no es de color**: se exige que difieran en grosor y en trama
+ *    (continuo vs discontinuo), que es lo que ve quien no distingue dos tonos del mismo naranja.
+ * 3. **La mancha sigue siendo contexto**: se exige que su opacidad siga siendo tenue, porque subirla
+ *    hasta el 3:1 (haría falta 0,70) taparía la curva y rompería la regla del brief de una sola
+ *    mancha de color. Que el contraste lo ponga el filete es la decisión, y aquí queda anclada.
  */
 function lasBandasSeVenYSeDistinguenEntreSi(): void {
   exigirBuild();
   const tokens = readFileSync(TOKENS_CSS, "utf8");
   const pagina = readFileSync(PAGINA_CSS, "utf8");
 
+  const base = /\.grafico__banda\s*\{([^}]*)\}/.exec(pagina)?.[1];
+  assert.ok(base, "el CSS ya no declara la banda: revisa este ataque antes de darlo por cerrado");
   assert.match(
-    pagina,
-    /\.grafico__banda\s*\{[^}]*fill:\s*var\(--m-terra\)/,
+    base,
+    /fill:\s*var\(--m-terra\)/,
     "la banda ya no se pinta con --m-terra: revisa este ataque antes de darlo por cerrado",
   );
+  assert.match(
+    base,
+    /stroke:\s*var\(--m-terra\)/,
+    "la banda ya no lleva filete del token: es el filete lo que la hace visible, vuelve a medir",
+  );
+  const alfaFilete = Number(/(?:^|;|\s)stroke-opacity:\s*([\d.]+)/.exec(base)?.[1] ?? "1");
 
   const inicioNoche = tokens.indexOf("@media (prefers-color-scheme: dark)");
   assert.ok(inicioNoche > 0, "tokens.css ya no declara el tema noche por preferencia del sistema");
@@ -267,32 +296,48 @@ function lasBandasSeVenYSeDistinguenEntreSi(): void {
     { nombre: "claro", desde: tokens.indexOf(":root {") },
     { nombre: "noche", desde: inicioNoche },
   ];
-  const opacidades = [
-    { enfasis: "fuerte", alfa: opacidadDeBanda(pagina, "fuerte") },
-    { enfasis: "suave", alfa: opacidadDeBanda(pagina, "suave") },
-  ];
 
   const flojos: string[] = [];
   for (const tema of temas) {
     const fondo = tokenOklch(tokens, "--m-bg", tema.desde);
     const terra = tokenOklch(tokens, "--m-terra", tema.desde);
-    const compuestas = opacidades.map((o) => ({ ...o, color: componer(terra, fondo, o.alfa) }));
-    for (const banda of compuestas) {
-      const razon = contraste(banda.color, fondo);
-      if (razon < CONTRASTE_MINIMO_OBJETO_GRAFICO) {
-        flojos.push(`${tema.nombre}/${banda.enfasis} vs fondo = ${razon.toFixed(2)}:1`);
-      }
-    }
-    const [fuerte, suave] = compuestas as [(typeof compuestas)[0], (typeof compuestas)[0]];
-    const entreSi = contraste(fuerte.color, suave.color);
-    if (entreSi < CONTRASTE_MINIMO_OBJETO_GRAFICO) {
-      flojos.push(`${tema.nombre}/mayor vs menor = ${entreSi.toFixed(2)}:1`);
+    const razon = contraste(componer(terra, fondo, alfaFilete), fondo);
+    if (razon < CONTRASTE_MINIMO_OBJETO_GRAFICO) {
+      flojos.push(`${tema.nombre}/filete vs fondo = ${razon.toFixed(2)}:1`);
     }
   }
   assert.ok(
     flojos.length === 0,
-    `bandas por debajo de ${CONTRASTE_MINIMO_OBJETO_GRAFICO}:1 (WCAG 1.4.11): ${flojos.join(" · ")}`,
+    `el filete de la banda no llega a ${CONTRASTE_MINIMO_OBJETO_GRAFICO}:1 (WCAG 1.4.11): ` +
+      flojos.join(" · "),
   );
+
+  const grosor = {
+    fuerte: exigirDeBanda(pagina, "fuerte", "stroke-width"),
+    suave: exigirDeBanda(pagina, "suave", "stroke-width"),
+  };
+  const trama = {
+    fuerte: declaracionDeBanda(pagina, "fuerte", "stroke-dasharray") ?? "continuo",
+    suave: declaracionDeBanda(pagina, "suave", "stroke-dasharray") ?? "continuo",
+  };
+  assert.notEqual(
+    grosor.fuerte,
+    grosor.suave,
+    `mayor y menor comparten grosor de filete (${grosor.fuerte}): la distinción vuelve a ser de color`,
+  );
+  assert.notEqual(
+    trama.fuerte,
+    trama.suave,
+    `mayor y menor comparten trama (${trama.fuerte}): quien no distingue tonos no las distingue`,
+  );
+
+  for (const enfasis of ["fuerte", "suave"] as const) {
+    const mancha = Number(exigirDeBanda(pagina, enfasis, "fill-opacity"));
+    assert.ok(
+      mancha > 0 && mancha <= 0.25,
+      `la mancha de «${enfasis}» es ${mancha}: o desapareció o dejó de ser contexto y tapa la curva`,
+    );
+  }
 }
 
 // =================================================================================================
@@ -371,19 +416,19 @@ async function elRotuloDelRatingSaleDeLosTextosAuditados(): Promise<void> {
 
 // =================================================================================================
 
-hallazgoAbierto(
+gatePermanente(
   "A-13 · la sección de módulo se expone como región, igual que las otras siete",
   todaSeccionDeBloqueTieneNombreAccesible,
 );
-hallazgoAbierto(
+gatePermanente(
   "A-14 · las bandas se ven sobre el fondo y la mayor se distingue de la menor",
   lasBandasSeVenYSeDistinguenEntreSi,
 );
-hallazgoAbierto(
+gatePermanente(
   "A-15 · el pie visible del gráfico dice qué son las franjas sombreadas",
   elPieDelGraficoExplicaLasBandas,
 );
-hallazgoAbierto(
+gatePermanente(
   "A-16 · el rótulo que califica el rating es un texto auditado del módulo",
   elRotuloDelRatingSaleDeLosTextosAuditados,
 );
