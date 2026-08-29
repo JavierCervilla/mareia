@@ -103,6 +103,12 @@ jobs:
             "$DOKPLOY_API_URL/api/application.byId?applicationId=$DOKPLOY_WEB_APP_ID")"
 
           # (a) Lo que queríamos escribir, se escribió.
+          #
+          # Ojo con el reflejo de «estaba rojo, le doy a re-run»: en una SEGUNDA corrida del mismo
+          # día este check se cumple solo, porque `BUILD_DATE=hoy` ya está guardado de la primera.
+          # No llega a producción —si ya está guardado, el build hornea hoy igualmente, y el último
+          # paso espera a que el dominio publique la fecha— pero el camino de ESCRITURA solo se
+          # verifica de verdad en la primera corrida del día. Un re-run no lo re-verifica.
           if ! printf '%s\n' "$(printf '%s' "$despues" | jq -r '.buildArgs // ""')" \
               | grep -qx "BUILD_DATE=$HOY"; then
             echo "::error::El build arg BUILD_DATE=$HOY no quedó guardado en Dokploy; sin él el build reutilizaría la capa cacheada y el sitio publicaría la fecha de ayer."
@@ -128,6 +134,14 @@ jobs:
           #    lecturas y daría un rojo diciendo una mentira. Un rojo por el motivo equivocado
           #    tampoco es un gate.
           #  · `updatedAt`/`refreshToken` cambian solos en cada escritura.
+          #
+          # Y una advertencia para el primer rojo, que puede no ser el que esperas: `jq -S` ordena
+          # CLAVES, no elementos de array, y esta comparación abarca todos los arrays de la ficha
+          # (`domains`, `mounts`, `ports`, `redirects`, `security`). Si Dokploy devolviera alguno en
+          # otro orden, esto salta sin que nadie haya borrado nada. Se acepta a propósito: falla en
+          # ROJO y ANTES de desplegar, que es la dirección segura, y nombra el campo — así que la
+          # primera corrida real contra el panel dirá en un minuto si hay algo más que excluir. Si
+          # el primer rojo es un `domains` reordenado, no es un reemplazo: es esto.
           if ! diff -q \
               <(printf '%s' "$antes"   | jq -S 'del(.buildArgs, .applicationStatus, .updatedAt, .refreshToken)') \
               <(printf '%s' "$despues" | jq -S 'del(.buildArgs, .applicationStatus, .updatedAt, .refreshToken)') \
