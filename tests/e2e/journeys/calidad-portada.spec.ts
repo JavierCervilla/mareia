@@ -18,6 +18,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import type { Page } from "@playwright/test";
 import { expect, test } from "../fixtures/qa-bundle";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
@@ -49,6 +50,27 @@ const REGIONES_VISIBLES = "section.grupo:visible";
 
 test.use({ javaScriptEnabled: false });
 
+/**
+ * Ninguna región se queda con su rótulo sobre una lista vacía: el bloque se va con sus puertos.
+ *
+ * Se comprueba en **los dos** estados del filtro, y no en uno, porque la regla CSS que lo sostiene
+ * también tiene dos mitades —`[data-medidos="0"]` y `[data-estimados="0"]`— y cada una tapa un caso
+ * real del catálogo: Ceuta tiene 1 puerto y 0 medidos, Melilla 1 y 0 estimados. Comprobando solo
+ * «estimados» se podía borrar la mitad de «medidos» y el recorrido seguía en verde con Ceuta
+ * enseñando su encabezado sobre la nada. Lo reprodujo el verificador borrando media regla, y por eso
+ * este ayudante existe: un gate que pasa en verde sobre el defecto que motivó su propio código no es
+ * un gate.
+ */
+async function sinRegionesHuerfanas(page: Page, estado: string): Promise<void> {
+  const vacias = await page
+    .locator(`${REGIONES_VISIBLES}:not(:has(${ENTRADAS_VISIBLES}))`)
+    .allTextContents();
+  expect(
+    vacias,
+    `con el filtro en «${estado}», regiones con el rótulo puesto y ningún puerto debajo: ${vacias.join(" | ")}`,
+  ).toEqual([]);
+}
+
 test("la portada dice la calidad de cada puerto y se filtra por ella sin JavaScript", async ({
   page,
   qa,
@@ -75,6 +97,7 @@ test("la portada dice la calidad de cada puerto y se filtra por ella sin JavaScr
   expect(visiblesMedidos.length, "el filtro no enseña todos los puertos medidos").toBe(
     medidos.length,
   );
+  await sinRegionesHuerfanas(page, "medidos");
 
   qa.step("filtrar «solo los estimados»: el complemento exacto, sin ningún medido");
   await page.locator('label[for="calidad-estimados"]').click();
@@ -83,14 +106,7 @@ test("la portada dice la calidad de cada puerto y se filtra por ella sin JavaScr
   expect(perdidas, `el filtro dejó pasar puertos medidos: ${perdidas.join(" | ")}`).toEqual([]);
   expect(visiblesEstimados.length).toBe(estimados.length);
 
-  // Ninguna región se queda con su rótulo sobre una lista vacía: el bloque se va con sus puertos.
-  const regionesVacias = await page
-    .locator(`${REGIONES_VISIBLES}:not(:has(${ENTRADAS_VISIBLES}))`)
-    .allTextContents();
-  expect(
-    regionesVacias,
-    `regiones con el rótulo puesto y ningún puerto debajo: ${regionesVacias.join(" | ")}`,
-  ).toEqual([]);
+  await sinRegionesHuerfanas(page, "estimados");
 
   qa.step("volver a «todos los puertos»: el catálogo entero otra vez");
   await page.locator('label[for="calidad-todos"]').click();

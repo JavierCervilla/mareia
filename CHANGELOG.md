@@ -16,8 +16,9 @@ publica una precisión que no tiene» acaba teniendo el mismo efecto.
   costaba **153 peticiones** a `/v1/ports/:slug`; ahora, una. Los `null` viajan **como `null`** y no
   se omiten del objeto: «no se pudo medir» es dato, y un campo ausente se rellena con un cero. Las
   frases que explican el porqué (`grade_reason`, `estimated_reason`) se quedan en la ficha: son un
-  párrafo por puerto y una lista no es donde se lee un párrafo. Medido: el cuerpo pasa de 30.823 a
-  43.495 B (**+41 %**; gzip 4.254 → 4.714, **+10,8 %**) y la primera petición tarda 87 ms leyendo las
+  párrafo por puerto y una lista no es donde se lee un párrafo. Medido contra el servidor,
+  no contra la función: el cuerpo pasa de 30.956 a 43.628 B (**+41 %**; gzip 4.175 → 4.660,
+  **+11,6 %**) y la primera petición tarda 87 ms leyendo las
   153 estaciones — las siguientes, 2,2 ms, porque el repositorio cachea por fichero.
 - **La portada lo dice en cada entrada, y se lee sin JavaScript.** «Almería · estimada», «Almería ·
   medida», en la misma cursiva de la meta del índice: una palabra, no un chip de color (el color
