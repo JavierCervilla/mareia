@@ -52,8 +52,6 @@ for (const hostil of CUERPOS_HOSTILES) {
     page,
     qa,
   }) => {
-    test.fail();
-
     qa.step(`servir 200 con ${hostil.nombre}`);
     await montarApi(page, { cuerpo: hostil.cuerpo }, { cuerpo: fixture("bulletin-ok") });
     await page.goto(PAGINA);
@@ -76,8 +74,6 @@ test("A3 · un 200 con basura no se puede confundir con «el navegador no pudo p
   page,
   qa,
 }) => {
-  test.fail();
-
   qa.step("caso A: el API contesta 200 con un cuerpo que no es JSON (un proxy de por medio)");
   await montarApi(
     page,

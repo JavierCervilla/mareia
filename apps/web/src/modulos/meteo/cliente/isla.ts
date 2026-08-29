@@ -20,8 +20,7 @@
  *   envejecer la página sin que nadie lo pidiera. Si el dato interesa más nuevo, se recarga.
  */
 
-import type { BulletinPayload, WeatherPayload } from "@mareia/module-weather/ui";
-
+import { esRespuestaDeBoletin, esRespuestaDeMeteo } from "../contrato.ts";
 import type { BloqueMeteo, CitaOficial, FilaMeteo, Traida, VistaMeteo } from "../vista.ts";
 import { vistaMeteo } from "../vista.ts";
 
@@ -59,23 +58,59 @@ function anclajeDe(seccion: HTMLElement): Anclaje | undefined {
  * Pide un endpoint del módulo y **nunca lanza**: un fallo de red es un estado de la sección, no una
  * excepción. El motivo que devuelve habla de *nuestro* servidor, no de Open-Meteo ni de AEMET: si
  * la petición no llegó a salir, atribuirle el fallo a la fuente sería inventar un diagnóstico.
+ *
+ * Hay **cuatro** formas de volver sin dato y cada una lo dice con sus palabras, porque son cuatro
+ * averías distintas y quien lee la página no puede confundirlas (es la lección del hallazgo A-11
+ * del pase de T-09, y el hallazgo H-6 del de T-11: el 200 ilegible y el API caído publicaban una
+ * frase idéntica carácter por carácter, aunque en un caso el servidor contestó y en el otro el
+ * navegador ni siquiera pudo preguntar):
+ *
+ *   1. la petición no sale (red caída, timeout) → «no se ha podido pedir»;
+ *   2. el servidor contesta un estado que no es 2xx → «no ha servido … (HTTP nnn)»;
+ *   3. contesta 2xx con un cuerpo que no es JSON → «su respuesta no se puede leer»;
+ *   4. contesta 2xx con JSON que no tiene la forma del contrato → «no la sabe leer esta página».
+ *
+ * El `valido` de la 4 es lo que impide el hallazgo H-2: sin él, un 200 con el cuerpo cambiado
+ * entraba en la vista y la reventaba a media sección.
  */
-async function traer<T>(url: string, que: string): Promise<Traida<T>> {
+async function traer<T>(
+  url: string,
+  que: string,
+  valido: (cuerpo: unknown) => cuerpo is T,
+): Promise<Traida<T>> {
+  let respuesta: Response;
   try {
-    const respuesta = await fetch(url, {
+    respuesta = await fetch(url, {
       headers: { accept: "application/json" },
       signal: AbortSignal.timeout(ESPERA_MS),
     });
-    if (!respuesta.ok) {
-      return {
-        ok: false,
-        motivo: `El servidor de Mareia no ha servido ${que} (HTTP ${respuesta.status}).`,
-      };
-    }
-    return { ok: true, cuerpo: (await respuesta.json()) as T };
   } catch {
     return { ok: false, motivo: `No se ha podido pedir ${que} al servidor de Mareia.` };
   }
+  if (!respuesta.ok) {
+    return {
+      ok: false,
+      motivo: `El servidor de Mareia no ha servido ${que} (HTTP ${respuesta.status}).`,
+    };
+  }
+  // El `json()` va en su propio `try`: si comparte el del `fetch`, un cuerpo ilegible se cuenta
+  // como una petición que no salió, que es exactamente lo que confundía las dos ausencias.
+  let cuerpo: unknown;
+  try {
+    cuerpo = await respuesta.json();
+  } catch {
+    return {
+      ok: false,
+      motivo: `El servidor de Mareia contestó a la petición de ${que}, pero su respuesta no se puede leer: no es JSON.`,
+    };
+  }
+  if (!valido(cuerpo)) {
+    return {
+      ok: false,
+      motivo: `El servidor de Mareia contestó a la petición de ${que}, pero su respuesta no tiene la forma que esta página sabe leer.`,
+    };
+  }
+  return { ok: true, cuerpo };
 }
 
 function texto(etiqueta: string, clase: string, contenido: string): HTMLElement {
@@ -184,13 +219,40 @@ async function montarSeccion(anclaje: Anclaje): Promise<void> {
 
   anunciarPeticion(anclaje);
   const [meteo, boletin] = await Promise.all([
-    traer<WeatherPayload>(ruta("weather"), "el estado del mar"),
-    traer<BulletinPayload>(ruta("bulletin"), "el boletín de AEMET"),
+    traer(ruta("weather"), "el estado del mar", esRespuestaDeMeteo),
+    traer(ruta("bulletin"), "el boletín de AEMET", esRespuestaDeBoletin),
   ]);
   // `recibidoEnMs` es el instante en que llegaron las respuestas: a partir de aquí la edad del dato
   // se mide como intervalo desde este punto (ver la regla 2 de `vista.ts`).
   const recibidoEnMs = Date.now();
   pintar(anclaje, vistaMeteo({ meteo, boletin, recibidoEnMs }, Date.now(), anclaje.zona));
+}
+
+/**
+ * La red de seguridad: si montar la sección lanza pese a todo, se dice.
+ *
+ * `montarSeccion` es una promesa que nadie espera, así que una excepción suya no la ve nadie y la
+ * sección se quedaba anunciándose ocupada para siempre (hallazgo H-2). Que el error sea imprevisto
+ * no lo convierte en un quinto estado: se cierra el `aria-busy` y se publica la única ausencia
+ * honesta que cabe aquí —«la página no ha podido pintarlo»—, sin volcar el error en la pantalla
+ * (va a la consola, que es donde lo lee quien puede arreglarlo).
+ */
+function avisarDelFalloAlPintar(anclaje: Anclaje, fallo: unknown): void {
+  console.error("[meteo] la isla no ha podido pintar la sección", fallo);
+  anclaje.seccion.setAttribute("aria-busy", "false");
+  anclaje.bloques.replaceChildren();
+  anclaje.bloques.hidden = true;
+  anclaje.aviso.hidden = false;
+  anclaje.aviso.className = "meteo__sello meteo__sello--sin-dato";
+  anclaje.aviso.replaceChildren(
+    texto("strong", "meteo__sello-titular", "No se ha podido enseñar el estado del mar"),
+    texto(
+      "span",
+      "meteo__sello-detalle",
+      "Esta página no ha conseguido pintar la sección en este navegador. El resto de la página " +
+        "—mareas, curva, sol y luna— no depende de ella y está completo.",
+    ),
+  );
 }
 
 /**
@@ -205,7 +267,9 @@ export function montarIslaMeteo(): void {
     }
     const anclaje = anclajeDe(nodo);
     if (anclaje !== undefined) {
-      void montarSeccion(anclaje);
+      void montarSeccion(anclaje).catch((fallo: unknown) => {
+        avisarDelFalloAlPintar(anclaje, fallo);
+      });
     }
   }
 }
