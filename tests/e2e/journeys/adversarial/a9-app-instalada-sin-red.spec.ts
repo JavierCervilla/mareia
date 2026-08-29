@@ -60,4 +60,20 @@ test("A9 · con un puerto guardado, el icono de la pantalla de inicio no abre na
     `el arranque de la app instalada (${arranque}) no lleva a ninguna parte sin red`,
   ).toBeUndefined();
   await expect(page.locator("body")).toContainText("Mareia");
+
+  // Que la puerta abra no es la promesa: la promesa es LLEGAR. El hallazgo decía «la app abriría y
+  // no llevaría a ninguna parte», así que el recorrido tiene que caminar el camino entero —índice,
+  // región, provincia, puerto— sin red, y no quedarse en el umbral.
+  qa.step("caminar sin red desde el arranque hasta el puerto, que es lo que promete el hallazgo");
+  for (const salto of ["/mareas/", "/mareas/galicia/", "/mareas/galicia/pontevedra/", PAGINA]) {
+    const roto = await page.goto(salto).then(
+      () => undefined,
+      (error: Error) => error.message,
+    );
+    expect(roto, `sin red, ${salto} no abre: el camino hasta el puerto está cortado`).toBeUndefined();
+    await expect(page.locator("body")).toContainText("Mareia");
+  }
+
+  qa.step("y al llegar, la tabla de mareas está de verdad");
+  await expect(page.locator("#tabla-de-mareas")).toBeVisible();
 });

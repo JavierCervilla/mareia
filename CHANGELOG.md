@@ -98,8 +98,10 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   `/sw.js` publicado pesa **27 329 B** (8 771 comprimidos), comentarios incluidos: son su
   documentación y su auditoría. Un favorito ocupa en la Cache API **164 547 B** el primero —página
   28 906, hoja de estilos 15 883, isla meteo 13 234, bundle de la PWA 16 639, su trozo común 1 698,
-  motor 70 372, constantes 2 537 y el camino desde la portada 15 278— y **36 804 B** cada siguiente
-  (su página, sus constantes y los dos índices que no comparte), porque el resto ya está. Todas las
+  motor 70 372, constantes 2 537 y el camino desde la portada 15 278— y **entre 36 553 y 38 770 B**
+  cada siguiente (su página, sus constantes y los dos índices que no comparte), porque el resto ya
+  está. Se publica el rango y no una media: los doce puertos van de bilbao a la-manga y **ninguno**
+  vale la cifra única que decía antes esta línea. Todas las
   cifras en bytes y kB de mil, medidas sobre el `dist/` de este commit, y las comprimidas con
   `zlib.gzipSync(datos, { level: 9 })`.
 - **El sello mira los dos almacenes, no uno.** Prometía los bytes de la caché del worker

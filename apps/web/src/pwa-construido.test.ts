@@ -30,7 +30,7 @@ import { diaOffline } from "./pwa/dia-offline.ts";
 import { iconoSvg, MANIFIESTO } from "./pwa/marca.ts";
 import { politicasDeModulos, urlsDeFavorito } from "./pwa/precacheo.ts";
 import { PROTOCOLO, RUTA_MANIFEST, rutaEstacionOffline } from "./pwa/protocolo.ts";
-import { RUTA_MAREAS, rutaProvincia, rutaPuerto, rutaRegion } from "./rutas.ts";
+import { rutaPuerto } from "./rutas.ts";
 
 const RAIZ = dirname(fileURLToPath(import.meta.url));
 const DIST = join(RAIZ, "..", "dist");
@@ -247,12 +247,19 @@ test("la puerta de entrada de la app instalada está entre lo que guarda un favo
   }
   const manifiesto = JSON.parse(fichero("manifest.webmanifest")) as { start_url: string };
   const puerto = (await cargarPuertos())[0]!;
+
+  // El camino se LEE del HTML construido, no se re-deriva aquí. Re-derivarlo medía `urlsDeFavorito`
+  // —una función— en vez de lo que la página pide guardar, así que vaciar `data-sin-red-camino`
+  // dejaba este test en verde con la app instalada abriendo y sin llevar a ninguna parte, que es el
+  // hallazgo H-3 literal. El artefacto publicado es el único sujeto que vale.
+  const html = fichero(join(rutaPuerto(puerto).slice(1), "index.html"));
+  const atributo = /data-sin-red-camino="([^"]*)"/u.exec(html)?.[1];
+  assert.ok(atributo !== undefined, `${puerto.slug}: la página no publica el camino que hay que guardar`);
+  const camino = JSON.parse(atributo.replaceAll("&#91;", "[").replaceAll("&quot;", '"')) as string[];
+  assert.ok(camino.length > 0, "el camino publicado está vacío: la app instalada no llevaría a ninguna parte");
+
   const guardadas = urlsDeFavorito(
-    {
-      slug: puerto.slug,
-      ruta: rutaPuerto(puerto),
-      camino: ["/", RUTA_MAREAS, rutaRegion(puerto.region.slug), rutaProvincia(puerto.region.slug, puerto.province.slug)],
-    },
+    { slug: puerto.slug, ruta: rutaPuerto(puerto), camino },
     ["/_astro/cualquiera.css"],
   );
 
@@ -296,8 +303,14 @@ const TOPES = {
   swCodigoBytes: 9_000,
   /** Constantes armónicas de UN puerto: lo que se baja al marcar un favorito. */
   estacionBytes: 4_000,
-  /** El bundle que baja CUALQUIERA que abra un puerto, use la PWA o no. */
-  pwaBaseBytes: 22_000,
+  /**
+   * El bundle que baja CUALQUIERA que abra un puerto, use la PWA o no.
+   *
+   * Subió a 22.000 en el commit del pase adversario **sin explicarlo en ninguna parte**, cuando la
+   * cabecera de este bloque exige justificar cada subida en el CHANGELOG. Revertido: medido, el
+   * bundle son 16.639 B, el 83 % del tope viejo, así que nada lo forzaba.
+   */
+  pwaBaseBytes: 20_000,
   /** El motor, que solo baja quien pide otro día (o quien guarda el puerto). */
   motorBytes: 80_000,
 } as const;
