@@ -13,16 +13,28 @@
  *   se lee como lo que es, caracteres. Es el mismo cuidado que el core resuelve con el escapado de
  *   Astro (`escapar-marcado.ts`), aplicado al único sitio de la web donde el marcado se genera en el
  *   navegador.
- * - **Los dos endpoints se piden por separado y fallan por separado.** Que AEMET no conteste no
- *   puede dejar sin viento a quien mira la página; cada bloque trae su propio estado.
+ * - **Los dos endpoints se piden por separado, fallan por separado y se PINTAN por separado.** Que
+ *   AEMET no conteste no puede dejar sin viento a quien mira la página; cada bloque trae su propio
+ *   estado y aparece en cuanto llega el suyo, sin esperar al otro (lo tercero lo aprendimos por las
+ *   malas: hasta T-11 se pedían por separado pero se pintaban juntos, y el mar ya descargado se
+ *   quedaba de rehén del boletín hasta 8 s).
  * - **No se reintenta ni se refresca solo.** Un reintento automático convertiría una caída del API
  *   en una tormenta de peticiones desde todos los móviles abiertos, y un auto-refresco haría
  *   envejecer la página sin que nadie lo pidiera. Si el dato interesa más nuevo, se recarga.
  */
 
+import type { BulletinPayload, WeatherPayload } from "@mareia/module-weather/ui";
+
 import { esRespuestaDeBoletin, esRespuestaDeMeteo } from "../contrato.ts";
-import type { BloqueMeteo, CitaOficial, FilaMeteo, Traida, VistaMeteo } from "../vista.ts";
-import { vistaMeteo } from "../vista.ts";
+import type {
+  BloqueMeteo,
+  CitaOficial,
+  EstadoDeFuente,
+  FilaMeteo,
+  Traida,
+  VistaMeteo,
+} from "../vista.ts";
+import { PIDIENDO, vistaMeteo } from "../vista.ts";
 
 /** Atributos que la sección construida en build le deja a la isla. */
 interface Anclaje {
@@ -194,7 +206,6 @@ function pintarBloque(bloque: BloqueMeteo): HTMLElement {
 function pintar(anclaje: Anclaje, vista: VistaMeteo): void {
   anclaje.bloques.replaceChildren(...vista.bloques.map(pintarBloque));
   anclaje.bloques.hidden = false;
-  anclaje.seccion.setAttribute("aria-busy", "false");
   if (vista.resumen === undefined) {
     anclaje.aviso.hidden = true;
     anclaje.aviso.replaceChildren();
@@ -205,27 +216,72 @@ function pintar(anclaje: Anclaje, vista: VistaMeteo): void {
   anclaje.aviso.replaceChildren(texto("strong", "meteo__sello-titular", vista.resumen));
 }
 
-/** Mientras se espera al API: se dice que se está pidiendo, no se deja el hueco de antes. */
-function anunciarPeticion(anclaje: Anclaje): void {
-  anclaje.seccion.setAttribute("aria-busy", "true");
-  anclaje.aviso.replaceChildren(
-    texto("strong", "meteo__sello-titular", "Pidiendo el estado del mar…"),
-  );
+/**
+ * Lo que la sección sabe de sus dos endpoints en un instante dado. Es mutable a propósito: cada
+ * respuesta que llega anota lo suyo y repinta, sin esperar a la otra.
+ */
+interface EstadoDeLaSeccion {
+  meteo: EstadoDeFuente<WeatherPayload>;
+  boletin: EstadoDeFuente<BulletinPayload>;
+  /** Instante en que llegó la PRIMERA respuesta; `undefined` mientras no ha llegado ninguna. */
+  recibidoEnMs: number | undefined;
 }
 
+/**
+ * Monta la sección **pintando cada endpoint en cuanto llega**, no cuando llegan los dos.
+ *
+ * Antes había un `Promise.all` de los dos y no se tocaba el DOM hasta que resolvían ambos, lo que
+ * dejaba el estado del mar —ya descargado en el navegador— de rehén del boletín de AEMET, que es el
+ * endpoint lento del par (fuente ajena, caché de horas): hasta 8 s mirando un hueco con el dato ya
+ * en la máquina (hallazgo H-3). La cabecera de este fichero decía que los dos endpoints «fallan por
+ * separado»; ahora también **se pintan** por separado.
+ *
+ * El primer pintado es el esqueleto: los tres bloques diciendo qué se está pidiendo. Así la sección
+ * nunca está en un estado que no sea uno de los suyos, ni siquiera durante la espera.
+ */
 async function montarSeccion(anclaje: Anclaje): Promise<void> {
   const ruta = (endpoint: string): string =>
     `${anclaje.base}/v1/modules/weather/${endpoint}?port=${encodeURIComponent(anclaje.puerto)}`;
 
-  anunciarPeticion(anclaje);
-  const [meteo, boletin] = await Promise.all([
-    traer(ruta("weather"), "el estado del mar", esRespuestaDeMeteo),
-    traer(ruta("bulletin"), "el boletín de AEMET", esRespuestaDeBoletin),
+  const estado: EstadoDeLaSeccion = {
+    meteo: PIDIENDO,
+    boletin: PIDIENDO,
+    recibidoEnMs: undefined,
+  };
+  const repintar = (): void => {
+    pintar(anclaje, vistaDelEstado(estado, anclaje.zona));
+  };
+
+  anclaje.seccion.setAttribute("aria-busy", "true");
+  repintar();
+  await Promise.all([
+    traer(ruta("weather"), "el estado del mar", esRespuestaDeMeteo).then((traida) => {
+      estado.meteo = traida;
+      // La edad se mide desde que llegó la primera respuesta (ver `RespuestaMeteo.recibidoEnMs`).
+      estado.recibidoEnMs ??= Date.now();
+      repintar();
+    }),
+    traer(ruta("bulletin"), "el boletín de AEMET", esRespuestaDeBoletin).then((traida) => {
+      estado.boletin = traida;
+      estado.recibidoEnMs ??= Date.now();
+      repintar();
+    }),
   ]);
-  // `recibidoEnMs` es el instante en que llegaron las respuestas: a partir de aquí la edad del dato
-  // se mide como intervalo desde este punto (ver la regla 2 de `vista.ts`).
-  const recibidoEnMs = Date.now();
-  pintar(anclaje, vistaMeteo({ meteo, boletin, recibidoEnMs }, Date.now(), anclaje.zona));
+  anclaje.seccion.setAttribute("aria-busy", "false");
+}
+
+/** La vista de este instante: la edad se recalcula en cada pintado, nunca se guarda hecha. */
+function vistaDelEstado(estado: EstadoDeLaSeccion, zona: string): VistaMeteo {
+  const ahoraMs = Date.now();
+  return vistaMeteo(
+    {
+      meteo: estado.meteo,
+      boletin: estado.boletin,
+      recibidoEnMs: estado.recibidoEnMs ?? ahoraMs,
+    },
+    ahoraMs,
+    zona,
+  );
 }
 
 /**

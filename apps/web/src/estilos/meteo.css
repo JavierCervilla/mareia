@@ -77,6 +77,20 @@
   border-left-color: var(--m-ink);
 }
 
+/* Pidiendo: el bloque ya está, su dato viene de camino. Se compone como el fresco
+   —filete apagado, titular sin negrita— porque es un estado de paso y no una
+   advertencia; lo que no puede es parecerse a un dato. Cada bloque dice QUÉ está
+   pidiendo, porque desde T-11 los dos endpoints se pintan por separado y en la
+   misma pantalla puede haber uno servido y otro esperando. */
+.meteo__sello--pidiendo {
+  border-left-color: var(--m-rule-soft);
+}
+
+.meteo__sello--pidiendo .meteo__sello-titular {
+  font-weight: 400;
+  color: var(--m-sub);
+}
+
 /* --- Los bloques: mar, atmósfera y boletín ------------------------------- */
 .meteo__bloques {
   display: grid;

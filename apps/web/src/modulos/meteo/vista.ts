@@ -39,11 +39,35 @@ export type Traida<T> =
   | { readonly ok: true; readonly cuerpo: T }
   | { readonly ok: false; readonly motivo: string };
 
+/**
+ * Que ese endpoint **todavía no ha contestado**. Es un estado del bloque, no la falta de un estado:
+ * desde el hallazgo H-3 los dos endpoints se pintan por separado, así que mientras uno viaja el
+ * otro ya está en pantalla y el que falta tiene que decir que se le está pidiendo.
+ */
+export interface Pidiendo {
+  readonly pidiendo: true;
+}
+
+/** El único valor de `Pidiendo` que hace falta: no lleva datos, es el estado en sí. */
+export const PIDIENDO: Pidiendo = { pidiendo: true };
+
+/** Lo que sabe la sección de un endpoint en un instante dado. */
+export type EstadoDeFuente<T> = Traida<T> | Pidiendo;
+
+function estaPidiendo<T>(estado: EstadoDeFuente<T>): estado is Pidiendo {
+  return "pidiendo" in estado;
+}
+
 /** Las dos respuestas del módulo y el instante en que llegaron al navegador. */
 export interface RespuestaMeteo {
-  readonly meteo: Traida<WeatherPayload>;
-  readonly boletin: Traida<BulletinPayload>;
-  /** Reloj del navegador al recibir las respuestas. Solo se usa para medir intervalos. */
+  readonly meteo: EstadoDeFuente<WeatherPayload>;
+  readonly boletin: EstadoDeFuente<BulletinPayload>;
+  /**
+   * Reloj del navegador al recibir **la primera** de las dos respuestas. Solo se usa para medir
+   * intervalos. Se toma la primera y no la de cada una porque las dos llegan con segundos de
+   * diferencia y sobreestimar unos segundos la edad de la que llegó después es la dirección segura:
+   * un dato nunca se rejuvenece.
+   */
   readonly recibidoEnMs: number;
 }
 
@@ -57,8 +81,8 @@ export interface FilaMeteo {
   readonly ausencia: string | undefined;
 }
 
-/** Los tres tonos del sello. El CSS los distingue; el texto ya se distingue solo. */
-export type ClaseDeSello = "fresco" | "caducado" | "sin-dato";
+/** Los tonos del sello. El CSS los distingue; el texto ya se distingue solo. */
+export type ClaseDeSello = "fresco" | "caducado" | "sin-dato" | "pidiendo";
 
 /**
  * El sello de antigüedad de un bloque. Es obligatorio: **ningún bloque se pinta sin decir de cuándo
@@ -344,25 +368,36 @@ function bloqueDeFuente<T>(
   };
 }
 
+const TITULO_MAR = "Estado del mar";
+const TITULO_ATMOSFERA = "Atmósfera";
+
+/** Un bloque que todavía no tiene nada que enseñar: o se está pidiendo, o no se pudo traer. */
+function bloqueSinFilas(id: string, titulo: string, sello: SelloDeAntiguedad): BloqueMeteo {
+  return { id, titulo, sello, filas: [], cita: undefined, nota: undefined };
+}
+
 /** Los dos bloques de Open-Meteo cuando el endpoint no llegó a contestar. */
 function bloquesSinMeteo(motivo: string): readonly BloqueMeteo[] {
   return [
-    {
-      id: "meteo-mar",
-      titulo: "Estado del mar",
-      sello: selloSinDato(motivo),
-      filas: [],
-      cita: undefined,
-      nota: undefined,
-    },
-    {
-      id: "meteo-atmosfera",
-      titulo: "Atmósfera",
-      sello: selloSinDato(motivo),
-      filas: [],
-      cita: undefined,
-      nota: undefined,
-    },
+    bloqueSinFilas("meteo-mar", TITULO_MAR, selloSinDato(motivo)),
+    bloqueSinFilas("meteo-atmosfera", TITULO_ATMOSFERA, selloSinDato(motivo)),
+  ];
+}
+
+/**
+ * El sello de una fuente a la que todavía no ha contestado. Dice **qué** se está pidiendo, no un
+ * «cargando…» genérico: con los dos endpoints pintándose por separado, en la misma pantalla puede
+ * haber un bloque con su dato y otro esperando, y el que espera tiene que decir cuál es.
+ */
+function selloPidiendo(que: string): SelloDeAntiguedad {
+  return { clase: "pidiendo", titular: `Pidiendo ${que}…`, detalle: undefined };
+}
+
+/** Los dos bloques de Open-Meteo mientras su endpoint viaja. */
+function bloquesPidiendoMeteo(): readonly BloqueMeteo[] {
+  return [
+    bloqueSinFilas("meteo-mar", TITULO_MAR, selloPidiendo("el estado del mar")),
+    bloqueSinFilas("meteo-atmosfera", TITULO_ATMOSFERA, selloPidiendo("el estado de la atmósfera")),
   ];
 }
 
@@ -470,8 +505,11 @@ function notaDelBoletin(zonaVerificada: boolean, hayTexto: boolean): string | un
 const TITULO_BOLETIN = "Boletín marítimo de AEMET";
 
 /** El bloque del boletín: cita oficial, o el motivo de que no la haya. */
-function bloqueDelBoletin(traida: Traida<BulletinPayload>, contexto: Contexto): BloqueMeteo {
+function bloqueDelBoletin(traida: EstadoDeFuente<BulletinPayload>, contexto: Contexto): BloqueMeteo {
   const base = { id: "meteo-boletin", titulo: TITULO_BOLETIN, filas: [] as readonly FilaMeteo[] };
+  if (estaPidiendo(traida)) {
+    return bloqueSinFilas(base.id, base.titulo, selloPidiendo("el boletín de AEMET"));
+  }
   if (!traida.ok) {
     return { ...base, sello: selloSinDato(traida.motivo), cita: undefined, nota: undefined };
   }
@@ -497,6 +535,30 @@ function bloqueDelBoletin(traida: Traida<BulletinPayload>, contexto: Contexto): 
   };
 }
 
+/** Los dos bloques de Open-Meteo, en cualquiera de los tres estados de su endpoint. */
+function bloquesDeLaMeteo(
+  meteo: EstadoDeFuente<WeatherPayload>,
+  contexto: Contexto,
+): readonly BloqueMeteo[] {
+  if (estaPidiendo(meteo)) {
+    return bloquesPidiendoMeteo();
+  }
+  if (!meteo.ok) {
+    return bloquesSinMeteo(meteo.motivo);
+  }
+  return [
+    bloqueDeFuente("meteo-mar", TITULO_MAR, "Open-Meteo", meteo.cuerpo.marine, filasDelMar, contexto),
+    bloqueDeFuente(
+      "meteo-atmosfera",
+      TITULO_ATMOSFERA,
+      "Open-Meteo",
+      meteo.cuerpo.forecast,
+      filasDeLaAtmosfera,
+      contexto,
+    ),
+  ];
+}
+
 /**
  * La sección meteo lista para pintar.
  *
@@ -514,28 +576,8 @@ export function vistaMeteo(
     ahoraMs,
     zona: zonaHoraria,
   };
-  const { meteo } = respuesta;
   const bloques = [
-    ...(meteo.ok
-      ? [
-          bloqueDeFuente(
-            "meteo-mar",
-            "Estado del mar",
-            "Open-Meteo",
-            meteo.cuerpo.marine,
-            filasDelMar,
-            contexto,
-          ),
-          bloqueDeFuente(
-            "meteo-atmosfera",
-            "Atmósfera",
-            "Open-Meteo",
-            meteo.cuerpo.forecast,
-            filasDeLaAtmosfera,
-            contexto,
-          ),
-        ]
-      : bloquesSinMeteo(meteo.motivo)),
+    ...bloquesDeLaMeteo(respuesta.meteo, contexto),
     bloqueDelBoletin(respuesta.boletin, contexto),
   ];
 

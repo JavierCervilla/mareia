@@ -20,8 +20,6 @@ import { expect, test } from "../../fixtures/qa-bundle";
 import { PAGINA, fixture, montarApi } from "./utiles";
 
 test("A10 · el estado del mar se enseña sin esperar a que AEMET conteste", async ({ page, qa }) => {
-  test.fail();
-
   qa.step("Open-Meteo contesta al momento; AEMET tarda 5 s (dentro de la espera de 8 s)");
   await montarApi(
     page,

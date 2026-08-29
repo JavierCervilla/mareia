@@ -17,7 +17,7 @@ import test from "node:test";
 import type { BulletinPayload, WeatherPayload } from "@mareia/module-weather/ui";
 
 import type { BloqueMeteo, RespuestaMeteo, VistaMeteo } from "./vista.ts";
-import { antiguedad, parrafosDelBoletin, vistaMeteo } from "./vista.ts";
+import { PIDIENDO, antiguedad, parrafosDelBoletin, vistaMeteo } from "./vista.ts";
 
 import BOLETIN_CLAVE_CADUCADA from "./fixtures/bulletin-clave-caducada.json" with { type: "json" };
 import BOLETIN_OK from "./fixtures/bulletin-ok.json" with { type: "json" };
@@ -221,6 +221,65 @@ test("si el navegador no puede pedir al API, lo dice con SU motivo y no con el d
     assert.doesNotMatch(bloqueMeteo.sello.detalle ?? "", /Open-Meteo|AEMET/u);
   }
   assert.ok(vista.resumen, "sin ningún dato, la sección abre diciéndolo");
+});
+
+// --- Mientras el endpoint viaja: el bloque existe y dice QUÉ está pidiendo ------------------------
+
+test("mientras los dos endpoints viajan, cada bloque dice qué se está pidiendo", () => {
+  const vista = vistaMeteo(
+    { meteo: PIDIENDO, boletin: PIDIENDO, recibidoEnMs: RECIBIDO },
+    RECIBIDO,
+    ZONA,
+  );
+
+  assert.deepEqual(
+    vista.bloques.map((bloqueMeteo) => bloqueMeteo.sello.titular),
+    [
+      "Pidiendo el estado del mar…",
+      "Pidiendo el estado de la atmósfera…",
+      "Pidiendo el boletín de AEMET…",
+    ],
+  );
+  assert.equal(
+    vista.resumen,
+    undefined,
+    "estar pidiendo no es «no hay estado del mar que enseñar»: todavía no se sabe",
+  );
+});
+
+test("el mar que ya llegó no espera al boletín: se pinta con su sello mientras el otro viaja", () => {
+  const vista = vistaMeteo(
+    { meteo: { ok: true, cuerpo: meteoDe(METEO_OK) }, boletin: PIDIENDO, recibidoEnMs: RECIBIDO },
+    RECIBIDO,
+    ZONA,
+  );
+
+  assert.equal(bloque(vista, "meteo-mar").sello.clase, "fresco");
+  assert.match(textoDe(bloque(vista, "meteo-mar")), /Ola \| 1,68 m/u);
+  assert.equal(bloque(vista, "meteo-boletin").sello.clase, "pidiendo");
+});
+
+test("pedir todavía no se puede confundir con no haber podido traer", () => {
+  const pidiendo = vistaMeteo(
+    { meteo: PIDIENDO, boletin: PIDIENDO, recibidoEnMs: RECIBIDO },
+    RECIBIDO,
+    ZONA,
+  );
+  const sinDato = vistaMeteo(
+    {
+      meteo: { ok: false, motivo: "No se ha podido pedir el estado del mar al servidor de Mareia." },
+      boletin: PIDIENDO,
+      recibidoEnMs: RECIBIDO,
+    },
+    RECIBIDO,
+    ZONA,
+  );
+
+  assert.notEqual(
+    bloque(pidiendo, "meteo-mar").sello.titular,
+    bloque(sinDato, "meteo-mar").sello.titular,
+  );
+  assert.notEqual(bloque(pidiendo, "meteo-mar").sello.clase, bloque(sinDato, "meteo-mar").sello.clase);
 });
 
 // --- El otro ausente: la fuente respondió pero el modelo no publica el valor ----------------------
