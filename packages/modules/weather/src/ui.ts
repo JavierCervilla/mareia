@@ -15,7 +15,7 @@
  * vez de uno.
  */
 
-import type { AppModule, PageSection } from "@mareia/module-contract";
+import type { AppModule, PageSection, PrecachePolicy } from "@mareia/module-contract";
 
 import { WEATHER_ATTRIBUTIONS, WEATHER_MODULE_VERSION } from "./meta.ts";
 
@@ -41,6 +41,41 @@ export const WEATHER_PAGE_SECTIONS: readonly [PageSection, ...PageSection[]] = [
 ];
 
 /**
+ * Prefijos de los dos endpoints del módulo, **relativos a la raíz del sitio**.
+ *
+ * Son prefijos y no URL completas porque las dos se piden con `?port=<slug>`: casar por igualdad no
+ * acertaría nunca. Se escriben aquí, junto al módulo que los sirve, para que el service worker de
+ * la PWA no tenga que conocer ninguna ruta de ningún módulo (T-12).
+ */
+export const WEATHER_ROUTE_PREFIXES: readonly [string, ...string[]] = [
+  "/v1/modules/weather/weather",
+  "/v1/modules/weather/bulletin",
+];
+
+/**
+ * Política offline del módulo (contrato `AppModule.offline`, T-06; la consume la PWA en T-12).
+ *
+ * **`network-first`**: la meteo es el único dato del portal que caduca, así que con red se pide
+ * siempre a la red y la copia guardada es exclusivamente la red de emergencia. Al revés
+ * —`cache-first`— la sección enseñaría el estado del mar de anteayer teniendo cobertura, que es
+ * justo lo que `docs/adr/ADR-01` existe para impedir.
+ *
+ * **No se declara `maxAgeSeconds`, y es una decisión, no un olvido.** Una edad máxima haría que el
+ * worker tirase la copia vieja, y sin red una copia vieja **con su edad en la cara** es más útil
+ * que un hueco: quien decide si un estado del mar de hace cinco horas le sirve es quien está en la
+ * orilla, no el service worker. La ventana en la que el dato sigue siendo «el de ahora» ya la
+ * publica este módulo (`MARINE_TTL_SECONDS` y compañía) y es el sello de la sección quien la
+ * aplica, diciéndolo. Descartar en silencio sería la misma mentira de T-11 con otro disfraz.
+ *
+ * **Tampoco declara `assets`**: la sección no trae ningún fichero propio; su isla es un bundle de
+ * Astro con hash, y esos los aporta la página al guardarse (ver `apps/web/src/pwa/precacheo.ts`).
+ */
+export const WEATHER_PRECACHE_POLICY: PrecachePolicy = {
+  strategy: "network-first",
+  routes: WEATHER_ROUTE_PREFIXES,
+};
+
+/**
  * El módulo visto por una superficie de UI: identidad, atribuciones y secciones, **sin `api`**.
  *
  * Que no traiga `api` es exacto y no una amputación: el contrato declara `api` opcional
@@ -53,6 +88,7 @@ export const WEATHER_UI_MODULE: AppModule = {
   version: WEATHER_MODULE_VERSION,
   attributions: WEATHER_ATTRIBUTIONS,
   pageSections: WEATHER_PAGE_SECTIONS,
+  offline: WEATHER_PRECACHE_POLICY,
 };
 
 /**

@@ -11,6 +11,12 @@
  *    segundo (la bisección de extremos converge con tolerancia de 1 s) y las alturas al milímetro
  *    (el RMSE del dataset está en centímetros). Ángulos, fracciones y distancias salen tal cual los
  *    da el motor: recortarlos sería inventarse una precisión — o perderla — sin justificación.
+ *
+ * Este módulo se publica **también por su propio subpath** (`@mareia/usecases/dto`) desde T-12,
+ * porque la PWA calcula mareas en el navegador y tiene que publicar exactamente los mismos números
+ * que el API: los milisegundos de ruido de la bisección y los quince decimales de un metro no son
+ * dato, son artefacto, y redondearlos «parecido» a como lo hace el servidor es como dos superficies
+ * empiezan a discrepar. Sale barato: aquí no hay un solo import de runtime, solo tipos.
  */
 
 import type {

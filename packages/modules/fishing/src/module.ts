@@ -64,7 +64,14 @@ export const SECCION_ACTIVIDAD: PageSection = {
   component: SECCION_ACTIVIDAD_SOLUNAR,
 };
 
-/** El módulo, listo para el registry. Sin dependencias que inyectar: no lee nada del entorno. */
+/**
+ * El módulo, listo para el registry. Sin dependencias que inyectar: no lee nada del entorno.
+ *
+ * **No declara `offline` (T-12) y eso es exacto, no un olvido**: los periodos solunares se calculan
+ * en build y viajan dentro del HTML de la página, así que esta sección se lee sin red porque ya
+ * está ahí. No hay ninguna URL suya que precachear; declarar una política vacía sería decir que
+ * este módulo tiene algo que guardar, y no lo tiene.
+ */
 export const fishingModule: AppModule = {
   id: "fishing",
   version: FISHING_MODULE_VERSION,

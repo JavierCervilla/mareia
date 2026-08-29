@@ -1,0 +1,9 @@
+{"at":11,"kind":"step","text":"guardar el puerto con cobertura"}
+{"at":35,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":54,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":54,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":269,"kind":"step","text":"el navegador desaloja IndexedDB y deja la caché del worker en su sitio"}
+{"at":302,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":311,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":313,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":376,"kind":"step","text":"comprobar que el sello no da por perdida una copia que sigue guardada"}

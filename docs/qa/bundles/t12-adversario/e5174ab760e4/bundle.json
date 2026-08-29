@@ -1,0 +1,80 @@
+{
+  "snapshotId": "e5174ab760e4",
+  "runId": "run-2026-08-29T09-37-08-610Z",
+  "test": {
+    "title": "adversarial/a3-sello-sin-copia.spec.ts > A3 · con la caché de páginas barrida, el sello sigue prometiendo la copia que ya no hay",
+    "file": "/home/user/mareia-t12/tests/e2e/journeys/adversarial/a3-sello-sin-copia.spec.ts",
+    "line": 107,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 437,
+  "urlAtFailure": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/",
+  "error": {
+    "message": "Error: el sello dice «Guardado en este dispositivo hace menos de un minuto» y en la caché del worker hay []\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true",
+    "stack": "Error: el sello dice «Guardado en este dispositivo hace menos de un minuto» y en la caché del worker hay []\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true\n    at elSelloYLaCacheDicenLoMismo (/home/user/mareia-t12/tests/e2e/journeys/adversarial/a3-sello-sin-copia.spec.ts:73:5)\n    at /home/user/mareia-t12/tests/e2e/journeys/adversarial/a3-sello-sin-copia.spec.ts:126:3"
+  },
+  "events": [
+    {
+      "at": 9,
+      "kind": "step",
+      "text": "guardar el puerto con cobertura"
+    },
+    {
+      "at": 29,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"
+    },
+    {
+      "at": 43,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 43,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "at": 281,
+      "kind": "step",
+      "text": "barrer la caché de páginas sin tocar IndexedDB (el barrido de ESQUEMA_CACHE v1→v2)"
+    },
+    {
+      "at": 287,
+      "kind": "step",
+      "text": "volver a la página con cobertura, que es cuando se podría arreglar sola"
+    },
+    {
+      "at": 306,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"
+    },
+    {
+      "at": 315,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 315,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "at": 378,
+      "kind": "step",
+      "text": "comprobar que el sello no promete un offline que ya no existe"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

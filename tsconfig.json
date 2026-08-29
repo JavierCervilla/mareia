@@ -31,6 +31,12 @@
   // sonda: un error de tipo en un `.ts` de `apps/web` sale por `astro check`.
   "exclude": [
     "apps/web/src/secciones.ts",
-    "apps/web/src/modulos/meteo/cliente/**"
+    "apps/web/src/modulos/meteo/cliente/**",
+    // Igual que la isla de meteo: código que solo existe dentro de un navegador. `pwa/cliente/**`
+    // usa DOM e IndexedDB y `pwa/sw.ts` corre en el ámbito de un service worker; ni una cosa ni la
+    // otra caben en la `lib: ES2022` de este tsconfig, que es deliberadamente ciega al DOM para que
+    // el dominio no pueda usarlo sin darse cuenta. Los tipa `astro check`, gate del job `web`.
+    "apps/web/src/pwa/cliente/**",
+    "apps/web/src/pwa/sw.ts"
   ]
 }

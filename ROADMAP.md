@@ -27,7 +27,6 @@
 - [x] T-09 · Página de puerto SSG (tabla + gráfico + coeficiente + sol/luna) + índices geográficos,
       con canónicas, sitemap y JSON-LD (la medida Lighthouse SEO ≥ 95 queda pendiente de T-15: no
       hay navegador en CI; el comando está documentado en `apps/web/design-brief.md` §8)
-- [ ] T-10 · Módulo pesca UI (overlay solunar + rating)
 - [x] T-11 · Módulo weather UI (isla meteo con estados ok/stale/no disponible/carga sin datos)
       (el HTML construido no lleva ninguna magnitud meteo: entra por isla y con sello de antigüedad,
       ver `docs/adr/ADR-01`; el boletín de AEMET se cita con su esquema aún sin verificar)
@@ -38,8 +37,16 @@
 - [x] T-10 · Módulo pesca UI (overlay solunar + rating), primer módulo que aporta interfaz por el
       contrato `AppModule` (el rating se publica como convención declarada, con su desglose y el
       aviso de que la teoría solunar no tiene respaldo experimental sólido)
-- [ ] T-11 · Módulo weather UI (isla meteo con estados ok/error/stale)
-- [ ] T-12 · PWA offline (almanaque de favoritos sin red)
+- [x] T-12 · PWA offline (almanaque de favoritos sin red): service worker + manifiesto instalable,
+      favoritos en IndexedDB (cero cuentas, cero servidor) y **cálculo de cualquier día en el
+      navegador** con las constantes armónicas del puerto y el motor de `domain-core` — no es un
+      caché de páginas. Un favorito guarda **constantes** (2,6 kB) y no el almanaque del año
+      (49,2 kB): 18,6× menos y sin tope de año. La política de actualización del worker está en
+      `docs/adr/ADR-02` (HTML `network-first` con `cache: "no-store"`, sin `skipWaiting`, sin banner)
+      (pase adversario cerrado: los 4 hallazgos arreglados y sus 6 ataques como gate permanente — el
+      sello mira los dos almacenes y ya no promete una copia que no está, la poda exige un censo
+      completo, la app instalada guarda su puerta de entrada y sin cobertura no se ofrece borrar el
+      almanaque que se está leyendo; ver `docs/qa/informe-adversario-t12.md`)
 
 ## Hito 4 — España completa y transparencia
 
