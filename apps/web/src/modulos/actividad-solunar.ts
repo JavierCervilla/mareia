@@ -62,6 +62,7 @@ function aVentanaDelGrafico(ventana: VentanaDeActividad): VentanaDestacada {
     finUtcMs: ventana.finUtcMs,
     enfasis: ventana.enfasis,
     etiqueta: ventana.etiqueta,
+    leyenda: ventana.leyenda,
   };
 }
 

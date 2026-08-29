@@ -58,6 +58,12 @@ export interface VentanaDestacada {
   readonly enfasis: EnfasisDeVentana;
   /** Texto para el `aria-label` del gráfico: un lector de pantalla no ve una banda. */
   readonly etiqueta: string;
+  /**
+   * Cómo se llama la clase de esta ventana en la leyenda **visible** del pie: «periodo mayor». Lo
+   * escribe quien la aporta, por lo mismo que la `etiqueta`: el gráfico no sabe de qué es la
+   * ventana, solo sabe con qué trama la dibuja.
+   */
+  readonly leyenda: string;
 }
 
 /** Una ventana ya colocada en el lienzo y recortada al día. */
@@ -67,6 +73,7 @@ export interface BandaGrafico {
   readonly ancho: number;
   readonly enfasis: EnfasisDeVentana;
   readonly etiqueta: string;
+  readonly leyenda: string;
 }
 
 export interface CurvaMarea {
@@ -224,6 +231,7 @@ function bandasDeVentanas(
       ancho: redondear(x(fin) - izquierda),
       enfasis: ventana.enfasis,
       etiqueta: ventana.etiqueta,
+      leyenda: ventana.leyenda,
     });
   }
   return bandas;

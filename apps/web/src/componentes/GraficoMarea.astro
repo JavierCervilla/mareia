@@ -10,7 +10,7 @@
  * Accesibilidad: el `<svg>` es `role="img"` con un `aria-label` que enumera los extremos del día.
  * Un lector de pantalla no puede leer un `path`, así que se le da la misma información en texto.
  */
-import type { CurvaMarea } from "../grafico-marea.ts";
+import type { CurvaMarea, EnfasisDeVentana } from "../grafico-marea.ts";
 import { hora, metros } from "../formato.ts";
 
 interface Props {
@@ -51,6 +51,33 @@ const sombreado =
   curva.bandas.length === 0
     ? ""
     : ` Franjas sombreadas: ${curva.bandas.map((banda) => banda.etiqueta).join("; ")}.`;
+
+/**
+ * Cómo dibuja el CSS cada énfasis (`estilos/pagina-puerto.css`, bandas). La leyenda **tiene** que
+ * decirlo: una trama que nadie explica no distingue nada, y el filete —continuo o discontinuo— es
+ * justo lo que hace visible la diferencia entre una ventana de más peso y una de menos sin pedirle
+ * al lector que distinga dos tonos del mismo color (hallazgo A-14).
+ */
+const TRAMA_DE_ENFASIS = {
+  fuerte: "filete continuo",
+  suave: "filete discontinuo",
+} as const satisfies Record<EnfasisDeVentana, string>;
+
+/**
+ * La leyenda **visible** del pie, que es lo que arregla el hallazgo A-15: hasta aquí el
+ * `aria-label` enumeraba las cuatro franjas con sus horas y quien miraba el gráfico veía cuatro
+ * manchas sin explicación. No repite las horas —están en el `aria-label` y en la tabla de la
+ * sección, y un pie de figura no es una tabla—: dice qué representa cada trama, una vez por clase
+ * de ventana y en orden fijo (primero las de más peso), no una vez por banda.
+ */
+const clasesDeBanda = (["fuerte", "suave"] as const).flatMap((enfasis) => {
+  const banda = curva.bandas.find((candidata) => candidata.enfasis === enfasis);
+  return banda === undefined ? [] : [`${TRAMA_DE_ENFASIS[enfasis]}, ${banda.leyenda}`];
+});
+const leyendaDeBandas =
+  clasesDeBanda.length === 0
+    ? ""
+    : ` Franjas sombreadas: ${clasesDeBanda.join("; ")}; sus horas, en la tabla de la sección que las aporta.`;
 ---
 
 <figure class="grafico">
@@ -98,6 +125,8 @@ const sombreado =
     {horasDelEje.map((etiqueta) => <li>{etiqueta}</li>)}
   </ol>
   <figcaption class="datos__nota">
-    Entre {metros(curva.minima_m)} y {metros(curva.maxima_m)} sobre el cero del puerto.
+    Entre {metros(curva.minima_m)} y {metros(curva.maxima_m)} sobre el cero del puerto.{
+      leyendaDeBandas
+    }
   </figcaption>
 </figure>

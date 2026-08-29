@@ -176,6 +176,7 @@ function ventana(desdeHoras: number, hastaHoras: number, id = "v"): VentanaDesta
     finUtcMs: INICIO + hastaHoras * 60 * MINUTO,
     enfasis: "fuerte",
     etiqueta: `de ${desdeHoras} a ${hastaHoras}`,
+    leyenda: "ventana de mentira",
   };
 }
 

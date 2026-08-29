@@ -84,6 +84,14 @@ export interface VentanaDeActividad {
   readonly enfasis: EnfasisDeVentana;
   /** Texto para lectores de pantalla; el gráfico lo enhebra en su `aria-label`. */
   readonly etiqueta: string;
+  /**
+   * Nombre corto de la CLASE de ventana —«periodo mayor»—, sin horas, para la leyenda **visible**
+   * del gráfico. Existe desde el hallazgo A-15 del pase adversario: el `aria-label` enumeraba las
+   * cuatro franjas con sus horas y el pie que ve quien mira el gráfico no decía qué eran esas
+   * manchas. La leyenda no repite las horas —eso ya lo hacen el `aria-label` y la tabla— sino que
+   * dice qué representa cada trama, que es lo que un pie de figura tiene que decir.
+   */
+  readonly leyenda: string;
 }
 
 /** Una fila de la tabla de periodos del día. */
@@ -205,6 +213,7 @@ export function ventanasDeActividad(
     finUtcMs: periodo.endUtcMs,
     enfasis: periodo.kind === "major" ? "fuerte" : "suave",
     etiqueta: `periodo ${NOMBRE_TIPO[periodo.kind]} ${franjaDePeriodo(periodo, dia, formato)}`,
+    leyenda: `periodo ${NOMBRE_TIPO[periodo.kind]}`,
   }));
 }
 
