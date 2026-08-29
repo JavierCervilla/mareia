@@ -2,6 +2,42 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-29 — T-18 · la credencial de AEMET deja de contar cómo se administra la instancia
+
+- **El aviso del operador sale del canal público.** `GET /v1/modules/weather/bulletin` publicaba,
+  dentro del estado de la credencial, la frase escrita para quien administra la instancia: qué
+  variable de entorno usa, en qué URL de AEMET se pide una clave nueva y que hay que «actualizar el
+  secreto». No hay material de clave ahí y la web no lo pintaba, así que no fue incidente; pero es
+  reconocimiento gratis y, sobre todo, es el canal equivocado — quien puede renovar la clave no se
+  entera por el JSON público. Es **fix forward** de T-08, no un rollback: el estado sigue viajando
+  (`status`, `expiresAt`, `daysLeft`, `source`, `thresholdDays`), porque quien consume el API
+  necesita poder decir *por qué* dejó de haber boletín. Lo que se recorta es la instrucción.
+- **Dos canales, dos textos.** `publicCredentialView()` proyecta el estado a lo que sale por HTTP y
+  sustituye el mensaje por una frase neutra **derivada del `status` y sin interpolar números** —los
+  números ya viajan en sus campos—, aplicada en las dos ramas del boletín y en el `detail` del
+  healthcheck. El mensaje completo se queda intacto donde sirve de algo: el workflow
+  `aemet-key.yml`, que es el único sitio desde el que alguien puede ir a renovar la clave.
+- **El gate mira la respuesta entera, no el campo.** Un test sobre `credential.message` habría
+  arreglado este bug dejando pasar el siguiente, porque el defecto **se mueve** de campo. El
+  recorrido nuevo serializa los cuatro cuerpos públicos del módulo (`/weather`, `/bulletin` con zona
+  y sin zona, y el healthcheck) en los **cinco** estados de la credencial y exige que en ninguno
+  aparezca ninguna de las cinco señas del canal del operador: 100 comprobaciones. Busca **señas**
+  —el nombre de la variable, el dominio de alta, los verbos de instrucción— y no la frase literal,
+  para que reescribir el aviso no desactive el gate. Comprobado mordiendo, seña a seña: revertir el
+  recorte del `credential` lo pone rojo en los cinco estados; revertir **solo** el del healthcheck
+  lo pone rojo en cuatro; y con el `credential` ya recortado, devolver el nombre del secreto al
+  `reason` lo pone rojo igual — que es exactamente el bug moviéndose de campo.
+- **Y el `reason` del boletín tampoco nombra el secreto.** Ahí estaba la segunda copia de la fuga:
+  sin clave, el motivo decía «falta la variable de entorno AEMET_API_KEY». Ese texto viaja al
+  cliente por diseño (`errors.ts`), así que ahora dice el hecho —«no hay credencial con la que pedir
+  el boletín»— y deja el nombre del secreto para el canal del operador.
+- **Trinquete al revés**: un test exige que `inspectAemetKey` **siga** produciendo el aviso
+  completo, con su URL de alta y su instrucción, para que «arreglar» esto nunca consista en vaciar
+  el único aviso que impide que la clave caduque por sorpresa.
+- Los tres fixtures de boletín de la web se **re-proyectaron con la función real**, no a mano: son
+  capturas de lo que sirve el módulo y tenían congelada la frase vieja (una de ellas, la del
+  «Renuévala», es la que el recorrido Playwright sirve como respuesta del API).
+
 ## 2026-08-29 — T-12 · el almanaque funciona sin cobertura, y lo dice
 
 - **Un puerto guardado se abre y *calcula* sin red.** Es la diferencia entre una PWA y un caché de

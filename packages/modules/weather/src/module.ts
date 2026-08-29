@@ -18,7 +18,7 @@ import express, { type Request, type RequestHandler, type Response, type Router 
 
 import { AEMET_ATTRIBUTION, fetchCoastalBulletin } from "./aemet.ts";
 import type { AemetKeyState } from "./aemet-key.ts";
-import { inspectAemetKey, needsHumanAction } from "./aemet-key.ts";
+import { inspectAemetKey, needsHumanAction, publicCredentialView } from "./aemet-key.ts";
 import type { WeatherCache } from "./cache.ts";
 import { cellKey, toCell } from "./cell.ts";
 import { BULLETIN_TTL_SECONDS, FORECAST_TTL_SECONDS, MARINE_TTL_SECONDS } from "./frescura.ts";
@@ -95,7 +95,9 @@ function createHealthTracker(keyState: () => AemetKeyState): HealthTracker {
       // en tres días es un problema hoy, no el día que devuelva 401.
       const credentialIsAProblem = credential.status === "missing" || needsHumanAction(credential);
       if (credentialIsAProblem) {
-        problems.push(credential.message);
+        // El `detail` sale por `/health`, que hoy es alcanzable sin autenticar: aquí va la frase
+        // pública, no el aviso al operador. Que la salud degrade no cambia (T-18).
+        problems.push(publicCredentialView(credential).message);
       }
       if (lastSeen.size === 0) {
         return credentialIsAProblem
@@ -241,7 +243,7 @@ function bulletinHandler(deps: WeatherModuleDeps, health: HealthTracker): Reques
           status: "unavailable",
           reason: `El puerto '${port.slug}' no tiene zona marítima de AEMET asignada`,
           attributions: [AEMET_ATTRIBUTION],
-          credential: inspectAemetKey(deps.aemetApiKey, deps.now()),
+          credential: publicCredentialView(inspectAemetKey(deps.aemetApiKey, deps.now())),
         } satisfies BulletinPayload,
       };
     }
@@ -266,7 +268,7 @@ function bulletinHandler(deps: WeatherModuleDeps, health: HealthTracker): Reques
       port,
       zone,
       attributions: [AEMET_ATTRIBUTION],
-      credential: inspectAemetKey(deps.aemetApiKey, deps.now()),
+      credential: publicCredentialView(inspectAemetKey(deps.aemetApiKey, deps.now())),
     };
     if (report.status === "unavailable") {
       return { status: 200, body: { ...head, status: "unavailable", reason: report.reason } };

@@ -117,8 +117,10 @@ export async function fetchCoastalBulletin(
 ): Promise<CoastalBulletin> {
   const apiKey = deps.apiKey?.trim();
   if (apiKey === undefined || apiKey === "") {
+    // Este motivo viaja al cliente en `reason` (ver `errors.ts`), así que dice el hecho y no
+    // cómo se arregla: el nombre de la variable de entorno es del canal del operador (T-18).
     throw new WeatherSourceError(
-      "AEMET no está configurada en esta instancia: falta la variable de entorno AEMET_API_KEY",
+      "AEMET no está configurada en esta instancia: no hay credencial con la que pedir el boletín",
     );
   }
 

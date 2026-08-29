@@ -170,6 +170,55 @@ export function needsHumanAction(state: AemetKeyState): boolean {
   return state.status === "expiring" || state.status === "expired" || state.status === "unreadable";
 }
 
+/**
+ * Lo que del estado de la credencial sale por HTTP: **el hecho, sin el manual**.
+ *
+ * `AemetKeyState.message` está escrito para quien puede renovar la clave —nombra la variable de
+ * entorno, la URL de alta y lo que hay que hacer— y ése no es quien pide un boletín por HTTP.
+ * Publicarlo entero es contarle a cualquiera cómo está montada la instancia por un canal donde
+ * además no lo lee nadie que pueda actuar.
+ *
+ * `expiresAtMs` no viaja: es el mismo instante que `expiresAt`, que ya es legible.
+ */
+export interface PublicCredentialView {
+  readonly status: KeyStatus;
+  readonly expiresAt?: string;
+  readonly daysLeft?: number;
+  readonly source?: ExpirySource;
+  readonly thresholdDays?: WarningThreshold;
+  /** Frase neutra derivada del `status`. Sin números: los números ya viajan en sus campos. */
+  readonly message: string;
+}
+
+/**
+ * Frase pública de cada estado. Se deriva del `status` y **no interpola nada**: lo que hay que
+ * saber (cuándo caduca, cuántos días quedan, de dónde sale la fecha) ya viaja en campos propios, y
+ * una frase sin interpolación es una frase que se puede vigilar.
+ */
+const PUBLIC_MESSAGES: Readonly<Record<KeyStatus, string>> = {
+  missing: "Esta instancia no tiene credencial de AEMET: no publica el boletín oficial",
+  unreadable: "La credencial de AEMET de esta instancia no se puede leer: se desconoce su caducidad",
+  valid: "La credencial de AEMET de esta instancia está vigente",
+  expiring: "La credencial de AEMET de esta instancia está a punto de caducar",
+  expired: "La credencial de AEMET de esta instancia ha caducado: no publica el boletín oficial",
+};
+
+/**
+ * Proyecta el estado a su vista pública. Es lo que el borde HTTP debe publicar en lugar del estado
+ * entero: el hecho viaja igual —quien consume el API necesita poder decir *por qué* dejó de haber
+ * boletín— y la instrucción se queda en el canal del operador.
+ */
+export function publicCredentialView(state: AemetKeyState): PublicCredentialView {
+  return {
+    status: state.status,
+    ...(state.expiresAt === undefined ? {} : { expiresAt: state.expiresAt }),
+    ...(state.daysLeft === undefined ? {} : { daysLeft: state.daysLeft }),
+    ...(state.source === undefined ? {} : { source: state.source }),
+    ...(state.thresholdDays === undefined ? {} : { thresholdDays: state.thresholdDays }),
+    message: PUBLIC_MESSAGES[state.status],
+  };
+}
+
 function utcDay(nowMs: number): string {
   return new Date(nowMs).toISOString().slice(0, 10);
 }

@@ -21,6 +21,11 @@
 - [x] T-08 · Módulo weather backend (Open-Meteo + AEMET + caché Deno KV)
       (los códigos de zona costera de AEMET quedan sin verificar hasta que haya `AEMET_API_KEY`;
       la caducidad de esa clave se vigila sola y avisa a 21, 7 y 1 días)
+- [x] T-18 · La credencial de AEMET deja de publicar el manual del operador en el borde público
+      (fix forward de T-08): la respuesta HTTP lleva el hecho —estado, caducidad, días, procedencia—
+      con una frase neutra, y la instrucción completa se queda en el canal de quien puede renovarla
+      (`aemet-key.yml`). Con gate que mira la **respuesta entera serializada** en los cinco estados
+      de la credencial, no un campo, porque el defecto se mueve de campo
 
 ## Hito 3 — Portal (10 puertos piloto)
 

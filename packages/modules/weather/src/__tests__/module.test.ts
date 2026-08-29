@@ -289,7 +289,7 @@ test("si se caen las dos fuentes sigue habiendo 200 con el motivo de cada una", 
   });
 });
 
-test("GET /bulletin sin AEMET_API_KEY degrada con estado explícito, no con un 500", async () => {
+test("GET /bulletin sin clave de AEMET degrada con estado explícito, no con un 500", async () => {
   const spy = upstream();
   await withModule(moduleDeps(spy, fakeClock(T0)), async (baseUrl) => {
     const response = await fetch(`${baseUrl}/bulletin?port=vigo`);
@@ -298,7 +298,7 @@ test("GET /bulletin sin AEMET_API_KEY degrada con estado explícito, no con un 5
 
     const body = await bulletinBody(response);
     assert.equal(body.status, "unavailable");
-    assert.match(body.status === "unavailable" ? body.reason : "", /AEMET_API_KEY/u);
+    assert.match(body.status === "unavailable" ? body.reason : "", /no está configurada/u);
     assert.deepEqual(body.zone, { code: "36", name: "Costa de Pontevedra", verified: false });
     assert.equal(spy.calls.length, 0, "se llamó a AEMET sin clave");
   });
@@ -355,7 +355,7 @@ test("sin clave de AEMET la salud es 'degraded' aunque el resto funcione", async
     await fetch(`${baseUrl}/weather?port=vigo`);
     const health = await healthcheck();
     assert.equal((health as { status: string }).status, "degraded");
-    assert.match((health as { detail: string }).detail, /AEMET_API_KEY/u);
+    assert.match((health as { detail: string }).detail, /no tiene credencial de AEMET/u);
   });
 });
 
