@@ -9,14 +9,21 @@
  * El orden de los bloques es el de la jerarquía del brief (crítico → contextual → consultable):
  * los avisos del puerto (marea de centímetros, estación sin observación con la que validar), tabla
  * del día, curva, sol y luna, tabla del mes y, al final, la calidad del dato y sus fuentes.
+ *
+ * Desde T-12 esta página —y solo ésta— lleva **un** script de core, declarado en
+ * `src/scripts-de-core.ts`: el de la PWA. Registra el service worker, guarda el puerto para leerlo
+ * sin cobertura y calcula cualquier otro día en el navegador. El resto del sitio sigue en cero
+ * JavaScript, y todo lo que se ve arriba se sigue leyendo sin ejecutar una sola línea.
  */
 import AvisoMicromareal from "../../../../../componentes/AvisoMicromareal.astro";
 import AvisoSinObservacion from "../../../../../componentes/AvisoSinObservacion.astro";
 import Coeficiente from "../../../../../componentes/Coeficiente.astro";
 import GraficoMarea from "../../../../../componentes/GraficoMarea.astro";
 import Migas from "../../../../../componentes/Migas.astro";
+import OtroDia from "../../../../../componentes/OtroDia.astro";
 import PieAtribuciones from "../../../../../componentes/PieAtribuciones.astro";
 import SeccionesDeModulos from "../../../../../componentes/SeccionesDeModulos.astro";
+import SinRed from "../../../../../componentes/SinRed.astro";
 import SolYLuna from "../../../../../componentes/SolYLuna.astro";
 import TablaDia from "../../../../../componentes/TablaDia.astro";
 import TablaMes from "../../../../../componentes/TablaMes.astro";
@@ -137,6 +144,8 @@ const jsonLd = grafo([
     )
   }
 
+  <SinRed slug={port.slug} nombre={port.name} ruta={ruta} />
+
   <div class="cuerpo">
     <section class="bloque cuerpo__mareas" id="tabla-de-mareas" aria-labelledby="titulo-hoy">
       <h2 class="etiqueta" id="titulo-hoy">Mareas de hoy · {fechaLarga(datos.fechaIso)}</h2>
@@ -153,6 +162,8 @@ const jsonLd = grafo([
     </div>
   </div>
 
+  <OtroDia slug={port.slug} nombre={port.name} />
+
   <SeccionesDeModulos secciones={seccionesDeModulos} contexto={contextoDeModulos} />
 
   <section class="bloque" id="tabla-mensual" aria-labelledby="titulo-mes">
@@ -167,4 +178,10 @@ const jsonLd = grafo([
 
   <Transparencia station={station} />
   <PieAtribuciones atribuciones={station.attributions} />
+
+  <script>
+    import { montarPwa } from "../../../../../pwa/cliente/montar.ts";
+
+    montarPwa();
+  </script>
 </AlmanaqueLayout>

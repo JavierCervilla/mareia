@@ -1,0 +1,184 @@
+/* =============================================================================
+ * PWA offline (T-12): la sección «sin cobertura» y la calculadora de otro día.
+ *
+ * Hereda todo lo que puede de la página de puerto —`.bloque`, `.etiqueta`,
+ * `.tabla-mareas`— porque estas dos secciones son página de anuario y no widgets
+ * de otro producto. Lo propio de aquí es poco y a propósito:
+ *
+ *  - el **sello** de la copia guardada, con el mismo tratamiento que el de la
+ *    sección meteo (filete a la izquierda, sin caja ni sombra), porque es la misma
+ *    idea: decir de cuándo es lo que se está leyendo. Los estados se distinguen por
+ *    el TEXTO; el filete solo refuerza, y en papel —donde la paleta colapsa— siguen
+ *    distinguiéndose;
+ *  - los dos únicos **controles** del portal (un botón y un campo de fecha), que se
+ *    componen como tipografía del almanaque y no como componentes de formulario de
+ *    dashboard: sin sombra, sin esquinas redondeadas, sin relleno de color.
+ * ========================================================================== */
+
+.sin-red {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-block: 20px;
+}
+
+/* `hidden` tiene que ganarle a `display: flex` (misma razón que en `meteo.css`). */
+.sin-red [hidden],
+.otro-dia [hidden] {
+  display: none;
+}
+
+/* --- El sello de la copia guardada --------------------------------------- */
+
+.sin-red__sello {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-left: 3px solid var(--m-rule-soft);
+  padding: 6px 0 6px 12px;
+  font-size: var(--m-text-body);
+}
+
+.sin-red__titular {
+  font-weight: 600;
+}
+
+.sin-red__detalle {
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+  overflow-wrap: anywhere;
+}
+
+/* Guardado y con red: el filete se apaga. No hay nada que avisar. */
+.sin-red__sello--fresco {
+  border-left-color: var(--m-rule-soft);
+}
+
+.sin-red__sello--fresco .sin-red__titular {
+  font-weight: 400;
+  color: var(--m-sub);
+}
+
+/* Sin conexión: el acento de los avisos, porque cambia cómo hay que leer la página. */
+.sin-red__sello--caducado {
+  border-left-color: var(--m-terra);
+}
+
+.sin-red__sello--caducado .sin-red__titular {
+  color: var(--m-terra);
+}
+
+/* Sin guardar (o sin poder guardar): filete de tinta llena, como la ausencia de
+   dato de la sección meteo. No es una advertencia, es un estado. */
+.sin-red__sello--sin-dato {
+  border-left-color: var(--m-ink);
+}
+
+/* La región viva no se ve: para quien mira la pantalla la noticia ya está en el
+   sello, y duplicarla sería ruido. Se compone como `.solo-lectores`. */
+.sin-red__anuncio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.sin-red__nota {
+  font-size: var(--m-text-meta);
+  color: var(--m-terra);
+  overflow-wrap: anywhere;
+}
+
+/* --- Los dos controles del portal ---------------------------------------- */
+/* Tipografía del almanaque con un filete debajo, como un pie de imprenta que se
+   puede pulsar. Nada de botón relleno: el design brief §3 veta el dashboard, y
+   este portal no tiene ningún CTA que vender. El anillo de foco es el del
+   navegador y no se suprime jamás (design brief §6). */
+
+.sin-red__accion,
+.otro-dia__accion {
+  align-self: flex-start;
+  border: 0;
+  border-bottom: 1px solid var(--m-navy);
+  background: none;
+  padding: 4px 0;
+  color: var(--m-navy);
+  font: inherit;
+  font-size: var(--m-text-body);
+  cursor: pointer;
+  /* Objetivo táctil cómodo con guantes o manos mojadas (design brief §1). */
+  min-height: 44px;
+}
+
+.sin-red__accion:disabled,
+.otro-dia__accion:disabled {
+  color: var(--m-sub);
+  border-bottom-color: var(--m-rule-soft);
+  cursor: default;
+}
+
+/* --- Mareas de otro día -------------------------------------------------- */
+
+.otro-dia {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.otro-dia__nota {
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+  max-width: 62ch;
+}
+
+.otro-dia__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.otro-dia__fecha {
+  border: 0;
+  border-bottom: 1px solid var(--m-rule);
+  background: none;
+  padding: 4px 0;
+  color: var(--m-ink);
+  font: inherit;
+  font-size: var(--m-text-body);
+  min-height: 44px;
+}
+
+.otro-dia__resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.otro-dia__resultado .tabla-mareas {
+  max-width: 32ch;
+}
+
+.otro-dia__procedencia {
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+  max-width: 62ch;
+}
+
+.otro-dia__ausencia {
+  font-size: var(--m-text-body);
+  color: var(--m-sub);
+  max-width: 62ch;
+}
+
+/* En papel no hay red que falte ni día que pedir: las dos secciones son controles,
+   y un control impreso es tinta gastada. La tabla del día y la del mes ya viajan
+   en el papel, que es de lo que va imprimir un almanaque. */
+@media print {
+  .sin-red,
+  .otro-dia {
+    display: none;
+  }
+}

@@ -1,0 +1,78 @@
+---
+/**
+ * La sección «sin cobertura» de la página de puerto: guardar este puerto para leerlo sin red, y
+ * saber en todo momento con qué se está quedando quien lo lee.
+ *
+ * Lo que se construye en build es **el marco y el estado sin JavaScript**: el rótulo, la
+ * explicación de qué de esta página depende de la red y qué no, y un botón que viaja `hidden`
+ * porque sin JavaScript no haría nada. El estado real —guardado o no, con red o sin ella— lo pinta
+ * `src/pwa/cliente/sin-red.ts` con las frases que decide `src/pwa/vista-sin-red.ts`.
+ *
+ * Va justo después de los avisos del puerto y antes del cuerpo, y ese sitio no es casual: cuando no
+ * hay red, «estás leyendo una copia guardada el 29 de agosto» es información **crítica** en el
+ * sentido del design brief §1 —cambia cómo hay que leer todo lo de abajo— y tiene que verse sin
+ * bajar. Con red es una línea corta que se lee y se olvida.
+ */
+import { FECHA_DE_BUILD } from "../datos/fecha-build.ts";
+import { fechaLarga } from "../formato.ts";
+import { activeModules } from "../modules.config.ts";
+import { assetsDeModulos, politicasDeModulos } from "../pwa/precacheo.ts";
+
+interface Props {
+  /** Slug del puerto: identifica el favorito y su fichero de constantes. */
+  slug: string;
+  nombre: string;
+  /** Ruta canónica de esta página, que es lo que se guarda. */
+  ruta: string;
+}
+
+const { slug, nombre, ruta } = Astro.props;
+
+/**
+ * Los assets propios que declaran los módulos activos en su `PrecachePolicy` (contrato T-06).
+ *
+ * Se resuelven **en build** y viajan al HTML porque el registry no puede cruzar al cliente: importar
+ * `modules.config.ts` desde el navegador arrastraría los dos módulos y con ellos el dominio entero
+ * (79 kB medidos). Hoy la lista está vacía —ningún módulo trae ficheros propios— y viaja igualmente
+ * como `[]`: así el mecanismo existe y se ve, y el día que un módulo declare un asset se guarda con
+ * el favorito sin tocar una línea de la PWA.
+ */
+const assetsDeLosModulos = assetsDeModulos(politicasDeModulos(activeModules));
+---
+
+<section
+  class="sin-red"
+  id="sin-cobertura"
+  aria-labelledby="titulo-sin-cobertura"
+  data-sin-red
+  data-sin-red-slug={slug}
+  data-sin-red-nombre={nombre}
+  data-sin-red-ruta={ruta}
+  data-sin-red-fecha={FECHA_DE_BUILD}
+  data-sin-red-assets-modulos={JSON.stringify(assetsDeLosModulos)}
+>
+  <h2 class="etiqueta" id="titulo-sin-cobertura">Sin cobertura</h2>
+
+  <p class="sin-red__sello sin-red__sello--sin-dato" data-sin-red-sello>
+    <strong class="sin-red__titular">Esta página se puede guardar en el teléfono</strong>
+    <span class="sin-red__detalle">
+      Las mareas, la curva y las efemérides de aquí abajo se calcularon el {
+        fechaLarga(FECHA_DE_BUILD)
+      } y no dependen de la conexión: se leen igual sin cobertura. El estado del mar sí depende, y su
+      bloque dice aparte de cuándo es lo que enseña. Guardar el puerto necesita JavaScript; si tu
+      navegador no lo ejecuta, sigues leyendo esta página entera y puedes imprimirla.
+    </span>
+  </p>
+
+  {/*
+    La región viva de la sección. Viaja VACÍA y se rellena solo cuando el estado CAMBIA —al irse la
+    red, al guardar—, nunca en el primer pintado: un `role="status"` que aparece con su texto ya
+    puesto no lo anuncia nadie, y repetir al abrir lo que ya está escrito arriba sería ruido. Es la
+    lección del hallazgo H-7 del pase adversario de T-11.
+  */}
+  <p class="sin-red__anuncio" data-sin-red-anuncio role="status" aria-live="polite"></p>
+
+  <button type="button" class="sin-red__accion" data-sin-red-accion hidden></button>
+
+  <p class="sin-red__nota" data-sin-red-nota hidden></p>
+</section>
