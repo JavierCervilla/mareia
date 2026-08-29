@@ -148,6 +148,40 @@ test("la edad se mide como intervalo desde que llegó la respuesta, no con el re
   assert.equal(mar.sello.titular, "Dato de hace 3 h 15 min", "el dato envejece mientras se mira");
 });
 
+// --- Estado 2 bis: el dato que envejece con la página abierta (H-1) ------------------------------
+
+test("un dato que llegó fresco deja de tener cara de fresco al pasar su ventana de frescura", () => {
+  const tresHorasDespues = RECIBIDO + 3 * 3_600_000;
+  const mar = bloque(escena(METEO_OK, BOLETIN_OK, { ahoraMs: tresHorasDespues }), "meteo-mar");
+
+  assert.equal(mar.sello.clase, "caducado", "tres horas en el bolsillo no son «hace un minuto»");
+  assert.equal(mar.sello.titular, "Dato de hace 3 h");
+  assert.match(mar.sello.detalle ?? "", /esta página no ha vuelto a preguntar/u);
+});
+
+test("cada fuente tiene SU ventana: a los 45 min el mar sigue siendo de ahora y la atmósfera no", () => {
+  // Las ventanas las publica el módulo: mar 1 h, atmósfera 30 min, boletín 6 h.
+  const vista = escena(METEO_OK, BOLETIN_OK, { ahoraMs: RECIBIDO + 45 * 60_000 });
+
+  assert.equal(bloque(vista, "meteo-mar").sello.clase, "fresco");
+  assert.equal(bloque(vista, "meteo-atmosfera").sello.clase, "caducado");
+  assert.equal(bloque(vista, "meteo-boletin").sello.clase, "fresco");
+});
+
+test("las dos caducidades son dos averías distintas y se leen distinto", () => {
+  // (a) el backend sirvió caché porque la fuente no responde; (b) la página lleva horas abierta.
+  const delBackend = bloque(escena(METEO_STALE, BOLETIN_OK), "meteo-mar").sello;
+  const deLaPestana = bloque(
+    escena(METEO_OK, BOLETIN_OK, { ahoraMs: RECIBIDO + 3 * 3_600_000 }),
+    "meteo-mar",
+  ).sello;
+
+  assert.equal(delBackend.clase, deLaPestana.clase, "las dos son un dato que no es de ahora");
+  assert.notEqual(delBackend.detalle, deLaPestana.detalle);
+  assert.match(delBackend.detalle ?? "", /Open-Meteo no responde en este momento/u);
+  assert.doesNotMatch(deLaPestana.detalle ?? "", /no responde/u);
+});
+
 test("un reloj de navegador atrasado no rejuvenece el dato", () => {
   // El navegador cree que son dos horas ANTES de recibir la respuesta: reloj torcido, caso real en
   // móviles sin sincronizar. La edad no puede bajar de la que declaró el servidor.

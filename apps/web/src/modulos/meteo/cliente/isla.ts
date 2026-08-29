@@ -217,6 +217,64 @@ function pintar(anclaje: Anclaje, vista: VistaMeteo): void {
 }
 
 /**
+ * Vuelve a sellar los bloques ya pintados, sin tocar nada más.
+ *
+ * Es el latido de la edad (H-1): cada bloque cambia SU sello sólo cuando el texto o el tono han
+ * cambiado de verdad. No se repinta la sección entera —eso tiraría cada minuto la cita del boletín
+ * y la selección de quien esté leyéndola— y no se toca el DOM cuando no hay nada que decir, que en
+ * una página abierta durante horas es la inmensa mayoría de las veces.
+ */
+function resellar(anclaje: Anclaje, vista: VistaMeteo): void {
+  for (const bloque of vista.bloques) {
+    const viejo = anclaje.bloques.querySelector(`#${bloque.id} > .meteo__sello`);
+    if (viejo === null) {
+      continue;
+    }
+    const nuevo = pintarSello(bloque);
+    if (viejo.className !== nuevo.className || viejo.textContent !== nuevo.textContent) {
+      viejo.replaceWith(nuevo);
+    }
+  }
+}
+
+/**
+ * Cada cuánto se vuelve a mirar la edad del dato con la página abierta.
+ *
+ * Medio minuto: la edad se escribe al minuto («12 minutos», «3 h 10 min»), así que con este paso el
+ * rótulo nunca va más de 30 s por detrás de la verdad, y es un temporizador que no despierta la
+ * CPU cada segundo en un móvil que va a estar horas en el bolsillo. Lo caro no es el latido, es
+ * repintar: por eso `resellar` sólo toca el DOM cuando el sello cambia.
+ */
+const LATIDO_MS = 30_000;
+
+/**
+ * Mantiene viva la edad mientras la página lo esté. Tres disparadores, y ninguno sobra:
+ *
+ * - **el temporizador**, para la pestaña abierta y a la vista;
+ * - **`visibilitychange`**, porque el navegador estrangula (y a veces congela) los temporizadores
+ *   de una pestaña en segundo plano: al volver, el rótulo puede llevar horas sin actualizarse y hay
+ *   que ponerlo al día ANTES de que lo lea nadie, no en el siguiente latido;
+ * - **`pageshow` con `persisted`**, porque en el bfcache la página se congela entera —temporizadores
+ *   incluidos— y vuelve intacta al pulsar «atrás»: sin esto, volver a la pestaña de la playa
+ *   enseñaría el sello exacto que se pintó ayer.
+ *
+ * Lo que **no** se hace es volver a pedir el dato solo. Un auto-refresco convertiría una caída del
+ * API en una tormenta de peticiones desde todos los móviles abiertos, y ADR-01 ya decidió que no.
+ * Envejecer el sello es honesto y gratis; refrescar el dato lo pide quien lee, recargando.
+ */
+function mantenerVivoElSello(refrescar: () => void): void {
+  setInterval(refrescar, LATIDO_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      refrescar();
+    }
+  });
+  window.addEventListener("pageshow", () => {
+    refrescar();
+  });
+}
+
+/**
  * Lo que la sección sabe de sus dos endpoints en un instante dado. Es mutable a propósito: cada
  * respuesta que llega anota lo suyo y repinta, sin esperar a la otra.
  */
@@ -254,6 +312,9 @@ async function montarSeccion(anclaje: Anclaje): Promise<void> {
 
   anclaje.seccion.setAttribute("aria-busy", "true");
   repintar();
+  mantenerVivoElSello(() => {
+    resellar(anclaje, vistaDelEstado(estado, anclaje.zona));
+  });
   await Promise.all([
     traer(ruta("weather"), "el estado del mar", esRespuestaDeMeteo).then((traida) => {
       estado.meteo = traida;

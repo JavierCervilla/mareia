@@ -22,8 +22,6 @@ import { expect, test } from "../../fixtures/qa-bundle";
 import { PAGINA, SECCION, fixture, montarApi } from "./utiles";
 
 test("A2 · el sello no envejece con la página abierta tres horas", async ({ page, qa }) => {
-  test.fail();
-
   qa.step("congelar el reloj de la página antes de cargarla (así el adelanto es medible)");
   await page.clock.install();
 

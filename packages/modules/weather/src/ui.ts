@@ -55,6 +55,16 @@ export const WEATHER_UI_MODULE: AppModule = {
   pageSections: WEATHER_PAGE_SECTIONS,
 };
 
+/**
+ * Las ventanas de frescura del módulo, también para la UI: la sección tiene que saber cuándo el
+ * dato que ya pintó ha dejado de ser el de ahora, y ese umbral lo pone el módulo, no la página.
+ */
+export {
+  BULLETIN_TTL_SECONDS,
+  FORECAST_TTL_SECONDS,
+  MARINE_TTL_SECONDS,
+} from "./frescura.ts";
+
 export type {
   BulletinData,
   BulletinPayload,

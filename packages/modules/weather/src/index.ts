@@ -48,9 +48,7 @@ export type {
 export { METEO_SECTION_COMPONENT, WEATHER_PAGE_SECTIONS, WEATHER_UI_MODULE } from "./ui.ts";
 
 export type { PortLocationRepository, WeatherModuleDeps } from "./module.ts";
-export {
-  BULLETIN_TTL_SECONDS,
-  FORECAST_TTL_SECONDS,
-  MARINE_TTL_SECONDS,
-  createWeatherModule,
-} from "./module.ts";
+export { createWeatherModule } from "./module.ts";
+
+// Las ventanas de frescura viven aparte porque también las necesita la UI (ver `frescura.ts`).
+export { BULLETIN_TTL_SECONDS, FORECAST_TTL_SECONDS, MARINE_TTL_SECONDS } from "./frescura.ts";

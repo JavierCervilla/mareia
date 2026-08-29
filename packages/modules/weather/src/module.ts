@@ -21,6 +21,7 @@ import type { AemetKeyState } from "./aemet-key.ts";
 import { inspectAemetKey, needsHumanAction } from "./aemet-key.ts";
 import type { WeatherCache } from "./cache.ts";
 import { cellKey, toCell } from "./cell.ts";
+import { BULLETIN_TTL_SECONDS, FORECAST_TTL_SECONDS, MARINE_TTL_SECONDS } from "./frescura.ts";
 import { WEATHER_ATTRIBUTIONS, WEATHER_MODULE_VERSION } from "./meta.ts";
 import { fetchForecast, fetchMarine } from "./open-meteo.ts";
 import type { BulletinData, BulletinPayload, PortLocation, WeatherPayload } from "./payload.ts";
@@ -28,15 +29,6 @@ import type { SourceReport } from "./source.ts";
 import { resolveSource } from "./source.ts";
 import { WEATHER_PAGE_SECTIONS } from "./ui.ts";
 import { zoneForPort } from "./zones.ts";
-
-/**
- * Cuánto tiempo se considera fresco cada dato. Salen de la cadencia real de las fuentes: los
- * modelos de oleaje se actualizan cada pocas horas, el de atmósfera con más frecuencia y un boletín
- * costero se emite tres veces al día.
- */
-export const MARINE_TTL_SECONDS = 3_600;
-export const FORECAST_TTL_SECONDS = 1_800;
-export const BULLETIN_TTL_SECONDS = 21_600;
 
 /**
  * Cuántos TTL sobrevive una entrada en la caché. La diferencia con el TTL es la ventana en la que

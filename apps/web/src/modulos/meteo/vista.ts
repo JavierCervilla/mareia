@@ -9,7 +9,11 @@
  *    caducada / no disponible) y los publica en `fetchedAt`, `ageSeconds` y `stale`. Esta capa no
  *    los re-deriva ni se inventa umbrales: los traduce a una frase con la edad **en la cara**
  *    («hace 3 h 10 min»), porque un dato de hace tres horas presentado como fresco es peor que no
- *    publicarlo.
+ *    publicarlo. Con un matiz que costó un hallazgo (H-1): el `stale` del backend es verdad **en el
+ *    instante en que contestó**, y la página se queda abierta. Cuando la edad supera la ventana de
+ *    frescura de esa fuente —la que publica el propio módulo, `MARINE_TTL_SECONDS` y compañía; aquí
+ *    no se inventa ningún número— el dato deja de llevar cara de fresco y lo dice con sus palabras:
+ *    no es que la fuente no responda, es que esta página no ha vuelto a preguntar.
  * 2. **La edad se mide como intervalo, no como instante.** `ageSeconds` es la edad en el momento
  *    en que el servidor contestó; a eso se le suma lo transcurrido desde que la respuesta llegó al
  *    navegador. Nunca se resta `Date.parse(fetchedAt)` del reloj del cliente: un reloj de móvil
@@ -23,6 +27,11 @@
  *    observación» a la vez, y le colgó a Cádiz un cartel falso).
  */
 
+import {
+  BULLETIN_TTL_SECONDS,
+  FORECAST_TTL_SECONDS,
+  MARINE_TTL_SECONDS,
+} from "@mareia/module-weather/ui";
 import type {
   BulletinPayload,
   ForecastConditions,
@@ -176,33 +185,70 @@ function edadSegundos(ageSeconds: number, recibidoEnMs: number, ahoraMs: number)
  * en la raíz de su respuesta (ver `BulletinPayload`). Lo común de las tres fuentes son estos tres
  * campos, y son los que pide esta función.
  */
+/**
+ * Quién sirve un dato y cuánto tiempo lo considera fresco **el módulo**, no esta capa: el umbral
+ * viaja desde `@mareia/module-weather/ui` para que la página no se invente ninguno (regla 1).
+ */
+interface Fuente {
+  readonly nombre: string;
+  readonly frescuraSegundos: number;
+}
+
+/** Las tres fuentes de la sección, con la ventana de frescura que publica el módulo. */
+const MAR: Fuente = { nombre: "Open-Meteo", frescuraSegundos: MARINE_TTL_SECONDS };
+const ATMOSFERA: Fuente = { nombre: "Open-Meteo", frescuraSegundos: FORECAST_TTL_SECONDS };
+const AEMET: Fuente = { nombre: "AEMET", frescuraSegundos: BULLETIN_TTL_SECONDS };
+
 interface FuenteServida {
   readonly fetchedAt: string;
   readonly ageSeconds: number;
   readonly stale: boolean;
 }
 
-/** El sello de una fuente que sí respondió (fresca o servida de caché caducada). */
+/**
+ * El sello de una fuente que sí respondió, en cualquiera de sus **tres** caras.
+ *
+ * Las dos primeras son las de siempre: fresca, y servida de caché caducada porque la fuente no
+ * respondía (`stale` del backend). La tercera la trajo el hallazgo H-1 del pase adversario: un dato
+ * que llegó fresco pero al que se le ha pasado su ventana de frescura **mientras la página estaba
+ * abierta**. Tres horas en el bolsillo convertían «Consultado hace menos de un minuto» en una
+ * mentira con la hora de consulta al lado dándole crédito — exactamente el defecto que ADR-01 dice
+ * evitar, movido del momento del build al momento de abrir la pestaña.
+ *
+ * El umbral **no se lo inventa esta capa** (regla 1 de la cabecera): es la ventana de frescura que
+ * publica el propio módulo para esa fuente (`MARINE_TTL_SECONDS` y compañía). Y la frase no se
+ * confunde con la del `stale` del backend, porque la avería es otra: allí la fuente no responde,
+ * aquí la página no ha vuelto a preguntar. Cada ausencia dice cuál es.
+ */
 function selloDeFuente(
   report: FuenteServida,
-  fuente: string,
+  fuente: Fuente,
   contexto: { readonly recibidoEnMs: number; readonly ahoraMs: number; readonly zona: string },
 ): SelloDeAntiguedad {
   const edad = edadSegundos(report.ageSeconds, contexto.recibidoEnMs, contexto.ahoraMs);
   const consultadoALas = hora(Date.parse(report.fetchedAt), contexto.zona);
-  if (!report.stale) {
+  if (report.stale) {
     return {
-      clase: "fresco",
-      titular: `Consultado hace ${antiguedad(edad)}`,
-      detalle: `${fuente} respondió a las ${consultadoALas}.`,
+      clase: "caducado",
+      titular: `Dato de hace ${antiguedad(edad)}`,
+      detalle:
+        `No es de ahora: ${fuente.nombre} no responde en este momento y se está sirviendo lo ` +
+        `último que se pudo guardar, de las ${consultadoALas}.`,
+    };
+  }
+  if (edad > fuente.frescuraSegundos) {
+    return {
+      clase: "caducado",
+      titular: `Dato de hace ${antiguedad(edad)}`,
+      detalle:
+        `No es de ahora: se consultó a las ${consultadoALas} y esta página no ha vuelto a ` +
+        `preguntar desde entonces. Recarga para pedir el estado de ahora.`,
     };
   }
   return {
-    clase: "caducado",
-    titular: `Dato de hace ${antiguedad(edad)}`,
-    detalle:
-      `No es de ahora: ${fuente} no responde en este momento y se está sirviendo lo último que ` +
-      `se pudo guardar, de las ${consultadoALas}.`,
+    clase: "fresco",
+    titular: `Consultado hace ${antiguedad(edad)}`,
+    detalle: `${fuente.nombre} respondió a las ${consultadoALas}.`,
   };
 }
 
@@ -343,7 +389,7 @@ interface Contexto {
 function bloqueDeFuente<T>(
   id: string,
   titulo: string,
-  fuente: string,
+  fuente: Fuente,
   report: SourceReport<T>,
   filas: (datos: T, zona: string) => readonly FilaMeteo[],
   contexto: Contexto,
@@ -526,7 +572,7 @@ function bloqueDelBoletin(traida: EstadoDeFuente<BulletinPayload>, contexto: Con
   const zona = payload.zone;
   return {
     ...base,
-    sello: selloDeFuente(payload, "AEMET", contexto),
+    sello: selloDeFuente(payload, AEMET, contexto),
     cita: {
       parrafos,
       pie: pieDeLaCita(zona?.name ?? "zona sin asignar", payload.issuedAt, contexto.zona),
@@ -547,11 +593,11 @@ function bloquesDeLaMeteo(
     return bloquesSinMeteo(meteo.motivo);
   }
   return [
-    bloqueDeFuente("meteo-mar", TITULO_MAR, "Open-Meteo", meteo.cuerpo.marine, filasDelMar, contexto),
+    bloqueDeFuente("meteo-mar", TITULO_MAR, MAR, meteo.cuerpo.marine, filasDelMar, contexto),
     bloqueDeFuente(
       "meteo-atmosfera",
       TITULO_ATMOSFERA,
-      "Open-Meteo",
+      ATMOSFERA,
       meteo.cuerpo.forecast,
       filasDeLaAtmosfera,
       contexto,

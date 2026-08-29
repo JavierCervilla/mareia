@@ -39,6 +39,11 @@ Se suma el transcurrido medido con el reloj del navegador **como diferencia**, n
 absoluto: así un reloj del cliente desajustado en horas no falsea la antigüedad (solo se le pide
 medir un intervalo corto, que es lo único que un reloj torcido mide bien).
 
+Y —esto es la otra mitad de la mitad— **el sello no se calcula una sola vez**: se recalcula
+mientras la página está abierta, y cuando la edad supera la ventana de frescura que el propio
+módulo publica para esa fuente, el bloque **cambia de estado**, no solo de rótulo. Por qué hizo
+falta escribirlo aparte, abajo.
+
 ## Por qué, y qué se pierde
 
 El argumento decisivo no es la frescura, es que **la inyección en build no puede sellar su propio
@@ -47,6 +52,44 @@ sello es texto congelado y miente por construcción. Se podría imprimir solo el
 («consultado a las 15:12»), que nunca miente, pero entonces la página no puede distinguir `ok` de
 `stale` —eso depende de *ahora*— y le carga al lector el trabajo de restar. Un dato de hace tres
 horas presentado como fresco es peor que no publicarlo, y esa frase es el corazón de T-11.
+
+### El argumento de arriba era refutable con una pestaña abierta (H-1)
+
+El pase adversario de T-11 lo demostró con el reloj de la página, no con la teoría: la isla
+calculaba la edad **al pintar** y no la volvía a mirar —ni temporizador, ni `visibilitychange`, ni
+`pageshow`—, así que a las tres horas de tener la pestaña abierta el bloque seguía rotulando
+«Consultado hace menos de un minuto» sobre un dato de hace tres horas, en verde y con la hora de
+consulta al lado dándole crédito. El defecto que este ADR dice eliminar no estaba eliminado: estaba
+**movido** del momento del build al momento de abrir la pestaña. Cambiaba la escala (horas en vez
+de un día) y el que más lo sufría era el que más se fiaba, porque el dato llevaba su sello. Y el
+entorno de uso que manda el design brief es justamente ése: un teléfono en el bolsillo, en la playa.
+
+Lo que hace ahora la isla para que la frase de arriba vuelva a ser verdad:
+
+- **La edad sigue viva mientras la página lo está**, con tres disparadores porque ninguno cubre lo
+  del otro: un **temporizador de 30 s** (la edad se escribe al minuto, así que el rótulo nunca va
+  más de medio minuto por detrás, y no despierta la CPU cada segundo en un móvil); **`visibilitychange`**,
+  porque el navegador estrangula y a veces congela los temporizadores de una pestaña en segundo
+  plano —al volver, el rótulo puede llevar horas parado y hay que ponerlo al día *antes* de que
+  nadie lo lea, no en el siguiente latido—; y **`pageshow`**, porque en el **bfcache** la página se
+  congela entera, temporizadores incluidos, y vuelve intacta al pulsar «atrás»: sin eso, volver a
+  la pestaña de ayer enseñaría el sello exacto de ayer.
+- **Repintar cuesta, mirar no**: en cada latido se recalcula el sello y solo se toca el DOM si el
+  texto o el tono han cambiado. En una página abierta durante horas, eso es no tocar nada casi
+  siempre, y nunca se le tira de debajo la cita del boletín a quien esté leyéndola.
+- **A partir de su ventana de frescura, el estado cambia de verdad.** Un dato de tres horas con una
+  ventana de 30 min ya no es `ok`: el bloque pasa a la cara de caducado, con la edad en el titular.
+  El umbral **no se lo inventa la página** —eso sería re-derivar lo que manda el backend—: son las
+  ventanas que publica el propio módulo (`MARINE_TTL_SECONDS` 1 h, `FORECAST_TTL_SECONDS` 30 min,
+  `BULLETIN_TTL_SECONDS` 6 h), exportadas desde `@mareia/module-weather/ui` precisamente para esto.
+  Cada fuente tiene la suya: a los 45 minutos el mar sigue siendo de ahora y la atmósfera ya no.
+- **Y se dice cuál de las dos caducidades es.** El `stale` del backend («la fuente no responde y se
+  sirve lo último guardado») y ésta («se consultó a las 15:12 y esta página no ha vuelto a
+  preguntar; recarga») son dos averías distintas y llevan dos frases distintas — la lección A-11 de
+  T-09, aplicada al tiempo.
+- **Lo que no se hace: refrescar el dato solo.** Envejecer el sello es honesto y gratis; volver a
+  pedir convertiría una caída del API en una tormenta de peticiones desde todos los móviles
+  abiertos. El dato lo vuelve a pedir quien lee, recargando, y ahora la página se lo dice.
 
 A cambio se aceptan tres costes, todos acotados:
 
@@ -72,9 +115,16 @@ hueco mudo. Sin JavaScript, sin red o con el API caído, la sección **escribe p
   versión perseguía unidades (`km/h`, `hPa`, `°C`) y no mordía —una inyección con altura de ola,
   dirección, periodo y el sello congelado dentro pasaba en verde—, porque perseguir magnitudes una
   a una es una carrera que se pierde en cuanto alguien añade una unidad nueva. Que el test se rompa
-  al tocar el texto de la sección es el precio, y es barato al lado de la garantía.
+  al tocar el texto de la sección es el precio, y es barato al lado de la garantía. Y el barrido de
+  atributos lee el **nombre entero** que admite HTML5 (con `_`, con `:`, con el valor sin comillas)
+  y prohíbe los comentarios dentro de `#meteo`: por ahí se colaban cuatro cargas con el gate en
+  verde (H-4), y el sitio del comentario es justo donde un framework deja su carga de hidratación.
 - Los cuatro estados (`ok`, `stale` con su antigüedad en la cara, `unavailable` con el motivo del
   backend, y «carga sin datos») tienen cada uno un test de vista y un recorrido Playwright con el
   API mockeado.
+- **El sello envejece**: con el reloj de la página adelantado tres horas, el bloque tiene que decir
+  que el dato tiene tres horas (`tests/e2e/journeys/adversarial/a2-sello-congelado.spec.ts`, gate
+  permanente desde el pase adversario). Y en `vista.test.ts`, que a los 45 minutos el mar siga
+  siendo de ahora y la atmósfera ya no, cada una con la ventana que publica el módulo.
 - El core sigue sin JavaScript: si mañana se borra la línea del módulo en
   `apps/web/src/modules.config.ts`, la página vuelve a ser cero JS y sigue construyendo.
