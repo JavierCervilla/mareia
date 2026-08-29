@@ -37,7 +37,6 @@
 - [x] T-10 · Módulo pesca UI (overlay solunar + rating), primer módulo que aporta interfaz por el
       contrato `AppModule` (el rating se publica como convención declarada, con su desglose y el
       aviso de que la teoría solunar no tiene respaldo experimental sólido)
-- [ ] T-11 · Módulo weather UI (isla meteo con estados ok/error/stale)
 - [x] T-12 · PWA offline (almanaque de favoritos sin red): service worker + manifiesto instalable,
       favoritos en IndexedDB (cero cuentas, cero servidor) y **cálculo de cualquier día en el
       navegador** con las constantes armónicas del puerto y el motor de `domain-core` — no es un
