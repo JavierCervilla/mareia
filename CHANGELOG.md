@@ -243,6 +243,166 @@ y los dos residuos que el adversario midió sin poder poner en rojo —el 1,1 % 
   página de puerto— y sustituirla por el índice de regiones es una decisión de producto, no una
   consecuencia de este cambio.
 
+## 2026-08-29 — T-18 · la credencial de AEMET deja de contar cómo se administra la instancia
+
+- **El aviso del operador sale del canal público.** `GET /v1/modules/weather/bulletin` publicaba,
+  dentro del estado de la credencial, la frase escrita para quien administra la instancia: qué
+  variable de entorno usa, en qué URL de AEMET se pide una clave nueva y que hay que «actualizar el
+  secreto». No hay material de clave ahí y la web no lo pintaba, así que no fue incidente; pero es
+  reconocimiento gratis y, sobre todo, es el canal equivocado — quien puede renovar la clave no se
+  entera por el JSON público. Es **fix forward** de T-08, no un rollback: el estado sigue viajando
+  (`status`, `expiresAt`, `daysLeft`, `source`, `thresholdDays`), porque quien consume el API
+  necesita poder decir *por qué* dejó de haber boletín. Lo que se recorta es la instrucción.
+- **Dos canales, dos textos.** `publicCredentialView()` proyecta el estado a lo que sale por HTTP y
+  sustituye el mensaje por una frase neutra **derivada del `status` y sin interpolar números** —los
+  números ya viajan en sus campos—, aplicada en las dos ramas del boletín y en el `detail` del
+  healthcheck. El mensaje completo se queda intacto donde sirve de algo: el workflow
+  `aemet-key.yml`, que es el único sitio desde el que alguien puede ir a renovar la clave.
+- **El gate mira la respuesta entera, no el campo.** Un test sobre `credential.message` habría
+  arreglado este bug dejando pasar el siguiente, porque el defecto **se mueve** de campo. El
+  recorrido nuevo serializa los cuatro cuerpos públicos del módulo (`/weather`, `/bulletin` con zona
+  y sin zona, y el healthcheck) en los **cinco** estados de la credencial y exige que en ninguno
+  aparezca ninguna de las cinco señas del canal del operador: 100 comprobaciones. Busca **señas**
+  —el nombre de la variable, el dominio de alta, los verbos de instrucción— y no la frase literal,
+  para que reescribir el aviso no desactive el gate. Comprobado mordiendo, seña a seña: revertir el
+  recorte del `credential` lo pone rojo en los cinco estados; revertir **solo** el del healthcheck
+  lo pone rojo en cuatro; y con el `credential` ya recortado, devolver el nombre del secreto al
+  `reason` lo pone rojo igual — que es exactamente el bug moviéndose de campo.
+- **Y el `reason` del boletín tampoco nombra el secreto.** Ahí estaba la segunda copia de la fuga:
+  sin clave, el motivo decía «falta la variable de entorno AEMET_API_KEY». Ese texto viaja al
+  cliente por diseño (`errors.ts`), así que ahora dice el hecho —«no hay credencial con la que pedir
+  el boletín»— y deja el nombre del secreto para el canal del operador.
+- **Y el gate obliga a decir algo, no solo prohíbe decir de más.** Una prohibición se satisface
+  callando: con solo el recorrido de arriba, `message: ""` en los cinco estados habría pasado verde,
+  y también una única frase repetida para los cinco. Eso no sería recortar el canal, sería apagarlo,
+  y quien consume el API dejaría de poder decir *por qué* no hay boletín — justo lo que este fix
+  forward prometió conservar. Así que un segundo recorrido exige que cada estado tenga su frase: no
+  vacía, distinta de las otras cuatro y nombrando de qué credencial habla. No congela la prosa
+  (reescribirla no lo rompe); vaciarla o colapsarla en una sola frase, sí. Comprobado mordiendo con
+  las dos mutaciones: vaciar las cinco frases lo pone rojo («no dice nada»), y darles a las cinco la
+  misma frase lo pone rojo nombrando el par que colisiona.
+- **Trinquete al revés**: un test exige que `inspectAemetKey` **siga** produciendo el aviso
+  completo, con su URL de alta y su instrucción, para que «arreglar» esto nunca consista en vaciar
+  el único aviso que impide que la clave caduque por sorpresa.
+- Los tres fixtures de boletín de la web se **re-proyectaron con la función real**, no a mano: son
+  capturas de lo que sirve el módulo y tenían congelada la frase vieja (una de ellas, la del
+  «Renuévala», es la que el recorrido Playwright sirve como respuesta del API).
+- **Pase adversario (rol `qa-adversario`): 4 hallazgos reproducidos en rojo, abiertos con
+  trinquete.** El gate de arriba prohíbe decir de más; el pase preguntó si lo que sí se dice es
+  verdad. (a) La frase «neutra» no es neutra: afirma «no publica el boletín oficial», y la misma
+  respuesta publica el boletín en cuanto la caché sirve con el secreto ya borrado o caducado. (b) La
+  **tercera copia** de la fuga la escribe AEMET: su `descripcion` en un 401 viaja literal al `reason`
+  público y de ahí **a la pantalla**, sin pasar por el criterio que se aplicó a las dos copias
+  propias. (c) Un `exp` finito fuera del rango de `Date` lanza `RangeError` dentro de
+  `inspectAemetKey`: `/bulletin` devuelve **500** y el healthcheck revienta, que es la promesa
+  incumplida por el lado contrario — no se filtra nada porque no se publica nada. (d) `daysLeft`
+  cuenta un día entero de más desde el primer milisegundo y no cuadra con el `expiresAt` que viaja a
+  su lado (ya visible en un fixture commiteado: `-40` con 39 días transcurridos).
+  Informe: `docs/qa/informe-adversario-t18.md`; bundle: `docs/qa/bundles/t18-adversario/FAILURE.md`.
+- **Pase adversario cerrado: los 4 hallazgos arreglados y sus 7 ataques como gate permanente.** El
+  envoltorio `hallazgoAbierto()` hizo su trabajo —los cinco cuerpos del módulo gritaron «YA NO
+  FALLA» a la vez— y se retiró; los cuerpos se quedan tal cual, midiendo lo mismo que medían cuando
+  reproducían el fallo, sólo que ahora tienen que pasar.
+  - **(a) La frase pública dice el estado de la credencial y sólo eso.** Se le quita la
+    consecuencia: `missing` y `expired` ya no afirman «no publica el boletín oficial», porque la
+    caducidad se lee **en local** del `exp` y la caché sigue sirviendo durante 4×TTL — el cuerpo se
+    desmentía a sí mismo. Quién publica y quién no ya lo dicen el `status` y la presencia del
+    `document`; hacer que la frase dependa de si hay caché la acoplaría al estado de otra cosa.
+  - **(b) El filtro de la tercera copia va en el borde, no en el adaptador.** `reasonFrom()`
+    —el borde por el que se llena el `reason` público— recorta las cinco señas del canal del
+    operador, las haya escrito quien las haya escrito. Es lista negra y se dice en el propio
+    comentario: conserva el diagnóstico del upstream a cambio de no prometer nada sobre prosa ajena
+    que no lleve esas señas. Ahora el gate ataca con un `descripcion` de AEMET que **sí** muerde —el
+    de T-18 estaba elegido para no morder— y el recorrido de la web compone su `reason` llamando al
+    borde real en vez de copiar el resultado a mano, así que quitar el filtro se ve en la pantalla.
+  - **(c) Una clave cuyo `exp` no es una fecha es una clave ilegible.** Antes de construir la fecha
+    se comprueba que el instante cabe en el rango de `Date`; si no cabe, `unreadable`, que ya es un
+    estado del dominio. `/bulletin` vuelve a devolver 200 con su `credential` y su `reason`, y el
+    `healthcheck()` deja de lanzar. El gate cubre los tres `exp` que reventaban, incluido **el borde
+    exacto medido** (`8 640 000 000 000` pasa, `+1` reventaba), y afirma que el último que sí es una
+    fecha se sigue leyendo como tal.
+  - **(d) El redondeo se arregla donde se calcula.** `daysBetween()` trunca hacia cero en vez de
+    hacia abajo, así que los dos canales —el `daysLeft` público y el «caducó hace N día(s)» del
+    operador— dejan de contar un día que no ha pasado. Y el **estado** deja de decidirse con ese
+    número: una clave muerta hace un minuto vale `daysLeft: 0` y `0 < 0` la habría dado por viva, de
+    modo que `expired` se pregunta comparando instantes. Los fixtures de boletín de la web se
+    re-proyectaron **con la función arreglada** (`-40` → `-39`), y un gate nuevo compara su bloque
+    `credential` con `publicCredentialView(inspectAemetKey(...))`: editar ese JSON a mano se pone
+    rojo.
+- **R-1 cerrado: el canal del operador ya tiene quien lo mire.** El «trinquete al revés» de T-18
+  vigilaba `inspectAemetKey`, pero lo que el humano lee dentro del issue de GitHub es la salida de
+  `scripts/check-aemet-key.ts`, y ese script **no lo alcanzaba ningún job** (`pnpm test` no lo ve
+  porque es Deno; el `deno task test` de la API corre sólo sobre `apps/api/src/`). Siete recorridos
+  nuevos **ejecutan el script** como subproceso —no importan su lógica: probar la función y no el
+  artefacto es el fallo que esto cierra— y afirman sobre su stdout, su stderr y su código de salida,
+  estado por estado. Comprobado mordiendo con **la mutación exacta que midió el adversario** (dos
+  líneas: imprimir la frase pública en vez del mensaje del operador y quitar los tres pasos del
+  stderr): antes dejaba la suite en 499/0 y el issue mudo; ahora pone dos recorridos en rojo
+  citando el texto que habría llegado al issue. Uno de los siete es el trinquete del trinquete: que
+  la línea de comando que se ejecuta aquí siga siendo la que ejecuta `aemet-key.yml`.
+  El job `api` de CI corre `deno task check` + `deno task test` desde `scripts/`, con su propio
+  `scripts/deno.json` — **no en la raíz** a propósito: medido que un `deno.json` en la raíz hace que
+  Deno tome el `package.json` de pnpm por miembro de workspace y reescriba `apps/api/deno.lock`.
+- **Y el punto ciego que dejó la verificación, cerrado con gate y sin hallazgo**: el recorrido nunca
+  ejercitaba la URL por defecto (todos los escenarios inyectan `urls.aemet`, y `AEMET_BASE_URL` lleva
+  la seña `opendata.aemet.es`). Atacado con la forma de error **medida** del runtime de producción
+  —Deno 2.9.6: `fetch failed` con la URL en la `cause`, no en el `message`— más el timeout, la
+  segunda llamada sin envolver y el sobre que apunta a otro origen: cero señas. Quedan cuatro gates
+  nuevos vigilando, uno de ellos para que nadie vuelva a inyectar `urls.aemet` y lo apague en
+  silencio.
+- **Rechazo del verificador (1/2): la lista negra fallaba contra sus propias señas.** El comentario
+  de `reasonFrom` prometía recortar las cinco «las haya escrito quien las haya escrito» y el filtro
+  casaba sobre texto **crudo**. Medido por el camino real (`aemet.ts` → `WeatherSourceError` →
+  `reasonFrom`), cuatro variantes de las propias señas salían **enteras** por el `reason` público:
+  «Renuévala» en `NFD` (`e` + U+0301 — la misma palabra en pantalla, otra cadena para `includes`),
+  `AEMET-API-KEY` con guion, `AEMET<U+200B>_API_KEY` con un carácter de ancho cero dentro y
+  `opendata. aemet.es` partido por un salto de línea. Agravante: el gate escribía las señas a mano y
+  **sólo en `NFC`**, así que vigilaba una forma de cinco y no se habría puesto rojo nunca. Ahora el
+  texto se **sanea antes de casar y se publica saneado** —fuera los invisibles, `NFC`, espacio
+  aplastado; casar sobre una forma y publicar otra dejaría el recorte aplicado a un texto distinto
+  del que sale por el cable— y el patrón tolera `-`, `_`, espacio o nada como separador de
+  `AEMET_API_KEY` y el espacio alrededor de los puntos del dominio. Las cinco variantes son casos
+  del gate, y el de la respuesta entera vigila cada seña en **las dos formas Unicode**. Comprobado
+  mordiendo, mutación a mutación: sin el saneado salen el `NFD` y el ancho cero; sin la tolerancia
+  del separador sale `AEMET-API-KEY`; sin la del dominio sale `opendata. aemet.es`; y una frase
+  pública con «Renuévala» en `NFD` deja el gate viejo en **7/0 verde** y el nuevo en rojo.
+- **Y lo que la lista negra NO cubre, contado en vez de callado.** No casa **codificaciones**:
+  `opendata&#46;aemet&#46;es` (entidades HTML) sale entero, igual que la prosa ajena sin señas («Su
+  clave ha expirado. Solicite una nueva y configúrela en el servidor»). Es decisión y no olvido —
+  descodificar es publicar un texto que el upstream no escribió, y el espacio de escapes no tiene
+  fondo (`&#x2E;`, `&period;`, doble codificación, porcentaje): perseguirlo dejaría la misma lista
+  negra con la promesa más grande y ninguna garantía nueva. El límite tiene **recorrido propio**
+  (`LÍMITE ·`) que se pone rojo si alguien amplía el filtro sin ampliar la frase —comprobado
+  mordiendo: descodificando `&#46;` en el saneado, rojo— porque lo que no puede pasar es que el
+  comentario y este changelog prometan una cosa y el código haga otra.
+- **Rechazo del verificador (2/2): «la única puerta» era falso, y ahora es verdad.** Había **dos**
+  sitios llenando el `reason` público y sólo uno pasaba por `reasonFrom`: la rama sin zona marítima
+  de `module.ts` lo componía a mano. No era una fuga —esa frase la escribimos nosotros y está
+  limpia—, era una **afirmación por costumbre**, la misma clase de frase que A-18 desmontó. Se
+  enruta esa rama por el borde, con lo que la frase pasa a ser cierta, y un gate lo mide **por
+  HTTP** (comprobado mordiendo: al volver a componer el `reason` a mano, rojo citando el cuerpo).
+  El comentario de `errors.ts` dice ahora **dos, con nombre y contados**, y añade que un tercer
+  camino no lo garantiza la función sino que quien lo escriba la llame — por eso los recorridos
+  atacan por HTTP y no llamando a `reasonFrom`.
+- **Cifra descuadrada, corregida (doctrina T-161).** Donde se decía «los 4 hallazgos y sus **8**
+  ataques» eran **7**: cinco recorridos sobre el cuerpo HTTP y dos sobre la pantalla. El 8 contaba
+  los `gatePermanente(` de un solo fichero —tres de ellos del punto ciego, que nunca fueron
+  hallazgo— y dejaba fuera los dos de la web. Contado hoy sobre los dos ficheros del pase: **7 con
+  letra de hallazgo + 7 sin ella** (6 `GATE ·` y 1 `LÍMITE ·`) = 14 recorridos.
+- **`scripts/deno.json`**: la tarea `test` llevaba `--allow-read ..`, y ese `..` no era el valor del
+  permiso sino un **path posicional** — o sea, «descubre tests desde la raíz del repo». Hoy no
+  encuentra ninguno más porque el resto son de Node, pero el día que Deno cambie cómo acota el
+  descubrimiento esa tarea intentaría correr los ~500 recorridos de Node bajo Deno. Ahora el permiso
+  va explícito y acotado (`--allow-read=.,../.github`: este directorio y el workflow que se lee) y
+  el path de descubrimiento es `.`. Sigue en 7/0.
+- **Las tres funciones «que no las usa la sección» viven donde dice su intención.**
+  `inspectAemetKey`, `publicCredentialView` y `reasonFrom` se exportaban desde `ui.ts` con un
+  comentario explicando que no eran para la sección sino para los gates de la web (no pueden salir
+  por `index.ts`, que arrastra Express). Un comentario no impide que mañana alguien las use: se van
+  a un subpath propio, `@mareia/module-weather/testing`, y `ui.ts` vuelve a ser sólo lo que la
+  página pinta.
+
+
 ## 2026-08-29 — T-12 · el almanaque funciona sin cobertura, y lo dice
 
 - **Un puerto guardado se abre y *calcula* sin red.** Es la diferencia entre una PWA y un caché de

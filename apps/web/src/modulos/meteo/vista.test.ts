@@ -213,8 +213,10 @@ test("sin credencial de AEMET el boletín explica el hueco en vez de desaparecer
   assert.equal(boletin.sello.clase, "sin-dato");
   assert.match(boletin.sello.detalle ?? "", /no tiene credencial de AEMET/u);
   assert.match(boletin.sello.detalle ?? "", /no publica el boletín oficial/u);
-  // El motivo técnico del backend sigue ahí: no se esconde lo que dijo el servidor.
-  assert.match(boletin.sello.detalle ?? "", /falta la variable de entorno AEMET_API_KEY/u);
+  // El motivo técnico del backend sigue ahí: no se esconde lo que dijo el servidor. Lo que ese
+  // motivo ya no lleva (T-18) es el nombre del secreto: eso es del canal del operador.
+  assert.match(boletin.sello.detalle ?? "", /no hay credencial con la que pedir el boletín/u);
+  assert.doesNotMatch(boletin.sello.detalle ?? "", /AEMET_API_KEY/u);
 });
 
 test("con la credencial caducada, el «HTTP 401» va acompañado de la causa de verdad", () => {

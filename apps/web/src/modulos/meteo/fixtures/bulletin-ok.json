@@ -16,11 +16,10 @@
   ],
   "credential": {
     "status": "valid",
-    "expiresAtMs": 1795132800000,
     "expiresAt": "2026-11-20T00:00:00.000Z",
     "daysLeft": 83,
     "source": "jwt-exp",
-    "message": "La AEMET_API_KEY es válida 83 día(s) más (2026-11-20T00:00:00.000Z, según su propio campo `exp`)."
+    "message": "La credencial de AEMET de esta instancia está vigente"
   },
   "status": "ok",
   "fetchedAt": "2026-08-28T17:49:00Z",

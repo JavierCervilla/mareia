@@ -91,6 +91,19 @@ jobs:
       - run: deno task check --frozen
       - run: deno task test --frozen
 
+      # El canal del OPERADOR (T-18/R-1). `scripts/check-aemet-key.ts` es lo que el humano acaba
+      # leyendo dentro de un issue de GitHub cuando la clave de AEMET caduca, y hasta ahora no lo
+      # alcanzaba ningún job: `pnpm test` no lo ve (es Deno) y el `deno task test` de arriba corre
+      # sólo sobre `apps/api/src/`. El pase adversario midió el agujero mutando dos líneas del
+      # script —el issue quedaba en «hace falta acción humana» sin variable, sin URL y sin los tres
+      # pasos— con la suite entera en verde. Los recorridos EJECUTAN el script, no importan su
+      # lógica: probar la función y no el artefacto es justo el fallo que esto cierra.
+      - name: Canal del operador · el script de aviso de AEMET
+        working-directory: scripts
+        run: |
+          deno task check
+          deno task test
+
   # Pipeline de datos (data/pipeline). Sólo el camino OFFLINE: el motor de predicción armónica
   # contra la tabla publicada de velocidades y contra el fixture de la implementación de referencia,
   # más la validación de los JSON commiteados contra el schema station/v1 y contra el catálogo de
