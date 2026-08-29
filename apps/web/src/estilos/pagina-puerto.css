@@ -406,20 +406,47 @@
 
 /* --- Bandas de las ventanas destacadas (overlay de módulos, T-10) ---------- */
 /* Van BAJO la curva y eso es marcado, no CSS: en SVG no hay `z-index` y manda el
-   orden del documento, así que `GraficoMarea` las emite antes del trazo. Aquí
-   solo se decide que sean una mancha tenue del acento cálido que ya existe, sin
-   borde ni etiqueta dentro del lienzo: la banda es contexto y la curva es el
-   dato. Las horas exactas se leen en la tabla de la sección, no del gráfico.
-   El énfasis llega como dato (`data-enfasis`) y no como dos clases: el gráfico
-   del core no sabe qué representa cada banda. */
+   orden del documento, así que `GraficoMarea` las emite antes del trazo. El
+   énfasis llega como dato (`data-enfasis`) y no como dos clases: el gráfico del
+   core no sabe qué representa cada banda.
+
+   Dos partes con dos trabajos distintos, y esto lo reescribió el hallazgo A-14
+   del pase adversario:
+
+   1. **El filete** (`stroke`) es el objeto gráfico. Va en `--m-terra` a plena
+      opacidad, así que mide lo que mide el token: 5,40:1 en claro y 5,69:1 en
+      noche sobre el fondo, por encima del 3:1 que WCAG 2.2 · 1.4.11 pide a un
+      objeto gráfico que porta información. Antes no había filete y toda la
+      información viajaba en la mancha: 1,30:1 y 1,14:1, invisible al sol.
+   2. **La mancha** (`fill` con `fill-opacity`) sigue siendo contexto y sigue
+      siendo tenue, que es lo que deja legibles la curva y los extremos por
+      encima. No se sube su opacidad hasta el 3:1 —haría falta un 0,70, y una
+      cuarta parte del gráfico teñida de terracota rompería la regla del brief
+      de una sola mancha de color y taparía el dato—; el contraste lo pone el
+      filete, que es lo que WCAG mide de una región sombreada.
+
+   Y la diferencia entre una ventana de más peso y una de menos NO es cromática:
+   filete continuo y grueso contra filete discontinuo y fino. Antes eran dos
+   opacidades del mismo tono separadas por 1,14:1 —quien no distingue tonos no
+   distinguía nada, y a pleno sol nadie los distingue—. La leyenda del pie del
+   gráfico nombra las dos tramas (`GraficoMarea.astro`): una trama que no se
+   explica tampoco distingue. */
 .grafico__banda {
   fill: var(--m-terra);
+  stroke: var(--m-terra);
+  /* El filete no escala con el lienzo: el SVG se dibuja a 620 unidades de ancho
+     y se muestra a ~340 px en un móvil, donde un trazo de 1,2 unidades quedaría
+     en 0,65 px y volvería a desaparecer justo en la pantalla que importa. */
+  vector-effect: non-scaling-stroke;
 }
 
 .grafico__banda[data-enfasis="fuerte"] {
-  opacity: 0.18;
+  fill-opacity: 0.18;
+  stroke-width: 1.8px;
 }
 
 .grafico__banda[data-enfasis="suave"] {
-  opacity: 0.09;
+  fill-opacity: 0.09;
+  stroke-width: 1px;
+  stroke-dasharray: 5 4;
 }
