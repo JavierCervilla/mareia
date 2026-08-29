@@ -156,6 +156,48 @@ cabecera.
   instala esto sigue queriendo ver la URL —para compartirla y para recortarla, que es una promesa de
   la jerarquía de URL de T-09— y sigue queriendo recargar. Parecer una app nativa no es un objetivo.
 
+## 7 ter. Ampliación T-14B — la calidad en la lista, y su filtro sin JavaScript
+
+Esta sección **amplía el brief** (no abre otro), como anuncia la cabecera: la portada deja de
+presentar los 153 puertos como si valieran lo mismo.
+
+- **El problema es de jerarquía, no de dato.** La calidad ya se publica —entera— en la página del
+  puerto (§1, nivel *contextual*: «grade de la estación»). Lo que faltaba es que llegara al sitio
+  donde se **elige**: una lista plana invita a leerla como plana, y 120 de los 153 puertos publican
+  una marea **estimada**. En la lista, esa marca sube a **crítica**: cambia qué puerto abres.
+- **La señal es una palabra, no un chip.** «medida» / «estimada» junto a la provincia, en la misma
+  cursiva de la meta del índice (`--m-text-meta`, `--m-sub`), separada por un punto medio. Nada de
+  pastilla de color, que es el anti-objetivo §3 («chips de colores») y además obligaría al color a
+  portar significado. Lo único que hace el color es **reforzar**: la palabra «estimada» va en
+  terracota (`--m-terra`), el mismo tono con el que la página del puerto ya marca sus avisos, y se
+  distingue igual leída en gris, impresa o dictada por un lector de pantalla.
+- **La señal se hornea en el HTML.** Va en el índice construido, sin una línea de JavaScript: una
+  señal que solo existe si corre el JS es una señal que a veces no está (lección de T-11). La
+  portada **conserva su cero scripts** (`scripts-de-core.ts`), y por tanto no toca el presupuesto de
+  bytes de T-12.
+- **El grade no sube a la lista.** Viaja en `/v1/ports` para quien afine, y se lee entero —con su
+  motivo— en la ficha. En la lista, una letra sin su umbral al lado es un adorno técnico: lo que
+  decide al elegir es si la marea está medida aquí o prestada de otro sitio.
+- **El filtro es CSS, no una isla.** Tres radios visualmente ocultos (pero enfocables) y reglas de
+  hermano: `#calidad-medidos:checked ~ .grupo .indice__entrada[data-estimado="true"]`. Cero bytes de
+  JavaScript, cero hidratación, funciona en cualquier navegador con radios y sin depender de `:has()`.
+  Se compone como los controles de §7 bis —tipografía del almanaque, filete bajo la opción activa,
+  sin relleno ni esquinas redondeadas, 44 px de zona pulsable—, como el pie de un índice impreso que
+  dice qué se está listando.
+- **Las cuentas van en la propia opción** («Todos 153 · Medidos 33 · Estimados 120»), horneadas del
+  catálogo. Sin JavaScript no hay contador vivo, y no hace falta: la cuenta de cada opción **es** el
+  resultado, y de paso dice el dato incómodo —cuántos hay de cada— antes de que nadie filtre.
+- **Una región que se queda sin puertos desaparece con ellos.** Cada bloque de región lleva
+  horneadas sus dos cuentas (`data-medidos`, `data-estimados`) y el CSS oculta el bloque cuyo
+  contador es `0`: un rótulo de región sobre una lista vacía es peor que no filtrar.
+- **En papel se imprime lo que se ve**, con la opción activa marcada por su filete. No se esconde el
+  control al imprimir: un papel que lista 33 puertos sin decir que están filtrados miente sobre el
+  catálogo, y ese es justo el pecado que esta trayectoria vino a corregir.
+- **Queda fuera** (deliberado, no olvido): los índices de región y provincia siguen sin la marca.
+  T-14B corrige los dos sitios donde el proyecto declaró que se elige puerto —la portada y
+  `/v1/ports`—; extenderlo a los índices es una línea más el día que se decida, no un cambio de
+  criterio.
+
 ## 8. Cómo se audita
 
 ```bash

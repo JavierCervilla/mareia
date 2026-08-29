@@ -37,6 +37,8 @@ export type {
   InstantDto,
   MoonIlluminationDto,
   PortDto,
+  PortQualityDto,
+  PortSummaryDto,
   SkySearchDto,
   StationDto,
   TideEventDto,

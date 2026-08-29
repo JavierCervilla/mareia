@@ -8,6 +8,13 @@
  * la lista se queda: sustituirla por el índice de regiones (que ya existe en `/mareas/` y es la
  * ruta canónica de navegación) es una decisión de producto, no una consecuencia de que el dataset
  * creciera, y le tocaría a la trayectoria que rediseñe la portada.
+ *
+ * T-14B le añade lo único que le faltaba para no mentir por omisión: **cada entrada dice si su
+ * marea está medida o estimada**, y la lista se puede filtrar por ello. Las dos cosas van en el
+ * HTML construido —la señal porque es lo que decide qué puerto abres, y el filtro porque tres
+ * radios y unas reglas de hermano bastan—, así que la portada conserva su cero scripts. El orden
+ * no cambia: sigue mandando la geografía, porque ordenar por calidad escondería puertos legítimos
+ * al final de la lista.
  */
 import Indice from "../componentes/Indice.astro";
 import { cargarCatalogo, puertosDeRegion } from "../datos/catalogo.ts";
@@ -15,7 +22,20 @@ import AlmanaqueLayout from "../layouts/AlmanaqueLayout.astro";
 import { RUTA_MAREAS, rutaPuerto, rutaRegion, urlAbsoluta } from "../rutas.ts";
 
 const regiones = await cargarCatalogo();
-const puertos = regiones.flatMap(puertosDeRegion).length;
+const todos = regiones.flatMap(puertosDeRegion);
+const puertos = todos.length;
+
+/**
+ * Cuántos puertos del catálogo publican una marea medida en su dársena y cuántos la estiman.
+ *
+ * Se cuentan aquí, del catálogo que se está pintando, y no de una constante: el día que el dataset
+ * gane un mareógrafo, la cuenta de las opciones del filtro cambia sola. Es también el dato incómodo
+ * de la portada —120 de 153 son estimaciones— dicho antes de que nadie filtre.
+ */
+const estimados = (lista: readonly { quality: { estimated: boolean } }[]): number =>
+  lista.filter((puerto) => puerto.quality.estimated).length;
+const totalEstimados = estimados(todos);
+const totalMedidos = puertos - totalEstimados;
 
 const titulo = "Mareia · mareas, coeficiente y efemérides de los puertos de España";
 const descripcion =
@@ -34,26 +54,70 @@ const descripcion =
     <p class="portada__entradilla">
       Mareas, coeficiente y efemérides de sol y luna de {puertos} puertos españoles, calculados con
       un motor de predicción armónica propio sobre constantes públicas. Cada página dice de dónde
-      sale su dato, con qué método y con cuánto error.
+      sale su dato, con qué método y con cuánto error; y esta lista dice, puerto a puerto, si su
+      marea está medida ahí o es una estimación.
     </p>
     <p><a href={RUTA_MAREAS}>Ver todas las regiones</a></p>
   </header>
 
-  {
-    regiones.map((region) => (
-      <section class="grupo" aria-labelledby={`region-${region.slug}`}>
-        <h2 class="etiqueta" id={`region-${region.slug}`}>
-          <a href={rutaRegion(region.slug)}>{region.nombre}</a>
-        </h2>
-        <Indice
-          titulo={`Puertos de ${region.nombre}`}
-          entradas={puertosDeRegion(region).map((puerto) => ({
-            nombre: puerto.name,
-            ruta: rutaPuerto(puerto),
-            meta: puerto.province.name,
-          }))}
-        />
-      </section>
-    ))
-  }
+  {/*
+    El filtro por calidad, sin JavaScript: tres radios ocultos a la vista (no al teclado ni al
+    lector de pantalla) y reglas de hermano en `estilos/indices.css`. Por eso los `<input>` son
+    hermanos de las secciones de región y van los primeros: el combinador `~` solo mira hacia
+    adelante. La cuenta de cada opción es el resultado de aplicarla, horneada del catálogo.
+  */}
+  <div class="catalogo">
+    <input class="filtro__radio" type="radio" name="calidad" id="calidad-todos" checked />
+    <input class="filtro__radio" type="radio" name="calidad" id="calidad-medidos" />
+    <input class="filtro__radio" type="radio" name="calidad" id="calidad-estimados" />
+
+    <div class="filtro">
+      <p class="filtro__nota">
+        Un puerto tiene la marea <strong>medida</strong> cuando el mareógrafo está en su propia
+        dársena y la predicción se ha contrastado contra sus observaciones. En los demás es
+        una <strong>estimación</strong>: constantes armónicas prestadas del mareógrafo más cercano, o
+        sin observaciones aquí con las que comprobarla. El error concreto de cada uno está en su
+        página.
+      </p>
+      <div class="filtro__opciones">
+        <label class="filtro__opcion" for="calidad-todos">
+          Todos los puertos <span class="filtro__cuenta">{puertos}</span>
+        </label>
+        <label class="filtro__opcion" for="calidad-medidos">
+          Solo los medidos <span class="filtro__cuenta">{totalMedidos}</span>
+        </label>
+        <label class="filtro__opcion" for="calidad-estimados">
+          Solo los estimados <span class="filtro__cuenta">{totalEstimados}</span>
+        </label>
+      </div>
+    </div>
+
+    {
+      regiones.map((region) => {
+        const puertosDe = puertosDeRegion(region);
+        const estimadosDe = estimados(puertosDe);
+        return (
+          <section
+            class="grupo"
+            aria-labelledby={`region-${region.slug}`}
+            data-estimados={String(estimadosDe)}
+            data-medidos={String(puertosDe.length - estimadosDe)}
+          >
+            <h2 class="etiqueta" id={`region-${region.slug}`}>
+              <a href={rutaRegion(region.slug)}>{region.nombre}</a>
+            </h2>
+            <Indice
+              titulo={`Puertos de ${region.nombre}`}
+              entradas={puertosDe.map((puerto) => ({
+                nombre: puerto.name,
+                ruta: rutaPuerto(puerto),
+                meta: puerto.province.name,
+                estimada: puerto.quality.estimated,
+              }))}
+            />
+          </section>
+        );
+      })
+    }
+  </div>
 </AlmanaqueLayout>

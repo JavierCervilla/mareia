@@ -71,6 +71,11 @@ interface Quality {
   readonly rmse_m: number | null;
 }
 
+/** La calidad que publica cada entrada de `/v1/ports` desde T-14B. */
+interface CatalogQuality extends Quality {
+  readonly estimated: boolean;
+}
+
 Deno.test("GET /v1/ports sirve el catálogo cacheable, sin filtrar dónde vive el dataset", async () => {
   await withApi(async (baseUrl) => {
     const { status, cacheControl, body } = await get(baseUrl, "/v1/ports");
@@ -113,6 +118,89 @@ Deno.test("GET /v1/ports sirve el catálogo cacheable, sin filtrar dónde vive e
     assertEquals(vigo?.["timezone"], "Europe/Madrid");
     assertEquals(vigo?.["stationFile"], undefined, "stationFile es infraestructura, no contrato");
     assertEquals((vigo?.["region"] as Record<string, unknown>)["slug"], "galicia");
+  });
+});
+
+/**
+ * Todo lo que le falta a una entrada del catálogo para publicar su calidad. Vacío = está completa.
+ *
+ * Devuelve **frases con el slug dentro** y no un booleano: el mensaje del rojo es el entregable de
+ * este gate tanto como el rojo mismo.
+ */
+function calidadIncompleta(slug: string, port: Record<string, unknown> | undefined): string[] {
+  if (port === undefined) {
+    return [`${slug}: no está en /v1/ports`];
+  }
+  const quality = port["quality"] as Record<string, unknown> | undefined;
+  if (quality === undefined) {
+    return [`${slug}: sin quality`];
+  }
+  const problemas: string[] = [];
+  if (typeof quality["grade"] !== "string" || quality["grade"] === "") {
+    problemas.push(`${slug}: sin grade`);
+  }
+  if (typeof quality["estimated"] !== "boolean") {
+    problemas.push(`${slug}: sin estimated`);
+  }
+  // `in` y no `!== undefined`: el `null` del QC significa «no se pudo medir» y tiene que llegar
+  // como `null`. Un campo ausente dice lo mismo que un cero, o sea, nada.
+  for (const metrica of ["rmse_m", "hw_time_err_p95_min"]) {
+    if (!(metrica in quality)) {
+      problemas.push(`${slug}: no publica ${metrica}`);
+    } else if (quality[metrica] !== null && typeof quality[metrica] !== "number") {
+      problemas.push(`${slug}: ${metrica} no es número ni null`);
+    }
+  }
+  return problemas;
+}
+
+/**
+ * **El gate de T-14B por el lado del API.**
+ *
+ * La forma de romperse esto no es que la calidad desaparezca de `/v1/ports` —eso lo caza cualquier
+ * test—: es que la traigan 148 de los 153 puertos y nadie lo note. Por eso la lista de puertos que
+ * se exige se **recalcula desde el catálogo real** en cada corrida (nada de una constante que hay
+ * que acordarse de subir al añadir un puerto) y el fallo **nombra el puerto**: un rojo que dice
+ * «esperaba 153, había 148» obliga a investigar; uno que dice «la-manga: sin quality» ya ha hecho
+ * el trabajo.
+ *
+ * Y mira el **cuerpo HTTP servido**, no lo que devuelve el caso de uso: entre uno y otro está la
+ * serialización a JSON, que es exactamente donde un `undefined` se convierte en un campo que no
+ * existe sin que nadie se entere.
+ */
+Deno.test("todos los puertos del catálogo publican su calidad en /v1/ports", async () => {
+  const esperados = (await testDeps().ports.list()).map((port) => port.slug);
+  await withApi(async (baseUrl) => {
+    const { body } = await get(baseUrl, "/v1/ports");
+    const ports = body["ports"] as readonly Record<string, unknown>[];
+    const porSlug = new Map(ports.map((port) => [String(port["slug"]), port]));
+
+    const problemas = esperados.flatMap((slug) => calidadIncompleta(slug, porSlug.get(slug)));
+    const sobran = [...porSlug.keys()].filter((slug) => !esperados.includes(slug));
+    assertEquals(problemas, [], "puertos con la calidad incompleta en /v1/ports");
+    assertEquals(sobran, [], "puertos servidos que no están en el catálogo");
+    assertEquals(ports.length, esperados.length);
+  });
+});
+
+/**
+ * Con la calidad en el catálogo, filtrar deja de costar 153 peticiones: se pide **una** y se filtra
+ * en memoria. Este test es esa promesa escrita — y de paso fija que la mayoría del catálogo es
+ * estimada, que es el hecho por el que existe la trayectoria.
+ */
+Deno.test("el catálogo se puede filtrar por calidad con una sola petición", async () => {
+  await withApi(async (baseUrl) => {
+    const { body } = await get(baseUrl, "/v1/ports");
+    const ports = body["ports"] as readonly { quality: CatalogQuality }[];
+
+    const estimados = ports.filter((port) => port.quality.estimated);
+    const medidos = ports.filter((port) => !port.quality.estimated);
+    assertEquals(estimados.length + medidos.length, ports.length);
+    assert(estimados.length > medidos.length, "la mayoría del catálogo es estimada desde T-13");
+    assert(
+      medidos.every((port) => port.quality.rmse_m !== null),
+      "un puerto medido sin RMSE no está medido: publicaría una precisión que no tiene",
+    );
   });
 });
 

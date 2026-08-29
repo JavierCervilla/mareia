@@ -33,8 +33,45 @@ test("el catálogo publica la ficha del puerto y NO por dónde se guarda su esta
     lat: VIGO.lat,
     lon: VIGO.lon,
     timezone: "Europe/Madrid",
+    quality: {
+      grade: "C",
+      estimated: false,
+      rmse_m: 0.0429,
+      hw_time_err_p95_min: null,
+    },
   });
   assert.equal("stationFile" in (vigo ?? {}), false);
+});
+
+/**
+ * El catálogo es el sitio donde se **elige** puerto, así que la calidad tiene que estar en él: sin
+ * esto, saber cuáles de los 153 publican una marea medida cuesta 153 peticiones a `/v1/ports/:slug`.
+ *
+ * Se comprueba puerto a puerto y no «alguno la trae»: la forma de romperse esto no es que
+ * desaparezca el campo, es que lo traigan 148 de 153.
+ */
+test("todas las entradas del catálogo traen su calidad, y el null viaja como null", async () => {
+  const { ports } = await listPorts(fakeDeps());
+
+  const sinCalidad = ports.filter((port) => port.quality === undefined).map((port) => port.slug);
+  assert.deepEqual(sinCalidad, [], "hay puertos del catálogo sin calidad publicada");
+
+  for (const port of ports) {
+    assert.equal(typeof port.quality.grade, "string", `${port.slug} sin grade`);
+    assert.equal(typeof port.quality.estimated, "boolean", `${port.slug} sin estimated`);
+    // `in` y no `!== undefined`: un campo ausente y un campo a `null` se serializan distinto, y lo
+    // que el cliente tiene que recibir es el `null` —«no se pudo medir»—, no un hueco.
+    assert.ok("rmse_m" in port.quality, `${port.slug} no publica rmse_m`);
+    assert.ok(
+      "hw_time_err_p95_min" in port.quality,
+      `${port.slug} no publica hw_time_err_p95_min`,
+    );
+  }
+  assert.equal(
+    ports.find((port) => port.slug === "vigo")?.quality.hw_time_err_p95_min,
+    null,
+    "el p95 no medible del fixture se maquilló al pasar por el catálogo",
+  );
 });
 
 test("el catálogo sale ordenado por región, provincia y puerto, en español", async () => {
