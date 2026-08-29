@@ -252,6 +252,14 @@ test("cada página de puerto trae la sección meteo anclada a su puerto y a su z
  * Así que se invierte: el `#meteo` del HTML construido tiene que decir EXACTAMENTE estas frases y
  * ninguna más. Es deliberadamente frágil — tocar el texto de la sección obliga a actualizar esta
  * constante — y esa fragilidad es el precio de que un dato horneado no pueda colarse jamás.
+ *
+ * Pero una lista blanca acotada a la sección **es más estrecha** que la lista negra que sustituye,
+ * y eso sería cambiar de sitio el agujero en vez de taparlo: un resumen del mar junto al título, o
+ * una `<meta name="description">` con «hoy, mar rizada, 1,68 m», quedaría fuera del perímetro. Por
+ * eso el trinquete son **tres** afirmaciones y no una: la sección dice exactamente esto (texto),
+ * la sección no esconde datos en atributos (un `title=` es un tooltip que se lee, y el propio
+ * recorrido de esta trayectoria exige que el sello esté VISIBLE y no en un `title` ni en un
+ * `aria-label`), y **el resto del HTML** tampoco trae magnitudes.
  */
 const TEXTO_ESTATICO_DE_METEO = [
   "Estado del mar y del cielo en {PUERTO}",
@@ -276,6 +284,36 @@ function textoDe(html: string): string {
     .trim();
 }
 
+/**
+ * Magnitudes que solo puede escribir la sección meteo. Se mantiene la lista negra —heredada de la
+ * primera versión de este gate— para el HTML de FUERA de `#meteo`: ahí no cabe una lista blanca
+ * (el resto de la página cambia a diario), y renunciar a ella sería perder cobertura que ya
+ * teníamos.
+ */
+const MAGNITUDES_DE_METEO =
+  /\d[\d,]*\s*(km\/h|hPa|°C|kt|nudos)\b|\bfetchedAt\b|\bageSeconds\b|Índice UV|Mar de fondo|Mar de viento|Temperatura del agua|consultado hace|Dato de hace/u;
+
+/** Valores de atributo que la sección puede llevar. Cualquier otro es un dato escondido. */
+function atributosInesperados(seccion: string, slug: string, zona: string): readonly string[] {
+  const permitidos = new Set([
+    "meteo",
+    "bloque",
+    "titulo-meteo",
+    "false",
+    "module",
+    slug,
+    zona,
+    "https://open-meteo.com/",
+    "https://www.aemet.es/es/nota_legal",
+  ]);
+  return [...seccion.matchAll(/\s[a-zA-Z-]+="([^"]*)"/gu)]
+    .map((encontrado) => encontrado[1] ?? "")
+    .filter((valor) => !permitidos.has(valor))
+    // Las clases CSS y el `src` del bundle de la isla no son datos: llevan hash o prefijo conocido.
+    .filter((valor) => !/^[a-z]+(__[a-z-]+)?(--[a-z-]+)?( [a-z]+(__[a-z-]+)?(--[a-z-]+)?)*$/u.test(valor))
+    .filter((valor) => !/^\/_astro\/Meteo\.astro[\w.]*\.js$/u.test(valor));
+}
+
 test("el HTML construido no lleva NI UNA magnitud meteorológica dentro (ADR-01)", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
@@ -283,13 +321,34 @@ test("el HTML construido no lleva NI UNA magnitud meteorológica dentro (ADR-01)
   }
   for (const puerto of await cargarPuertos()) {
     const html = paginaDe(rutaPuerto(puerto));
-    const seccion = /<section id="meteo"[\s\S]*?<\/section>/u.exec(html)?.[0];
-    assert.ok(seccion !== undefined, `${puerto.slug}: no hay sección meteo que comprobar`);
+    const secciones = [...html.matchAll(/<section id="meteo"[\s\S]*?<\/section>/gu)].map(
+      (encontrado) => encontrado[0],
+    );
+    // Una y solo una: con dos, la primera podría estar limpia y la segunda traer el dato horneado.
+    assert.equal(secciones.length, 1, `${puerto.slug}: se esperaba una sección meteo, no ${secciones.length}`);
+    const seccion = secciones[0] ?? "";
+
     assert.equal(
       textoDe(seccion),
       TEXTO_ESTATICO_DE_METEO.replace("{PUERTO}", puerto.name),
       `${puerto.slug}: la sección meteo del HTML dice algo que no es su texto estático — si es un
        dato, se horneó en build y va a envejecer sin poder decir cuánto`,
+    );
+
+    // Un `title=` es un tooltip que se lee y un `aria-label` lo lee un lector de pantalla: mirar
+    // solo el texto dejaría esa superficie sin vigilar, justo la que el recorrido e2e exige.
+    assert.deepEqual(
+      atributosInesperados(seccion, puerto.slug, puerto.timezone),
+      [],
+      `${puerto.slug}: la sección meteo esconde algo en un atributo`,
+    );
+
+    // Y el perímetro: fuera de la sección tampoco puede haber magnitudes. Sin esto, la lista
+    // blanca sería MENOS cobertura que la lista negra a la que sustituye.
+    assert.doesNotMatch(
+      html.replace(seccion, ""),
+      MAGNITUDES_DE_METEO,
+      `${puerto.slug}: hay meteo horneada FUERA de la sección`,
     );
   }
 });
