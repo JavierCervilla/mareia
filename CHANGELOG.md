@@ -14,7 +14,7 @@ configuración y las pruebas locales que demuestran que funciona; el despliegue 
   la aplicación añade **14,2 MiB** (12 MiB de dependencias resueltas contra `deno.lock` y 2,3 MiB de
   árbol). Dentro no hay `node`, `npm`, `pnpm`, `corepack` ni un solo `node_modules`; tampoco la web,
   ni el pipeline de datos, ni los `__tests__` (552 KB de 940 KB de `packages/`, casi todo fixtures
-  dorados de la USNO: material de CI, en la imagen solo serían superficie). Son **230 ficheros**, y
+  dorados de la USNO: material de CI, en la imagen solo serían superficie). Son **225 ficheros**, y
   la lista de lo que entra está **escrita en el Dockerfile**, que es lo que hace comprobable la
   frase «la imagen lleva esto». Se descartó `deno compile`, que habría dado una imagen más pequeña,
   porque `core-deps.ts` resuelve el dataset desde `import.meta.url` y en un binario compilado eso
@@ -76,8 +76,11 @@ configuración y las pruebas locales que demuestran que funciona; el despliegue 
 - **`actionlint` en CI, y lo primero que encontró.** Cierra el peldaño que faltaba desde T-17: los
   workflows son código de CI y hasta ahora no los miraba nadie. Y el primer hallazgo fue **en el
   propio paso de `shellcheck` de T-17**: `SC2046`, `$(git ls-files '*.sh')` sin comillas. Era real —
-  un `.sh` con un espacio en la ruta se partiría en dos argumentos, shellcheck miraría dos ficheros
-  que no existen y **saldría en verde**. Arreglado con `git ls-files -z | xargs -0`. `hadolint` pasa
+  un `.sh` con un espacio en la ruta se parte en dos argumentos y shellcheck acaba mirando ficheros
+  que no existen. Medido antes de escribirlo: sale con **exit 2** y «openBinaryFile: does not
+  exist», **no en verde** — el gate no se callaba, fallaba diciendo otra cosa mientras el fichero
+  que dice lintar no se lintaba nunca. Un rojo por el motivo equivocado tampoco es un gate: manda a
+  arreglar lo que no está roto. Arreglado con `git ls-files -z | xargs -0`. `hadolint` pasa
   ahora por **los dos** Dockerfiles; sobre el del API sacó `DL3003` (un `cd` dentro de un `RUN`),
   arreglado con rutas absolutas. Los dos linters se probaron **en rojo** además de en verde.
 - **El build es hermético.** El `packageManager` de la raíz lleva su hash de integridad

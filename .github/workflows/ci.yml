@@ -45,8 +45,10 @@ jobs:
       # comprobado que saben fallar (un `[ "$1" = ]` y un `FROM alpine:latest` los ponen en rojo).
       # `-z` + `xargs -0` y no `$(git ls-files …)` sin comillas: eso último lo cazó actionlint
       # (SC2046) al instalarlo en T-15, y tenía razón — un `.sh` con un espacio en la ruta se
-      # partiría en dos argumentos y shellcheck miraría dos ficheros que no existen, **saliendo en
-      # verde**. Un gate que se calla ante una entrada rara no es un gate.
+      # parte en dos argumentos y shellcheck acaba mirando ficheros que no existen. Medido: sale
+      # con **exit 2** y «openBinaryFile: does not exist», no en verde. O sea que el gate no se
+      # callaba: **fallaba diciendo otra cosa**, y el fichero que dice lintar no lo lintaba nunca.
+      # Un rojo por el motivo equivocado tampoco es un gate: manda a arreglar lo que no está roto.
       - name: Shell · shellcheck -S error
         run: |
           git ls-files -z '*.sh' | xargs -0 --no-run-if-empty \

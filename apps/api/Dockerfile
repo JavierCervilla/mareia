@@ -50,6 +50,7 @@ RUN set -eu; \
     mkdir -p /salida/apps/api /salida/packages /salida/data; \
     cp /repo/apps/api/deno.json /repo/apps/api/deno.lock /salida/apps/api/; \
     cp -R /repo/apps/api/src /salida/apps/api/src; \
+    find /salida -name '*_test.ts' -delete; \
     for p in adapters domain-core module-contract usecases modules/weather; do \
       mkdir -p "/salida/packages/$p"; \
       cp -R "/repo/packages/$p/src" "/salida/packages/$p/src"; \
@@ -97,6 +98,13 @@ USER deno
 # `0.0.0.0` explícito: la avería silenciosa de este despliegue es un proceso que bindea a la
 # interfaz equivocada, arranca sin quejarse, deja el contenedor `running` y hace que Traefik
 # conteste 502. Lo dice `main.ts`, y el banner de arranque lo LEE del socket en vez de repetirlo.
+# Sin esto el runtime abre una conexión TLS a Cloudflare **en cada arranque**, antes de la primera
+# petición y sin que ninguna línea de nuestro código lo pida: es su comprobación de versión. No es
+# un fallo de seguridad, pero un servicio que sale a internet para algo que no le hemos pedido es
+# ruido en el perímetro y una dependencia que no controlamos en el arranque. Lo midió el
+# verificador de T-15 sobre el contenedor recién levantado.
+ENV DENO_NO_UPDATE_CHECK=1
+
 ENV HOST=0.0.0.0
 ENV PORT=8787
 ENV HEALTH_PORT=8788

@@ -79,12 +79,17 @@ jobs:
           nuevos="$(printf '%s\nBUILD_DATE=%s\n' "$nuevos" "$HOY" | sed '/^$/d')"
           jq -n --arg id "$DOKPLOY_WEB_APP_ID" --arg args "$nuevos" \
             '{applicationId: $id, buildArgs: $args}' > /tmp/patch.json
-          curl -sSf -X PATCH -H "x-api-key: $DOKPLOY_API_KEY" -H 'Content-Type: application/json' \
+          # POST, no PATCH. La tabla de la skill de dokploy decía `PATCH` y se contradecía con su
+          # propio ejemplo; el heartbeat del 2026-08-21 ya lo tenía medido en campo: con PATCH la
+          # llamada devuelve otra cosa y **no aplica**. Es decir, este rebuild no habría corrido
+          # nunca, y la normativa fechada que depende de él se habría quedado sin su pieza.
+          curl -sSf -X POST -H "x-api-key: $DOKPLOY_API_KEY" -H 'Content-Type: application/json' \
             --data @/tmp/patch.json "$DOKPLOY_API_URL/api/application.update" > /dev/null
 
-          # Y se vuelve a leer para comprobar que el PATCH **surtió efecto**. Es el paso que
+          # Y se vuelve a leer para comprobar que **surtió efecto**. Es el paso que
           # convierte «creo que Dokploy acepta este campo» en un hecho comprobado en cada corrida:
-          # si un día la API cambia de forma, esto se pone rojo en vez de desplegar la fecha de ayer
+          # si un día la API cambia de forma —o si el método vuelve a estar mal—, esto se pone rojo
+          # en vez de desplegar la fecha de ayer
           # con toda la pinta de haber funcionado.
           confirmado="$(curl -sSf -H "x-api-key: $DOKPLOY_API_KEY" \
             "$DOKPLOY_API_URL/api/application.byId?applicationId=$DOKPLOY_WEB_APP_ID" \

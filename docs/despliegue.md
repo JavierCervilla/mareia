@@ -279,13 +279,14 @@ imagen construida:
   yarn       -> AUSENTE
   node_modules: 0 directorios
   __tests__:    0 directorios
-  ficheros bajo /repo: 230
+  *_test.ts:    0 ficheros
+  ficheros bajo /repo: 225
   /repo pesa: 2.2M · /deno-dir pesa: 11.5M
   /repo/apps: api  /repo/data: geo stations  /repo/packages: adapters domain-core module-contract modules usecases
 ```
 
 El árbol se **arma a mano** en la etapa 1 en vez de heredarse: solo los cinco paquetes que resuelve
-el import map de `deno.json`, `data/geo` y `data/stations`, y **sin `__tests__/`** (552 KB de 940 KB
+el import map de `deno.json`, `data/geo` y `data/stations`, y **sin `__tests__/` ni `*_test.ts`** (552 KB de 940 KB
 de `packages/`, casi todo fixtures dorados de la USNO y capturas de Open-Meteo: material de CI, en
 la imagen solo serían superficie). Que la lista esté escrita en el Dockerfile es lo que hace
 comprobable la frase «la imagen lleva esto».
