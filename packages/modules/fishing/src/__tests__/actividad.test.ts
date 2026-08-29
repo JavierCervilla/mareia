@@ -20,7 +20,7 @@ import {
   ventanasDeActividad,
 } from "../actividad.ts";
 import { ATRIBUCIONES_FISHING, fishingModule, SECCION_ACTIVIDAD_SOLUNAR } from "../module.ts";
-import * as textos from "../textos.ts";
+import * as modulo from "../index.ts";
 import {
   AVISO_SIN_RESPALDO,
   QUE_ES_ESTO,
@@ -177,10 +177,13 @@ const PROMESAS_PROHIBIDAS = /garantiz|infalible|pican|picar[áa]|asegura|seguro|
  * promete pesca. Aquí se vigila el **texto**; que llegue a las 12 páginas lo vigila el test del
  * `dist/`.
  *
- * La lista negra se aplica a **todas** las cadenas exportadas por `textos.ts`, no a tres elegidas a
- * mano: el hallazgo A-16 fue exactamente eso, un texto de la sección que no estaba en la lista
- * —porque ni siquiera estaba en el archivo— y al que la regla «aquí no se promete pesca» no
- * llegaba. Recorriendo el módulo entero, un texto nuevo nace vigilado y no hay que acordarse.
+ * La lista negra se aplica a **todas las cadenas de la superficie pública del package** —se recorre
+ * `index.ts`, no `textos.ts`—, y eso es exactamente el conjunto que el gate A-16 del `dist/` declara
+ * auditado (`Object.values(fishing)`). Que los dos conjuntos coincidan **no es cosmético**: mientras
+ * este guardián solo miraba `textos.ts`, quedaba una rendija por la que cabía el ataque original —
+ * exportar el rótulo desde `module.ts`, que A-16 acepta como «texto auditado» y esta lista no
+ * miraba— y las 12 páginas volvían a publicar «Hoy pican seguro» con los dos gates en verde.
+ * Recorriendo el índice, un texto nuevo nace vigilado viva donde viva y no hay que acordarse.
  */
 test("los textos declaran la convención y no prometen capturas", () => {
   assert.match(AVISO_SIN_RESPALDO, /no tiene respaldo experimental sólido/);
@@ -188,10 +191,10 @@ test("los textos declaran la convención y no prometen capturas", () => {
   assert.match(QUE_ES_ESTO, /Knight/);
   assert.match(ROTULO_DEL_RATING, /convención/);
 
-  const publicados = Object.entries(textos).filter(
+  const publicados = Object.entries(modulo).filter(
     (entrada): entrada is [string, string] => typeof entrada[1] === "string",
   );
-  assert.ok(publicados.length >= 9, `¿se han perdido textos? solo ${publicados.length}`);
+  assert.ok(publicados.length >= 12, `¿se han perdido textos? solo ${publicados.length}`);
   for (const [nombre, texto] of publicados) {
     assert.doesNotMatch(texto, PROMESAS_PROHIBIDAS, `${nombre} promete: ${texto}`);
   }
