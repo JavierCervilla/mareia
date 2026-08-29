@@ -293,25 +293,39 @@ function textoDe(html: string): string {
 const MAGNITUDES_DE_METEO =
   /\d[\d,]*\s*(km\/h|hPa|°C|kt|nudos)\b|\bfetchedAt\b|\bageSeconds\b|Índice UV|Mar de fondo|Mar de viento|Temperatura del agua|consultado hace|Dato de hace/u;
 
-/** Valores de atributo que la sección puede llevar. Cualquier otro es un dato escondido. */
+/**
+ * Atributos de la sección que no son los esperados — cada uno es un sitio donde esconder un dato.
+ *
+ * La clave está en **no tirar el nombre del atributo**. Una primera versión se quedaba solo con el
+ * valor y tenía que adivinar «esto parece una clase CSS» por su forma; con eso, cualquier prosa en
+ * minúsculas pasaba —y el boletín de AEMET es exactamente eso: prosa en minúsculas—, así que un
+ * `title="mar rizada o marejada viento del noroeste"` se colaba entero. Aquí se permite **por
+ * nombre**: `class` solo admite tokens del vocabulario de esta sección, `src` solo el bundle de la
+ * isla, y cualquier atributo que no esté en la tabla es un hallazgo, se llame como se llame.
+ */
 function atributosInesperados(seccion: string, slug: string, zona: string): readonly string[] {
-  const permitidos = new Set([
-    "meteo",
-    "bloque",
-    "titulo-meteo",
-    "false",
-    "module",
-    slug,
-    zona,
-    "https://open-meteo.com/",
-    "https://www.aemet.es/es/nota_legal",
-  ]);
-  return [...seccion.matchAll(/\s[a-zA-Z-]+="([^"]*)"/gu)]
-    .map((encontrado) => encontrado[1] ?? "")
-    .filter((valor) => !permitidos.has(valor))
-    // Las clases CSS y el `src` del bundle de la isla no son datos: llevan hash o prefijo conocido.
-    .filter((valor) => !/^[a-z]+(__[a-z-]+)?(--[a-z-]+)?( [a-z]+(__[a-z-]+)?(--[a-z-]+)?)*$/u.test(valor))
-    .filter((valor) => !/^\/_astro\/Meteo\.astro[\w.]*\.js$/u.test(valor));
+  const claseValida = (valor: string): boolean =>
+    valor
+      .split(/\s+/u)
+      .every((token) => /^(meteo|bloque|etiqueta)(__[a-z-]+)?(--[a-z-]+)?$/u.test(token));
+
+  const esperado: Record<string, (valor: string) => boolean> = {
+    class: claseValida,
+    id: (valor) => valor === "meteo" || valor === "titulo-meteo",
+    "aria-busy": (valor) => valor === "false",
+    type: (valor) => valor === "module",
+    "data-meteo-puerto": (valor) => valor === slug,
+    "data-meteo-zona": (valor) => valor === zona,
+    href: (valor) => valor === "https://open-meteo.com/" || valor === "https://www.aemet.es/es/nota_legal",
+    src: (valor) => /^\/_astro\/Meteo\.astro[\w.]*\.js$/u.test(valor),
+  };
+
+  // Nombres con dígitos (`data-ola1`) y valores entre comillas simples entran en el barrido: si no,
+  // bastaba renombrar el atributo para saltarse el gate.
+  return [...seccion.matchAll(/\s([a-zA-Z0-9-]+)=("([^"]*)"|'([^']*)')/gu)]
+    .map((encontrado) => [encontrado[1] ?? "", encontrado[3] ?? encontrado[4] ?? ""] as const)
+    .filter(([nombre, valor]) => !(esperado[nombre]?.(valor) ?? false))
+    .map(([nombre, valor]) => `${nombre}="${valor}"`);
 }
 
 test("el HTML construido no lleva NI UNA magnitud meteorológica dentro (ADR-01)", async (t) => {
