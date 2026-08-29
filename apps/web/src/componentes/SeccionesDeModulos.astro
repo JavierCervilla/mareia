@@ -2,24 +2,40 @@
 /**
  * Los trozos de página que aportan los **módulos** (contrato `AppModule`, T-06).
  *
- * Hoy no renderiza nada: `activeModules` está vacío y ningún módulo declara `pageSections` con UI
- * (pesca llega en T-10 y meteo en T-11). Lo que sí existe ya es el **hueco** —este componente y su
- * llamada en la página de puerto—, para que dar de alta un módulo con interfaz siga siendo editar
- * el registry y añadir su renderizador, sin cirugía en la plantilla.
+ * Desde T-10 renderiza la sección de actividad solunar del módulo `fishing`; meteo llega en T-11.
+ * Dar de alta un módulo con interfaz sigue siendo editar el registry y añadir su renderizador, sin
+ * cirugía en esta plantilla.
+ *
+ * A cada sección se le pasa el **contexto** de la página (qué puerto, qué día, qué zona horaria) y
+ * nada más: cada una le pide sus datos a los casos de uso. Pasarles el dato ya resuelto ataría esta
+ * plantilla a lo que necesite el módulo de turno.
  *
  * Y falla ruidoso: si un módulo declara una sección cuyo `component` nadie sabe renderizar, el
  * build se rompe nombrándola. La alternativa —ignorarla— publicaría 12 páginas a las que les falta
  * un trozo sin que nadie se entere hasta que un usuario lo eche de menos.
+ *
+ * **Nombre accesible: la sección se llama como su título, `titulo-<id de la sección>`.** Es la
+ * convención de las otras siete secciones de la página (`aria-labelledby` al `id` del `<h2>`) y sin
+ * ella la sección del módulo no se expone como región: el pase adversario de T-10 (hallazgo A-13)
+ * midió 7 regiones para 8 secciones, con el `<h2 id="titulo-actividad-solunar">` ya emitido y sin
+ * que nadie lo referenciase. Se compone aquí —y no lo pone cada módulo— porque el `<section>` lo
+ * escribe esta plantilla: un módulo que quisiera nombrarla no tendría dónde. **Contrapartida, para
+ * quien traiga el siguiente módulo con UI (meteo, T-11): su componente debe emitir su título con
+ * `id="titulo-<id de su sección>"`.** Si se olvida, el `aria-labelledby` apunta a nada; lo caza el
+ * gate `todaSeccionDeBloqueTieneNombreAccesible` de `adversario-t10.test.ts`, que exige que ningún
+ * `id` de título quede sin referenciar.
  */
 import type { PageSection } from "@mareia/module-contract";
 
+import type { ContextoDeSeccion } from "../modulos/contexto.ts";
 import { RENDERIZADORES_DE_SECCION } from "../secciones.ts";
 
 interface Props {
   secciones: readonly PageSection[];
+  contexto: ContextoDeSeccion;
 }
 
-const { secciones } = Astro.props;
+const { secciones, contexto } = Astro.props;
 
 const sinRenderizador = secciones.filter(
   (seccion) => RENDERIZADORES_DE_SECCION[seccion.component] === undefined,
@@ -37,8 +53,8 @@ if (sinRenderizador.length > 0) {
   secciones.map((seccion) => {
     const Seccion = RENDERIZADORES_DE_SECCION[seccion.component];
     return (
-      <section id={seccion.id} class="bloque">
-        <Seccion />
+      <section id={seccion.id} class="bloque" aria-labelledby={`titulo-${seccion.id}`}>
+        <Seccion contexto={contexto} />
       </section>
     );
   })

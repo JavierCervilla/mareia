@@ -2,6 +2,97 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-28 — T-10 · el módulo pesca, el primero con interfaz
+
+- **Los periodos solunares se leen encima de la marea**. La página de puerto sombrea bajo la curva
+  de 24 h las ventanas que la teoría solunar asocia a la Luna: 2 h en cada tránsito (mayores) y
+  1 h 30 min en su salida y su puesta (menores). En el build de hoy son **4 bandas** en Vigo. Van
+  emitidas **antes** del trazo —en SVG no hay `z-index`: pinta después quien viene después—, en el
+  acento cálido que ya existía y sin texto dentro del lienzo, para que lo legible del gráfico siga
+  siendo la marea. **Cero JavaScript de cliente**: SVG estático, como el resto del core.
+- **Las bandas se recortan al día civil.** Un periodo pertenece al día en el que cae su fenómeno,
+  así que su ventana puede empezar antes de medianoche o acabar después: la parte que se sale se
+  corta en el borde del lienzo y la que no toca el día no se dibuja. La franja completa sí se
+  escribe entera en la tabla, con la coletilla («de 23:30 del día anterior a 01:00»): recortar el
+  dibujo es geometría, recortar el texto sería mentir.
+- **Sección «Actividad solunar» con el rating 0-100, su etiqueta y el desglose de por qué.** Qué
+  suma la fase lunar, qué suman las coincidencias con el orto y el ocaso del Sol, cuánto da la suma
+  **sin redondear** y qué número se publica («100,0 → 100 · Muy alta»). Enseñar solo el entero
+  obligaría a creerse la suma.
+- **El rating se publica como lo que es: una convención, no una medida**, con esas palabras, y la
+  sección declara que **la teoría solunar no tiene respaldo experimental sólido** con enlace a la
+  metodología (el README del módulo `solunar/`, que es código público: el portal no tiene página de
+  metodología y prometer una que no existe fue el hallazgo A-3 del pase adversario de T-09). No se
+  promete pesca en ningún texto: se publica un cálculo reproducible. **Un test comprueba que el
+  aviso está en las 12 páginas**, así que borrarlo pone el CI en rojo.
+- **La cifra del rating es un peldaño más pequeña que la del coeficiente de marea y no lleva la
+  mancha de terracota.** El coeficiente se calcula sobre la marea real y esto es una convención: la
+  jerarquía tipográfica dice cuál manda sin tener que escribirlo.
+- **Golden contra el dominio, no contra el HTML**: las horas de las bandas y de la tabla se comparan
+  con las que publica el caso de uso `getSolunar` para ese puerto y ese día, y el rating de las 12
+  páginas con el que calcula el dominio. Con dos propiedades que el pase adversario buscaría:
+  ninguna banda se sale del lienzo en ninguna página, y los estados terminales (100 y 0) solo salen
+  si la fórmula llega exactamente ahí, nunca redondeando.
+- **Dar de baja el módulo es borrar una línea** de `apps/web/src/modules.config.ts`. Verificado
+  construyendo sin él: **33 páginas**, sin sección y sin bandas. El core no nombra a `fishing` en
+  ninguna línea — el gráfico solo sabe de «ventanas destacadas» con un peso y una etiqueta, y quién
+  las llena es el registro de secciones de la superficie.
+- **Una avería silenciosa cazada por el camino**: importando la hoja de estilos desde el propio
+  componente, Astro **no la mete en el bundle** cuando el componente llega por el mapa de
+  renderizadores, y la sección se publicaba **sin estilos con todo el CI en verde**. La hoja pasa a
+  importarse desde el layout (que es la regla del brief) y **un test comprueba que las reglas
+  siguen en la hoja publicada**.
+- **Coste medido**: la hoja compartida pasa de **9.988 a 11.759 bytes** (+1.771, y esa cifra no
+  depende de la fecha del build: sale idéntica el 28-08, el 29-08 y el 01-12). La página de puerto
+  crece entre **+4.786 y +4.929 bytes** —de media +4.861, un 24 %—, medido sobre los 12 puertos en
+  esas tres fechas contra el mismo `main` construido a la par. Se publica el incremento y no un
+  tamaño absoluto porque el absoluto se mueve con el día que se construye: la página de Vigo del
+  28-08 son 24.572 bytes y la del 01-12, 24.485. **25 tests nuevos** (9 del módulo, 5 del recorte de
+  bandas, 3 del registro de ventanas, 7 sobre el `dist/` construido y 1 del registry): la suite de
+  la web pasa de 41 a 57 y el repositorio queda en 344 en verde.
+
+### El pase adversario, y sus cuatro arreglos
+
+El rol `qa-adversario` atacó lo que los otros tres ya habían dado por bueno y sacó **cuatro
+hallazgos reproducidos** (más 12 sospechas que no se materializaron y cuatro juicios de producto:
+informe en `docs/qa/informe-adversario-t10.md`). Ninguno cambia un número —los números salen bien en
+los 12 puertos y en los dos días de cambio de hora—: los cuatro son **la sección publicándose peor
+de lo que se calcula**. Los cuatro van corregidos en este mismo PR y sus ataques se quedan de gate
+permanente, así que deshacer un arreglo pone el CI en rojo.
+
+- **El rótulo que califica la cifra ya no puede prometer pesca a espaldas de nadie.** «Actividad
+  prevista por la convención» estaba escrito a mano en la plantilla, fuera de los textos auditados:
+  el adversario lo sustituyó por **«Hoy pican seguro»**, las 12 páginas lo publicaron y la suite
+  entera quedó en verde. Ahora vive en `textos.ts` y la regla «aquí no se promete pesca» se aplica a
+  **todas las cadenas de la superficie pública del package** —se recorre `index.ts`, que es
+  exactamente el conjunto que el gate del `dist/` declara auditado— en vez de a tres elegidas a
+  mano; y la lista negra caza el ataque exacto, que con las palabras de antes no casaba. Y el rótulo
+  se reescribe a **«Índice de la convención solunar»**: «prever» era justo lo que el aviso niega doce
+  párrafos más abajo.
+- **Las bandas se ven al sol y se distinguen sin depender del color.** Medían **1,30:1** y
+  **1,14:1** sobre el fondo, y mayor contra menor **1,14:1**, frente al 3:1 de WCAG 1.4.11. Ahora la
+  banda lleva **filete** en terracota a opacidad plena, **continuo de 2 px** el mayor y
+  **discontinuo de 1,6 px** el menor: una diferencia que se ve en escala de grises y que no depende
+  de distinguir dos tonos del mismo naranja. Medido **sobre el SVG servido** —14 anchos de
+  presentación de 300 a 1440 px × 2 temas × los 4 bordes, 56 muestras por caso—: mayor
+  **5,42–5,81:1** en claro y **5,68–5,99:1** en noche, menor **3,95–5,78:1** y **4,13–5,94:1**,
+  **cero muestras por debajo de 3:1**. Los grosores no son de gusto: un filete de w px centrado en el
+  borde reparte su cobertura entre dos columnas de píxel y en la peor alineación se queda en w/2, así
+  que por debajo de 1,36 px no hay 3:1 que valga — con 1 px el menor caía a **2,31:1** en 9 de esos
+  14 anchos. La mancha se queda tenue a propósito: subirla al 3:1 exigiría 0,70 de opacidad y
+  taparía la curva.
+- **La sección del módulo se expone como región.** La página tenía ocho secciones y Chromium
+  anunciaba **siete**: la del módulo salía sin nombre accesible, con su `<h2>` ya emitido y sin que
+  nadie lo referenciase. Ahora son **8 de 8**, y el arreglo está en el envoltorio genérico, así que
+  el módulo de meteo (T-11) lo hereda.
+- **El pie del gráfico dice qué son esas manchas.** El `aria-label` enumeraba las cuatro franjas con
+  sus horas y el `<figcaption>` seguía hablando solo de metros: quien no veía el gráfico recibía la
+  explicación entera y quien lo veía, cuatro manchas sin leyenda. El pie da ahora la clave de las dos
+  tramas, sin repetir las horas (que ya están en la tabla y en el nombre accesible).
+
+**Suite en 348 en verde** (61 de la web, con los cuatro ataques ya como gate duro), `astro check` sin
+diagnósticos, el gate anti-slop de UI **limpio** en `apps/web/src` y en `packages/ui/src`, y los 20
+tests del API en Deno pasando.
 ## 2026-08-29 — T-17 · la web, en pie (adelanto de T-15)
 
 - **`apps/web/Dockerfile`**: imagen de la web en dos etapas. Se construye desde la **raíz** del repo

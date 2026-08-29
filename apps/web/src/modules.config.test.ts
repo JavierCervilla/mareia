@@ -21,9 +21,23 @@ const DUMMY: AppModule = {
   ],
 };
 
-test("el registry de producción arranca vacío y la página no pide ninguna sección", () => {
-  assert.deepEqual(activeModules, []);
-  assert.deepEqual(sectionsForPort(CORUNA), []);
+test("el registry de producción publica el módulo de pesca y su sección", () => {
+  assert.deepEqual(activeModules.map((modulo) => modulo.id), ["fishing"]);
+  assert.deepEqual(sectionsForPort(CORUNA).map((seccion) => seccion.id), ["actividad-solunar"]);
+});
+
+/**
+ * La propiedad que hace enchufable el contrato de T-06, y la que hay que poder demostrar antes de
+ * meter un módulo con UI: **dar de baja es borrar una línea**. Con el registry vacío la página no
+ * pide ninguna sección, no pide ninguna ventana para el gráfico (`modulos/ventanas.test.ts`) y
+ * vuelve a ser la de T-09.
+ *
+ * Que ninguna sección se quede sin renderizador no se comprueba aquí porque el mapa de
+ * renderizadores importa componentes `.astro` y esto corre en `node`: lo comprueba el propio build,
+ * que rompe nombrando la sección huérfana (`SeccionesDeModulos`), y CI construye antes de testear.
+ */
+test("dar de baja un módulo es borrar su línea del registry", () => {
+  assert.deepEqual(sectionsForPort(CORUNA, []), []);
 });
 
 test("dar de alta un módulo = añadirlo al registry: sus secciones salen ordenadas", () => {
