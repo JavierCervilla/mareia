@@ -27,7 +27,6 @@
 - [x] T-09 · Página de puerto SSG (tabla + gráfico + coeficiente + sol/luna) + índices geográficos,
       con canónicas, sitemap y JSON-LD (la medida Lighthouse SEO ≥ 95 queda pendiente de T-15: no
       hay navegador en CI; el comando está documentado en `apps/web/design-brief.md` §8)
-- [ ] T-10 · Módulo pesca UI (overlay solunar + rating)
 - [x] T-11 · Módulo weather UI (isla meteo con estados ok/stale/no disponible/carga sin datos)
       (el HTML construido no lleva ninguna magnitud meteo: entra por isla y con sello de antigüedad,
       ver `docs/adr/ADR-01`; el boletín de AEMET se cita con su esquema aún sin verificar)
