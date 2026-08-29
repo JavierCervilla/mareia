@@ -6,30 +6,24 @@
  * enchufarse a otra superficie. Alguien tiene que traducir esa cadena a un componente de verdad, y
  * ese alguien es la superficie: este mapa.
  *
- * La clave **no se escribe a mano**: se importa del propio módulo (`METEO_SECTION_COMPONENT`), que
- * es quien la declara en sus `pageSections`. Un literal repetido aquí sería una cadena que se puede
- * desincronizar en silencio, y desincronizarla rompe el build con «sección sin renderizador» (ver
- * `SeccionesDeModulos.astro`) en vez de publicar la página con un trozo de menos.
+ * Dar de alta una sección es añadir aquí una línea. Las claves **no se escriben a mano**: las
+ * exporta el propio módulo (`SECCION_ACTIVIDAD_SOLUNAR`, `METEO_SECTION_COMPONENT`), para que un
+ * renombrado no deje al registry apuntando a una cadena que ya no existe — el fallo saldría en
+ * build con «sección sin renderizador» (ver `SeccionesDeModulos.astro`), pero saldría tarde.
+ *
+ * El gemelo de este archivo es `src/modulos/ventanas.ts`, que traduce la misma clave a lo que la
+ * sección sombrea en el gráfico de marea. Están separados porque este importa componentes `.astro`
+ * y aquél tiene que poder correr en `node --test`.
  */
 
+import { SECCION_ACTIVIDAD_SOLUNAR } from "@mareia/module-fishing";
 import { METEO_SECTION_COMPONENT } from "@mareia/module-weather/ui";
 import type { AstroComponentFactory } from "astro/runtime/server/index.js";
 
 import Meteo from "./componentes/Meteo.astro";
-
-/**
- * Lo que una sección de módulo necesita saber del puerto en el que se pinta.
- *
- * Es a propósito **más estrecho que `PortDto`**: una sección de módulo no tiene por qué ver las
- * constantes armónicas ni el grade de la estación. Con el slug le pide su dato al API, con la zona
- * horaria escribe las horas donde se leen, y con el nombre habla del sitio.
- */
-export interface ContextoDeSeccion {
-  readonly slug: string;
-  readonly nombre: string;
-  readonly zonaHoraria: string;
-}
+import ActividadSolunar from "./componentes/modulos/ActividadSolunar.astro";
 
 export const RENDERIZADORES_DE_SECCION: Readonly<Record<string, AstroComponentFactory>> = {
+  [SECCION_ACTIVIDAD_SOLUNAR]: ActividadSolunar,
   [METEO_SECTION_COMPONENT]: Meteo,
 };

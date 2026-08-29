@@ -14,6 +14,7 @@
   "dependencies": {
     "@mareia/adapters": "workspace:*",
     "@mareia/domain-core": "workspace:*",
+    "@mareia/module-fishing": "workspace:*",
     "@mareia/module-contract": "workspace:*",
     "@mareia/module-weather": "workspace:*",
     "@mareia/ui": "workspace:*",

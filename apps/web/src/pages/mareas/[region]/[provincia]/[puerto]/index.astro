@@ -29,6 +29,7 @@ import { trazarCurvaMarea } from "../../../../../grafico-marea.ts";
 import AlmanaqueLayout from "../../../../../layouts/AlmanaqueLayout.astro";
 import { migasDePuerto } from "../../../../../migas.ts";
 import { sectionsForPort } from "../../../../../modules.config.ts";
+import { ventanasDeSecciones } from "../../../../../modulos/ventanas.ts";
 import { rutaPuerto, urlAbsoluta } from "../../../../../rutas.ts";
 import { grafo, lugarEstructurado, migasEstructuradas } from "../../../../../seo.ts";
 
@@ -52,6 +53,25 @@ const { slug } = Astro.props;
 const datos = await cargarDatosDePuerto(slug, FECHA_DE_BUILD);
 const { port, station, dia, mes, astro } = datos;
 
+/**
+ * Lo que la página le cuenta a las secciones de los módulos, y lo único: qué puerto, qué día y en
+ * qué zona se escriben las horas. Cada sección le pide sus datos a los casos de uso.
+ */
+const contextoDeModulos = {
+  slug: port.slug,
+  nombre: port.name,
+  fechaIso: datos.fechaIso,
+  timezone: port.timezone,
+};
+const seccionesDeModulos = sectionsForPort({ slug: port.slug });
+
+/**
+ * Las bandas del gráfico se piden ANTES de trazar la curva, porque son geometría del mismo lienzo.
+ * Salen de las secciones que la página va a renderizar: sin módulos activos la lista viene vacía y
+ * el gráfico es exactamente el de T-09.
+ */
+const ventanas = await ventanasDeSecciones(seccionesDeModulos, contextoDeModulos);
+
 const curva = trazarCurvaMarea({
   muestras: dia.muestras.map((muestra) => ({
     timeUtcMs: muestra.timeUtcMs,
@@ -64,6 +84,7 @@ const curva = trazarCurvaMarea({
   })),
   inicioUtcMs: dia.inicioUtcMs,
   finUtcMs: dia.finUtcMs,
+  ventanas,
 });
 
 const titulo = `Mareas en ${port.name} · ${fechaLarga(datos.fechaIso)} · Mareia`;
@@ -132,10 +153,7 @@ const jsonLd = grafo([
     </div>
   </div>
 
-  <SeccionesDeModulos
-    secciones={sectionsForPort({ slug: port.slug })}
-    contexto={{ slug: port.slug, nombre: port.name, zonaHoraria: port.timezone }}
-  />
+  <SeccionesDeModulos secciones={seccionesDeModulos} contexto={contextoDeModulos} />
 
   <section class="bloque" id="tabla-mensual" aria-labelledby="titulo-mes">
     <h2 class="bloque__titulo" id="titulo-mes">Mareas de {mesYAno(datos.fechaIso)}</h2>

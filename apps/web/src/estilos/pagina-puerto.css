@@ -403,3 +403,61 @@
     font-size: var(--m-text-small);
   }
 }
+
+/* --- Bandas de las ventanas destacadas (overlay de módulos, T-10) ---------- */
+/* Van BAJO la curva y eso es marcado, no CSS: en SVG no hay `z-index` y manda el
+   orden del documento, así que `GraficoMarea` las emite antes del trazo. El
+   énfasis llega como dato (`data-enfasis`) y no como dos clases: el gráfico del
+   core no sabe qué representa cada banda.
+
+   Dos partes con dos trabajos distintos, y esto lo reescribió el hallazgo A-14
+   del pase adversario:
+
+   1. **El filete** (`stroke`) es el objeto gráfico. Va en `--m-terra` a plena
+      opacidad, así que mide lo que mide el token: 5,40:1 en claro y 5,69:1 en
+      noche sobre el fondo, por encima del 3:1 que WCAG 2.2 · 1.4.11 pide a un
+      objeto gráfico que porta información. Antes no había filete y toda la
+      información viajaba en la mancha: 1,30:1 y 1,14:1, invisible al sol.
+   2. **La mancha** (`fill` con `fill-opacity`) sigue siendo contexto y sigue
+      siendo tenue, que es lo que deja legibles la curva y los extremos por
+      encima. No se sube su opacidad hasta el 3:1 —haría falta un 0,70, y una
+      cuarta parte del gráfico teñida de terracota rompería la regla del brief
+      de una sola mancha de color y taparía el dato—; el contraste lo pone el
+      filete, que es lo que WCAG mide de una región sombreada.
+
+   Y la diferencia entre una ventana de más peso y una de menos NO es cromática:
+   filete continuo y grueso contra filete discontinuo y fino. Antes eran dos
+   opacidades del mismo tono separadas por 1,14:1 —quien no distingue tonos no
+   distinguía nada, y a pleno sol nadie los distingue—. La leyenda del pie del
+   gráfico nombra las dos tramas (`GraficoMarea.astro`): una trama que no se
+   explica tampoco distingue.
+
+   Los grosores no son de gusto, son el suelo del contraste. Un filete de w px
+   centrado en el borde del `<rect>` cubre w px repartidos entre dos columnas de
+   píxel; en la peor alineación la mejor columna se queda en w/2 de cobertura, y
+   ahí es donde se mide de verdad el objeto gráfico. Para 3:1 hacen falta 0,679
+   de cobertura en claro (0,634 en noche), o sea **1,36 px de grosor**. De ahí
+   2 px para el mayor (cobertura plena en cualquier alineación: 5,40:1 / 5,69:1)
+   y 1,6 px para el menor (3,75:1 / 4,07:1 en el peor caso). El menor estuvo un
+   commit en 1 px, que da 2,18:1 en la peor alineación: el verificador lo midió
+   sobre el SVG servido y lo encontró por debajo de 3:1 en 8 de 10 anchos de
+   presentación. Por eso el gate mide ahora el grosor y no solo el color. */
+.grafico__banda {
+  fill: var(--m-terra);
+  stroke: var(--m-terra);
+  /* El filete no escala con el lienzo: el SVG se dibuja a 620 unidades de ancho
+     y se muestra a ~340 px en un móvil, donde un trazo de 1,2 unidades quedaría
+     en 0,65 px y volvería a desaparecer justo en la pantalla que importa. */
+  vector-effect: non-scaling-stroke;
+}
+
+.grafico__banda[data-enfasis="fuerte"] {
+  fill-opacity: 0.18;
+  stroke-width: 2px;
+}
+
+.grafico__banda[data-enfasis="suave"] {
+  fill-opacity: 0.09;
+  stroke-width: 1.6px;
+  stroke-dasharray: 5 4;
+}

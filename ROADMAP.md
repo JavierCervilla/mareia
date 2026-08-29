@@ -35,6 +35,10 @@
       el sello envejece con la pestaña abierta, un 200 hostil no deja la sección pidiendo para
       siempre y el trinquete de ADR-01 ya ve los atributos sin comillas y los comentarios;
       ver `docs/qa/informe-adversario-t11.md`)
+- [x] T-10 · Módulo pesca UI (overlay solunar + rating), primer módulo que aporta interfaz por el
+      contrato `AppModule` (el rating se publica como convención declarada, con su desglose y el
+      aviso de que la teoría solunar no tiene respaldo experimental sólido)
+- [ ] T-11 · Módulo weather UI (isla meteo con estados ok/error/stale)
 - [ ] T-12 · PWA offline (almanaque de favoritos sin red)
 
 ## Hito 4 — España completa y transparencia
@@ -42,10 +46,17 @@
 - [ ] T-13 · ~200–300 puertos con grade ≥ B o flag «estimado»
 - [ ] T-14 · Metodología pública + QC navegable + dataset CC-BY + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario
-      (incluye cerrar el peldaño 1 del gate de seguridad sobre lo que hoy no mira: `actionlint`
-      sobre `.github/workflows/` —es el único que lee los `run:` embebidos— y `shellcheck -S error`
-      sobre los 6 `.sh` del repo; y el healthcheck del API, que queda fuera del enrutado público
-      porque solo se publica `/v1/*`)
+      (queda del peldaño 1 del gate de seguridad `actionlint` sobre `.github/workflows/` —es el
+      único que lee los `run:` embebidos—; el `shellcheck -S error` sobre los `.sh` del repo **ya
+      corre desde T-17**, con `hadolint` al lado. Y el healthcheck del API, que queda fuera del
+      enrutado público porque solo se publica `/v1/*`)
+      · **La web ya está hecha, en T-17**: `apps/web/Dockerfile` construido y probado con `curl`
+      (rutas de directorio, 301 a la barra final, 404 con el cuerpo de `404.html`, y ninguna URL del
+      dominio contestando con una página ajena al portal), sirviendo en `0.0.0.0:3000` sin root, sin
+      toolchain en la imagen y con las bases fijadas por digest — ver `docs/despliegue.md`, que
+      incluye por qué **no** se escucha además en el 80. Aquí siguen el API con su volumen KV, el
+      rebuild diario que hornea el día, el healthcheck del contenedor, el e2e contra producción y el
+      pase adversario de despliegue.
 
 ## Fase 2 (rumbo, sin comprometer)
 

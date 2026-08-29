@@ -34,20 +34,39 @@ const DUMMY: AppModule = {
   ],
 };
 
-test("el registry de producción publica el módulo meteo y su sección", () => {
+test("el registry de producción publica los dos módulos y sus secciones, en orden", () => {
+  // Los dos, y en el orden que fija `order`: la unión es lo que rompía el merge de T-10 con T-11,
+  // así que se afirma aquí en vez de dejar que cada trayectoria compruebe solo la suya.
   assert.deepEqual(
     activeModules.map((modulo) => modulo.id),
-    ["weather"],
+    ["fishing", "weather"],
   );
   assert.deepEqual(
-    sectionsForPort(CORUNA).map((seccion) => [seccion.id, seccion.component, seccion.renderMode]),
-    [["meteo", METEO_SECTION_COMPONENT, "island"]],
+    sectionsForPort(CORUNA).map((seccion) => [seccion.id, seccion.renderMode]),
+    [
+      ["actividad-solunar", "static"],
+      ["meteo", "island"],
+    ],
+  );
+  assert.deepEqual(
+    sectionsForPort(CORUNA).filter((seccion) => seccion.id === "meteo"),
+    [...(WEATHER_UI_MODULE.pageSections ?? [])],
+  );
+  assert.equal(
+    sectionsForPort(CORUNA).find((seccion) => seccion.id === "meteo")?.component,
+    METEO_SECTION_COMPONENT,
   );
 });
 
 /**
- * El requisito que T-11 hereda de T-10: **dar de baja un módulo es borrar su línea del registry**,
- * no operar la plantilla. Se comprueba por los dos lados que pueden romperlo.
+ * La propiedad que hace enchufable el contrato de T-06, y la que hay que poder demostrar antes de
+ * meter un módulo con UI: **dar de baja es borrar una línea**. Con el registry vacío la página no
+ * pide ninguna sección, no pide ninguna ventana para el gráfico (`modulos/ventanas.test.ts`) y
+ * vuelve a ser la de T-09.
+ *
+ * Que ninguna sección se quede sin renderizador no se comprueba aquí porque el mapa de
+ * renderizadores importa componentes `.astro` y esto corre en `node`: lo comprueba el propio build,
+ * que rompe nombrando la sección huérfana (`SeccionesDeModulos`), y CI construye antes de testear.
  */
 test("con el registry vacío la página no pide ninguna sección: la baja es una línea", () => {
   assert.deepEqual(sectionsForPort(CORUNA, []), []);
@@ -71,10 +90,9 @@ test("nadie fuera del mapa de renderizadores conoce el componente de la sección
   );
 });
 
-test("el módulo declara la misma sección para la API y para la web", () => {
+test("el módulo meteo declara la misma sección para la API y para la web", () => {
   // `createWeatherModule` (la vista con servidor) y `WEATHER_UI_MODULE` (la vista sin él) comparten
   // `WEATHER_PAGE_SECTIONS`: la sección no puede contarse de dos maneras según quién pregunte.
-  assert.deepEqual(WEATHER_UI_MODULE.pageSections, sectionsForPort(CORUNA));
   assert.equal(WEATHER_UI_MODULE.api, undefined, "la web no monta la parte servidor del módulo");
   assert.ok(WEATHER_UI_MODULE.attributions.length >= 2, "sin atribuciones no se publica el módulo");
 });

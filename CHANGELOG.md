@@ -119,6 +119,182 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   hoja (`payload.ts`, `meta.ts`, `ui.ts`), para que la UI pueda tipar la respuesta **sin arrastrar
   Express** —el build de la web es Node con Astro y no lo tiene—. `apps/web` pasa de **41 a 71
   tests**; los 62 del módulo weather y los 20 de la API siguen en verde sin tocarlos.
+## 2026-08-28 — T-10 · el módulo pesca, el primero con interfaz
+
+- **Los periodos solunares se leen encima de la marea**. La página de puerto sombrea bajo la curva
+  de 24 h las ventanas que la teoría solunar asocia a la Luna: 2 h en cada tránsito (mayores) y
+  1 h 30 min en su salida y su puesta (menores). En el build de hoy son **4 bandas** en Vigo. Van
+  emitidas **antes** del trazo —en SVG no hay `z-index`: pinta después quien viene después—, en el
+  acento cálido que ya existía y sin texto dentro del lienzo, para que lo legible del gráfico siga
+  siendo la marea. **Cero JavaScript de cliente**: SVG estático, como el resto del core.
+- **Las bandas se recortan al día civil.** Un periodo pertenece al día en el que cae su fenómeno,
+  así que su ventana puede empezar antes de medianoche o acabar después: la parte que se sale se
+  corta en el borde del lienzo y la que no toca el día no se dibuja. La franja completa sí se
+  escribe entera en la tabla, con la coletilla («de 23:30 del día anterior a 01:00»): recortar el
+  dibujo es geometría, recortar el texto sería mentir.
+- **Sección «Actividad solunar» con el rating 0-100, su etiqueta y el desglose de por qué.** Qué
+  suma la fase lunar, qué suman las coincidencias con el orto y el ocaso del Sol, cuánto da la suma
+  **sin redondear** y qué número se publica («100,0 → 100 · Muy alta»). Enseñar solo el entero
+  obligaría a creerse la suma.
+- **El rating se publica como lo que es: una convención, no una medida**, con esas palabras, y la
+  sección declara que **la teoría solunar no tiene respaldo experimental sólido** con enlace a la
+  metodología (el README del módulo `solunar/`, que es código público: el portal no tiene página de
+  metodología y prometer una que no existe fue el hallazgo A-3 del pase adversario de T-09). No se
+  promete pesca en ningún texto: se publica un cálculo reproducible. **Un test comprueba que el
+  aviso está en las 12 páginas**, así que borrarlo pone el CI en rojo.
+- **La cifra del rating es un peldaño más pequeña que la del coeficiente de marea y no lleva la
+  mancha de terracota.** El coeficiente se calcula sobre la marea real y esto es una convención: la
+  jerarquía tipográfica dice cuál manda sin tener que escribirlo.
+- **Golden contra el dominio, no contra el HTML**: las horas de las bandas y de la tabla se comparan
+  con las que publica el caso de uso `getSolunar` para ese puerto y ese día, y el rating de las 12
+  páginas con el que calcula el dominio. Con dos propiedades que el pase adversario buscaría:
+  ninguna banda se sale del lienzo en ninguna página, y los estados terminales (100 y 0) solo salen
+  si la fórmula llega exactamente ahí, nunca redondeando.
+- **Dar de baja el módulo es borrar una línea** de `apps/web/src/modules.config.ts`. Verificado
+  construyendo sin él: **33 páginas**, sin sección y sin bandas. El core no nombra a `fishing` en
+  ninguna línea — el gráfico solo sabe de «ventanas destacadas» con un peso y una etiqueta, y quién
+  las llena es el registro de secciones de la superficie.
+- **Una avería silenciosa cazada por el camino**: importando la hoja de estilos desde el propio
+  componente, Astro **no la mete en el bundle** cuando el componente llega por el mapa de
+  renderizadores, y la sección se publicaba **sin estilos con todo el CI en verde**. La hoja pasa a
+  importarse desde el layout (que es la regla del brief) y **un test comprueba que las reglas
+  siguen en la hoja publicada**.
+- **Coste medido**: la hoja compartida pasa de **9.988 a 11.759 bytes** (+1.771, y esa cifra no
+  depende de la fecha del build: sale idéntica el 28-08, el 29-08 y el 01-12). La página de puerto
+  crece entre **+4.786 y +4.929 bytes** —de media +4.861, un 24 %—, medido sobre los 12 puertos en
+  esas tres fechas contra el mismo `main` construido a la par. Se publica el incremento y no un
+  tamaño absoluto porque el absoluto se mueve con el día que se construye: la página de Vigo del
+  28-08 son 24.572 bytes y la del 01-12, 24.485. **25 tests nuevos** (9 del módulo, 5 del recorte de
+  bandas, 3 del registro de ventanas, 7 sobre el `dist/` construido y 1 del registry): la suite de
+  la web pasa de 41 a 57 y el repositorio queda en 344 en verde.
+
+### El pase adversario, y sus cuatro arreglos
+
+El rol `qa-adversario` atacó lo que los otros tres ya habían dado por bueno y sacó **cuatro
+hallazgos reproducidos** (más 12 sospechas que no se materializaron y cuatro juicios de producto:
+informe en `docs/qa/informe-adversario-t10.md`). Ninguno cambia un número —los números salen bien en
+los 12 puertos y en los dos días de cambio de hora—: los cuatro son **la sección publicándose peor
+de lo que se calcula**. Los cuatro van corregidos en este mismo PR y sus ataques se quedan de gate
+permanente, así que deshacer un arreglo pone el CI en rojo.
+
+- **El rótulo que califica la cifra ya no puede prometer pesca a espaldas de nadie.** «Actividad
+  prevista por la convención» estaba escrito a mano en la plantilla, fuera de los textos auditados:
+  el adversario lo sustituyó por **«Hoy pican seguro»**, las 12 páginas lo publicaron y la suite
+  entera quedó en verde. Ahora vive en `textos.ts` y la regla «aquí no se promete pesca» se aplica a
+  **todas las cadenas de la superficie pública del package** —se recorre `index.ts`, que es
+  exactamente el conjunto que el gate del `dist/` declara auditado— en vez de a tres elegidas a
+  mano; y la lista negra caza el ataque exacto, que con las palabras de antes no casaba. Y el rótulo
+  se reescribe a **«Índice de la convención solunar»**: «prever» era justo lo que el aviso niega doce
+  párrafos más abajo.
+- **Las bandas se ven al sol y se distinguen sin depender del color.** Medían **1,30:1** y
+  **1,14:1** sobre el fondo, y mayor contra menor **1,14:1**, frente al 3:1 de WCAG 1.4.11. Ahora la
+  banda lleva **filete** en terracota a opacidad plena, **continuo de 2 px** el mayor y
+  **discontinuo de 1,6 px** el menor: una diferencia que se ve en escala de grises y que no depende
+  de distinguir dos tonos del mismo naranja. Medido **sobre el SVG servido** —14 anchos de
+  presentación de 300 a 1440 px × 2 temas × los 4 bordes, 56 muestras por caso—: mayor
+  **5,42–5,81:1** en claro y **5,68–5,99:1** en noche, menor **3,95–5,78:1** y **4,13–5,94:1**,
+  **cero muestras por debajo de 3:1**. Los grosores no son de gusto: un filete de w px centrado en el
+  borde reparte su cobertura entre dos columnas de píxel y en la peor alineación se queda en w/2, así
+  que por debajo de 1,36 px no hay 3:1 que valga — con 1 px el menor caía a **2,31:1** en 9 de esos
+  14 anchos. La mancha se queda tenue a propósito: subirla al 3:1 exigiría 0,70 de opacidad y
+  taparía la curva.
+- **La sección del módulo se expone como región.** La página tenía ocho secciones y Chromium
+  anunciaba **siete**: la del módulo salía sin nombre accesible, con su `<h2>` ya emitido y sin que
+  nadie lo referenciase. Ahora son **8 de 8**, y el arreglo está en el envoltorio genérico, así que
+  el módulo de meteo (T-11) lo hereda.
+- **El pie del gráfico dice qué son esas manchas.** El `aria-label` enumeraba las cuatro franjas con
+  sus horas y el `<figcaption>` seguía hablando solo de metros: quien no veía el gráfico recibía la
+  explicación entera y quien lo veía, cuatro manchas sin leyenda. El pie da ahora la clave de las dos
+  tramas, sin repetir las horas (que ya están en la tabla y en el nombre accesible).
+
+**Suite en 348 en verde** (61 de la web, con los cuatro ataques ya como gate duro), `astro check` sin
+diagnósticos, el gate anti-slop de UI **limpio** en `apps/web/src` y en `packages/ui/src`, y los 20
+tests del API en Deno pasando.
+## 2026-08-29 — T-17 · la web, en pie (adelanto de T-15)
+
+- **`apps/web/Dockerfile`**: imagen de la web en dos etapas. Se construye desde la **raíz** del repo
+  (`docker build -f apps/web/Dockerfile .`) y no desde `apps/web`, porque el sitio no se rellena en
+  el navegador: se **calcula en build** llamando a los casos de uso, y necesita `packages/` y el
+  dataset de `data/`. La imagen final son **94 MB**: la base `nginx:alpine` (94,2 MB) más **528 KB**
+  de HTML. El toolchain —232 MB de Node, pnpm, `node_modules` y el código fuente— se queda en la
+  primera etapa; comprobado sobre la imagen construida: `node`, `npm`, `pnpm` y `corepack` no
+  existen en ella. Lo que no está en la imagen no se puede explotar ni se paga al desplegar.
+- **Existe porque el dominio estaba roto, no porque tocara desplegar**: `mareia.cervilla.es` ya
+  estaba enganchado en Dokploy a dos apps que apuntaban a Dockerfiles inexistentes, así que Traefik
+  contestaba **502**. Un dominio enganchado a un servicio que no arranca no es una URL «que aún no
+  existe», es una URL rota. Esto pone en pie lo que ya estaba terminado, la web; el API, el volumen
+  KV y el rebuild diario siguen en T-15.
+- **Escucha en `0.0.0.0:3000` y lo dice en el log**, leyendo la dirección de su propia
+  configuración en vez de repetirla en el mensaje. Esta es la avería que el proyecto ya conoce: un
+  servidor que bindea al hostname del contenedor arranca sin quejarse, el contenedor queda
+  `running`, el log dice «listo» y Traefik devuelve 502 igualmente. Un mensaje escrito a mano podría
+  decir `0.0.0.0` mientras el servidor escucha en otro sitio; leído de la configuración, es una
+  prueba y no una opinión. La primera línea del arranque publica además **el día que hornea el
+  HTML**, que es como se ve desde fuera si el contenedor es el rebuild de hoy o el de la semana
+  pasada.
+- **Servidor: nginx, elegido midiendo**. `nginx:alpine` (94,2 MB) frente a `caddy:2-alpine`
+  (88,7 MB): el tamaño no decide. Decide la semántica de rutas, y en concreto **que no haya ningún
+  catch-all**. Un `try_files … /index.html` —el patrón de las SPA— devolvería la portada con un
+  **200** ante cualquier URL inventada y le diría a un buscador que todas son páginas reales; este
+  sitio es SSG y su motivo de existir es el SEO, así que el 404 tiene que ser un 404, con el cuerpo
+  de `404.html`. Las otras dos reglas: `index index.html` para los directorios y **301** de
+  `/mareas/…/vigo` a `/mareas/…/vigo/` con **`absolute_redirect off`**, porque un `Location`
+  absoluto se construiría con el **puerto interno** y detrás de Traefik mandaría al visitante a una
+  dirección que desde fuera no existe.
+- **Sin root**: el proceso corre como el usuario `nginx` (el 3000 no necesita privilegio) y el HTML
+  que sirve no le pertenece. Además `server_tokens off`, sin autoindex, fuera el `server` por
+  defecto del puerto 80 y los logs al stdout/stderr del contenedor, que es lo que lee Dokploy.
+- **`BUILD_DATE` es un `ARG` de build, y no puede ser otra cosa**: el día está horneado en el HTML
+  de las 33 páginas, así que una variable de runtime no movería ni una marea, solo mentiría. El
+  rebuild diario de T-15 tendrá que reconstruir la imagen; lo que se ha hecho es que sea barato.
+  Los `ARG` van declarados **después** del `pnpm install`, de modo que un día nuevo invalida la
+  caché solo a partir del `astro build`: **18,3 s** el build desde cero, **8,4 s** el del día
+  siguiente sobre el mismo commit. También hay `SITE_URL` (por defecto el dominio de producción):
+  sin él, el `sitemap.xml` y las canónicas se publicarían apuntando a `localhost`.
+- **La prueba, no el Dockerfile, es el entregable**: imagen construida y levantada de verdad, y las
+  seis preguntas hechas con `curl` — portada 200; `/mareas/galicia/pontevedra/vigo/` 200 con las
+  cuatro mareas del día en la tabla; la misma sin barra final **301** con `Location` relativo;
+  `sitemap.xml` 200 con 32 `<loc>` sobre el dominio de producción; una URL inventada **404** y su
+  cuerpo **byte a byte igual** al `404.html` del `dist/`; y la imagen sin rastro de toolchain. La
+  salida completa está en `docs/despliegue.md`, junto a cómo se configura en Dokploy —incluido el
+  aviso de que la imagen hereda un `EXPOSE 80` de la base que no se puede deshacer, y de que
+  autodetectar ese puerto sería otro 502— y qué queda pendiente de T-15.
+- **Ninguna URL del dominio contesta con una página que no sea del portal.** Dos fugas, la misma
+  familia: `COPY` **fusiona, no limpia**, así que el `50x.html` de la imagen base sobrevivía a la
+  copia del `dist/` y `/50x.html` respondía **200** con una página en inglés que además publicaba la
+  marca `nginx` pese al `server_tokens off`; y `/_astro/`, que es un directorio real sin
+  `index.html`, respondía **403** con la página de error compilada en nginx. Ahora la raíz web de la
+  base se **vacía** antes de copiar el sitio, y `error_page 403 =404 /404.html` devuelve el 404 del
+  portal — **404 y no 403** a propósito: un 403 confirma que ese directorio existe. Medido después:
+  cero apariciones de la marca `nginx` en esos cuerpos. Quedan tres respuestas que genera nginx y a
+  las que **no se llega navegando** (el cuerpo del 301, el 405 de un método no soportado y el 414 de
+  una URI desmedida); se dejan como están porque convertirlas en 404 sería mentir sobre lo que pasó.
+- **Las dos bases van fijadas por digest**, no por tag: `22-alpine` y `alpine` se mueven, y con el
+  rebuild diario de T-15 la base cambiaría bajo los pies **sin que ningún commit lo cuente** — una
+  avería que aparece un martes sin que nadie haya tocado nada. Subirla pasa a ser un cambio que se
+  revisa.
+- **El `.sh` que corre como PID 1 y el Dockerfile ya tienen quien los vigile**: `shellcheck -S error`
+  sobre todos los `.sh` del repo y `hadolint` sobre el Dockerfile, en el job `anti-slop` y **por
+  imagen fijada**, de modo que local y CI corren exactamente lo mismo. Los dos pasos se probaron
+  **en rojo** además de en verde: un gate que no sabe fallar no vigila nada. Con esto queda cerrada
+  media casilla del peldaño 1 que T-15 tenía apuntado (falta `actionlint`).
+- **Se probó escuchar también en el puerto 80 y se descarta, con la medida delante.** La imagen
+  hereda un `EXPOSE 80` de la base que Docker no deja deshacer, y como `ExposedPorts` es un mapa sin
+  orden, una heurística de «el primero» elegiría el puerto malo. Escuchar en los dos parecía gratis:
+  funciona con los defaults de Docker (`ip_unprivileged_port_start=0`), pero con
+  `--sysctl net.ipv4.ip_unprivileged_port_start=1024` el bind falla con `Permission denied`, **nginx
+  no arranca y el 3000 se cae con él**. No es una segunda vía, es una dependencia de arranque sobre
+  una condición del host que no podemos verificar: cambiaría un 502 con el sitio vivo en el 3000 por
+  una caída entera. Se queda declarar el 3000 a mano en Dokploy, que es lo que ya está configurado.
+- **El rodeo para construir en el entorno del enjambre es ahora una receta que se puede repetir.**
+  Aquí el tráfico HTTPS pasa por un proxy que intercepta el TLS y `pnpm install` muere con
+  `SELF_SIGNED_CERT_IN_CHAIN`. La CA **no** se hornea en la imagen —sería un defecto de seguridad de
+  verdad, y permanente—: se sustituye la base al construir con `--build-context`, que no toca el
+  Dockerfile. `docs/despliegue.md` lleva los comandos exactos, probados copiándolos tal cual desde
+  cero.
+- **`.dockerignore`** en la raíz: fuera dependencias y `dist/` (se reconstruyen dentro; un `dist/`
+  viejo del portátil podría acabar servido en producción sin que nadie lo notara), y fuera `.env` y
+  las capturas de QA, que en una imagen quedarían en una capa legible para siempre.
 
 ## 2026-08-28 — T-08 · el módulo weather, primer módulo real del registry
 

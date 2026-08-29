@@ -1,0 +1,151 @@
+---
+/**
+ * La sección que aporta el módulo `fishing` a la página de puerto: la actividad solunar del día.
+ *
+ * **Es la primera sección de un módulo con interfaz**, y entra por donde tiene que entrar: el
+ * módulo declara su `PageSection` (una cadena), `src/secciones.ts` la traduce a este componente y
+ * `SeccionesDeModulos` lo coloca. La página de puerto no lo nombra en ninguna línea.
+ *
+ * Lo que se pinta aquí, en este orden y por este motivo:
+ *
+ * 1. **Qué es esto** antes que ningún número. Un rating sin contexto se lee como un pronóstico.
+ * 2. **El rating con su etiqueta**, en cifra grande pero **un peldaño por debajo del coeficiente de
+ *    marea** (`--m-text-hora`, no `--m-text-coef`) y **sin la mancha de terracota**, que el brief
+ *    reserva al coeficiente y a los avisos. No es cosmética: el coeficiente es una magnitud
+ *    calculada sobre la marea real y esto es una convención. Lo que se mide manda sobre lo que se
+ *    conviene, y el tamaño lo dice sin tener que escribirlo.
+ * 3. **Los periodos con sus horas locales**, que es el dato útil.
+ * 4. **El desglose**: qué suma cada factor y cuánto da antes de redondear.
+ * 5. **El aviso** de que la teoría no tiene respaldo experimental sólido, con el enlace a la
+ *    metodología, y las fuentes del módulo.
+ *
+ * Los textos viven en `@mareia/module-fishing/textos.ts` (constantes) y no aquí: son requisito de
+ * producto y hay tests —de package y sobre el `dist/` construido— que comprueban que están.
+ *
+ * Su hoja de estilos (`estilos/actividad-solunar.css`) la importa el LAYOUT, no este componente.
+ * Medido: importándola desde aquí, Astro no la mete en el bundle cuando el componente llega por el
+ * mapa de renderizadores (un `.ts`) y la sección se publica **sin estilos** — con todo en verde. Es
+ * además la regla del brief («el CSS vive en `.css` importados desde el layout»). El precio es que
+ * la hoja viaja aunque el módulo esté de baja: 1.771 bytes de CSS sin usar, medidos.
+ *
+ * No hay rama para «cero periodos»: el día lunar dura 24 h 50 min, así que un día civil contiene
+ * entre 1 y 4 (propiedad probada en `domain-core/src/solunar/`). Un vacío que no puede darse sería
+ * código que ningún test alcanza.
+ */
+import {
+  ATRIBUCIONES_FISHING,
+  AVISO_SIN_RESPALDO,
+  COMO_SE_LEEN_LOS_PERIODOS,
+  desgloseDelRating,
+  ENLACE_METODOLOGIA,
+  filasDeActividad,
+  NOTA_DE_REDONDEO,
+  QUE_ES_ESTO,
+  RATING_ES_CONVENCION,
+  ROTULO_DEL_RATING,
+  TITULO_ACTIVIDAD,
+  URL_METODOLOGIA_SOLUNAR,
+} from "@mareia/module-fishing";
+
+import { numero } from "../../formato.ts";
+import { cargarActividad, formatoDelPuerto } from "../../modulos/actividad-solunar.ts";
+import type { ContextoDeSeccion } from "../../modulos/contexto.ts";
+
+interface Props {
+  contexto: ContextoDeSeccion;
+}
+
+const { contexto } = Astro.props;
+
+const actividad = await cargarActividad(contexto);
+const formato = formatoDelPuerto(contexto.timezone);
+const dia = { inicioUtcMs: actividad.day.startUtcMs, finUtcMs: actividad.day.endUtcMs };
+const filas = filasDeActividad(actividad.periods, dia, formato);
+const desglose = desgloseDelRating(actividad.rating, formato);
+---
+
+<h2 class="bloque__titulo" id="titulo-actividad-solunar">{TITULO_ACTIVIDAD}</h2>
+<p class="solunar__intro">{QUE_ES_ESTO}</p>
+
+<div class="solunar__rating">
+  <p class="solunar__marcador">
+    <span class="solunar__cifra">{desglose.score}</span>
+    <span class="solunar__escala">de 100</span>
+  </p>
+  <p class="solunar__veredicto">
+    <span class="etiqueta">{ROTULO_DEL_RATING}</span>
+    <span class="solunar__valoracion">{desglose.etiqueta}</span>
+  </p>
+</div>
+<p class="solunar__convencion">{RATING_ES_CONVENCION}</p>
+
+<table class="tabla-solunar">
+  <caption class="solo-lectores">
+    Periodos solunares de hoy en {actividad.port.name}
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">Periodo</th>
+      <th scope="col">Franja horaria</th>
+      <th scope="col">Fenómeno lunar</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      filas.map((fila) => (
+        <tr data-periodo={fila.id}>
+          <th scope="row">{fila.tipo}</th>
+          <td class="tabla-solunar__franja">{fila.franja}</td>
+          <td>
+            {fila.ancla}, a las {fila.pico}
+            {fila.coincideConElSol && (
+              <span class="tabla-solunar__sol">
+                {" "}· cae sobre la salida o la puesta del Sol
+              </span>
+            )}
+          </td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>
+<p class="datos__nota">{COMO_SE_LEEN_LOS_PERIODOS}</p>
+
+<h3 class="etiqueta">De dónde sale el número</h3>
+<div class="datos">
+  {
+    desglose.factores.map((factor) => (
+      <p class="datos__fila">
+        <span>
+          {factor.concepto}
+          <span class="solunar__detalle">{factor.detalle}</span>
+        </span>
+        <span class="datos__valor">+{numero(factor.puntos, 1)}</span>
+      </p>
+    ))
+  }
+  <p class="datos__fila solunar__total">
+    <span>Total</span>
+    <span class="datos__valor">
+      {numero(desglose.totalSinRedondear, 1)} → {desglose.score} · {desglose.etiqueta}
+    </span>
+  </p>
+</div>
+<p class="datos__nota">{NOTA_DE_REDONDEO}</p>
+
+<p class="solunar__aviso">
+  {AVISO_SIN_RESPALDO}{" "}
+  <a href={URL_METODOLOGIA_SOLUNAR}>{ENLACE_METODOLOGIA}</a>.
+</p>
+
+<p class="datos__nota">
+  Fuentes de esta sección ·{" "}
+  {
+    ATRIBUCIONES_FISHING.map((atribucion, indice) => (
+      <>
+        {indice > 0 && <> · </>}
+        <a href={atribucion.url}>{atribucion.name}</a> ({atribucion.license})
+      </>
+    ))
+  }
+</p>

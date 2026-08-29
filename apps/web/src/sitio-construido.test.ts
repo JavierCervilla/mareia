@@ -229,7 +229,7 @@ test("cada página de puerto trae la sección meteo anclada a su puerto y a su z
   }
   for (const puerto of await cargarPuertos()) {
     const html = paginaDe(rutaPuerto(puerto));
-    assert.match(html, /<section id="meteo" class="bloque">/u, `${puerto.slug}: sin sección meteo`);
+    assert.match(html, /<section id="meteo" class="bloque"/u, `${puerto.slug}: sin sección meteo`);
     assert.match(
       html,
       new RegExp(`data-meteo-puerto="${puerto.slug}" data-meteo-zona="${puerto.timezone}"`, "u"),
@@ -336,6 +336,8 @@ function atributosInesperados(seccion: string, slug: string, zona: string): read
   const esperado: Record<string, (valor: string) => boolean> = {
     class: claseValida,
     id: (valor) => valor === "meteo" || valor === "titulo-meteo",
+    // Lo pone `SeccionesDeModulos` desde T-10 (hallazgo A-13): la sección se llama como su título.
+    "aria-labelledby": (valor) => valor === "titulo-meteo",
     "aria-busy": (valor) => valor === "false",
     type: (valor) => valor === "module",
     "data-meteo-puerto": (valor) => valor === slug,

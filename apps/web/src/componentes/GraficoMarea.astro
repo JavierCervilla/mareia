@@ -10,7 +10,7 @@
  * Accesibilidad: el `<svg>` es `role="img"` con un `aria-label` que enumera los extremos del día.
  * Un lector de pantalla no puede leer un `path`, así que se le da la misma información en texto.
  */
-import type { CurvaMarea } from "../grafico-marea.ts";
+import type { CurvaMarea, EnfasisDeVentana } from "../grafico-marea.ts";
 import { hora, metros } from "../formato.ts";
 
 interface Props {
@@ -41,6 +41,43 @@ const resumen = curva.extremos
       `${metros(extremo.height_m)}`,
   )
   .join("; ");
+
+/**
+ * Las bandas también se cuentan: un lector de pantalla no ve un sombreado, así que las ventanas que
+ * aporten los módulos entran en el nombre accesible del gráfico con sus horas. Cada banda trae su
+ * etiqueta ya escrita por quien sabe lo que es (el gráfico no).
+ */
+const sombreado =
+  curva.bandas.length === 0
+    ? ""
+    : ` Franjas sombreadas: ${curva.bandas.map((banda) => banda.etiqueta).join("; ")}.`;
+
+/**
+ * Cómo dibuja el CSS cada énfasis (`estilos/pagina-puerto.css`, bandas). La leyenda **tiene** que
+ * decirlo: una trama que nadie explica no distingue nada, y el filete —continuo o discontinuo— es
+ * justo lo que hace visible la diferencia entre una ventana de más peso y una de menos sin pedirle
+ * al lector que distinga dos tonos del mismo color (hallazgo A-14).
+ */
+const TRAMA_DE_ENFASIS = {
+  fuerte: "filete continuo",
+  suave: "filete discontinuo",
+} as const satisfies Record<EnfasisDeVentana, string>;
+
+/**
+ * La leyenda **visible** del pie, que es lo que arregla el hallazgo A-15: hasta aquí el
+ * `aria-label` enumeraba las cuatro franjas con sus horas y quien miraba el gráfico veía cuatro
+ * manchas sin explicación. No repite las horas —están en el `aria-label` y en la tabla de la
+ * sección, y un pie de figura no es una tabla—: dice qué representa cada trama, una vez por clase
+ * de ventana y en orden fijo (primero las de más peso), no una vez por banda.
+ */
+const clasesDeBanda = (["fuerte", "suave"] as const).flatMap((enfasis) => {
+  const banda = curva.bandas.find((candidata) => candidata.enfasis === enfasis);
+  return banda === undefined ? [] : [`${TRAMA_DE_ENFASIS[enfasis]}, ${banda.leyenda}`];
+});
+const leyendaDeBandas =
+  clasesDeBanda.length === 0
+    ? ""
+    : ` Franjas sombreadas: ${clasesDeBanda.join("; ")}; sus horas, en la tabla de la sección que las aporta.`;
 ---
 
 <figure class="grafico">
@@ -48,8 +85,28 @@ const resumen = curva.extremos
     class="grafico__lienzo"
     viewBox={`0 0 ${curva.ancho} ${curva.alto}`}
     role="img"
-    aria-label={`Curva de altura de marea de las 24 horas: ${resumen}.`}
+    aria-label={`Curva de altura de marea de las 24 horas: ${resumen}.${sombreado}`}
   >
+    {/* Las bandas van PRIMERO: en SVG no hay `z-index` y pinta después quien viene después, así que
+        emitirlas aquí es lo que deja la curva por encima y legible. Son `aria-hidden` porque su
+        contenido ya está en el `aria-label` del gráfico y en la tabla de la sección que las aporta:
+        anunciarlas dos veces es ruido. El `data-ventana` es el identificador que le puso quien la
+        aportó: permite nombrar una banda —en un test, en un informe del pase adversario— sin contar
+        rectángulos de izquierda a derecha. */}
+    {
+      curva.bandas.map((banda) => (
+        <rect
+          class="grafico__banda"
+          data-ventana={banda.id}
+          data-enfasis={banda.enfasis}
+          x={banda.x}
+          y="0"
+          width={banda.ancho}
+          height={curva.alto}
+          aria-hidden="true"
+        />
+      ))
+    }
     <line
       class="grafico__nivel"
       x1="0"
@@ -68,6 +125,8 @@ const resumen = curva.extremos
     {horasDelEje.map((etiqueta) => <li>{etiqueta}</li>)}
   </ol>
   <figcaption class="datos__nota">
-    Entre {metros(curva.minima_m)} y {metros(curva.maxima_m)} sobre el cero del puerto.
+    Entre {metros(curva.minima_m)} y {metros(curva.maxima_m)} sobre el cero del puerto.{
+      leyendaDeBandas
+    }
   </figcaption>
 </figure>

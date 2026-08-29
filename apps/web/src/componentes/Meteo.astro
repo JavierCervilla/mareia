@@ -15,7 +15,7 @@
 import { WEATHER_UI_MODULE } from "@mareia/module-weather/ui";
 
 import { API_BASE } from "../modulos/meteo/api.ts";
-import type { ContextoDeSeccion } from "../secciones.ts";
+import type { ContextoDeSeccion } from "../modulos/contexto.ts";
 
 interface Props {
   contexto: ContextoDeSeccion;
@@ -27,7 +27,7 @@ const { contexto } = Astro.props;
 <div
   class="meteo"
   data-meteo-puerto={contexto.slug}
-  data-meteo-zona={contexto.zonaHoraria}
+  data-meteo-zona={contexto.timezone}
   data-meteo-api={API_BASE}
   aria-busy="false"
 >
