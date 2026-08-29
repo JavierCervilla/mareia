@@ -121,7 +121,7 @@
         "phase_deg": 212.87
       }
     ],
-    "derived_at": "2026-08-29T09:28:00Z",
+    "derived_at": "2026-08-29T09:58:50Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -381,7 +381,9 @@
       ],
       "observation_source": "IOC tene",
       "observation_code": "tene",
-      "observation_distance_km": 0.7
+      "observation_distance_km": 0.7,
+      "observation_lat": 28.47722,
+      "observation_lon": -16.24111
     }
   }
 }

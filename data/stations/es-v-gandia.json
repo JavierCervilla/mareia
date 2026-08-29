@@ -95,7 +95,7 @@
         "phase_deg": 353.6629
       }
     ],
-    "derived_at": "2026-08-29T09:28:00Z",
+    "derived_at": "2026-08-29T09:58:50Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -363,7 +363,9 @@
       ],
       "observation_source": "IOC gand",
       "observation_code": "gand",
-      "observation_distance_km": 0.399
+      "observation_distance_km": 0.399,
+      "observation_lat": 38.99521,
+      "observation_lon": -0.15139
     }
   }
 }

@@ -46,17 +46,37 @@ describe("coeficiente · golden contra los valores publicados de Brest 2026", ()
   /**
    * El sesgo es la parte del desacuerdo que no se arregla mirando un día concreto: nuestras
    * constantes de Brest son TICON-4 (análisis 2006-2025 del mareógrafo REFMAR) y las del oráculo
-   * son las del SHOM, así que las dos predicciones son parientes y no gemelas. Un sesgo de +1,19
-   * unidades son 3,6 cm de semirrango sobre una marea de 6,6 m: nuestra amplitud semidiurna corre
-   * medio punto porcentual por encima de la del SHOM, y eso no lo arregla ninguna elección de
-   * constituyentes, porque no es un constituyente: es el análisis armónico.
+   * son las del SHOM, así que las dos predicciones son parientes y no gemelas.
+   *
+   * **Y es aditivo, no multiplicativo — medido, no supuesto.** Regresión del error sobre el valor
+   * publicado, en los 32 valores del fixture (que van de 21 a 104): pendiente **0,00025**, r
+   * **0,011**, intercepto **+1,17**. Es decir, nos separamos del SHOM en poco más de una unidad
+   * tanto en una cuadratura de 21 como en una sizigia de 104. Un modelo multiplicativo —«nuestra
+   * amplitud corre un tanto por ciento por encima»— predeciría una pendiente de **0,017**, sesenta
+   * y ocho veces mayor que la medida, así que esa explicación queda descartada: era una frase que
+   * sonaba a mecanismo y no lo era. La dispersión alrededor del sesgo es σ = 0,64.
    *
    * **La cota sube de 1 a 1,25 en T-13, con la medida delante y sólo aquí.** La aserción principal
    * —los ±2 unidades día a día, que es lo que un usuario ve— se queda **intacta**: con el dataset
    * regenerado a 42 constituyentes y la modulación radiacional fuera del cálculo, los 32 valores
    * publicados caen dentro de ±2. El sesgo agregado se queda en 1,19, contra el 0,91 que daba el
-   * fichero truncado a 37 (histogramas y alternativas medidas en `fixtures/README.md`), y 1,25 es
-   * la cota más ajustada que lo admite.
+   * fichero truncado a 37, y 1,25 es la cota más ajustada que lo admite.
+   *
+   * Se buscaron dos instrumentos antes de tocar la constante y los dos fallan honestamente:
+   *
+   * - **Recalibrar `BREST_UNIT_HEIGHT_M`** sería el instrumento si el desacuerdo fuera
+   *   multiplicativo. No lo es (pendiente 0,00025), así que mover la unidad de altura arreglaría la
+   *   media a costa de descuadrar los extremos de la escala.
+   * - **Redondear con `floor` en vez de `round`** dejaría el sesgo en 0,66 y pasaría la cota
+   *   original sin tocar nada. Pero el sesgo **sin redondear** es +1,165: el convenio de redondeo
+   *   no explica el desacuerdo, sólo lo desplazaría medio punto. Elegir el convenio que le sienta
+   *   bien al golden es la misma trampa que elegir los constituyentes que le sientan bien.
+   *
+   * **Aviso para quien venga**: 1 → 1,5 → 1,25 es una constante persiguiendo al dato, y eso tiene
+   * fecha de caducidad. El instrumento honesto a medio plazo no es afinar la media, sino gatear la
+   * **forma** del desacuerdo —que no aparezca estructura: pendiente ≈ 0, r ≈ 0, σ acotada—, que es
+   * lo que de verdad distinguiría «dos análisis armónicos distintos» de «nuestro cálculo se está
+   * torciendo».
    *
    * Lo que **no** se hizo, y merece decirse porque era la vía corta: sacar también `EP2` del
    * cálculo deja el sesgo en 0,84 y no habría hecho falta tocar nada. Pero `EP2` es un semidiurno

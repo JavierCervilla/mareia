@@ -102,6 +102,11 @@ class Metrics:
     #: exactamente lo que T-13 vino a impedir. Con él, un test lo comprueba sin salir a la red.
     observation_code: str | None
     observation_distance_km: float | None
+    #: Coordenadas del mareógrafo con el que se midió, para que la distancia de arriba se pueda
+    #: **recomputar** desde el JSON en vez de creérsela. Sin ellas, la procedencia de la observación
+    #: era autodeclarada: bastaba escribir «0,9 km» al lado de un RMSE ajeno para que cuadrara.
+    observation_lat: float | None
+    observation_lon: float | None
 
     def as_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -250,4 +255,6 @@ def evaluate(
         observation_source=None if observations is None else f"IOC {observations.code}",
         observation_code=None if observations is None else observations.code,
         observation_distance_km=None if observations is None else observations.distance_km,
+        observation_lat=None if observations is None else observations.lat,
+        observation_lon=None if observations is None else observations.lon,
     )

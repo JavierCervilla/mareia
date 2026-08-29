@@ -134,7 +134,7 @@
         "phase_deg": 33.1816
       }
     ],
-    "derived_at": "2026-08-29T09:28:00Z",
+    "derived_at": "2026-08-29T09:58:50Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -402,7 +402,9 @@
       ],
       "observation_source": "IOC mari",
       "observation_code": "mari",
-      "observation_distance_km": 0.924
+      "observation_distance_km": 0.924,
+      "observation_lat": 42.40612,
+      "observation_lon": -8.69108
     }
   }
 }

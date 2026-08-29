@@ -55,11 +55,27 @@ lunar** justo por eso. Con ellos fuera, los 32 valores publicados vuelven a caer
 
 Lo único que se ensancha es la cota del **sesgo agregado**, de 1 a 1,25, que es una aserción distinta
 y secundaria: mide el desacuerdo medio, no lo que ve un usuario un día concreto. El sesgo medido es
-+1,19, y +1,19 unidades son 3,6 cm de semirrango sobre una marea de 6,6 m: nuestra amplitud
-semidiurna corre medio punto porcentual por encima de la del SHOM. Ese desacuerdo **ya existía**
-—+0,91 con el fichero truncado, rozando la cota— y no lo produce ningún constituyente: lo produce
-comparar dos análisis armónicos distintos del mismo puerto (TICON-4 2006-2025 del mareógrafo REFMAR
-contra el del SHOM).
++1,19, y ese desacuerdo **ya existía** —+0,91 con el fichero truncado, rozando la cota— y no lo
+produce ningún constituyente: lo produce comparar dos análisis armónicos distintos del mismo puerto
+(TICON-4 2006-2025 del mareógrafo REFMAR contra el del SHOM).
+
+**Qué forma tiene ese desacuerdo, medido y no supuesto.** Es **aditivo y plano**: regresión del error
+sobre el valor publicado, en los 32 valores del fixture (que van de 21 a 104), da pendiente
+**0,00025**, r **0,011** e intercepto **+1,17**, con σ = 0,64. Nos separamos del SHOM en poco más de
+una unidad tanto en una cuadratura de 21 como en una sizigia de 104. Una versión anterior de este
+documento lo explicaba diciendo que «nuestra amplitud semidiurna corre medio punto porcentual por
+encima de la del SHOM»: eso es un modelo **multiplicativo**, predeciría una pendiente de 0,017
+—sesenta y ocho veces la medida— y por tanto **queda descartado**. Era una frase que sonaba a
+mecanismo sin ser uno, que es la misma especie de error que el párrafo de más abajo corrige.
+
+**Dos instrumentos que se buscaron antes de tocar la constante, y por qué fallan.** *Recalibrar
+`BREST_UNIT_HEIGHT_M`* sería el instrumento correcto si el desacuerdo fuese multiplicativo, y no lo
+es. *Redondear con `floor` en vez de `round`* dejaría el sesgo en 0,66 y pasaría la cota original sin
+tocar nada, pero el sesgo **sin redondear** es +1,165: el convenio de redondeo no explica el
+desacuerdo, sólo lo desplazaría medio punto, y adoptarlo sería elegir el convenio que le sienta bien
+al golden. La constante es el sitio honesto **hoy**, con un aviso: 1 → 1,5 → 1,25 es una constante
+persiguiendo al dato, y el instrumento a medio plazo es gatear la **forma** del desacuerdo (que no
+aparezca estructura) en vez de la media.
 
 **Por qué no se saca también `EP2`**, que es la vía por la que no habría hecho falta tocar nada
 (sesgo 0,84, todo verde): `EP2` es un semidiurno lunar elíptico de segundo orden, marea astronómica

@@ -93,23 +93,33 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
 - **Los invariantes muerden a escala, y el arreglo tiene trinquete.** Retirar el atajo de T-05 en el
   dato no bastaba: se pudo volver a inyectar a mano en un JSON el RMSE de un mareógrafo a 46 km y
   toda la suite siguió verde, porque lo único que cazaba el caso era una aserción clavada a Cabo de
-  Palos. Ahora el dataset **publica la procedencia del número** —con qué mareógrafo del IOC se midió
-  y a qué distancia de la dársena estaba (`observation_code`, `observation_distance_km`)— y hay un
-  invariante, en Python y en TypeScript, que exige que todo puerto con RMSE lo haya medido a menos
-  de 5 km de su dársena. Reproducida la inyección en sus tres formas (sólo el RMSE; con la fuente;
-  con la fuente y la distancia real), las tres salen en rojo. Se añaden además las cuatro ramas de
-  `grade.estimate()` y un test que fija que la observación se busca **una sola vez y en el puerto**,
-  que es donde vive el arreglo. `python run.py check` repite la coherencia catálogo↔dataset sin red;
-  el golden de Vigo sigue siendo golden.
-- **El gate adversario A-1 se re-apunta sin ningún número inventado.** La primera versión cambió una
-  constante por otras dos igual de arbitrarias, y las dos estaban mal: el corte de carrera (0,15 m)
-  dejaba fuera mesetas de 80 min con 0,178 m, y el tope del 60 % del día dejaba pasar una
-  congelación real de catorce horas. Lo que se comprueba ahora no es cuánto dura la meseta sino **si
-  la marea se movió durante ella**: se pregunta al motor la altura sin redondear en los dos extremos
-  del tramo plano y se exige que la diferencia quepa en el paso de publicación (1 mm, que es lo que
-  `toHeight` redondea). El umbral no se elige, es la resolución. Medido sobre 153 puertos × 15 días
-  (500 mesetas de más de una hora): el movimiento real máximo dentro de una meseta publicada es
-  **0,983 mm**.
+  Palos. Ahora el dataset **publica la procedencia del número** —con qué mareógrafo del IOC se
+  midió, a qué distancia de la dársena y **desde qué coordenadas**— y hay un invariante, en Python y
+  en TypeScript con aritmética propia, que **recomputa** esa distancia por haversine y exige que sea
+  menor de 5 km. Reproducida la inyección en sus cuatro formas —sólo el RMSE; con la fuente; con la
+  fuente y la distancia real; y con la distancia forjada a 0,9 km, que era la que quedaba abierta
+  porque la procedencia de la observación se autodeclaraba— las cuatro salen en rojo, y la última
+  nombra los 46,418 km que hay de verdad. Se añaden además las cuatro ramas de `grade.estimate()` y
+  un test que fija que la observación se busca **una sola vez y en el puerto**, que es donde vive el
+  arreglo. `python run.py check` repite la coherencia catálogo↔dataset sin red; el golden de Vigo
+  sigue siendo golden.
+- **El gate adversario A-1 se re-apunta sin ningún número elegido, y a la tercera mirando donde hay
+  que mirar.** El primer intento cambió una constante por otras dos igual de arbitrarias, y las dos
+  estaban mal. El segundo acertó el diseño —medir movimiento y no duración, con el paso de
+  publicación (1 mm) como umbral— pero puso la sonda en las **puntas** de la meseta, que es
+  exactamente la magnitud que la avería original anula: una meseta centrada en un extremo tiene los
+  dos bordes a la misma altura pase lo que pase en medio, y la avería de A-1 era literalmente «una
+  pleamar de cinco horas». Medido congelando la curva a propósito, aquel instrumento dejaba pasar en
+  verde mesetas de **670 min en Gijón** (0,49 mm en los bordes, 3 283,7 mm de movimiento real
+  dentro) y las admitía en **133 de los 153 puertos**: para el caso que da nombre al hallazgo era
+  más débil que la regla de una hora que sustituía. Ahora la sonda mira **los instantes de muestreo
+  publicados que caen dentro del tramo**, que son los que la página podría haber dibujado distintos
+  y no dibujó; no se mira la curva continua a propósito, porque entre dos muestras la marea puede
+  abombarse sobre un extremo hasta 2,4 mm y eso no es representable en el artefacto. Medido sobre
+  153 puertos × 15 días (**9 941 mesetas**): la excursión máxima de una meseta legítima es **0,995
+  mm**. Y congelando la pleamar de los 153 puertos, el gate las caza **153 de 153**, con un test de
+  sensibilidad permanente que reconstruye esa avería sobre Vigo para que nadie vuelva a apuntar la
+  sonda a los bordes sin enterarse.
 - **El motivo del grade nombra todos los umbrales, también los que faltaban.** El primer arreglo
   dejaba fuera las ramas de «sin observaciones» y 39 puertos publicaban un motivo que sólo culpaba a
   la distancia al mareógrafo; ahora hay una sola función que evalúa y enumera, y quedan 1, que es el

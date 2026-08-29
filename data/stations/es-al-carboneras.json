@@ -121,7 +121,7 @@
         "phase_deg": 86.2812
       }
     ],
-    "derived_at": "2026-08-29T09:28:00Z",
+    "derived_at": "2026-08-29T09:58:50Z",
     "attribution": [
       {
         "name": "TICON-4",
@@ -389,7 +389,9 @@
       ],
       "observation_source": "IOC carb",
       "observation_code": "carb",
-      "observation_distance_km": 1.843
+      "observation_distance_km": 1.843,
+      "observation_lat": 36.9743,
+      "observation_lon": -1.89959
     }
   }
 }

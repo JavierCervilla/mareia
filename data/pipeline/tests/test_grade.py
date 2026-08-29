@@ -35,6 +35,8 @@ _EXCELLENT = Metrics(
     observation_source="IOC test",
     observation_code="test",
     observation_distance_km=1.0,
+    observation_lat=42.24,
+    observation_lon=-8.72,
 )
 
 
@@ -106,6 +108,8 @@ def test_without_observations_corroboration_only_reaches_b() -> None:
         observation_source=None,
         observation_code=None,
         observation_distance_km=None,
+        observation_lat=None,
+        observation_lon=None,
     )
     result = grading.assign(blind, epoch_years=19.0)
     assert result.grade == "B"
@@ -121,6 +125,8 @@ def test_without_observations_nor_corroboration_the_grade_is_c() -> None:
         observation_source=None,
         observation_code=None,
         observation_distance_km=None,
+        observation_lat=None,
+        observation_lon=None,
         cross_rmse_m=None,
         cross_source=None,
         cross_rmse_worst_m=None,
@@ -152,6 +158,8 @@ def test_the_reason_names_every_unmet_threshold_not_just_the_first() -> None:
         observation_source=None,
         observation_code=None,
         observation_distance_km=None,
+        observation_lat=None,
+        observation_lon=None,
         cross_rmse_m=None,
         cross_source=None,
         cross_rmse_worst_m=None,

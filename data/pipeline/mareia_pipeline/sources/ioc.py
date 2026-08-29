@@ -35,6 +35,12 @@ class Observations:
     code: str
     location: str
     distance_km: float
+    #: Coordenadas del mareógrafo. Viajan hasta el JSON de estación para que la distancia publicada
+    #: se pueda **recomputar** en vez de creérsela: la del mareógrafo de constantes ya se recomputa
+    #: por haversine desde T-05, y la de la observación era el único número de procedencia que
+    #: seguía siendo autodeclarado.
+    lat: float
+    lon: float
     times: list[dt.datetime]
     levels: list[float]
 
@@ -64,16 +70,26 @@ def _station_list(*, refresh: bool) -> list[dict]:
 
 def nearby_codes(
     lat: float, lon: float, *, max_km: float, refresh: bool = False
-) -> list[tuple[float, str, str]]:
-    """``(distancia_km, código, nombre)`` de los mareógrafos IOC cercanos, de más cerca a más lejos."""
+) -> list[tuple[float, str, str, float, float]]:
+    """``(distancia_km, código, nombre, lat, lon)`` de los mareógrafos IOC cercanos, de más cerca a
+    más lejos."""
     stations = _station_list(refresh=refresh)
-    found: list[tuple[float, str, str]] = []
+    found: list[tuple[float, str, str, float, float]] = []
     for station in stations:
         if station.get("Lat") is None or station.get("Lon") is None:
             continue
-        distance = haversine_km(lat, lon, float(station["Lat"]), float(station["Lon"]))
+        gauge_lat, gauge_lon = float(station["Lat"]), float(station["Lon"])
+        distance = haversine_km(lat, lon, gauge_lat, gauge_lon)
         if distance <= max_km:
-            found.append((distance, str(station.get("Code", "")), str(station.get("Location", ""))))
+            found.append(
+                (
+                    distance,
+                    str(station.get("Code", "")),
+                    str(station.get("Location", "")),
+                    gauge_lat,
+                    gauge_lon,
+                )
+            )
     return sorted(found)
 
 
@@ -91,7 +107,9 @@ def fetch_observations(
     Se prueban los mareógrafos por proximidad y se acepta el primero que devuelva al menos
     ``min_samples`` medidas: un código puede existir en el catálogo y estar mudo.
     """
-    for distance, code, location in nearby_codes(lat, lon, max_km=max_km, refresh=refresh):
+    for distance, code, location, gauge_lat, gauge_lon in nearby_codes(
+        lat, lon, max_km=max_km, refresh=refresh
+    ):
         if not code:
             continue
         try:
@@ -112,6 +130,8 @@ def fetch_observations(
             code=code,
             location=location,
             distance_km=round(distance, 3),
+            lat=gauge_lat,
+            lon=gauge_lon,
             times=[t for t, _ in parsed],
             levels=[v for _, v in parsed],
         )

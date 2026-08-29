@@ -128,6 +128,21 @@ test("toda estación referenciada trae su calidad, y la de un grade C viaja con 
  */
 const RADIO_DE_LA_DARSENA_KM = 5;
 
+/**
+ * Distancia de círculo máximo, en km. Se implementa aquí en vez de importarla del pipeline —que la
+ * tiene— a propósito: el sentido de este fichero es comprobar el artefacto **desde fuera**, con su
+ * propia aritmética, para que un error en la del productor no se cancele con el del comprobador.
+ */
+function distanciaKm(latA: number, lonA: number, latB: number, lonB: number): number {
+  const RADIO_TIERRA_KM = 6371.0088;
+  const rad = (grados: number): number => (grados * Math.PI) / 180;
+  const dLat = rad(latB - latA);
+  const dLon = rad(lonB - lonA);
+  const a =
+    Math.sin(dLat / 2) ** 2 + Math.cos(rad(latA)) * Math.cos(rad(latB)) * Math.sin(dLon / 2) ** 2;
+  return 2 * RADIO_TIERRA_KM * Math.asin(Math.sqrt(a));
+}
+
 /** El `quality.metrics` crudo del JSON: el DTO no lo expone y aquí hace falta la procedencia. */
 function metricsDe(stationFile: string): Record<string, unknown> {
   const documento = JSON.parse(readFileSync(`${STATIONS_DIR}/${stationFile}`, "utf8")) as {
@@ -161,12 +176,26 @@ test("ningún puerto publica una precisión que no tiene", async () => {
         incoherentes.push(`${port.slug}: error de hora sin observación con la que medirlo`);
       }
     } else {
+      const lat = metrics["observation_lat"];
+      const lon = metrics["observation_lon"];
       if (typeof distancia !== "number") {
         incoherentes.push(`${port.slug}: publica RMSE sin decir a qué distancia se midió`);
       } else if (distancia > RADIO_DE_LA_DARSENA_KM) {
         incoherentes.push(
           `${port.slug}: publica como suyo un error medido a ${distancia} km de su dársena`,
         );
+      } else if (typeof lat !== "number" || typeof lon !== "number") {
+        incoherentes.push(`${port.slug}: declara una distancia de medida sin decir desde dónde`);
+      } else {
+        // La distancia no se cree, se recalcula: si sólo se comprobara el número declarado, para
+        // colar un RMSE ajeno bastaría con escribir al lado una distancia pequeña.
+        const recomputada = distanciaKm(port.lat, port.lon, lat, lon);
+        if (Math.abs(recomputada - distancia) > 0.01) {
+          incoherentes.push(
+            `${port.slug}: dice haber medido a ${distancia} km y sus coordenadas dan ` +
+              `${recomputada.toFixed(3)} km`,
+          );
+        }
       }
       if (metrics["observation_source"] === null) {
         incoherentes.push(`${port.slug}: publica RMSE sin decir contra qué se midió`);

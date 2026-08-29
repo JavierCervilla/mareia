@@ -27,6 +27,7 @@ import pytest
 
 import run as pipeline
 from mareia_pipeline import grade as grading
+from mareia_pipeline.geo import haversine_km
 from mareia_pipeline.ports import PILOT_PORTS
 from mareia_pipeline.schema import station_files
 from mareia_pipeline.sources.ioc import Observations
@@ -65,6 +66,30 @@ def test_a_published_error_was_measured_in_this_port(path) -> None:
         f"el error se midió a {distance} km de la dársena, por encima de los "
         f"{pipeline.OBSERVATION_RADIUS_KM} km que definen «medido aquí»"
     )
+
+
+@pytest.mark.parametrize("path", station_files(), ids=lambda p: p.name)
+def test_the_observation_distance_is_recomputed_not_believed(path) -> None:
+    """La distancia a la que se midió se **recalcula** desde las coordenadas publicadas.
+
+    Sin esto, la procedencia de la observación era el único número autodeclarado del artefacto: la
+    distancia al mareógrafo de constantes ya se recomputa por haversine desde T-05, pero bastaba
+    escribir «0,9 km» junto a un RMSE ajeno para que todas las comprobaciones cuadrasen. Ahora hay
+    que falsificar también un par de coordenadas que caigan de verdad en la dársena.
+    """
+    document = json.loads(path.read_text(encoding="utf-8"))
+    metrics = document["quality"]["metrics"]
+    if metrics["observation_distance_km"] is None:
+        assert metrics["observation_lat"] is None
+        assert metrics["observation_lon"] is None
+        return
+    measured = haversine_km(
+        document["lat"], document["lon"], metrics["observation_lat"], metrics["observation_lon"]
+    )
+    assert measured == pytest.approx(metrics["observation_distance_km"], abs=0.01), (
+        "la distancia declarada no es la que hay entre el puerto y el mareógrafo que dice"
+    )
+    assert measured <= pipeline.OBSERVATION_RADIUS_KM
 
 
 @pytest.mark.parametrize("path", station_files(), ids=lambda p: p.name)
@@ -135,6 +160,8 @@ def test_an_observation_in_the_harbour_is_published_with_its_provenance(monkeypa
         code="vig2",
         location="Vigo",
         distance_km=1.234,
+        lat=PORT.lat + 0.01,
+        lon=PORT.lon,
         times=times,
         # Una señal que se mueve: con nivel constante la varianza es cero y el R² sale de dividir
         # por cero, que es ruido del fixture y no del código bajo prueba.
@@ -148,6 +175,7 @@ def test_an_observation_in_the_harbour_is_published_with_its_provenance(monkeypa
     )
     assert metrics.observation_code == "vig2"
     assert metrics.observation_distance_km == 1.234
+    assert metrics.observation_lat == PORT.lat + 0.01
     assert metrics.rmse_m is not None
 
 
