@@ -136,6 +136,36 @@ export interface VistaMeteo {
   readonly resumen: string | undefined;
 }
 
+/** En qué anda cada bloque, dicho en tres palabras para quien no ve la pantalla. */
+const SITUACION: Record<ClaseDeSello, string> = {
+  pidiendo: "todavía se está pidiendo",
+  fresco: "ya está en la página",
+  caducado: "en la página, pero no es de ahora",
+  "sin-dato": "no se ha podido traer",
+};
+
+/**
+ * Lo que se le dice a un lector de pantalla cuando la sección cambia de estado.
+ *
+ * Existe por el hallazgo H-7: el contenido se sustituye con `replaceChildren` y `aria-busy` solo
+ * dice «espera», así que quien no mira la pantalla se quedaba con el estado que salió del `dist/`
+ * —«el estado del mar todavía no ha llegado»— para siempre.
+ *
+ * La frase habla de **la situación de cada bloque y no de la edad del dato**, y eso es deliberado:
+ * si llevara la antigüedad cambiaría cada minuto y el lector estaría interrumpiendo la lectura para
+ * cantar «hace tres minutos, hace cuatro minutos». Cambia cuando cambia el estado, que es cuando
+ * hay una noticia. Mientras no ha contestado ninguno de los dos endpoints se calla: eso ya lo dice
+ * el texto que viaja en el HTML, y anunciarlo otra vez al abrir sería ruido en cada visita.
+ */
+export function anuncioDeLaSeccion(vista: VistaMeteo): string {
+  if (vista.bloques.every((bloque) => bloque.sello.clase === "pidiendo")) {
+    return "";
+  }
+  return vista.bloques
+    .map((bloque) => `${bloque.titulo}, ${SITUACION[bloque.sello.clase]}.`)
+    .join(" ");
+}
+
 const SEGUNDOS_POR_MINUTO = 60;
 const SEGUNDOS_POR_HORA = 3_600;
 const SEGUNDOS_POR_DIA = 86_400;

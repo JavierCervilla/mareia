@@ -43,6 +43,19 @@ const { contexto } = Astro.props;
     </span>
   </p>
 
+  {/*
+    La región viva de la sección. Viaja VACÍA en el HTML, y a propósito: un `role="status"` que
+    aparece en el DOM a la vez que su texto no lo anuncia nadie —el lector de pantalla tiene que
+    haberlo registrado antes de que cambie—, así que su sitio es el build y no la isla, que lo
+    rellena con una frase corta cada vez que la sección cambia de ESTADO. Existe porque `aria-busy`
+    dice «esto está cambiando, no lo leas todavía» y no anuncia nada: quien navega con lector de
+    pantalla se quedaba en «El estado del mar todavía no ha llegado» aunque el dato llegara, aunque
+    la fuente se cayera y aunque lo que hubiera en pantalla fuese de hace tres horas (hallazgo H-7
+    del pase adversario). No se ve porque para quien mira la pantalla la noticia ya está en los
+    bloques; duplicarla sería ruido.
+  */}
+  <p class="meteo__anuncio" data-meteo-anuncio role="status" aria-live="polite"></p>
+
   <div class="meteo__bloques" data-meteo-bloques hidden></div>
 
   <p class="meteo__fuentes">

@@ -17,7 +17,7 @@ import test from "node:test";
 import type { BulletinPayload, WeatherPayload } from "@mareia/module-weather/ui";
 
 import type { BloqueMeteo, RespuestaMeteo, VistaMeteo } from "./vista.ts";
-import { PIDIENDO, antiguedad, parrafosDelBoletin, vistaMeteo } from "./vista.ts";
+import { PIDIENDO, antiguedad, anuncioDeLaSeccion, parrafosDelBoletin, vistaMeteo } from "./vista.ts";
 
 import BOLETIN_CLAVE_CADUCADA from "./fixtures/bulletin-clave-caducada.json" with { type: "json" };
 import BOLETIN_OK from "./fixtures/bulletin-ok.json" with { type: "json" };
@@ -330,6 +330,51 @@ test("un hueco del modelo NO se dice como una fuente caída: son dos ausencias d
   assert.equal(ola.ausencia, "el modelo no publica la altura de esta ola en esta celda");
   // Y la atmósfera de la misma celda sí trae valores: el hueco es del modelo de oleaje, no del día.
   assert.match(textoDe(bloque(vista, "meteo-atmosfera")), /Viento \| 7,0 km\/h/u);
+});
+
+// --- Lo que oye quien no ve la pantalla ----------------------------------------------------------
+
+test("mientras no ha contestado nadie no se anuncia nada: ya lo dice el HTML", () => {
+  const vista = vistaMeteo(
+    { meteo: PIDIENDO, boletin: PIDIENDO, recibidoEnMs: RECIBIDO },
+    RECIBIDO,
+    ZONA,
+  );
+
+  assert.equal(anuncioDeLaSeccion(vista), "");
+});
+
+test("el anuncio dice la situación de cada fuente, no un «actualizado» que no informa", () => {
+  const vista = vistaMeteo(
+    {
+      meteo: { ok: true, cuerpo: meteoDe(METEO_PARCIAL) },
+      boletin: { ok: true, cuerpo: boletinDe(BOLETIN_SIN_CLAVE) },
+      recibidoEnMs: RECIBIDO,
+    },
+    RECIBIDO,
+    ZONA,
+  );
+
+  assert.equal(
+    anuncioDeLaSeccion(vista),
+    "Estado del mar, ya está en la página. Atmósfera, no se ha podido traer. " +
+      "Boletín marítimo de AEMET, no se ha podido traer.",
+  );
+});
+
+test("el anuncio NO cambia porque pase el tiempo: cambia cuando cambia el estado", () => {
+  // Si llevara la edad, la región viva interrumpiría cada minuto para cantar «hace 4 minutos».
+  const alLlegar = escena(METEO_OK, BOLETIN_OK);
+  const cincoMinutosDespues = escena(METEO_OK, BOLETIN_OK, { ahoraMs: RECIBIDO + 5 * 60_000 });
+  const tresHorasDespues = escena(METEO_OK, BOLETIN_OK, { ahoraMs: RECIBIDO + 3 * 3_600_000 });
+
+  assert.equal(anuncioDeLaSeccion(alLlegar), anuncioDeLaSeccion(cincoMinutosDespues));
+  assert.notEqual(
+    anuncioDeLaSeccion(alLlegar),
+    anuncioDeLaSeccion(tresHorasDespues),
+    "que el dato deje de ser el de ahora SÍ es una noticia y se anuncia",
+  );
+  assert.match(anuncioDeLaSeccion(tresHorasDespues), /Estado del mar, en la página, pero no es de ahora\./u);
 });
 
 // --- El boletín: se cita, no se reescribe ---------------------------------------------------------

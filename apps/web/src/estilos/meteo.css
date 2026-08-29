@@ -91,6 +91,24 @@
   color: var(--m-sub);
 }
 
+/* --- El anuncio a los lectores de pantalla -------------------------------- */
+/* Región viva de la sección: no se ve, se oye. Se oculta con el recorte de un
+   píxel y no con `display: none` ni `visibility: hidden`, que sacan el nodo del
+   árbol de accesibilidad y lo dejarían mudo — que es justo lo contrario de para
+   lo que está. Sin `position: absolute` un párrafo de 1 px seguiría abriendo hueco
+   en la columna flex de la sección. */
+.meteo__anuncio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* --- Los bloques: mar, atmósfera y boletín ------------------------------- */
 .meteo__bloques {
   display: grid;

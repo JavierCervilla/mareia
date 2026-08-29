@@ -34,8 +34,6 @@ test("A9 · el cambio de estado de la sección se anuncia a un lector de pantall
   page,
   qa,
 }) => {
-  test.fail();
-
   qa.step("cargar la página con el API sirviendo un dato normal");
   await montarApi(page, { cuerpo: fixture("weather-ok") }, { cuerpo: fixture("bulletin-ok") });
   await page.goto(PAGINA);

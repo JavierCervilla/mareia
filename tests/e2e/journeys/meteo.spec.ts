@@ -245,6 +245,25 @@ test("un hueco del modelo se lee distinto de una fuente caída", async ({ page }
   expect(sinSalidasNuevas(escapes), "origen externo nuevo").toEqual(EXTERNOS_CONOCIDOS);
 });
 
+// --- Lo que oye quien no mira la pantalla ------------------------------------------------------
+
+test("el cambio de estado se anuncia: la región viva dice qué ha pasado con cada fuente", async ({
+  page,
+}) => {
+  // La región viva viaja VACÍA en el HTML construido, para que el lector de pantalla la registre
+  // antes de que cambie. Que exista no basta —una región viva vacía es tan muda como no tenerla—,
+  // así que aquí se afirma lo que DICE cuando llega el dato.
+  const escapes = await montarApi(page, "weather-ok", "bulletin-sin-clave");
+  await page.goto(PAGINA);
+
+  const anuncio = page.locator(`${SECCION} [data-meteo-anuncio]`);
+  await expect(anuncio).toHaveText(/Estado del mar, ya está en la página\./u);
+  await expect(anuncio).toHaveText(/Boletín marítimo de AEMET, no se ha podido traer\./u);
+  // Y no lleva la edad: si la llevara, el lector interrumpiría cada minuto para cantarla.
+  await expect(anuncio).not.toContainText("hace");
+  expect(sinSalidasNuevas(escapes), "origen externo nuevo").toEqual(EXTERNOS_CONOCIDOS);
+});
+
 // --- Degradación parcial ---------------------------------------------------------------------
 
 test("degradación parcial · el mar servido no se contagia de la atmósfera caída", async ({

@@ -34,12 +34,14 @@ import type {
   Traida,
   VistaMeteo,
 } from "../vista.ts";
-import { PIDIENDO, vistaMeteo } from "../vista.ts";
+import { PIDIENDO, anuncioDeLaSeccion, vistaMeteo } from "../vista.ts";
 
 /** Atributos que la sección construida en build le deja a la isla. */
 interface Anclaje {
   readonly seccion: HTMLElement;
   readonly aviso: HTMLElement;
+  /** La región viva donde se anuncia el cambio de estado (`role="status"`). */
+  readonly anuncio: HTMLElement | undefined;
   readonly bloques: HTMLElement;
   readonly base: string;
   readonly puerto: string;
@@ -63,7 +65,17 @@ function anclajeDe(seccion: HTMLElement): Anclaje | undefined {
   if (aviso === undefined || bloques === undefined || !puerto || !zona) {
     return undefined;
   }
-  return { seccion, aviso, bloques, base: seccion.dataset["meteoApi"] ?? "", puerto, zona };
+  return {
+    seccion,
+    aviso,
+    // La región viva es opcional a propósito: si un día falta en el HTML, la sección se sigue
+    // montando (muda para el lector, que es peor, pero no rota para todos, que sería peor aún).
+    anuncio: elementoPorDato(seccion, "data-meteo-anuncio"),
+    bloques,
+    base: seccion.dataset["meteoApi"] ?? "",
+    puerto,
+    zona,
+  };
 }
 
 /**
@@ -202,10 +214,23 @@ function pintarBloque(bloque: BloqueMeteo): HTMLElement {
   return nodo;
 }
 
+/**
+ * Anuncia el estado de la sección a quien navega con lector de pantalla, y **solo cuando cambia**:
+ * escribir la misma frase otra vez en una región viva la vuelve a leer en voz alta, y el latido del
+ * sello pasa por aquí cada medio minuto.
+ */
+function anunciar(anclaje: Anclaje, vista: VistaMeteo): void {
+  const frase = anuncioDeLaSeccion(vista);
+  if (anclaje.anuncio !== undefined && anclaje.anuncio.textContent !== frase) {
+    anclaje.anuncio.textContent = frase;
+  }
+}
+
 /** Vuelca la vista sobre la sección, sustituyendo lo que hubiera. */
 function pintar(anclaje: Anclaje, vista: VistaMeteo): void {
   anclaje.bloques.replaceChildren(...vista.bloques.map(pintarBloque));
   anclaje.bloques.hidden = false;
+  anunciar(anclaje, vista);
   if (vista.resumen === undefined) {
     anclaje.aviso.hidden = true;
     anclaje.aviso.replaceChildren();
@@ -235,6 +260,9 @@ function resellar(anclaje: Anclaje, vista: VistaMeteo): void {
       viejo.replaceWith(nuevo);
     }
   }
+  // Un dato que cruza su ventana de frescura con la página abierta es una noticia, y quien no ve
+  // la pantalla también tiene derecho a enterarse.
+  anunciar(anclaje, vista);
 }
 
 /**
