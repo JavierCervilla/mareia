@@ -1,0 +1,209 @@
+/* =============================================================================
+ * Sección meteo (módulo `weather`, T-11).
+ *
+ * Hereda todo lo que puede del almanaque —`.bloque`, `.etiqueta`, `.datos` y sus
+ * filas— porque esta sección es una página de anuario más y no un widget de otro
+ * producto: si tuviera su propia retícula y su propio cuerpo, se leería como un
+ * pegote de dashboard dentro de la página (design-brief §3, anti-objetivos).
+ *
+ * Lo único propio de aquí es **el sello de antigüedad**, que es la razón de ser de
+ * la trayectoria: cada bloque dice de cuándo es lo que enseña, y los tres estados
+ * —fresco, caducado y sin dato— se distinguen sin depender del color. El color solo
+ * refuerza; lo que separa los estados es el texto («Consultado hace 4 minutos» /
+ * «Dato de hace 3 h 10 min» / «No se ha podido traer») y el filete de la izquierda.
+ * En papel, donde la paleta colapsa a negro sobre blanco, siguen distinguiéndose.
+ * ========================================================================== */
+
+.meteo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* `hidden` tiene que GANARLE a `display: flex`/`grid`. El atributo lo aplica la hoja de la UA con
+   menos especificidad que cualquier clase, así que sin esta regla un contenedor oculto por la isla
+   sigue ocupando su sitio: el hueco de los bloques todavía vacío y —peor— el filete del aviso de
+   carga debajo del dato ya cargado, como si quedara algo por llegar. */
+.meteo [hidden] {
+  display: none;
+}
+
+/* --- El sello de antigüedad ---------------------------------------------- */
+/* Mismo tratamiento que los avisos del puerto (filete a la izquierda, sin caja ni
+   sombra): es una advertencia sobre el dato, y en esta página las advertencias se
+   escriben así. */
+.meteo__sello {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-left: 3px solid var(--m-rule-soft);
+  padding: 6px 0 6px 12px;
+  font-size: var(--m-text-body);
+}
+
+.meteo__sello-titular {
+  font-weight: 600;
+}
+
+.meteo__sello-detalle {
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+  /* La otra puerta del desbordamiento de H-5: aquí cae el `reason` del backend, que es texto que no
+     escribimos nosotros y puede traer la URL que falló. Medido con una sonda sobre el `dist/`
+     servido: un motivo con la URL de Open-Meteo desbordaba 49 px a 320. Misma cura y por la misma
+     razón que en `.meteo__cita`. */
+  overflow-wrap: anywhere;
+}
+
+/* Fresco: el filete se apaga. Un dato de ahora no necesita llamar la atención, y
+   destacarlo restaría contraste justo a los dos estados que sí lo necesitan. */
+.meteo__sello--fresco {
+  border-left-color: var(--m-rule-soft);
+}
+
+.meteo__sello--fresco .meteo__sello-titular {
+  font-weight: 400;
+  color: var(--m-sub);
+}
+
+/* Caducado: el acento de los avisos y el titular en negrita, porque la edad del
+   dato es lo primero que hay que leer del bloque. */
+.meteo__sello--caducado {
+  border-left-color: var(--m-terra);
+}
+
+.meteo__sello--caducado .meteo__sello-titular {
+  color: var(--m-terra);
+}
+
+/* Sin dato: filete de tinta llena. No es un aviso sobre el dato, es la ausencia de
+   dato, y se distingue del caducado por el texto y por el tono del filete. */
+.meteo__sello--sin-dato {
+  border-left-color: var(--m-ink);
+}
+
+/* Pidiendo: el bloque ya está, su dato viene de camino. Se compone como el fresco
+   —filete apagado, titular sin negrita— porque es un estado de paso y no una
+   advertencia; lo que no puede es parecerse a un dato. Cada bloque dice QUÉ está
+   pidiendo, porque desde T-11 los dos endpoints se pintan por separado y en la
+   misma pantalla puede haber uno servido y otro esperando. */
+.meteo__sello--pidiendo {
+  border-left-color: var(--m-rule-soft);
+}
+
+.meteo__sello--pidiendo .meteo__sello-titular {
+  font-weight: 400;
+  color: var(--m-sub);
+}
+
+/* --- El anuncio a los lectores de pantalla -------------------------------- */
+/* Región viva de la sección: no se ve, se oye. Se oculta con el recorte de un
+   píxel y no con `display: none` ni `visibility: hidden`, que sacan el nodo del
+   árbol de accesibilidad y lo dejarían mudo — que es justo lo contrario de para
+   lo que está. Sin `position: absolute` un párrafo de 1 px seguiría abriendo hueco
+   en la columna flex de la sección. */
+.meteo__anuncio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- Los bloques: mar, atmósfera y boletín ------------------------------- */
+.meteo__bloques {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--m-gap-bloque);
+}
+
+.meteo__bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Un hueco del modelo se escribe en cursiva y en cuerpo pequeño, como las ausencias
+   de sol y luna: es una frase, no un número, y no debe alinearse como si lo fuera. */
+.meteo__ausencia {
+  font-size: var(--m-text-meta);
+  font-style: italic;
+  color: var(--m-sub);
+}
+
+/* --- La cita del boletín de AEMET ---------------------------------------- */
+/* Es una cita literal de un tercero y se compone como tal: sangrada, con filete y
+   con su autoría al pie. Que se lea como cita es parte de la honestidad de la
+   página — el texto es de AEMET, no nuestro. */
+.meteo__cita {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-left: 1px solid var(--m-rule-soft);
+  padding-left: 14px;
+  font-size: var(--m-text-body);
+  /* El texto es AJENO y no se reescribe, así que puede traer una palabra que no quepa: AEMET pone
+     enlaces a su propio boletín en el suyo (84 caracteres sin un espacio). El mínimo de contenido
+     de un hijo flex es su palabra más larga, y sin política de partición esa palabra le imponía el
+     ancho a toda la sección: +170 px de desplazamiento horizontal a 320 px, con la página entera
+     moviéndose de lado en el móvil (hallazgo H-5 del pase adversario).
+     `anywhere` y no `break-word` porque solo `anywhere` BAJA el ancho mínimo de contenido —
+     `break-word` parte al pintar pero sigue midiendo la palabra entera y el desborde se queda. */
+  overflow-wrap: anywhere;
+}
+
+.meteo__cita-rotulo {
+  display: block;
+  font-size: var(--m-text-eyebrow);
+  letter-spacing: var(--m-track-label);
+  text-transform: uppercase;
+  color: var(--m-sub);
+}
+
+.meteo__cita-pie {
+  font-size: var(--m-text-meta);
+  font-style: italic;
+  color: var(--m-sub);
+}
+
+.meteo__nota {
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+}
+
+/* --- Fuentes y descargo -------------------------------------------------- */
+/* Las atribuciones van EN la sección, no solo en el pie: las licencias de
+   Open-Meteo (CC-BY 4.0) y de AEMET piden reconocimiento junto al dato, y quien lee
+   solo esta sección tiene que ver de quién es. */
+.meteo__fuentes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  border-top: 1px solid var(--m-rule-soft);
+  padding-top: 8px;
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+}
+
+.meteo__descargo {
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+}
+
+/* Escritorio: mar y atmósfera en paralelo (se leen juntos, uno explica al otro) y
+   el boletín cruzando debajo, que es un texto y necesita medida de lectura. */
+@media (min-width: 1100px) {
+  .meteo__bloques {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 32px;
+  }
+
+  #meteo-boletin {
+    grid-column: 1 / -1;
+  }
+}

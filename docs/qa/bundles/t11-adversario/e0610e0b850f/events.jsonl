@@ -1,0 +1,3 @@
+{"at":11,"kind":"step","text":"inyectar la carga en el dist/: nombre de atributo con dos puntos"}
+{"at":11,"kind":"step","text":"comprobar que la carga está DE VERDAD en el HTML publicado, dentro de #meteo"}
+{"at":13,"kind":"step","text":"correr el gate de ADR-01 tal cual lo corre CI"}

@@ -1,0 +1,58 @@
+{
+  "port": {
+    "slug": "vigo",
+    "lat": 42.2406,
+    "lon": -8.7207
+  },
+  "cell": {
+    "lat": 42.2,
+    "lon": -8.7
+  },
+  "status": "ok",
+  "marine": {
+    "status": "ok",
+    "fetchedAt": "2026-08-28T17:49:00Z",
+    "ageSeconds": 0,
+    "stale": false,
+    "data": {
+      "observedAt": "2026-08-28T17:45:00Z",
+      "waveHeightM": 1.68,
+      "waveDirectionDeg": 287,
+      "wavePeriodS": 8.9,
+      "windWaveHeightM": 0,
+      "windWaveDirectionDeg": 238,
+      "windWavePeriodS": 0.1,
+      "swellWaveHeightM": 1.68,
+      "swellWaveDirectionDeg": 287,
+      "swellWavePeriodS": 7.45,
+      "seaSurfaceTemperatureC": 18.3
+    }
+  },
+  "forecast": {
+    "status": "ok",
+    "fetchedAt": "2026-08-28T17:49:00Z",
+    "ageSeconds": 0,
+    "stale": false,
+    "data": {
+      "observedAt": "2026-08-28T17:45:00Z",
+      "windSpeedKmh": 9.4,
+      "windDirectionDeg": 272,
+      "windGustsKmh": 20.2,
+      "pressureMslHpa": 1021.5,
+      "visibilityM": 33600,
+      "uvIndex": 1.3
+    }
+  },
+  "attributions": [
+    {
+      "name": "Open-Meteo",
+      "url": "https://open-meteo.com/",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "name": "AEMET — Agencia Estatal de Meteorología",
+      "url": "https://www.aemet.es/es/nota_legal",
+      "license": "Uso condicionado al reconocimiento de AEMET como autora de los datos"
+    }
+  ]
+}

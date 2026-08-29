@@ -13,6 +13,8 @@
 export interface ContextoDeSeccion {
   /** Slug del puerto en el catálogo (`a-coruna`). */
   readonly slug: string;
+  /** Nombre del puerto tal como se escribe («A Coruña»): una sección habla del sitio, no del slug. */
+  readonly nombre: string;
   /** Día civil que publica la página, `YYYY-MM-DD` (el `BUILD_DATE`). */
   readonly fechaIso: string;
   /** Zona IANA del puerto: toda hora que se imprima se proyecta a ella. */

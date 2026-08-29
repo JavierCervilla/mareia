@@ -1,0 +1,6 @@
+{"at":4,"kind":"step","text":"servir 200 con sin el bloque marine (backend a medio desplegar)"}
+{"at":56,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":76,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":76,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":149,"kind":"step","text":"esperar a que la sección resuelva a alguno de sus cuatro estados"}
+{"at":175,"kind":"pageerror","text":"Cannot read properties of undefined (reading 'status')","detail":"TypeError: Cannot read properties of undefined (reading 'status')\n    at j (http://127.0.0.1:4321/_astro/Meteo.astro_astro_type_script_index_0_lang.BDu69t5Y.js:1:3432)\n    at H (http://127.0.0.1:4321/_astro/Meteo.astro_astro_type_script_index_0_lang.BDu69t5Y.js:1:5870)\n    at ee (http://127.0.0.1:4321/_astro/Meteo.astro_astro_type_script_index_0_lang.BDu69t5Y.js:1:9028)"}

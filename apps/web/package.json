@@ -16,6 +16,7 @@
     "@mareia/domain-core": "workspace:*",
     "@mareia/module-fishing": "workspace:*",
     "@mareia/module-contract": "workspace:*",
+    "@mareia/module-weather": "workspace:*",
     "@mareia/ui": "workspace:*",
     "@mareia/usecases": "workspace:*",
     "astro": "^7.2.9"

@@ -1,0 +1,82 @@
+---
+/**
+ * La sección meteo del módulo `weather` en la página de puerto.
+ *
+ * Lo que se construye en build es **el marco y el cuarto estado**: el título, las atribuciones y la
+ * frase que explica que el dato todavía no ha llegado. Ninguna magnitud meteorológica entra en el
+ * HTML, y eso es la decisión de ADR-01, no una omisión: un dato que caduca en media hora dentro de
+ * una página que se reconstruye una vez al día llegaría viejo y —lo grave— sin poder decir cuánto.
+ * El dato lo trae la isla (`../modulos/meteo/cliente/isla.ts`) y llega con su sello de antigüedad.
+ *
+ * Consecuencia buscada: si el navegador no ejecuta JavaScript, o si el API está caído, esta sección
+ * **explica el hueco** en lugar de quedarse muda o, peor, de enseñar un número de ayer con cara de
+ * hoy. Y las atribuciones se ven igual, porque son estáticas: no dependen de que la petición salga.
+ */
+import { WEATHER_UI_MODULE } from "@mareia/module-weather/ui";
+
+import { API_BASE } from "../modulos/meteo/api.ts";
+import type { ContextoDeSeccion } from "../modulos/contexto.ts";
+
+interface Props {
+  contexto: ContextoDeSeccion;
+}
+
+const { contexto } = Astro.props;
+---
+
+<div
+  class="meteo"
+  data-meteo-puerto={contexto.slug}
+  data-meteo-zona={contexto.timezone}
+  data-meteo-api={API_BASE}
+  aria-busy="false"
+>
+  <h2 class="bloque__titulo" id="titulo-meteo">Estado del mar y del cielo en {contexto.nombre}</h2>
+
+  <p class="meteo__sello meteo__sello--sin-dato" data-meteo-aviso>
+    <strong class="meteo__sello-titular">El estado del mar todavía no ha llegado</strong>
+    <span class="meteo__sello-detalle">
+      Esta sección no viaja dentro de la página: se pide al servidor al abrirla, porque la meteo
+      caduca en horas y esta página se construye una vez al día. Si sigues leyendo esto, o la
+      petición no ha terminado o tu navegador no ejecuta JavaScript. El resto de la página —mareas,
+      curva, sol y luna— no lo necesita y ya está completa.
+    </span>
+  </p>
+
+  {/*
+    La región viva de la sección. Viaja VACÍA en el HTML, y a propósito: un `role="status"` que
+    aparece en el DOM a la vez que su texto no lo anuncia nadie —el lector de pantalla tiene que
+    haberlo registrado antes de que cambie—, así que su sitio es el build y no la isla, que lo
+    rellena con una frase corta cada vez que la sección cambia de ESTADO. Existe porque `aria-busy`
+    dice «esto está cambiando, no lo leas todavía» y no anuncia nada: quien navega con lector de
+    pantalla se quedaba en «El estado del mar todavía no ha llegado» aunque el dato llegara, aunque
+    la fuente se cayera y aunque lo que hubiera en pantalla fuese de hace tres horas (hallazgo H-7
+    del pase adversario). No se ve porque para quien mira la pantalla la noticia ya está en los
+    bloques; duplicarla sería ruido.
+  */}
+  <p class="meteo__anuncio" data-meteo-anuncio role="status" aria-live="polite"></p>
+
+  <div class="meteo__bloques" data-meteo-bloques hidden></div>
+
+  <p class="meteo__fuentes">
+    <span class="etiqueta etiqueta--corta">Fuentes de esta sección</span>
+    {
+      WEATHER_UI_MODULE.attributions.map((fuente) => (
+        <span class="meteo__fuente">
+          <a href={fuente.url}>{fuente.name}</a> · {fuente.license}
+        </span>
+      ))
+    }
+  </p>
+
+  <p class="meteo__descargo">
+    Predicción de modelo numérico y boletín oficial, para saber con qué se va a encontrar quien
+    llegue a la orilla. <strong>No apto para navegación.</strong>
+  </p>
+</div>
+
+<script>
+  import { montarIslaMeteo } from "../modulos/meteo/cliente/isla.ts";
+
+  montarIslaMeteo();
+</script>

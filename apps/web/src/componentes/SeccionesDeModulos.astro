@@ -2,13 +2,15 @@
 /**
  * Los trozos de página que aportan los **módulos** (contrato `AppModule`, T-06).
  *
- * Desde T-10 renderiza la sección de actividad solunar del módulo `fishing`; meteo llega en T-11.
- * Dar de alta un módulo con interfaz sigue siendo editar el registry y añadir su renderizador, sin
- * cirugía en esta plantilla.
+ * Desde T-10 renderiza la sección de actividad solunar de `fishing` y desde T-11 la de meteo. Lo
+ * que no cambia es el mecanismo: dar de alta (o de baja) un módulo con interfaz es editar el
+ * registry y su renderizador, sin cirugía en esta plantilla; con el registry vacío no pinta nada y
+ * la página sigue construyendo.
  *
- * A cada sección se le pasa el **contexto** de la página (qué puerto, qué día, qué zona horaria) y
- * nada más: cada una le pide sus datos a los casos de uso. Pasarles el dato ya resuelto ataría esta
- * plantilla a lo que necesite el módulo de turno.
+ * A cada sección se le pasa el **contexto** del puerto —slug, nombre y zona horaria— y nada más:
+ * cada una le pide su dato a quien corresponda. Es lo mínimo con lo que un módulo puede hablar del
+ * sitio y escribir horas en la hora del sitio, y pasarle el dato ya resuelto ataría esta plantilla
+ * a lo que necesite el módulo de turno.
  *
  * Y falla ruidoso: si un módulo declara una sección cuyo `component` nadie sabe renderizar, el
  * build se rompe nombrándola. La alternativa —ignorarla— publicaría 12 páginas a las que les falta

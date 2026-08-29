@@ -1,0 +1,5 @@
+{"at":4,"kind":"step","text":"cargar la página con el API sirviendo un dato normal"}
+{"at":49,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":79,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":79,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":220,"kind":"step","text":"mirar si algo de la sección declara región viva"}

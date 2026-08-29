@@ -1,0 +1,43 @@
+{
+  "snapshotId": "e0610e0b850f",
+  "runId": "t11-adversario",
+  "test": {
+    "title": "adversarial/a12-trinquete-adr01-permeable.spec.ts > A12 · el gate de ADR-01 tiene que ver una magnitud escondida en nombre de atributo con dos puntos",
+    "file": "/home/user/mareia-t11/tests/e2e/journeys/adversarial/a12-trinquete-adr01-permeable.spec.ts",
+    "line": 106,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 434,
+  "urlAtFailure": "about:blank",
+  "error": {
+    "message": "Error: el gate de ADR-01 da por bueno un HTML con meteo horneada dentro de #meteo\n\nexpect(received).not.toBe(expected) // Object.is equality\n\nExpected: not 0",
+    "stack": "Error: el gate de ADR-01 da por bueno un HTML con meteo horneada dentro de #meteo\n\nexpect(received).not.toBe(expected) // Object.is equality\n\nExpected: not 0\n    at /home/user/mareia-t11/tests/e2e/journeys/adversarial/a12-trinquete-adr01-permeable.spec.ts:135:13"
+  },
+  "events": [
+    {
+      "at": 11,
+      "kind": "step",
+      "text": "inyectar la carga en el dist/: nombre de atributo con dos puntos"
+    },
+    {
+      "at": 11,
+      "kind": "step",
+      "text": "comprobar que la carga está DE VERDAD en el HTML publicado, dentro de #meteo"
+    },
+    {
+      "at": 13,
+      "kind": "step",
+      "text": "correr el gate de ADR-01 tal cual lo corre CI"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

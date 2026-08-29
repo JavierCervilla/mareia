@@ -1,0 +1,58 @@
+{
+  "port": {
+    "slug": "tierra-adentro",
+    "lat": 42.2,
+    "lon": -7.5
+  },
+  "cell": {
+    "lat": 42.2,
+    "lon": -7.5
+  },
+  "status": "ok",
+  "marine": {
+    "status": "ok",
+    "fetchedAt": "2026-08-28T17:49:00Z",
+    "ageSeconds": 0,
+    "stale": false,
+    "data": {
+      "observedAt": "2026-08-28T17:45:00Z",
+      "waveHeightM": null,
+      "waveDirectionDeg": null,
+      "wavePeriodS": null,
+      "windWaveHeightM": null,
+      "windWaveDirectionDeg": null,
+      "windWavePeriodS": null,
+      "swellWaveHeightM": null,
+      "swellWaveDirectionDeg": null,
+      "swellWavePeriodS": null,
+      "seaSurfaceTemperatureC": null
+    }
+  },
+  "forecast": {
+    "status": "ok",
+    "fetchedAt": "2026-08-28T17:49:00Z",
+    "ageSeconds": 0,
+    "stale": false,
+    "data": {
+      "observedAt": "2026-08-28T17:45:00Z",
+      "windSpeedKmh": 7,
+      "windDirectionDeg": 282,
+      "windGustsKmh": 36.4,
+      "pressureMslHpa": 1021.6,
+      "visibilityM": 27940,
+      "uvIndex": 1.15
+    }
+  },
+  "attributions": [
+    {
+      "name": "Open-Meteo",
+      "url": "https://open-meteo.com/",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "name": "AEMET — Agencia Estatal de Meteorología",
+      "url": "https://www.aemet.es/es/nota_legal",
+      "license": "Uso condicionado al reconocimiento de AEMET como autora de los datos"
+    }
+  ]
+}

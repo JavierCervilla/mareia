@@ -12,9 +12,11 @@
     "build": "pnpm --filter web build",
     "lint": "eslint .",
     "test": "pnpm -r --if-present test",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/node": "^22.20.1",
     "eslint": "^9.39.5",
     "eslint-plugin-astro": "^3.1.0",

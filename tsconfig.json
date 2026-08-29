@@ -16,6 +16,21 @@
     "types/*.d.ts",
     "apps/web/src/**/*.ts",
     "packages/*/src/**/*.ts",
-    "packages/modules/*/src/**/*.ts"
+    "packages/modules/*/src/**/*.ts",
+    // Los recorridos Playwright y su servidor estático (T-11). Entran aquí porque son código que
+    // se ejecuta y puede romperse: un locator que ya no existe o un fixture renombrado tienen que
+    // salir en el typecheck y no la primera vez que alguien corre el navegador.
+    "playwright.config.ts",
+    "tests/e2e/**/*.ts"
+  ],
+  // Ficheros de la web que solo existen dentro del entorno de Astro y que ESTE tsconfig no puede
+  // tipar: `lib` se queda en ES2022 a propósito —el dominio no tiene DOM, y así no puede usarlo sin
+  // darse cuenta— y `tsc` no entiende un import de `.astro`. No quedan sin comprobar: `astro check`
+  // los tipa con la config de `apps/web` (que extiende `astro/tsconfigs/strict`, con lib DOM y el
+  // plugin de Astro) y es gate del job `web` de CI, al lado de este `tsc --noEmit`. Verificado con
+  // sonda: un error de tipo en un `.ts` de `apps/web` sale por `astro check`.
+  "exclude": [
+    "apps/web/src/secciones.ts",
+    "apps/web/src/modulos/meteo/cliente/**"
   ]
 }

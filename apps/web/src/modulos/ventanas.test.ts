@@ -17,6 +17,7 @@ import { VENTANAS_DE_SECCION, ventanasDeSecciones } from "./ventanas.ts";
 
 const VIGO: ContextoDeSeccion = {
   slug: "vigo",
+  nombre: "Vigo",
   fechaIso: "2026-08-28",
   timezone: "Europe/Madrid",
 };

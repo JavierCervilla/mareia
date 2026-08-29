@@ -36,18 +36,19 @@ export { AEMET_ATTRIBUTION, AEMET_BASE_URL, fetchCoastalBulletin } from "./aemet
 export type { CoastalZone } from "./zones.ts";
 export { COASTAL_ZONES, zoneForPort } from "./zones.ts";
 
+export { WEATHER_ATTRIBUTIONS, WEATHER_MODULE_VERSION } from "./meta.ts";
+
 export type {
   BulletinData,
   BulletinPayload,
   PortLocation,
-  PortLocationRepository,
-  WeatherModuleDeps,
   WeatherPayload,
-} from "./module.ts";
-export {
-  BULLETIN_TTL_SECONDS,
-  FORECAST_TTL_SECONDS,
-  MARINE_TTL_SECONDS,
-  WEATHER_MODULE_VERSION,
-  createWeatherModule,
-} from "./module.ts";
+} from "./payload.ts";
+
+export { METEO_SECTION_COMPONENT, WEATHER_PAGE_SECTIONS, WEATHER_UI_MODULE } from "./ui.ts";
+
+export type { PortLocationRepository, WeatherModuleDeps } from "./module.ts";
+export { createWeatherModule } from "./module.ts";
+
+// Las ventanas de frescura viven aparte porque también las necesita la UI (ver `frescura.ts`).
+export { BULLETIN_TTL_SECONDS, FORECAST_TTL_SECONDS, MARINE_TTL_SECONDS } from "./frescura.ts";

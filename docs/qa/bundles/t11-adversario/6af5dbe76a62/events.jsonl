@@ -1,0 +1,13 @@
+{"at":4,"kind":"step","text":"caso A: el API contesta 200 con un cuerpo que no es JSON (un proxy de por medio)"}
+{"at":58,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":77,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":77,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":246,"kind":"step","text":"caso B: la petición ni siquiera sale (el API está caído de verdad)"}
+{"at":275,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":290,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":290,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":317,"kind":"requestfailed","text":"GET http://127.0.0.1:4321/v1/modules/weather/weather?port=vigo","detail":"net::ERR_CONNECTION_REFUSED"}
+{"at":317,"kind":"console","text":"[error] Failed to load resource: net::ERR_CONNECTION_REFUSED"}
+{"at":317,"kind":"requestfailed","text":"GET http://127.0.0.1:4321/v1/modules/weather/bulletin?port=vigo","detail":"net::ERR_CONNECTION_REFUSED"}
+{"at":317,"kind":"console","text":"[error] Failed to load resource: net::ERR_CONNECTION_REFUSED"}
+{"at":373,"kind":"step","text":"comparar las dos frases: son dos ausencias distintas y tienen que leerse distinto"}

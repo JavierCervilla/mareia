@@ -33,10 +33,12 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { activeModules } from "./modules.config.ts";
 import { cargarPuertos } from "./datos/catalogo.ts";
 import { cargarDatosDePuerto } from "./datos/pagina-puerto.ts";
 import { escaparMarcado } from "./escapar-marcado.ts";
 import { alturaEn, trazarCurvaMarea } from "./grafico-marea.ts";
+import { rutaPuerto } from "./rutas.ts";
 import type { EntradaCurva } from "./grafico-marea.ts";
 
 const DIST = join(dirname(fileURLToPath(import.meta.url)), "..", "dist");
@@ -355,25 +357,51 @@ test("A-7 · el tema forzado por data-theme ajusta también el color-scheme", (t
 // =================================================================================================
 
 /**
- * Promesa 2 · cero JavaScript de cliente.
+ * Promesa 2 · cero JavaScript de cliente **en el core**.
  *
- * El único `<script>` admitido es el `application/ld+json` del SEO: son datos declarativos que el
- * navegador no ejecuta ni descarga aparte. Cualquier otro —con `src`, con módulo o con código
- * dentro— rompe la promesa, y con ella el argumento de que la página se abre sin cobertura.
+ * RE-APUNTADO en T-11, no relajado. Hasta T-10 el gate exigía cero `<script>` ejecutable en todo el
+ * sitio, y era la formulación correcta mientras la única fuente de la página era la astronomía: un
+ * dato que se calcula meses antes no necesita hidratarse. La meteo del módulo `weather` sí caduca, y
+ * hornearla en build la haría envejecer dentro del HTML sin poder decir cuánto (`docs/adr/ADR-01`).
+ * El design brief ya reservaba esa puerta y solo esa: «si una sección necesita hidratación, es una
+ * isla de módulo y entra por el contrato `AppModule`».
+ *
+ * Así que la promesa que se vigila ahora es más estrecha y más comprobable que «cero scripts»: el
+ * JavaScript que se sirve tiene que estar **declarado en el registry** como `renderMode: "island"`.
+ * Ni uno más, ni inline, ni manejadores en atributos, ni hidratación de framework. Una isla que se
+ * cuele sin declararse —o un `client:load` en una página del core— sigue poniendo esto en rojo, y el
+ * argumento de que la página se lee sin cobertura sigue en pie para todo lo que no es el módulo.
  */
-test("promesa 2 · el HTML construido no trae JavaScript de cliente", (t) => {
+test("promesa 2 · el único JavaScript del sitio son las islas declaradas en el registry", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
   }
+  const islasDeclaradas = activeModules
+    .flatMap((modulo) => modulo.pageSections ?? [])
+    .filter((seccion) => seccion.renderMode === "island").length;
+  const paginasDePuerto = new Set(
+    (await cargarPuertos()).map((puerto) => join(DIST, rutaPuerto(puerto), "index.html")),
+  );
+
   for (const pagina of paginasConstruidas()) {
     const html = readFileSync(pagina, "utf8");
     const nombre = relative(DIST, pagina);
-    const scripts = [...html.matchAll(/<script[^>]*>/g)].map((etiqueta) => etiqueta[0]);
-    const ejecutables = scripts.filter(
-      (etiqueta) => !etiqueta.includes('type="application/ld+json"'),
+    const ejecutables = [...html.matchAll(/<script[^>]*>/g)]
+      .map((etiqueta) => etiqueta[0])
+      .filter((etiqueta) => !etiqueta.includes('type="application/ld+json"'));
+
+    // Solo las páginas de puerto llevan secciones de módulo; el resto del sitio sigue en cero.
+    const permitidos = paginasDePuerto.has(pagina) ? islasDeclaradas : 0;
+    assert.equal(
+      ejecutables.length,
+      permitidos,
+      `${nombre}: se sirven ${ejecutables.length} scripts y el registry declara ${permitidos}`,
     );
-    assert.deepEqual(ejecutables, [], `${nombre}: hay <script> ejecutable en la página construida`);
+    for (const etiqueta of ejecutables) {
+      // Con `src`: el código va en un fichero cacheable y auditable, no incrustado en 12 páginas.
+      assert.match(etiqueta, /^<script type="module" src="\/_astro\/[^"]+\.js">$/u, nombre);
+    }
     assert.deepEqual([...html.matchAll(/\son[a-z]+="/g)].map((atributo) => atributo[0]), [], nombre);
     assert.ok(!html.includes("astro-island"), `${nombre}: hay una isla hidratada en la página`);
   }
