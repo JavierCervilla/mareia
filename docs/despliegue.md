@@ -34,6 +34,16 @@ La imagen final es la base `nginx:alpine` (94,2 MB / 26,28 MB comprimida) **más
 todo lo demás se queda en la primera etapa. Comprobado sobre la imagen construida: `node`, `npm`,
 `pnpm` y `corepack` no existen en ella, y no hay ningún `node_modules`.
 
+Las **dos bases van fijadas por digest**, no solo por el tag. `22-alpine` y `alpine` son etiquetas
+móviles, y con el rebuild diario de T-15 la base cambiaría bajo los pies **sin que ningún commit lo
+cuente**: la avería llegaría un martes sin que nada del repo hubiera cambiado. Así, subir la base es
+un cambio que se revisa:
+
+```sh
+docker pull node:22-alpine
+docker image inspect node:22-alpine --format '{{index .RepoDigests 0}}'   # y al Dockerfile
+```
+
 ### Los dos `ARG`
 
 - **`SITE_URL`** (por defecto `https://mareia.cervilla.es`): de él cuelgan las **canónicas** y el
@@ -76,6 +86,23 @@ rutas: nginx hace de serie las tres cosas que este sitio necesita, **sin ningún
    SPA: devolvería la portada con un 200 y le diría a un buscador que cada URL inventada es una
    página real del portal. Este sitio es SSG y su motivo de existir es el SEO.
 
+4. **Ninguna superficie de error ajena al portal**, que es la misma idea llevada hasta el final.
+   Un directorio real sin `index.html` —`/_astro/`, donde viven los assets— responde 403, y por
+   defecto lo contestaría la página de error **compilada en nginx**: en inglés, ajena al portal y
+   con la marca `nginx` a pesar del `server_tokens off`. `error_page 403 =404 /404.html` la
+   sustituye por la del portal, **con estado 404 y no 403** a propósito: un 403 confirma que ese
+   directorio existe, y de cara afuera este sitio no tiene más superficie que sus páginas.
+5. **La raíz web de la base se vacía antes de copiar el `dist/`**. `COPY` **fusiona, no limpia**:
+   sin ese `rm -rf`, los ficheros de la base que el sitio no pisa sobreviven, y `/50x.html`
+   respondía **200** con una página en inglés que no es del portal y que publica la marca `nginx`.
+   Una URL del dominio que contesta 200 con algo ajeno es exactamente lo que no puede pasar.
+
+Quedan tres respuestas que nginx genera él y que **no son navegables**: el cuerpo del 301 (que
+ningún visitante llega a ver), el **405** ante un método no soportado (`POST /`) y el **414** ante
+una URI desmedida. Medidas, no supuestas. No se han tocado porque `error_page` sobre esos códigos
+tiene semántica sutil —el 405 se decide antes de leer el cuerpo de la petición— y convertirlos en
+404 sería mentir sobre lo que ha pasado; ninguna publica versión y a ninguna se llega navegando.
+
 Además, y por reducir superficie: `server_tokens off`, sin autoindex, el `server` por defecto del
 puerto 80 borrado, los logs al stdout/stderr del contenedor (que es lo que lee Dokploy) y el
 proceso **corriendo como el usuario `nginx`, no como root** — el 3000 está por encima de 1024, así
@@ -98,10 +125,28 @@ prueba y pasa a ser una opinión. Y hace falta una prueba porque **ésta es la a
 servidor que bindea al hostname del contenedor arranca sin quejarse, el contenedor queda `running`,
 el log dice «listo» y Traefik devuelve 502. Si esa línea no dice `0.0.0.0`, el 502 ya tiene causa.
 
-> **Aviso para la configuración en Dokploy**: la imagen **hereda un `EXPOSE 80`** de `nginx:alpine`
-> y Docker no permite deshacerlo, así que `docker ps` muestra `80/tcp` además del 3000. El puerto
-> real es el **3000** y ahí no hay nada escuchando en el 80: si el enrutado se dejara autodetectar y
-> cogiera el 80, el resultado sería otro 502. Hay que declarar el 3000 a mano.
+### El `EXPOSE 80` heredado, y por qué NO se escucha también en el 80
+
+La imagen **hereda un `EXPOSE 80`** de `nginx:alpine` y Docker no tiene `UNEXPOSE`, así que
+`docker ps` muestra `80/tcp` además del 3000. Como `ExposedPorts` es un mapa JSON sin orden y
+`80 < 3000`, cualquier heurística de «el primero» o «el menor» elegiría el puerto **malo** y
+volveríamos al 502. La tentación evidente es escuchar también en el 80 para que dé igual cuál se
+escoja. Se probó, y **se descarta**. Los dos experimentos:
+
+| escenario | resultado |
+|---|---|
+| `listen 0.0.0.0:80;` con los **defaults de Docker** (`net.ipv4.ip_unprivileged_port_start=0`) | funciona: 200 por el 80 **y** por el 3000 |
+| lo mismo con `--sysctl net.ipv4.ip_unprivileged_port_start=1024` (un entorno sin ese default) | `bind() to 0.0.0.0:80 failed (13: Permission denied)`, **nginx no arranca**, contenedor `exited (1)` y **el 3000 tampoco responde** |
+
+Es decir: escuchar en el 80 no añade una segunda vía, añade una **dependencia de arranque** sobre
+una condición del kernel del host que aquí no se puede verificar. Y el intercambio sale al revés de
+lo que parece: hoy, elegir mal el puerto daría un 502 con el sitio **vivo** en el 3000; con el
+`listen 80`, un bind denegado **mata el servidor entero**. Además el riesgo que evitaría ya está
+cerrado —el dominio tiene el 3000 declarado a mano en Dokploy—, así que se cambiaría un riesgo
+inexistente por uno real. Tampoco se baja a root ni se le ponen capacidades al binario para forzarlo.
+
+**Lo que hay que hacer, entonces**: declarar el **3000** a mano en Dokploy y no dejar que se
+autodetecte el puerto.
 
 ## Configuración en Dokploy
 
@@ -115,26 +160,31 @@ el log dice «listo» y Traefik devuelve 502. Si esa línea no dice `0.0.0.0`, e
 ## Comprobar la imagen antes de desplegar
 
 Es lo que hay que hacer siempre, y no mirando si el contenedor está `running`, sino pidiéndole las
-páginas. Las seis comprobaciones y su salida real sobre la imagen construida:
+páginas. Las ocho comprobaciones y su salida real sobre la imagen construida:
 
 ```sh
 docker build -f apps/web/Dockerfile -t mareia-web --build-arg BUILD_DATE=2026-08-29 .
 docker run -d --name mareia-web -p 3000:3000 mareia-web
-docker logs mareia-web | head -1
+docker logs mareia-web | head -1                    # 0. debe decir 0.0.0.0, no un id de contenedor
 
-# Las seis preguntas. Con `-w '%{http_code}'`, porque lo que importa es el ESTADO, no que salga algo.
+# Con `-w '%{http_code}'`: lo que importa es el ESTADO, no que salga algo por pantalla.
 B=http://localhost:3000
-curl -sS -o /dev/null -w '%{http_code}\n' $B/                                        # 200
-curl -sS -o /tmp/vigo.html -w '%{http_code}\n' $B/mareas/galicia/pontevedra/vigo/     # 200 + tabla
-curl -sS -o /dev/null -D - $B/mareas/galicia/pontevedra/vigo | grep -i '^location'    # 301 limpio
-curl -sS -o /dev/null -w '%{http_code}\n' $B/sitemap.xml                             # 200
-curl -sS -o /tmp/404.html -w '%{http_code}\n' $B/mareas/galicia/pontevedra/no-existe-este-puerto/
+curl -sS -o /dev/null -w '%{http_code}\n' $B/                                        # 1. 200
+curl -sS -o /tmp/vigo.html -w '%{http_code}\n' $B/mareas/galicia/pontevedra/vigo/     # 2. 200 + tabla
+curl -sS -o /dev/null -D - $B/mareas/galicia/pontevedra/vigo | grep -i '^location'    # 3. 301 relativo
+curl -sS -o /dev/null -w '%{http_code}\n' $B/sitemap.xml                             # 4. 200
+curl -sS -o /tmp/404.html -w '%{http_code}\n' $B/mareas/galicia/pontevedra/no-existe/ # 5. 404
 docker cp mareia-web:/usr/share/nginx/html/404.html /tmp/404-de-la-imagen.html
 diff /tmp/404.html /tmp/404-de-la-imagen.html   # el cuerpo del 404 ES el 404.html, no la portada
-docker run --rm --entrypoint sh mareia-web -c 'command -v node npm pnpm corepack'     # nada
+curl -sS -o /dev/null -w '%{http_code}\n' $B/50x.html                                # 6. 404, no 200
+curl -sS -o /tmp/astro.html -w '%{http_code}\n' $B/_astro/                            # 7. 404 del portal
+docker run --rm --entrypoint sh mareia-web -c 'command -v node npm pnpm corepack'     # 8. nada
 ```
 
 ```text
+### 0. log de arranque
+   [mareia] escucha: 0.0.0.0:3000 · raíz: /usr/share/nginx/html · publica el día: 2026-08-29
+
 ### 1. portada /
 HTTP 200  text/html  5951 bytes
 
@@ -152,28 +202,56 @@ HTTP 200  19706 bytes
 HTTP/1.1 301 Moved Permanently
 Location: /mareas/galicia/pontevedra/vigo/
 HTTP 301
-   y siguiendo la redirección:
-   HTTP 200 tras 1 redirección(es) -> http://localhost:3000/mareas/galicia/pontevedra/vigo/
+   siguiendo la redirección: HTTP 200 tras 1 salto -> http://localhost:3000/mareas/galicia/pontevedra/vigo/
 
 ### 4. /sitemap.xml
 HTTP 200  text/xml  6120 bytes
-   <url> declaradas: 32
-   primera: https://mareia.cervilla.es/
+   <url> declaradas: 32 · primera: https://mareia.cervilla.es/
 
 ### 5. URL inventada /mareas/galicia/pontevedra/no-existe-este-puerto/
 HTTP 404  5857 bytes
    <title>: <title>Esta página no existe · Mareia
-   cuerpo idéntico a 404.html de dist/: SÍ (no es la portada con un 200 disfrazado)
-   ¿y una raíz inventada? HTTP 404
+   cuerpo idéntico al 404.html de dist/: SÍ (no es la portada con un 200 disfrazado)
 
-### 6. la imagen no lleva toolchain
+### 6. /50x.html — el residuo de la imagen base (B1)
+HTTP 404  5857 bytes
+   ¿queda algún fichero de la base en la raíz web?
+     404.html
+     _astro
+     index.html
+     mareas
+     sitemap.xml
+
+### 7. /_astro/ — directorio real sin index.html (B2)
+HTTP 404  5857 bytes
+   <title>: <title>Esta página no existe · Mareia
+   cuerpo: el 404.html del portal, no la página compilada en nginx
+   marca «nginx» en los cuerpos de /50x.html y /_astro/: 0 veces
+
+### 8. la imagen no lleva toolchain
    node      -> AUSENTE
    npm       -> AUSENTE
    pnpm      -> AUSENTE
    corepack  -> AUSENTE
    node_modules en la imagen: 
-   36 ficheros bajo /usr/share/nginx/html
+   35 ficheros bajo /usr/share/nginx/html
 ```
+
+## Qué vigila esto en CI
+
+En el job `anti-slop`, y por imagen fijada para que local y CI corran **exactamente lo mismo**:
+
+```sh
+docker run --rm -v "$PWD:/repo" -w /repo koalaman/shellcheck:v0.10.0 -S error $(git ls-files '*.sh')
+docker run --rm -i hadolint/hadolint:v2.12.0-alpine hadolint - < apps/web/Dockerfile
+```
+
+Existe porque este repo tiene desde ahora un `.sh` que corre como **PID 1 en una imagen de
+producción** y un Dockerfile que construye lo que se sirve en el dominio: haberlos leído una vez no
+es un gate. Los dos pasos se han comprobado **en rojo** además de en verde (un `[ "$1" = ]` y un
+`FROM alpine:latest` los hacen fallar); un gate que no sabe fallar no vigila nada. Y de paso cierra
+media casilla de T-15: el `shellcheck -S error` que tenía apuntado ya corre, sobre **todos** los
+`.sh` del repo.
 
 ## Qué queda pendiente (T-15)
 
@@ -187,18 +265,43 @@ HTTP 404  5857 bytes
   con `ETag`/`Last-Modified`). Decidir si lo pone nginx o Traefik.
 - **e2e contra producción, pase adversario de despliegue y la medida de Lighthouse SEO ≥ 95**, que
   necesita un navegador y por eso quedó pendiente desde T-09.
-- El nuevo `apps/web/docker-entrypoint.sh` entra en el `shellcheck -S error` que T-15 tiene apuntado
-  como peldaño 1 del gate de seguridad.
+- **El build todavía no es hermético**: `corepack` descarga el tarball de pnpm en cada build limpio.
+  Cerrarlo pide que el `packageManager` de la raíz lleve su hash de integridad
+  (`pnpm@10.33.0+sha512.…`, que corepack verifica) o vendorizar el tarball. Las dos cosas son del
+  monorepo, no de esta imagen, y por eso no se han hecho aquí.
+- **`actionlint`** sobre `.github/workflows/`, que sigue siendo el peldaño 1 pendiente de T-15 (el
+  `shellcheck` ya corre, ver arriba).
 
 ## Nota sobre el entorno de desarrollo del enjambre
 
 La verificación de arriba se hizo en un entorno cuyo tráfico HTTPS pasa por un proxy que
 **intercepta el TLS**, y la imagen base de Node no confía en su CA: `pnpm install` muere ahí con
 `SELF_SIGNED_CERT_IN_CHAIN`. Eso es del entorno, no del Dockerfile —en Dokploy no existe ese
-proxy—, así que **no se ha metido ningún parche de certificados en la imagen**. Para construir en
-local se sustituye la base sin tocar el Dockerfile:
+proxy—, así que **no se ha metido ningún parche de certificados en la imagen**: hornear la CA de un
+MITM en algo que se despliega sería un defecto de seguridad de verdad, y además permanente.
+
+Lo que se hace es **sustituir la base al construir, sin tocar el Dockerfile**. La receta completa,
+para que la pueda repetir cualquiera:
 
 ```sh
-docker build -f apps/web/Dockerfile -t mareia-web \
-  --build-context node:22-alpine=docker-image://<base-con-el-CA-del-proxy> .
+# 1. Una base igual que la del Dockerfile, pero que confíe en la CA del proxy.
+#    Ojo: `apk add ca-certificates` NO sirve aquí, porque para bajar ese paquete haría falta
+#    justamente la confianza que falta. Se añade la CA al bundle que la imagen ya trae.
+mkdir -p /tmp/base-ca && cp /root/.ccr/ca-bundle.crt /tmp/base-ca/proxy-ca.crt
+cat > /tmp/base-ca/Dockerfile <<'DOCKERFILE'
+FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32
+COPY proxy-ca.crt /usr/local/share/ca-certificates/proxy-ca.crt
+RUN cat /usr/local/share/ca-certificates/proxy-ca.crt >> /etc/ssl/certs/ca-certificates.crt
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/proxy-ca.crt
+DOCKERFILE
+docker build -t node-con-ca-del-proxy:22-alpine /tmp/base-ca
+
+# 2. El build de siempre, con la base sustituida. La clave del `--build-context` es la referencia
+#    EXACTA que aparece en el `FROM` del Dockerfile, digest incluido.
+docker build -f apps/web/Dockerfile -t mareia-web --build-arg BUILD_DATE=2026-08-29 \
+  --build-context 'node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32=docker-image://node-con-ca-del-proxy:22-alpine' .
 ```
+
+`/root/.ccr/ca-bundle.crt` es la ruta de la CA en el arnés del enjambre; si el proxy es otro, ese es
+el único dato que cambia. Y si algún día se sube el digest de la base (ver «La imagen»), hay que
+subirlo **en los dos sitios**: en el `FROM` del Dockerfile y en esta receta.

@@ -12,12 +12,21 @@
 # ---------------------------------------------------------------------------------------------
 # Etapa 1: construir el sitio. Todo el toolchain vive y muere aquí.
 # ---------------------------------------------------------------------------------------------
-FROM node:22-alpine AS build
+# La base va fijada por DIGEST y no solo por el tag: `22-alpine` es una etiqueta móvil, y con el
+# rebuild diario de T-15 la base cambiaría bajo los pies sin que ningún commit lo cuente. Así, la
+# base es dato del repo y actualizarla es un cambio que se revisa. Para subirla:
+#   docker pull node:22-alpine && docker image inspect node:22-alpine --format '{{index .RepoDigests 0}}'
+FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS build
 
 # corepack usa el pnpm EXACTO que fija `packageManager` en el package.json de la raíz: la versión
 # del gestor es dato del repo, no de esta imagen, y así no se puede desincronizar del lockfile.
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable
+# Queda una dependencia de red que este Dockerfile no puede cerrar solo: corepack DESCARGA el
+# tarball de pnpm en cada build limpio, así que el build no es hermético. Cerrarlo del todo pide
+# tocar el `packageManager` de la raíz para que lleve su hash de integridad (`pnpm@10.33.0+sha512.…`,
+# que corepack verifica) o vendorizar el tarball; las dos cosas son del monorepo, no de la imagen,
+# y van apuntadas en `docs/despliegue.md` como pendiente de T-15.
 
 WORKDIR /repo
 
@@ -53,13 +62,19 @@ RUN set -eu; \
 # Etapa 2: servir. Aquí no hay node, ni pnpm, ni node_modules, ni el código fuente: solo el HTML
 # y nginx. Lo que no está en la imagen no se puede explotar ni se paga al desplegar.
 # ---------------------------------------------------------------------------------------------
-FROM nginx:alpine AS runtime
+# Fijada por digest, por lo mismo que la de arriba (cómo subirla: ver el comentario de la etapa 1).
+FROM nginx:alpine@sha256:db35bfc6b2951e7f8a72db5db120288c127ffaeeb4a6d4b95a26fead017d5913 AS runtime
 
 # El `server` por defecto de la imagen escucha en el 80 y sirve su propia portada: fuera, para que
 # el único sitio que responda sea el nuestro.
 # Y `/var/cache/nginx` tiene que ser escribible por el usuario `nginx`: el master crea ahí sus
 # directorios temporales al arrancar y, como aquí NO es root, sin este chown el arranque muere.
+# Y la raíz web de la base se VACÍA antes de copiar la nuestra: `COPY` fusiona, no limpia, así que
+# los ficheros de la base que el `dist/` no pisa (su `50x.html`) sobrevivirían y el dominio
+# respondería 200 en una URL que no es del portal, con una página en inglés que además publica la
+# marca `nginx` pese al `server_tokens off`. Se borra el contenido, no el directorio: es la raíz.
 RUN rm -f /etc/nginx/conf.d/default.conf \
+    && rm -rf /usr/share/nginx/html/* \
     && chown -R nginx:nginx /var/cache/nginx
 
 COPY apps/web/nginx.conf /etc/nginx/nginx.conf

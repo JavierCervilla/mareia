@@ -36,15 +36,17 @@
 - [ ] T-13 · ~200–300 puertos con grade ≥ B o flag «estimado»
 - [ ] T-14 · Metodología pública + QC navegable + dataset CC-BY + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario
-      (incluye cerrar el peldaño 1 del gate de seguridad sobre lo que hoy no mira: `actionlint`
-      sobre `.github/workflows/` —es el único que lee los `run:` embebidos— y `shellcheck -S error`
-      sobre los 6 `.sh` del repo; y el healthcheck del API, que queda fuera del enrutado público
-      porque solo se publica `/v1/*`)
+      (queda del peldaño 1 del gate de seguridad `actionlint` sobre `.github/workflows/` —es el
+      único que lee los `run:` embebidos—; el `shellcheck -S error` sobre los `.sh` del repo **ya
+      corre desde T-17**, con `hadolint` al lado. Y el healthcheck del API, que queda fuera del
+      enrutado público porque solo se publica `/v1/*`)
       · **La web ya está hecha, en T-17**: `apps/web/Dockerfile` construido y probado con `curl`
-      (rutas de directorio, 301 a la barra final, 404 con el cuerpo de `404.html`), sirviendo en
-      `0.0.0.0:3000` sin root y sin toolchain en la imagen — ver `docs/despliegue.md`. Aquí siguen
-      el API con su volumen KV, el rebuild diario que hornea el día, el healthcheck del contenedor,
-      el e2e contra producción y el pase adversario de despliegue.
+      (rutas de directorio, 301 a la barra final, 404 con el cuerpo de `404.html`, y ninguna URL del
+      dominio contestando con una página ajena al portal), sirviendo en `0.0.0.0:3000` sin root, sin
+      toolchain en la imagen y con las bases fijadas por digest — ver `docs/despliegue.md`, que
+      incluye por qué **no** se escucha además en el 80. Aquí siguen el API con su volumen KV, el
+      rebuild diario que hornea el día, el healthcheck del contenedor, el e2e contra producción y el
+      pase adversario de despliegue.
 
 ## Fase 2 (rumbo, sin comprometer)
 

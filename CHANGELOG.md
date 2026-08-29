@@ -51,6 +51,39 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   salida completa está en `docs/despliegue.md`, junto a cómo se configura en Dokploy —incluido el
   aviso de que la imagen hereda un `EXPOSE 80` de la base que no se puede deshacer, y de que
   autodetectar ese puerto sería otro 502— y qué queda pendiente de T-15.
+- **Ninguna URL del dominio contesta con una página que no sea del portal.** Dos fugas, la misma
+  familia: `COPY` **fusiona, no limpia**, así que el `50x.html` de la imagen base sobrevivía a la
+  copia del `dist/` y `/50x.html` respondía **200** con una página en inglés que además publicaba la
+  marca `nginx` pese al `server_tokens off`; y `/_astro/`, que es un directorio real sin
+  `index.html`, respondía **403** con la página de error compilada en nginx. Ahora la raíz web de la
+  base se **vacía** antes de copiar el sitio, y `error_page 403 =404 /404.html` devuelve el 404 del
+  portal — **404 y no 403** a propósito: un 403 confirma que ese directorio existe. Medido después:
+  cero apariciones de la marca `nginx` en esos cuerpos. Quedan tres respuestas que genera nginx y a
+  las que **no se llega navegando** (el cuerpo del 301, el 405 de un método no soportado y el 414 de
+  una URI desmedida); se dejan como están porque convertirlas en 404 sería mentir sobre lo que pasó.
+- **Las dos bases van fijadas por digest**, no por tag: `22-alpine` y `alpine` se mueven, y con el
+  rebuild diario de T-15 la base cambiaría bajo los pies **sin que ningún commit lo cuente** — una
+  avería que aparece un martes sin que nadie haya tocado nada. Subirla pasa a ser un cambio que se
+  revisa.
+- **El `.sh` que corre como PID 1 y el Dockerfile ya tienen quien los vigile**: `shellcheck -S error`
+  sobre todos los `.sh` del repo y `hadolint` sobre el Dockerfile, en el job `anti-slop` y **por
+  imagen fijada**, de modo que local y CI corren exactamente lo mismo. Los dos pasos se probaron
+  **en rojo** además de en verde: un gate que no sabe fallar no vigila nada. Con esto queda cerrada
+  media casilla del peldaño 1 que T-15 tenía apuntado (falta `actionlint`).
+- **Se probó escuchar también en el puerto 80 y se descarta, con la medida delante.** La imagen
+  hereda un `EXPOSE 80` de la base que Docker no deja deshacer, y como `ExposedPorts` es un mapa sin
+  orden, una heurística de «el primero» elegiría el puerto malo. Escuchar en los dos parecía gratis:
+  funciona con los defaults de Docker (`ip_unprivileged_port_start=0`), pero con
+  `--sysctl net.ipv4.ip_unprivileged_port_start=1024` el bind falla con `Permission denied`, **nginx
+  no arranca y el 3000 se cae con él**. No es una segunda vía, es una dependencia de arranque sobre
+  una condición del host que no podemos verificar: cambiaría un 502 con el sitio vivo en el 3000 por
+  una caída entera. Se queda declarar el 3000 a mano en Dokploy, que es lo que ya está configurado.
+- **El rodeo para construir en el entorno del enjambre es ahora una receta que se puede repetir.**
+  Aquí el tráfico HTTPS pasa por un proxy que intercepta el TLS y `pnpm install` muere con
+  `SELF_SIGNED_CERT_IN_CHAIN`. La CA **no** se hornea en la imagen —sería un defecto de seguridad de
+  verdad, y permanente—: se sustituye la base al construir con `--build-context`, que no toca el
+  Dockerfile. `docs/despliegue.md` lleva los comandos exactos, probados copiándolos tal cual desde
+  cero.
 - **`.dockerignore`** en la raíz: fuera dependencias y `dist/` (se reconstruyen dentro; un `dist/`
   viejo del portátil podría acabar servido en producción sin que nadie lo notara), y fuera `.env` y
   las capturas de QA, que en una imagen quedarían en una capa legible para siempre.
