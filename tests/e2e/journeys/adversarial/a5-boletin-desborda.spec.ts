@@ -70,4 +70,42 @@ for (const ancho of [320, 360]) {
       `la sección desborda ${medida.desplazable - medida.visible} px · ${medida.culpables.join(", ")}`,
     ).toBeLessThanOrEqual(medida.visible + 1);
   });
+
+  /**
+   * La segunda puerta del mismo hallazgo, y la que más importa de las dos: el detalle del sello
+   * publica el `reason` que da el backend, y ahí puede venir la URL que falló. Es texto que **no
+   * escribimos nosotros**, igual que el boletín.
+   *
+   * El arreglo de H-5 tocó dos selectores con la misma cura; el recorrido solo cubría uno. Un gate
+   * que protege la mitad de su propio arreglo deja la otra mitad a merced de la próxima limpieza
+   * de CSS, así que aquí va la que faltaba.
+   */
+  test(`A5b · una URL en el motivo del backend tampoco desborda a ${ancho} px`, async ({
+    page,
+    qa,
+  }) => {
+    qa.step(`ventana de ${ancho} px`);
+    await page.setViewportSize({ width: ancho, height: 800 });
+
+    qa.step("el módulo degrada con 200 y el `reason` trae la URL que falló");
+    // Un 503 NO vale para este ataque: el motivo de un no-2xx lo escribe la isla y no publica el
+    // cuerpo del backend. La URL solo llega a la página por el `reason` de una degradación con
+    // 200, que es como el módulo de T-08 expresa que una fuente no respondió.
+    const caido = fixture("weather-no-disponible");
+    for (const fuente of ["marine", "forecast"] as const) {
+      (caido[fuente] as Record<string, unknown>)["reason"] =
+        `Open-Meteo no respondió al consultar ${ENLACE_DE_AEMET}`;
+    }
+    await montarApi(page, { cuerpo: caido }, { cuerpo: fixture("bulletin-ok") });
+    await page.goto(PAGINA);
+    await expect(page.locator("#meteo")).toContainText("Open-Meteo no respondió");
+
+    qa.step("medir si la página se desplaza en horizontal");
+    const medida = await page.evaluate<Medida>(MEDIR_DESBORDAMIENTO);
+
+    expect(
+      medida.desplazable,
+      `el motivo del backend desborda ${medida.desplazable - medida.visible} px · ${medida.culpables.join(", ")}`,
+    ).toBeLessThanOrEqual(medida.visible + 1);
+  });
 }

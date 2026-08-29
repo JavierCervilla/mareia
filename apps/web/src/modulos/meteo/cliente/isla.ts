@@ -79,6 +79,16 @@ function anclajeDe(seccion: HTMLElement): Anclaje | undefined {
 }
 
 /**
+ * «de» + un rótulo que empieza por «el» es «del», no «de el». Los rótulos llevan el artículo porque
+ * las otras dos frases lo necesitan («no se ha podido pedir **el** boletín»), así que la
+ * contracción se resuelve aquí en vez de partir el rótulo y dejar que cada frase lo recomponga.
+ */
+function de(que: string): string {
+  return que.startsWith("el ") ? `del ${que.slice(3)}` : `de ${que}`;
+}
+
+
+/**
  * Pide un endpoint del módulo y **nunca lanza**: un fallo de red es un estado de la sección, no una
  * excepción. El motivo que devuelve habla de *nuestro* servidor, no de Open-Meteo ni de AEMET: si
  * la petición no llegó a salir, atribuirle el fallo a la fuente sería inventar un diagnóstico.
@@ -125,13 +135,13 @@ async function traer<T>(
   } catch {
     return {
       ok: false,
-      motivo: `El servidor de Mareia contestó a la petición de ${que}, pero su respuesta no se puede leer: no es JSON.`,
+      motivo: `El servidor de Mareia contestó a la petición ${de(que)}, pero su respuesta no se puede leer: no es JSON.`,
     };
   }
   if (!valido(cuerpo)) {
     return {
       ok: false,
-      motivo: `El servidor de Mareia contestó a la petición de ${que}, pero su respuesta no tiene la forma que esta página sabe leer.`,
+      motivo: `El servidor de Mareia contestó a la petición ${de(que)}, pero su respuesta no tiene la forma que esta página sabe leer.`,
     };
   }
   return { ok: true, cuerpo };

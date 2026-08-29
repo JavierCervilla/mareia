@@ -93,9 +93,11 @@ Lo que hace ahora la isla para que la frase de arriba vuelva a ser verdad:
 
 A cambio se aceptan tres costes, todos acotados:
 
-- **JavaScript en la página.** Se acota a la isla del módulo: **12,8 KB (4,8 KB comprimidos)**
-  —medido sobre el bundle construido— que solo pintan la sección meteo. Eran 9,3 KB (3,7
-  comprimidos) antes de los arreglos del pase adversario; los 3,5 KB de más son el portero que
+- **JavaScript en la página.** Se acota a la isla del módulo: **13,1 KB (4,9 KB comprimidos)**
+  —13.103 y 4.873 bytes medidos sobre el bundle construido, en KB decimales como el resto de este
+  documento; en KiB serían 12,8 y 4,8, y mezclarlos era lo que hacía cuadrar mal la resta— que solo
+  pintan la sección meteo. Eran 9,3 KB (3,7 comprimidos) antes de los arreglos del pase adversario:
+  **+41 % crudo y +31 % comprimido**. Los 3,8 KB de más son el portero que
   valida la forma de la respuesta (H-2), el latido que mantiene viva la edad (H-1) y el anuncio a
   lectores de pantalla (H-7), y se pagan a gusto. La tabla de mareas, la curva, el coeficiente y las efemérides siguen siendo HTML
   puro y **se leen igual con JavaScript desactivado**. Es exactamente el hueco que el design brief
