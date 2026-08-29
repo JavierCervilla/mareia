@@ -241,8 +241,16 @@ test("la sección de guardar lleva los datos que necesita el cliente, y ninguno 
  * llegar a la playa. Si una cifra sube de verdad, se sube el tope **y se explica en el CHANGELOG**.
  */
 const TOPES = {
-  /** El worker entero, con sus comentarios (que son su documentación y su auditoría). */
-  swBytes: 24_000,
+  /**
+   * El worker entero, con sus comentarios (que son su documentación y su auditoría).
+   *
+   * Se sube de 24.000 a 28.000 B tras el registro de favoritos y el fail-safe de la poda: el worker
+   * creció un cuarto en un delta y con el tope anterior el siguiente párrafo de TSDoc habría puesto
+   * el gate en rojo por escribir documentación, que no es lo que este tope vigila. Lo que vigila es
+   * un descuido que multiplique el peso; la cifra que manda es **la medida que se publica en el
+   * CHANGELOG**, no este número.
+   */
+  swBytes: 28_000,
   /** Constantes armónicas de UN puerto: lo que se baja al marcar un favorito. */
   estacionBytes: 4_000,
   /** El bundle que baja CUALQUIERA que abra un puerto, use la PWA o no. */

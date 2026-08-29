@@ -22,6 +22,7 @@
  */
 
 import { ventanaVigente } from "../estacion-offline.ts";
+import { EVENTO_COPIA_CAMBIADA } from "../protocolo.ts";
 import type { EstacionOffline } from "../estacion-offline.ts";
 import { fechaLarga, hora, metros } from "../../formato.ts";
 import { leerFavorito } from "./almacen.ts";
@@ -80,6 +81,11 @@ export function montarOtroDia(anclaje: AnclajeOtroDia): void {
     void calcular(anclaje);
   });
   void ajustarVentana(anclaje);
+  // Y cada vez que la copia guardada cambie: al guardar, al olvidar y al revalidarse con constantes
+  // de otro año. La ventana es un derivado del payload, así que tiene que seguirlo.
+  document.addEventListener(EVENTO_COPIA_CAMBIADA, () => {
+    void ajustarVentana(anclaje);
+  });
 }
 
 /**

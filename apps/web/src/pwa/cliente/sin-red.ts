@@ -12,7 +12,7 @@
 import { ventanaVigente } from "../estacion-offline.ts";
 import type { EstacionOffline } from "../estacion-offline.ts";
 import { urlsDeFavorito, urlsDeOlvido } from "../precacheo.ts";
-import { MENSAJE_GUARDAR, MENSAJE_OLVIDAR } from "../protocolo.ts";
+import { EVENTO_COPIA_CAMBIADA, MENSAJE_GUARDAR, MENSAJE_OLVIDAR } from "../protocolo.ts";
 import { vistaSinRed } from "../vista-sin-red.ts";
 import type { VistaSinRed } from "../vista-sin-red.ts";
 import { guardarFavorito, leerFavorito, olvidarFavorito } from "./almacen.ts";
@@ -186,7 +186,21 @@ async function refrescarCopia(anclaje: AnclajeSinRed, favorito: Favorito): Promi
   });
   if (guardado) {
     await pintarEstado(anclaje);
+    avisarDelCambio(anclaje.slug);
   }
+}
+
+/**
+ * Avisa al resto de la página de que la copia guardada de este puerto ha cambiado.
+ *
+ * Lo escucha la calculadora, que deriva del payload guardado su ventana de años: sin este aviso, una
+ * revalidación que trajera constantes de otro año dejaba el rótulo y los límites del campo hablando
+ * de la copia anterior mientras el sello ya se había repintado. Falla al lado seguro —los límites
+ * viejos son más estrechos o iguales— pero es la misma clase de deriva que R-2, y esa ya la hemos
+ * pagado una vez.
+ */
+function avisarDelCambio(slug: string): void {
+  document.dispatchEvent(new CustomEvent(EVENTO_COPIA_CAMBIADA, { detail: { slug } }));
 }
 
 /** Si dos payloads dicen lo mismo. Se compara el dato, no el `generadoEn`, que cambia cada día. */
@@ -263,6 +277,7 @@ async function alPulsar(anclaje: AnclajeSinRed): Promise<void> {
   anclaje.boton.textContent = verbo === "olvidar" ? "Borrando…" : "Guardando…";
   const nota = verbo === "olvidar" ? await olvidar(anclaje) : await guardar(anclaje);
   await pintarEstado(anclaje, nota);
+  avisarDelCambio(anclaje.slug);
 }
 
 /**

@@ -31,16 +31,23 @@ import type { Protocolo } from "./protocolo.ts";
 /**
  * Cualquier forma de traer código de fuera que sobreviva al borrado de tipos.
  *
- * Son **tres** y las tres tienen que estar: el `import`/`export` estático al principio de una línea,
- * el `import(...)` dinámico —que puede aparecer dentro de una función, en mitad de un fichero, y
- * que un guardián que solo mire el principio de línea no ve— y el `require(...)`. El dinámico es el
- * peligroso justo por eso: el build quedaría verde y el worker reventaría en el navegador, que es
- * exactamente el fallo silencioso que este guardián existe para impedir.
+ * Son **cuatro** y las cuatro tienen que estar:
+ *
+ * - el `import`/`export` **estático** al principio de una línea;
+ * - el `import(...)` **dinámico**, que puede aparecer dentro de una función, en mitad de un fichero,
+ *   y que un guardián que solo mire el principio de línea no ve — el build quedaría verde y el
+ *   worker reventaría en el navegador, sin error en CI y sin nada en los logs;
+ * - el `require(...)`;
+ * - y **`importScripts(...)`**, que es el que más importa aunque parezca el más exótico: es la única
+ *   de las cuatro que **sí funciona** en un worker clásico, así que es la única capaz de meter
+ *   código sin auditar en `/sw.js` sin romper nada y sin que se note. Las otras tres fallan ruidoso
+ *   en cuanto alguien abre la página; ésta no falla nunca.
  */
 const FORMAS_DE_IMPORTAR: readonly (readonly [RegExp, string])[] = [
   [/^\s*(?:import|export)\s/mu, "un import/export estático"],
   [/\bimport\s*\(/u, "un import() dinámico"],
   [/\brequire\s*\(/u, "un require()"],
+  [/\bimportScripts\s*\(/u, "un importScripts()"],
 ];
 
 /** Longitud de la huella que va en la versión. 8 hex bastan para distinguir builds de un día. */
@@ -81,7 +88,7 @@ export function generarServiceWorker(entradas: EntradasDelWorker): string {
 }
 
 /** En qué parte del texto va el escáner. */
-type Zona = "codigo" | "linea" | "bloque" | "cadena";
+type Zona = "codigo" | "linea" | "bloque" | "cadena" | "regex";
 
 /** Lo que el escáner hace en un carácter: qué emite, a qué zona pasa y cuántos caracteres consume. */
 interface Paso {
@@ -97,19 +104,42 @@ function enBlanco(caracter: string): string {
 
 const ABRE_CADENA = new Set(['"', "'", "`"]);
 
-/** En código: se copia tal cual, salvo que empiece un comentario o una cadena. */
-function pasoEnCodigo(caracter: string, siguiente: string): Paso {
+/**
+ * Caracteres tras los cuales una barra empieza una **expresión regular** y no una división.
+ *
+ * Es la heurística estándar y aquí basta: sin ella, un literal como `/['"]/u` metía al escáner en
+ * modo cadena y a partir de ahí se tragaba el resto del fichero — o sea, el guardián dejaba de ver
+ * lo que viniera después. Fallaba hacia el silencio, que en un guardián es la única dirección que no
+ * vale.
+ */
+const ANTES_DE_UNA_REGEX = new Set("(,=:[!&|?{};+-*%~^<>".split(""));
+
+/** En código: se copia tal cual, salvo que empiece un comentario, una cadena o una regex. */
+function pasoEnCodigo(caracter: string, siguiente: string, anterior: string): Paso {
   if (caracter === "/" && siguiente === "/") {
     return { emite: " ", zona: "linea", saltar: 0 };
   }
   if (caracter === "/" && siguiente === "*") {
     return { emite: " ", zona: "bloque", saltar: 0 };
   }
+  if (caracter === "/" && (anterior === "" || ANTES_DE_UNA_REGEX.has(anterior))) {
+    return { emite: " ", zona: "regex", saltar: 0 };
+  }
   return {
     emite: caracter,
     zona: ABRE_CADENA.has(caracter) ? "cadena" : "codigo",
     saltar: 0,
   };
+}
+
+/** Dentro de una expresión regular: todo en blanco hasta su barra de cierre. */
+function pasoEnRegex(caracter: string, escapado: boolean): Paso {
+  if (escapado) {
+    return { emite: " ", zona: "regex", saltar: 0 };
+  }
+  return caracter === "/"
+    ? { emite: " ", zona: "codigo", saltar: 0 }
+    : { emite: enBlanco(caracter), zona: "regex", saltar: 0 };
 }
 
 /** En un comentario: todo en blanco hasta que se cierre. */
@@ -141,27 +171,50 @@ function pasoEnCadena(caracter: string, comilla: string, escapado: boolean): Pas
  * un guardián que salta con su propia documentación acaba desactivado, y desactivado no guarda
  * nada. Se conservan los saltos de línea para que el `^` de los patrones siga significando lo mismo.
  */
+/** Lo que el escáner necesita saber del punto en el que va. */
+interface Punto {
+  readonly caracter: string;
+  readonly siguiente: string;
+  /** Último carácter de código no blanco, para distinguir una regex de una división. */
+  readonly anterior: string;
+  readonly comilla: string;
+  readonly escapado: boolean;
+}
+
+/** Despacha el carácter a la zona en la que va el escáner. */
+function siguientePaso(zona: Zona, punto: Punto): Paso {
+  if (zona === "codigo") {
+    return pasoEnCodigo(punto.caracter, punto.siguiente, punto.anterior);
+  }
+  if (zona === "cadena") {
+    return pasoEnCadena(punto.caracter, punto.comilla, punto.escapado);
+  }
+  if (zona === "regex") {
+    return pasoEnRegex(punto.caracter, punto.escapado);
+  }
+  return pasoEnComentario(zona, punto.caracter, punto.siguiente);
+}
+
 export function soloCodigo(fuente: string): string {
   const salida: string[] = [];
   let zona: Zona = "codigo";
   let comilla = "";
   let escapado = false;
+  let anterior = "";
 
   for (let indice = 0; indice < fuente.length; indice += 1) {
     const caracter = fuente[indice] ?? "";
     const siguiente = fuente[indice + 1] ?? "";
     // La anotación no es adorno: `zona` se reasigna desde `paso.zona`, así que sin ella TypeScript
     // se muerde la cola intentando inferir el tipo y lo deja en `any`.
-    const paso: Paso =
-      zona === "codigo"
-        ? pasoEnCodigo(caracter, siguiente)
-        : zona === "cadena"
-          ? pasoEnCadena(caracter, comilla, escapado)
-          : pasoEnComentario(zona, caracter, siguiente);
+    const paso: Paso = siguientePaso(zona, { caracter, siguiente, anterior, comilla, escapado });
 
-    escapado = zona === "cadena" && !escapado && caracter === "\\";
+    escapado = (zona === "cadena" || zona === "regex") && !escapado && caracter === "\\";
     if (zona === "codigo" && paso.zona === "cadena") {
       comilla = caracter;
+    }
+    if (zona === "codigo" && caracter.trim() !== "") {
+      anterior = caracter;
     }
     zona = paso.zona;
     salida.push(paso.emite);
