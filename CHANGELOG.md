@@ -8,8 +8,8 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   de 24 h las ventanas que la teoría solunar asocia a la Luna: 2 h en cada tránsito (mayores) y
   1 h 30 min en su salida y su puesta (menores). En el build de hoy son **4 bandas** en Vigo. Van
   emitidas **antes** del trazo —en SVG no hay `z-index`: pinta después quien viene después—, en el
-  acento cálido que ya existía y sin borde ni texto dentro del lienzo, para que lo legible del
-  gráfico siga siendo la marea. **Cero JavaScript de cliente**: SVG estático, como el resto del core.
+  acento cálido que ya existía y sin texto dentro del lienzo, para que lo legible del gráfico siga
+  siendo la marea. **Cero JavaScript de cliente**: SVG estático, como el resto del core.
 - **Las bandas se recortan al día civil.** Un periodo pertenece al día en el que cae su fenómeno,
   así que su ventana puede empezar antes de medianoche o acabar después: la parte que se sale se
   corta en el borde del lienzo y la que no toca el día no se dibuja. La franja completa sí se
@@ -50,6 +50,42 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   28-08 son 24.572 bytes y la del 01-12, 24.485. **25 tests nuevos** (9 del módulo, 5 del recorte de
   bandas, 3 del registro de ventanas, 7 sobre el `dist/` construido y 1 del registry): la suite de
   la web pasa de 41 a 57 y el repositorio queda en 344 en verde.
+
+### El pase adversario, y sus cuatro arreglos
+
+El rol `qa-adversario` atacó lo que los otros tres ya habían dado por bueno y sacó **cuatro
+hallazgos reproducidos** (más 12 sospechas que no se materializaron y cuatro juicios de producto:
+informe en `docs/qa/informe-adversario-t10.md`). Ninguno cambia un número —los números salen bien en
+los 12 puertos y en los dos días de cambio de hora—: los cuatro son **la sección publicándose peor
+de lo que se calcula**. Los cuatro van corregidos en este mismo PR y sus ataques se quedan de gate
+permanente, así que deshacer un arreglo pone el CI en rojo.
+
+- **El rótulo que califica la cifra ya no puede prometer pesca a espaldas de nadie.** «Actividad
+  prevista por la convención» estaba escrito a mano en la plantilla, fuera de los textos auditados:
+  el adversario lo sustituyó por **«Hoy pican seguro»**, las 12 páginas lo publicaron y la suite
+  entera quedó en verde. Ahora vive en `textos.ts`, la regla «aquí no se promete pesca» se aplica a
+  **todas** las cadenas del módulo (y no a tres elegidas a mano) y la lista negra caza el ataque
+  exacto. Y el rótulo se reescribe a **«Índice de la convención solunar»**: «prever» era justo lo que
+  el aviso niega doce párrafos más abajo.
+- **Las bandas se ven al sol y se distinguen sin depender del color.** Medían **1,30:1** y
+  **1,14:1** sobre el fondo, y mayor contra menor **1,14:1**, frente al 3:1 de WCAG 1.4.11. Ahora la
+  banda lleva **filete** en terracota a opacidad plena —**5,40:1** en claro, **5,69:1** en noche
+  sobre los tokens; **5,06–5,42:1** y **5,27–5,68:1** medidos sobre píxeles renderizados— y la
+  diferencia mayor↔menor es **continuo de 1,8 px contra discontinuo de 1 px**, que se ve en escala
+  de grises. La mancha se queda tenue a propósito: subirla al 3:1 exigiría 0,70 de opacidad y
+  taparía la curva.
+- **La sección del módulo se expone como región.** La página tenía ocho secciones y Chromium
+  anunciaba **siete**: la del módulo salía sin nombre accesible, con su `<h2>` ya emitido y sin que
+  nadie lo referenciase. Ahora son **8 de 8**, y el arreglo está en el envoltorio genérico, así que
+  el módulo de meteo (T-11) lo hereda.
+- **El pie del gráfico dice qué son esas manchas.** El `aria-label` enumeraba las cuatro franjas con
+  sus horas y el `<figcaption>` seguía hablando solo de metros: quien no veía el gráfico recibía la
+  explicación entera y quien lo veía, cuatro manchas sin leyenda. El pie da ahora la clave de las dos
+  tramas, sin repetir las horas (que ya están en la tabla y en el nombre accesible).
+
+**Suite en 348 en verde** (61 de la web, con los cuatro ataques ya como gate duro), `astro check` sin
+diagnósticos, el gate anti-slop de UI **limpio** en `apps/web/src` y en `packages/ui/src`, y los 20
+tests del API en Deno pasando.
 
 ## 2026-08-28 — T-08 · el módulo weather, primer módulo real del registry
 

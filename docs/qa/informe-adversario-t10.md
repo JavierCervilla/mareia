@@ -28,7 +28,12 @@
 > `tests/e2e/` no lo ejecutaría nadie— así que se sigue el precedente de T-09 y viven junto a los
 > demás tests del `dist/`. Es el mismo trato: project por defecto, gate duro, no un cajón aparte.
 >
-> **Trinquete.** `test.fail()` es de Playwright; aquí el equivalente es `hallazgoAbierto()`, con la
+> **Trinquete (ya retirado).** Los cuatro hallazgos se **corrigieron en este mismo PR** —ver el
+> estado de cada uno— y el envoltorio se retiró: los cuatro ataques son hoy **gates permanentes**
+> (`gatePermanente`), rojos el día que alguien deshaga un arreglo. Lo que sigue describe cómo
+> funcionó mientras estuvieron abiertos.
+>
+> `test.fail()` es de Playwright; aquí el equivalente es `hallazgoAbierto()`, con la
 > misma tabla de verdad: el cuerpo afirma **el comportamiento correcto**, CI se queda verde mientras
 > el hallazgo está abierto (imprimiendo el motivo como diagnóstico en cada ejecución) y se pone
 > **rojo el día que alguien lo arregle**, pidiendo que se retire el trinquete para que el ataque
@@ -98,7 +103,14 @@ se publica.
   el envoltorio genérico, no en el módulo.
 - **Repro:** `apps/web/src/adversario-t10.test.ts` · `todaSeccionDeBloqueTieneNombreAccesible`
 - **Bundle:** `docs/qa/bundles/t10/FAILURE.md` §A-13
-- **Estado:** abierto (trinquete puesto)
+- **Estado:** ✅ **corregido en este PR** (`9b0e89d`) · **trinquete retirado** (`3b8697d`), el ataque
+  es gate permanente. **Mecanismo:** `SeccionesDeModulos.astro` compone
+  `aria-labelledby="titulo-<id de la sección>"`, que es la convención que ya seguían las otras siete
+  y la que el `<h2>` del módulo ya cumplía. Se arregla en el envoltorio genérico, así que **T-11
+  hereda el arreglo** sin tocar nada; la contrapartida (su componente debe emitir su título con ese
+  `id`) queda escrita en la cabecera del archivo y la caza el propio gate, que exige que ningún `id`
+  de título quede sin referenciar. **Medido** en Chromium sobre el `dist/` servido: **8 regiones
+  expuestas de 8 secciones**, «actividad-solunar» entre ellas
 - **Severidad:** molestia con sesgo — la información existe y es correcta, pero es más difícil de
   alcanzar justo para quien más depende de la estructura del documento
 - **Escalado:** no
@@ -122,9 +134,31 @@ se publica.
 
 - **Repro:** `apps/web/src/adversario-t10.test.ts` · `lasBandasSeVenYSeDistinguenEntreSi`
 - **Bundle:** `docs/qa/bundles/t10/FAILURE.md` §A-14
-- **Estado:** abierto (trinquete puesto). **Caveat honesto:** el cuerpo mide contraste; si la
-  distinción se resolviera con un canal **no cromático** (trama, filete, rótulo) el assert habría
-  que reescribirlo, no solo destrincarlo.
+- **Estado:** ✅ **corregido en este PR** (`cc564b5`) · **trinquete retirado y cuerpo reescrito**
+  (`3b8697d`), que es lo que el caveat de abajo pedía. **Mecanismo:** la banda se parte en dos
+  trabajos. El **filete** (`stroke: var(--m-terra)` a opacidad 1) es el objeto gráfico que WCAG mide
+  de una región sombreada: **5,40:1** en claro y **5,69:1** en noche. La **mancha** sigue tenue
+  (0,18 / 0,09), que es lo que deja legible la curva por encima. Y la distinción mayor↔menor deja de
+  ser cromática: **filete continuo de 1,8 px contra discontinuo de 1 px**, con
+  `vector-effect: non-scaling-stroke` para que no se adelgace en el móvil, y con la leyenda del pie
+  nombrando las dos tramas (A-15) — una trama que no se explica tampoco distingue.
+  **Medido sobre píxeles renderizados** (Chromium 1440 px, dSF 1), contra el fondo real de cada tema:
+
+  | Tema | filete mayor | filete menor | mancha mayor | mancha menor |
+  |---|---|---|---|---|
+  | claro | 5,06–5,42:1 | 3,37–3,47:1 | 1,30:1 | 1,14:1 |
+  | noche | 5,27–5,68:1 | 3,63–3,69:1 | 1,27:1 | 1,11:1 |
+
+  (el menor pierde algo por el antialias de un trazo de 1 px discontinuo y aun así queda sobre 3:1;
+  la mancha sigue donde estaba **a propósito**: el contraste ya no vive ahí).
+- **Caveat honesto (cumplido):** el cuerpo medía contraste, y la distinción se resolvió con un canal
+  **no cromático**, así que el assert se reescribió en vez de destrincarse solo. De paso quedó
+  demostrado que **la vara original era insatisfacible**: si el menor da 3:1 contra el fondo y el
+  mayor 3:1 contra el menor, el mayor tiene que dar 9:1 contra el fondo, y `--m-terra` a opacidad 1
+  da 5,40:1; barrido exhaustivo de las dos opacidades en pasos de 0,01, el mejor mínimo alcanzable
+  es **2,31:1** (claro) y **2,37:1** (noche). Lo que mide ahora: filete ≥3:1 en los dos temas,
+  distinción por grosor y trama, y mancha ≤0,25 para que subirla no sea el atajo con el que alguien
+  tape la curva. Verificado en rojo contra el CSS de antes y contra dos mutaciones.
 - **Severidad:** molestia — información contextual degradada, no dato erróneo
 - **Escalado:** no
 
@@ -139,7 +173,13 @@ se publica.
   12/12 páginas.
 - **Repro:** `apps/web/src/adversario-t10.test.ts` · `elPieDelGraficoExplicaLasBandas`
 - **Bundle:** `docs/qa/bundles/t10/FAILURE.md` §A-15
-- **Estado:** abierto (trinquete puesto)
+- **Estado:** ✅ **corregido en este PR** (`4bff71c`) · **trinquete retirado** (`3b8697d`).
+  **Mecanismo:** el pie **no repite las horas** —eso ya lo hacen el `aria-label` y la tabla, y
+  repetirlas se las leería dos veces a quien usa lector de pantalla— sino que dice qué representa
+  cada trama: «Franjas sombreadas: filete continuo, periodo mayor; filete discontinuo, periodo
+  menor; sus horas, en la tabla de la sección que las aporta». Para eso la ventana trae un nombre
+  corto (`leyenda`) además de su etiqueta larga, y lo escribe quien la aporta: el gráfico sigue sin
+  saber de qué es la ventana, solo con qué trama la dibuja. 12/12 páginas
 - **Severidad:** molestia — un elemento visual nuevo sin leyenda en la superficie que lo muestra
 - **Escalado:** no
 
@@ -159,7 +199,17 @@ se publica.
   de prometer pesca.
 - **Repro:** `apps/web/src/adversario-t10.test.ts` · `elRotuloDelRatingSaleDeLosTextosAuditados`
 - **Bundle:** `docs/qa/bundles/t10/FAILURE.md` §A-16
-- **Estado:** abierto (trinquete puesto)
+- **Estado:** ✅ **corregido en este PR** (`9b4d70b`) · **trinquete retirado** (`3b8697d`).
+  **Mecanismo, en tres partes porque mover la cadena no bastaba:** (1) el rótulo pasa a ser
+  `ROTULO_DEL_RATING` en `textos.ts`; (2) la lista negra se aplica ahora a **todas** las cadenas
+  exportadas del módulo y no a tres elegidas a mano —elegirlas a mano *era* el hallazgo—; (3) la
+  lista crece con las formas que el ataque demostró que faltaban, porque **«Hoy pican seguro» no
+  casaba con `/garantiz|infalible|picarán|asegura que/i`**: ahora también `pican`, `picará`,
+  `asegura`, `seguro`, `promete`, con cuidado de no tumbar «cuánto pica hoy» ni «no una predicción
+  de capturas». **Verificado revirtiendo el ataque exacto**: con `ROTULO_DEL_RATING = "Hoy pican
+  seguro"` el CI se pone rojo (`ROTULO_DEL_RATING promete: …`).
+  **Y el rótulo se reescribió** («Índice de la convención solunar»), que es el juicio J-3 de más
+  abajo: «Actividad **prevista**» era exactamente lo que el aviso niega
 - **Severidad:** **la más alta de la pasada** — es la promesa central de la trayectoria («jamás
   promete capturas») sin guardián, en la única cadena que la puede romper de un `sed`
 - **Escalado:** no (no es seguridad; es integridad editorial del producto)
@@ -213,7 +263,13 @@ pero el marcador anuncia «de 100» sin decirlo. El suelo real se puede *deducir
 en línea recta hasta 30 en el cuarto»), que habla del factor lunar, no del total. Un 37 se lee como
 «37 %» cuando en realidad es el peor día posible.
 
-### J-3 · «Actividad prevista» es la palabra que el propio aviso dice que no es
+### J-3 · «Actividad prevista» es la palabra que el propio aviso dice que no es — ✅ atendido (`9b4d70b`)
+
+> **Resuelto al cerrar A-16**: el rótulo pasó a decir **«Índice de la convención solunar»**, que
+> nombra lo que el número es sin pronosticar nada, y la palabra «actividad» se quedó en el título de
+> la sección, donde no promete nada. El orden de lectura sigue siendo el que era (cifra arriba,
+> aviso al final), pero ya no hay un verbo de predicción en la parte de arriba.
+
 
 El rótulo que califica la cifra dice «Actividad **prevista** por la convención»; doce párrafos más
 abajo, el aviso dice que aquí se publica «un cálculo reproducible de sus ventanas horarias, **no una
@@ -239,3 +295,18 @@ la sección entera es falsa y no hay nada dentro de ella que lo delate.
 
 **4 reproducidos · 12 no reproducidos · 4 juicios de producto** (J-1 re-registrado) → al ledger
 (`Contexto_Base_SRE/04_Logs_de_Trayectoria/adversarial_ledger.md`).
+
+## Cierre de la pasada (implementador, mismo PR #12)
+
+| Hallazgo | Estado | Commit | Qué lo impide ahora |
+|---|---|---|---|
+| **A-16** · el rótulo escapaba a los textos auditados | ✅ corregido | `9b4d70b` | el rótulo vive en `textos.ts`, la lista negra cubre **todos** los textos del módulo y caza «Hoy pican seguro» |
+| **A-14** · bandas por debajo del umbral y sin distinción | ✅ corregido | `cc564b5` | filete de 5,40:1 / 5,69:1 y distinción **no cromática** (continuo vs discontinuo) |
+| **A-13** · la sección sin nombre accesible | ✅ corregido | `9b0e89d` | `aria-labelledby` en el envoltorio: 8 regiones de 8, y T-11 lo hereda |
+| **A-15** · el pie no explicaba las manchas | ✅ corregido | `4bff71c` | leyenda visible con la clave de las dos tramas |
+
+Los cuatro cuerpos siguen en `adversario-t10.test.ts` como **gates permanentes** (`3b8697d`); el de
+A-14 reescrito por el caveat que él mismo llevaba escrito, los otros tres intactos. **Sin tocar** se
+quedan los juicios **J-2** (el marcador satura: «100 de 100» un día de cada siete y suelo real 30) y
+**J-4** (la sección publica un solo día y la pregunta «¿qué día salgo?» no se puede hacer): son
+decisiones de producto y van al humano, no al parche.
