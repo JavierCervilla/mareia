@@ -65,7 +65,11 @@ En concreto:
 7. **La caché no se versiona por build.** Se versiona por *esquema* (`ESQUEMA_CACHE`), que se sube a
    mano cuando cambia la forma de lo guardado. Versionar por build obligaría a re-descargarlo todo
    cada día y —lo grave— dejaría sin copia offline a quien actualizara el worker justo cuando se
-   quedó sin cobertura, que es el momento exacto en que la copia hace falta.
+   quedó sin cobertura, que es el momento exacto en que la copia hace falta. Cuando sí toca subirlo,
+   se sube: el registro de favoritos del apéndice es una entrada obligatoria nueva, así que la caché
+   pasó a **v2**. Una caché de la v1 tiene favoritos y no tiene registro, y ese estado a medias es
+   indistinguible de un registro corrupto — el worker no podría decidir si «no hay registro» es
+   «esta caché es de antes» o «alguien la ha roto».
 
 ## Por qué
 
@@ -134,3 +138,12 @@ sin estilos, sin la isla meteo y sin el trozo de la calculadora, sin un solo err
 Por eso el worker guarda, bajo una clave sintética de su propia caché, qué URL necesita cada
 favorito, y poda conservando **la unión**. Es lo único que convierte «qué sobra» en una pregunta con
 respuesta en vez de en una adivinanza.
+
+Y de ahí se sigue lo que no era obvio y costó un segundo rechazo: **cuando el registro no se puede
+leer, la respuesta correcta es no podar**. Colapsar «no hay registro» y «el registro dice que no hay
+favoritos» en un mismo objeto vacío devuelve la adivinanza por la puerta de atrás, y esta vez adivina
+«sobra todo»: borra de golpe cuanto hay bajo `/_astro/` y deja al favorito con su página y ningún
+fichero — el fallo original, con el arreglo puesto. Un `{}` de verdad sí es una respuesta (no queda
+ningún favorito, y entonces sus assets sobran); la ausencia de registro no lo es. La decisión de
+podar vive en quien sabe si el registro es de fiar, y no repartida entre dos funciones, porque
+repartir una guardia es cómo una de las dos mitades se queda sin ella en el siguiente refactor.

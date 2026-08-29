@@ -49,6 +49,16 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   es el caso normal—: el primero se quedaba con su página y **cero assets**, abriéndose sin estilos,
   sin la isla meteo y sin el trozo de la calculadora. Hay recorrido nuevo que simula el rebuild y lo
   reproduce en rojo con el comportamiento viejo.
+- **Y no podar es una respuesta válida.** Si el registro no se puede leer —no está, o se quedó a
+  medias— el worker guarda igual pero **no poda**: no saber qué sobra no es que sobre todo, y
+  colapsar las dos cosas en un «no hay favoritos» borraba de golpe todo lo que había bajo `/_astro/`,
+  o sea el mismo fallo que el registro vino a arreglar. Va con su recorrido, que corrompe el registro
+  a propósito y comprueba sobre la caché —no sobre cómo pinte el navegador, que puede taparlo con su
+  propia caché HTTP— que no falta un solo fichero.
+- **El esquema de caché sube a v2.** Una caché de la v1 tiene favoritos y no tiene registro, y ese
+  estado a medias es indistinguible de uno corrupto. Subiendo el esquema, `activate` la barre entera
+  y quien tuviera un puerto guardado lo vuelve a guardar con un clic; el precio se paga una vez y
+  solo dentro de este PR, que no está desplegado.
 - **Las constantes guardadas se revalidan.** Su URL no lleva hash y el pipeline las corrige —T-13
   acaba de regenerar el dataset entero—, así que el worker las sirve `stale-while-revalidate` y la
   página compara su copia de IndexedDB con la del servidor cuando hay cobertura. Un `cache-first`
@@ -66,8 +76,10 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   arranque instantáneo offline-first, y que una pestaña abierta días conserva el worker viejo.
 - **El worker es un `.ts` de verdad**, tipado contra el protocolo y contra el contrato de módulos, y
   el build lo publica en `/sw.js` quitándole los tipos con el propio Node. **El build se cae** si el
-  fichero acaba con un solo `import` de runtime — estático, **dinámico** o `require`, y sin
-  confundirse con los que aparecen en sus propios comentarios. **No conoce ni una ruta de meteo**: las políticas
+  fichero acaba con una sola forma de traer código de fuera: estático, **dinámico**, `require` o
+  **`importScripts`** —que es la que más importa, porque es la única de las cuatro que *sí* funciona
+  en un worker clásico y por tanto la única capaz de colar código sin auditar sin romper nada—. Y sin
+  confundirse con los que aparecen en sus propios comentarios, cadenas o expresiones regulares. **No conoce ni una ruta de meteo**: las políticas
   salen de la `PrecachePolicy` que cada módulo declara en `AppModule` (T-06), así que dar de baja un
   módulo se lleva su política por delante.
 - **Instalable**: manifiesto (`minimal-ui`, no `standalone` — quien instala esto sigue queriendo ver
@@ -80,14 +92,15 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   pueden ser HTML y en qué páginas se sirven. La cuenta sigue siendo **exacta** página a página, y la
   portada, el 404 y los índices geográficos siguen en **cero** JavaScript.
 - **Coste medido en la página de puerto**: el bundle que baja *cualquiera* que abra un puerto sube
-  **14 626 B** (5 369 comprimidos) — el motor de mareas, que son **70 372 B**, va en un trozo aparte
-  con `import()` dinámico y solo lo baja quien pide otro día o guarda el puerto. Sin ese corte eran
-  82 916 B para todo el mundo. El `/sw.js` publicado pesa **20 953 B** (6 781 comprimidos),
-  comentarios incluidos: son su documentación y su auditoría. Un favorito ocupa en la Cache API
-  **147 040 B** el primero —página 28 778, hoja de estilos 15 883, isla meteo 13 234, bundle de la
-  PWA 14 626, su trozo común 1 610, motor 70 372 y constantes 2 537— y **31 343 B** cada siguiente,
-  porque los assets se comparten. Todas las cifras en kB de mil y medidas sobre el `dist/` de este
-  commit con `zlib.gzipSync(datos, { level: 9 })` para las comprimidas.
+  **14 764 B** (5 414 comprimidos) — el motor de mareas, que son **70 372 B**, va en un trozo aparte
+  con `import()` dinámico y solo lo baja quien pide otro día o guarda el puerto. Sin ese corte serían
+  **83 980 B** para todo el mundo (medido haciendo estático el `import()` y reconstruyendo). El
+  `/sw.js` publicado pesa **22 585 B** (7 397 comprimidos), comentarios incluidos: son su
+  documentación y su auditoría. Un favorito ocupa en la Cache API **147 211 B** el primero —página
+  28 778, hoja de estilos 15 883, isla meteo 13 234, bundle de la PWA 14 764, su trozo común 1 643,
+  motor 70 372 y constantes 2 537— y **31 315 B** cada siguiente (su página, 28 778, más sus
+  constantes, 2 537), porque los assets se comparten. Todas las cifras en bytes y kB de mil, medidas
+  sobre el `dist/` de este commit, y las comprimidas con `zlib.gzipSync(datos, { level: 9 })`.
 - **Los gates de antes siguen mordiendo con el worker puesto**: los pases adversarios de T-09, T-10 y
   T-11 quedan en verde sin tocar un solo assert suyo, salvo los dos que contaban scripts, que se
   re-apuntan al registro de scripts de core. `apps/web` pasa de **114 a 172 tests** y los recorridos
