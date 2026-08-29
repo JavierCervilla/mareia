@@ -25,6 +25,7 @@
 
 import type { BulletinPayload, WeatherPayload } from "@mareia/module-weather/ui";
 
+import { CABECERA_GUARDADO } from "../../../pwa/protocolo.ts";
 import { esRespuestaDeBoletin, esRespuestaDeMeteo } from "../contrato.ts";
 import type {
   BloqueMeteo,
@@ -104,6 +105,13 @@ function de(que: string): string {
  *   3. contesta 2xx con un cuerpo que no es JSON → «su respuesta no se puede leer»;
  *   4. contesta 2xx con JSON que no tiene la forma del contrato → «no la sabe leer esta página».
  *
+ * Y desde T-12 hay una **quinta**, que es la que trae la PWA y la que más fácil sería confundir con
+ * la primera: el dispositivo está **sin conexión**. No es «no se ha podido pedir» —eso pasa con
+ * cobertura, cuando el servidor no coge el teléfono— sino que aquí no hay línea, y encima no hay
+ * copia guardada de la que tirar. Son dos averías distintas para quien lee (una se arregla
+ * esperando, la otra buscando cobertura) y publicarlas con la misma frase sería el hallazgo A-11 de
+ * T-09 otra vez.
+ *
  * El `valido` de la 4 es lo que impide el hallazgo H-2: sin él, un 200 con el cuerpo cambiado
  * entraba en la vista y la reventaba a media sección.
  */
@@ -119,7 +127,7 @@ async function traer<T>(
       signal: AbortSignal.timeout(ESPERA_MS),
     });
   } catch {
-    return { ok: false, motivo: `No se ha podido pedir ${que} al servidor de Mareia.` };
+    return { ok: false, motivo: sinConexion() ? faltaSinRed(que) : `No se ha podido pedir ${que} al servidor de Mareia.` };
   }
   if (!respuesta.ok) {
     return {
@@ -144,7 +152,44 @@ async function traer<T>(
       motivo: `El servidor de Mareia contestó a la petición ${de(que)}, pero su respuesta no tiene la forma que esta página sabe leer.`,
     };
   }
-  return { ok: true, cuerpo };
+  const guardadoEnMs = selloDeGuardado(respuesta);
+  return guardadoEnMs === undefined ? { ok: true, cuerpo } : { ok: true, cuerpo, guardadoEnMs };
+}
+
+/**
+ * Si este dispositivo se declara sin conexión.
+ *
+ * `navigator.onLine` es famoso por sus falsos positivos —dice `true` cuando hay wifi sin salida a
+ * internet— pero su **negativo es fiable**: si el navegador dice que no hay red, no la hay. Y ese
+ * es exactamente el uso que se le da aquí: solo se consulta cuando el `fetch` YA ha fallado, para
+ * decidir si el motivo del fallo es la falta de línea o algo peor.
+ */
+function sinConexion(): boolean {
+  return navigator.onLine === false;
+}
+
+/** La quinta ausencia: no hay línea y tampoco hay copia guardada de la que tirar. */
+function faltaSinRed(que: string): string {
+  return (
+    `Sin conexión: este dispositivo no ha podido pedirle ${que} al servidor de Mareia, y no hay ` +
+    `ninguna copia guardada aquí. El dato existe; lo que falta es la red.`
+  );
+}
+
+/**
+ * Cuándo guardó el service worker esta respuesta, si viene de la copia guardada (T-12).
+ *
+ * La cabecera la estampa el worker al meter la respuesta en la caché (`pwa/sw.ts`). Que esté
+ * significa dos cosas a la vez: que esto no acaba de llegar de la red, y de cuándo es. Un valor que
+ * no sea un número se ignora en vez de creerse: preferimos sellar de menos que sellar en falso.
+ */
+function selloDeGuardado(respuesta: Response): number | undefined {
+  const crudo = respuesta.headers.get(CABECERA_GUARDADO);
+  if (crudo === null) {
+    return undefined;
+  }
+  const instante = Number(crudo);
+  return Number.isFinite(instante) && instante > 0 ? instante : undefined;
 }
 
 function texto(etiqueta: string, clase: string, contenido: string): HTMLElement {

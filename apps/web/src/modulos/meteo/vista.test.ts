@@ -451,3 +451,70 @@ test("la antigüedad se escribe en la escala en la que se decide si el dato sirv
   assert.equal(antiguedad(86_400), "1 día");
   assert.equal(antiguedad(2 * 86_400 + 4 * 3_600), "2 días 4 h");
 });
+
+// =================================================================================================
+// T-12 · La quinta cara del sello: la copia guardada en el dispositivo, sin red.
+//
+// El service worker sella la respuesta con la hora a la que la guardó (`x-mareia-guardado-en`) y la
+// isla la pasa como `guardadoEnMs`. La edad de ese bloque deja de medirse desde que llegó la
+// respuesta —que sin red es «ahora mismo», y sería falso— y pasa a medirse desde que se guardó.
+// =================================================================================================
+
+/** Una escena en la que la copia del estado del mar la sirvió el worker, no la red. */
+function escenaGuardada(guardadoEnMs: number, ahoraMs: number): VistaMeteo {
+  const respuesta: RespuestaMeteo = {
+    meteo: { ok: true, cuerpo: meteoDe(METEO_OK), guardadoEnMs },
+    boletin: PIDIENDO,
+    recibidoEnMs: ahoraMs,
+  };
+  return vistaMeteo(respuesta, ahoraMs, ZONA);
+}
+
+test("sin red, la copia guardada se pinta con la edad que tiene, no con la de ahora", () => {
+  const guardadoEnMs = RECIBIDO;
+  const tresHorasDespues = guardadoEnMs + 3 * 3_600_000;
+  const sello = bloque(escenaGuardada(guardadoEnMs, tresHorasDespues), "meteo-mar").sello;
+
+  assert.equal(sello.clase, "caducado");
+  // La edad que dijo el backend (`ageSeconds` del fixture) MÁS las tres horas que lleva guardada.
+  assert.match(sello.titular, /^Dato de hace 3 h/u);
+  assert.doesNotMatch(sello.titular, /Consultado hace/u, "una copia de hace 3 h no es «de ahora»");
+});
+
+test("«servida de la copia guardada» no se lee igual que «la fuente no responde»", () => {
+  const guardada = bloque(escenaGuardada(RECIBIDO, RECIBIDO + 60_000), "meteo-mar").sello;
+  const caida = bloque(escena(METEO_STALE, BOLETIN_OK), "meteo-mar").sello;
+
+  assert.match(guardada.detalle ?? "", /Sin conexión/u);
+  assert.match(guardada.detalle ?? "", /copia que se guardó en este dispositivo/u);
+  assert.doesNotMatch(guardada.detalle ?? "", /no responde en este momento/u);
+
+  // El stale del backend es otra avería: allí la fuente no contesta, aquí no hay línea.
+  assert.match(caida.detalle ?? "", /no responde en este momento/u);
+  assert.doesNotMatch(caida.detalle ?? "", /Sin conexión/u);
+  assert.notEqual(guardada.detalle, caida.detalle);
+});
+
+test("una copia recién guardada tampoco se anuncia como fresca: sigue sin poder comprobarse", () => {
+  const sello = bloque(escenaGuardada(RECIBIDO, RECIBIDO + 1_000), "meteo-mar").sello;
+
+  assert.equal(sello.clase, "caducado");
+  assert.match(sello.detalle ?? "", /no hay forma de comprobarlo hasta que vuelva la red/u);
+});
+
+test("el sello de guardado es POR FUENTE: una de la copia no le cuelga su edad a la otra", () => {
+  const ahoraMs = RECIBIDO + 5 * 3_600_000;
+  const respuesta: RespuestaMeteo = {
+    meteo: { ok: true, cuerpo: meteoDe(METEO_OK), guardadoEnMs: RECIBIDO },
+    boletin: { ok: true, cuerpo: boletinDe(BOLETIN_OK) },
+    recibidoEnMs: ahoraMs,
+  };
+  const vista = vistaMeteo(respuesta, ahoraMs, ZONA);
+
+  assert.match(bloque(vista, "meteo-mar").sello.detalle ?? "", /Sin conexión/u);
+  assert.doesNotMatch(
+    bloque(vista, "meteo-boletin").sello.detalle ?? "",
+    /Sin conexión/u,
+    "el boletín llegó por la red: no puede heredar el sello de la copia del mar",
+  );
+});
