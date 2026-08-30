@@ -262,9 +262,11 @@ eso mueve una regla que hasta ahora era estética.
   puerto — y ninguno cae sobre una cifra. Hay un gate que lo mide sobre la hoja
   (`tallas-construido.test.ts`).
 - **La nota va pegada a la cifra, no en el pie.** Es la decisión de composición que sostiene la
-  trayectoria entera: la lubina son 36 cm salvo en las divisiones 8a y 8b del CIEM —el golfo de
-  Vizcaya, o sea los 47 puertos del Anexo I de este portal—, donde son 44; el pulpo del Anexo II no
-  aplica en aguas interiores de Balears, y ahí hay 17 puertos. Una marca sola (`36 (***)`) es una
+  trayectoria entera: el boquerón son 12 cm salvo en la división IX a) —de Galicia sur al golfo de
+  Cádiz, donde sí tenemos puertos—, donde son 10; el pulpo del Anexo II no aplica en aguas interiores
+  de Balears, y ahí hay 17 puertos. (La nota de la lubina, 44 cm en las divisiones 8.a/8.b, es la de
+  mayor diferencia y por eso se cita, pero **no toca a ningún puerto del portal**: la costa española
+  es la división 8.c.) Una marca sola (`36 (***)`) es una
   **promesa de nota** que hay que ir a buscar, y en un móvil al sol nadie la busca. Se paga en
   repetición —la nota `(*)` sale seis veces en el Anexo I— y en bytes; se acepta, porque la
   alternativa es publicar una cifra legal falsa para esos puertos. El pie con las notas enteras se

@@ -139,8 +139,12 @@ test("la lubina publica 36 cm y, en la misma fila, los 44 de las divisiones 8a y
     t.skip(SIN_BUILD);
     return;
   }
-  // El caso que da nombre al gate: 8 cm de diferencia, y la zona excepcionada es el golfo de
-  // Vizcaya, o sea los puertos cantábricos de este portal.
+  // El caso que da nombre al gate: 8 cm de diferencia entre la cifra y su excepción, que es la
+  // mayor de las tres notas. OJO con la glosa fácil: las divisiones 8.a/8.b son el golfo de Vizcaya
+  // NORTE Y CENTRAL —la vertiente francesa—, y la costa española es la 8.c, así que la excepción no
+  // afecta a ninguno de estos 47 puertos. Lo que el gate exige es que la nota viaje entera junto a
+  // la cifra, y eso vale igual: quien lee tiene que poder decidir si le aplica, y para eso necesita
+  // el texto, no la marca.
   const cantabricos = (await paginasConTabla()).filter(
     (pagina) => pagina.caladero.id === "cantabrico-noroeste-y-golfo-de-cadiz",
   );

@@ -143,8 +143,9 @@ test("las tres notas que cambian la cifra para puertos de este portal dicen el n
   const filasI = filasDeTallas(anexoI, FORMATO_DE_TALLAS, EN_GALICIA);
   const filasII = filasDeTallas(anexoII, FORMATO_DE_TALLAS, EN_GALICIA);
 
-  // Lubina: 36 cm salvo en las divisiones 8a/8b del CIEM —el golfo de Vizcaya, o sea los puertos
-  // cantábricos de este portal—, donde son 44. Ocho centímetros, del lado que multa.
+  // Lubina: 36 cm salvo en las divisiones 8a/8b del CIEM, donde son 44. Ocho centímetros, la mayor
+  // diferencia de las tres notas — pero 8.a/8.b es el Vizcaya norte y central (Francia) y la costa
+  // española es 8.c, así que a estos puertos no les aplica y sus 36 cm son los buenos.
   const lubina = filasI.find((fila) => fila.clave === "lubina");
   assert.equal(lubina?.talla.texto, "36\u00a0cm");
   assert.match(lubina?.notas[0]?.texto ?? "", /44 cent[ií]metros/u);

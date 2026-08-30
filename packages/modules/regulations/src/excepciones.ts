@@ -50,11 +50,16 @@ export interface ExcepcionPorComunidad {
 /**
  * Las excepciones administrativas que este portal sabe resolver. **Una, hoy.**
  *
- * No es una lista corta por pereza: de las tres notas que cambian la cifra en puertos del catálogo,
- * las otras dos hablan de divisiones del CIEM (8a/8b para la lubina, IX a) para el boquerón) y eso
- * es geometría marina que este portal no calcula. Publicarlas resueltas exigiría asignar una
- * división a cada dársena, y una división mal asignada da un número seguro y falso, que es peor que
- * una excepción visible.
+ * No es una lista corta por pereza: las otras dos notas hablan de divisiones del CIEM (8.a/8.b para
+ * la lubina, IX a) para el boquerón) y eso es geometría marina que este portal no calcula.
+ * Publicarlas resueltas exigiría asignar una división a cada dársena, y una división mal asignada da
+ * un número seguro y falso, que es peor que una excepción visible.
+ *
+ * Y hay una prueba viva de que ese miedo está bien puesto: el plan de T-19 afirmaba que las 8.a/8.b
+ * eran «los puertos cantábricos de este portal» y **es falso** —8.a/8.b son el Vizcaya norte y
+ * central, la vertiente francesa; la costa española es la 8.c—. Si aquella glosa se hubiera llevado
+ * a código en vez de quedarse en la prosa, estas 47 páginas publicarían 44 cm donde la norma dice
+ * 36. La regla de no resolver lo que no se sabe evitó un error que ya estaba escrito.
  */
 export const EXCEPCIONES_POR_COMUNIDAD: readonly ExcepcionPorComunidad[] = [
   {

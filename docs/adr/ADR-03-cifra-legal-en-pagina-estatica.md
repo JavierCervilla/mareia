@@ -94,8 +94,8 @@ portal**:
 
 | Nota | Qué dice | A quién afecta aquí |
 |---|---|---|
-| `(***)` Anexo I | la lubina son 36 cm salvo en las divisiones 8a y 8b del CIEM, donde son **44** | las 8a/8b son el golfo de Vizcaya: los puertos cantábricos |
-| `(**)` Anexo I | el boquerón son 12 cm salvo en la división IX a), donde son **10** | golfo de Cádiz y Atlántico ibérico |
+| `(***)` Anexo I | la lubina son 36 cm salvo en las divisiones 8a y 8b del CIEM, donde son **44** | **a ninguno**: 8.a/8.b son el Vizcaya norte y central (Francia); la costa española es **8.c** |
+| `(**)` Anexo I | el boquerón son 12 cm salvo en la división IX a), donde son **10** | **sí toca**: la 9.a va de Galicia sur al golfo de Cádiz |
 | `(*)` Anexo II | la talla del pulpo **no se aplica** en aguas interiores de Illes Balears | **17** puertos del catálogo |
 
 La nota viaja pegada a la cifra y se renderiza junto a ella, **siempre**, en la misma celda. Sobre

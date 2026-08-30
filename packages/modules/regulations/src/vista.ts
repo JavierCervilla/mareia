@@ -183,9 +183,11 @@ function nombreSecundario(
 /**
  * Las notas de una especie, resueltas contra el pie del anexo.
  *
- * **Levanta si una marca no tiene nota.** Es el caso que rompe la promesa entera de la sección: la
- * lubina son 36 cm salvo en las divisiones 8a y 8b del CIEM, donde son 44. Publicar «36 (***)» con
- * el pie perdido son 8 cm de error del lado que multa, y encima con aspecto de dato anotado.
+ * **Levanta si una marca no tiene nota.** Es el caso que rompe la promesa entera de la sección: el
+ * boquerón son 12 cm salvo en la división IX a) —de Galicia sur al golfo de Cádiz, donde sí hay
+ * puertos nuestros—, donde son 10. Publicar «12 (**)» con el pie perdido es una cifra con aspecto de
+ * dato anotado y sin el dato. (La nota de la lubina, 44 cm en 8.a/8.b, se cita mucho por ser la de
+ * mayor diferencia, pero **no afecta a ningún puerto del portal**: la costa española es 8.c.)
  *
  * Además de traerla entera, **resuelve la nota para este puerto cuando se puede** (`excepciones.ts`):
  * la del pulpo del Anexo II excepciona a una comunidad autónoma y el portal sabe en cuál está el

@@ -82,11 +82,14 @@ Leídas las notas de las versiones en vigor:
 - **`(*)` del Anexo I = «Talla por determinar».** Seis especies no tienen talla mínima fijada. Eso es
   un dato, y se publica diciendo *por qué* falta —lo dice la norma— en vez de omitir la fila.
 - **`(***)` del Anexo I**: la lubina son 36 cm **«excepto en las divisiones 8a y 8b del CIEM … en las
-  que la talla mínima es de 44 centímetros»**. Las divisiones 8a/8b son el golfo de Vizcaya: es decir,
-  **los puertos cantábricos de este portal**. Publicar «36» a secas en Bilbao o Santander se equivoca
-  en 8 cm, otra vez del lado que multa.
-- **`(**)` del Anexo I**: el boquerón son 12 cm salvo en la división IX a) —el golfo de Cádiz y el
-  Atlántico ibérico—, donde son 10.
+  que la talla mínima es de 44 centímetros»**. **Esta nota NO afecta a ningún puerto del portal**, y
+  la primera versión de este plan decía lo contrario. Según el propio ICES, **8.a y 8.b son el golfo
+  de Vizcaya norte y central** —la vertiente francesa— y la costa española está en **8.c**, «southern
+  Bay of Biscay and Cantabrian Sea». Los puertos cantábricos leen sus 36 cm y hacen bien.
+- **`(**)` del Anexo I**: el boquerón son 12 cm salvo en la división **IX a)**, donde son 10. **Ésta
+  sí** toca aquí: la 9.a son las «Atlantic Iberian waters», de Galicia sur al golfo de Cádiz. Es
+  decir: el ejemplo bueno de «una nota que cambia el número para nuestros puertos» era éste, no la
+  lubina — y va del lado conservador (publicamos 12 donde la excepción dice 10).
 - **`(*)` del Anexo II**: la talla del pulpo **no se aplica en aguas interiores de Illes Balears**.
   Tenemos 17 puertos baleares.
 
