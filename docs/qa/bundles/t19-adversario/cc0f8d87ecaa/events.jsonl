@@ -1,0 +1,9 @@
+{"at":16,"kind":"step","text":"abrir la página de un puerto con cobertura y leer la sección de tallas"}
+{"at":50,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":74,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_FAILED"}
+{"at":74,"kind":"console","text":"[error] Failed to load resource: net::ERR_FAILED"}
+{"at":272,"kind":"step","text":"comprobar que la página promete DE VERDAD que la tabla se guarda"}
+{"at":287,"kind":"step","text":"dejar que el worker se instale, como en cualquier visita"}
+{"at":322,"kind":"step","text":"se va la cobertura y el lector vuelve a la misma página"}
+{"at":351,"kind":"requestfailed","text":"GET http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/","detail":"net::ERR_FAILED"}
+{"at":391,"kind":"navigation","text":"chrome-error://chromewebdata/"}

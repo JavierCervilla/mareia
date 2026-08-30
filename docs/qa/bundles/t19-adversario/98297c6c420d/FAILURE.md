@@ -1,0 +1,34 @@
+# Fallo de recorrido — adversarial/a2-sello-de-vigencia-que-no-caduca.spec.ts > A2 · una vigencia comprobada por última vez en 2019 tiene que leerse distinta
+
+- **snapshotId:** `98297c6c420d` — lo comparten TODOS los artefactos de este bundle.
+- **runId:** `run-2026-08-30T05-06-56-263Z`
+- **Test:** `/home/user/mareia/tests/e2e/journeys/adversarial/a2-sello-de-vigencia-que-no-caduca.spec.ts:76` (project `movil`, intento 0)
+- **Estado:** failed (se esperaba passed) en 21963 ms
+- **URL al fallar:** about:blank
+
+## Qué se hizo, en orden
+
+| t (ms) | tipo | qué |
+|-------:|------|-----|
+| 4 | step | la sección tal y como se publica hoy, con el sello recién escrito por G2 |
+| 13 | step | construir el sitio con verificadoEn = 2019-04-07 (la rama ámbar de G2, meses) |
+| 21852 | step | comprobar que el sello atrasado llegó DE VERDAD a la página |
+| 21854 | step | comparar lo publicado con el sello de hoy y con el de hace siete años |
+
+## El error
+
+```
+Error: la sección publica lo mismo con la vigencia comprobada hoy que con la de 2019: la rama ámbar de G2 no tiene ninguna consecuencia visible, y el workflow promete que «la sección degradará sola»
+
+expect(received).not.toBe(expected) // Object.is equality
+
+Expected: not "Tallas mínimas del caladero Cantábrico y noroeste y golfo de Cádiz Talla mínima legal de captura: por debajo de estas medidas la pieza no se puede desembarcar ni retener, ni pescando de forma profesional ni de forma recreativa. La tabla es la del caladero al que pertenece este puerto; los otros dos caladeros tienen la suya, con cifras distintas para la misma especie. De dónde salen estas cifras Norma Real Decreto 560/1995, de 7 de abril, por el que se establece las tallas mínimas de determinadas especies pesqueras. (BOE-A-1995-8639) Anexo que aplica a este puerto ANEXO I · Tallas mínimas autorizadas para los caladeros del Cantábrico y noroeste y del golfo de Cádiz Redacción en vigor desde «fecha», por BOE-A-2025-22024 Vigencia comprobada contra el BOE el «fecha» Texto auténtico https://www.boe.es/eli/es/rd/1995/04/07/560 Solo el texto publicado en el BOE tiene carácter auténtico. Esto es un derivado para consulta: antes de quedarse una pieza, la referencia es el texto consolidado del BOE , no esta tabla. Esta tabla se guarda para leerla sin cobertura, así que puedes estar viendo una copia de hace semanas: la fecha de comprobación de arriba es la del día en que se guardó, no la de hoy, y desde entonces la norma ha podido cambiar o quedar derogada sin que esta página se entere. Una talla derogada se lee igual de bien que la vigente. Tallas mínimas de captura del caladero Cantábrico y noroeste y golfo de Cádiz, que es el que aplica en Vigo Especie Talla mínima Como lo escribe el BOE Abadejo Pollachius pollachius 30 cm 30 Acedia Dicologoglossa cuneata 15 cm 15 Aguja Belone belone 25 cm 25 Anguila Anguilla anguilla La norma no fija talla (*) Talla por determinar. (*) Arenque Clupea harengus 20 cm 20 Atún rojo Thunnus thynnus 6,4 kg de peso 6,4 kg Bacalao Gadus morhua 35 cm 35 Besugo Pagellus bogaraveo 25 cm 25 Boga Boops boops La norma no imprime una talla legible la norma imprime «1 1», que no se lee como una talla en cm ni como un peso; se publica el literal porque corregir por inferencia una cifra legal es inventarla 1 1 Boquerón Engraulis encrasicholus 12 cm (**) Excepto en la división IX, a), en la que la talla mínima es de 10 centímetros. 12 (**) Buey Cáncer pagurus La norma no fija talla (*) Talla por determinar. (*) Caballa, Estornino Scomber spp 20 cm 20 Calamar Loligo vulgaris La norma no fija talla (*) Talla por determinar. (*) Carbonero Pollachius virens 35 cm 35 Centolla Maja squinado 12 cm 12 Cigala (entera) Longitud cefalotórax Nephrops norvegicus 2 cm 2 Cigala (entera) Longitud total Nephrops norvegicus 7 cm 7 Cigalas (colas) la norma escribe «Cigalas (colas)» y ahí no hay ningún nombre latino entre paréntesis; no se infiere 3,7 cm 3,7 Congrio Conger conger 58 cm 58 Chopa Spondyliosoma cantharus 23 cm 23 Dorada Sparus aurata 19 cm 19 Eglefino Melanogrammús aeglefinus 30 cm 30 Faneca Trisopterus luscus La norma no fija talla (*) Talla por determinar. (*) Gallos Lepidorhombus spp 20 cm 20 Jibias Sepia spp La norma no fija talla (*) Talla por determinar. (*) Jurel Trachurus trachurus 15 cm 15 Lenguado Solea vulgaris 24 cm 24 Limanda Limanda limanda 23 cm 23 Lisas Mugil spp 20 cm 20 Lubina Dicentrarchus labrax 36 cm (***) Excepto en las divisiones 8a y 8b del Consejo Internacional para la Exploración del Mar, tanto para la pesca profesional como para la pesca recreativa, en las que la talla mínima es de 44 centímetros. 36 (***) Maruca Azul Molva dypterygia 70 cm 70 Maruca Molva molva 63 cm 63 Mendo limón Microstommus kitt 25 cm 25 Mendo Gliptocephalus cynoglossus 28 cm 28 Merlán Merlangus merlangus 23 cm 23 Merluza Merluccius merluccius 27 cm 27 Palometa negra o japuta Brama brama 16 cm 16 Pargo Pagrus pagrus 15 cm 15 Patudo Thunnus obesus 3,2 kg de peso 3,2 kg Platija Platichthys flesus 25 cm 25 Pulpo Octopus vulgaris 1 kg de peso 1 kg Rabil Thunnus albacares 3,2 kg de peso 3,2 kg Rape Lophius piscatorius, L. Budegassa La norma no fija talla (*) Talla por determinar. (*) Ramal Scophthalmus rhombus 30 cm 30 Rodaballo Psetta maxima 30 cm 30 Sabalos Alosa spp 30 cm 30 Salema Sarpa salpa 15 cm 15 Salmón Salmo salar 50 cm 50 Salmonete de roca Mullus surmuletus 15 cm 15 Sardina Sardina pilchardus 11 cm 11 Solla Pleuronectes platessa 25 cm 25 Trucha marisca o reo Salmo trutta 25 cm 25 Vieira Pecten maximus 10 cm 10 Notas de la norma (*) Talla por determinar. (**) Excepto en la división IX, a), en la que la talla mínima es de 10 centímetros. (***) Excepto en las divisiones 8a y 8b del Consejo Internacional para la Exploración del Mar, tanto para la pesca profesional como para la pesca recreativa, en las que la talla mínima es de 44 centímetros. Cuando una cifra tiene excepción, la excepción va escrita junto a ella y no solo aquí abajo: hay especies cuya talla cambia según la zona, y el número sin su excepción es una cifra falsa para quien pesca en la zona excepcionada. No se resuelve por puerto porque eso exige saber en qué división del CIEM cae cada dársena, y asignarla mal daría un número seguro y equivocado. Fuentes de esta sección · Agencia Estatal Boletín Oficial del Estado · Real Decreto 560/1995, texto consolidado (solo el texto publicado en el BOE tiene carácter auténtico) (Reutilización de la legislación (art. 13 Ley 37/2007 y RD 1495/2011))"
+    at /home/user/mareia/tests/e2e/journeys/adversarial/a2-sello-de-vigencia-que-no-caduca.spec.ts:113:11
+```
+
+## Artefactos
+
+- **screenshot** → `screenshot.png`
+- **dom** → `dom.html`
+- **events** → `events.jsonl`
+- **bundle** → `bundle.json`

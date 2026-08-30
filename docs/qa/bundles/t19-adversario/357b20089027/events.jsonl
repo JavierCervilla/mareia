@@ -1,0 +1,17 @@
+{"at":4,"kind":"step","text":"abrir Valencia, un puerto del Anexo II donde la talla del pulpo SÍ rige"}
+{"at":31,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/comunitat-valenciana/valencia/valencia/"}
+{"at":12549,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_CONNECTION_RESET"}
+{"at":12549,"kind":"console","text":"[error] Failed to load resource: net::ERR_CONNECTION_RESET"}
+{"at":12586,"kind":"httperror","text":"HTTP 404 GET http://127.0.0.1:4321/v1/modules/weather/weather?port=valencia"}
+{"at":12586,"kind":"console","text":"[error] Failed to load resource: the server responded with a status of 404 (Not Found)"}
+{"at":12586,"kind":"httperror","text":"HTTP 404 GET http://127.0.0.1:4321/v1/modules/weather/bulletin?port=valencia"}
+{"at":12586,"kind":"console","text":"[error] Failed to load resource: the server responded with a status of 404 (Not Found)"}
+{"at":12710,"kind":"step","text":"abrir Palma de Mallorca, uno de los 17 puertos que la nota excepciona"}
+{"at":12737,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/illes-balears/illes-balears/palma-de-mallorca/"}
+{"at":25274,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_CONNECTION_RESET"}
+{"at":25274,"kind":"console","text":"[error] Failed to load resource: net::ERR_CONNECTION_RESET"}
+{"at":25298,"kind":"httperror","text":"HTTP 404 GET http://127.0.0.1:4321/v1/modules/weather/weather?port=palma-de-mallorca"}
+{"at":25298,"kind":"console","text":"[error] Failed to load resource: the server responded with a status of 404 (Not Found)"}
+{"at":25299,"kind":"httperror","text":"HTTP 404 GET http://127.0.0.1:4321/v1/modules/weather/bulletin?port=palma-de-mallorca"}
+{"at":25299,"kind":"console","text":"[error] Failed to load resource: the server responded with a status of 404 (Not Found)"}
+{"at":25398,"kind":"step","text":"comprobar que la nota que excepciona está de verdad ahí (el gate de T-19 lo asegura)"}

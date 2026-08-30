@@ -1,0 +1,4 @@
+{"at":3,"kind":"step","text":"los gates tienen que estar vivos: verdes sobre el dataset publicado"}
+{"at":109,"kind":"step","text":"plantar Sardina = 0 cm en mediterraneo"}
+{"at":109,"kind":"step","text":"correr G1 + G3, los mismos que corre `run.py check`"}
+{"at":203,"kind":"step","text":"correr el gate de contenido de la web sobre ese mismo dataset"}
