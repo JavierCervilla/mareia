@@ -236,8 +236,18 @@ def leer_respuesta(cuerpo: bytes, *, consultado: str) -> Resolucion:
     return Resolucion(consultado=consultado, registro=registros[0])
 
 
+def descargar(consultado: str, *, refresh: bool = False) -> bytes:
+    """El cuerpo **crudo** de la respuesta a un nombre ya normalizado, tal cual lo sirve la API.
+
+    Existe separado de ``resolver`` porque el cuerpo sin interpretar es lo que se captura y se
+    commitea: el gate de procedencia rehace el taxón publicado pasando estos mismos bytes por
+    ``leer_respuesta``. Si la ingesta sólo devolviera el ``Resolucion`` ya parseado, la captura
+    tendría que reconstruirse desde el objeto y dejaría de ser lo que contestó la fuente.
+    """
+    return cache.fetch(url_de(consultado), suffix=".json", refresh=refresh)
+
+
 def resolver(nombre: str, *, refresh: bool = False) -> Resolucion:
     """Camino completo con red: normaliza → consulta (o sirve de caché) → lee la respuesta."""
     consultado = normalizar(nombre)
-    cuerpo = cache.fetch(url_de(consultado), suffix=".json", refresh=refresh)
-    return leer_respuesta(cuerpo, consultado=consultado)
+    return leer_respuesta(descargar(consultado, refresh=refresh), consultado=consultado)

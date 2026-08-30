@@ -70,6 +70,26 @@ celda. Corregir una grafía no cambia ninguna consecuencia, pero repartir una fi
 decide a qué alcance se aplica una talla mínima, y esa decisión no es nuestra. Se publica sin taxón
 y con su motivo, como el `1 1` ilegible de la boga en `data/normativa`.
 
+**4 · Lo que se publica se contrasta contra lo que dijo la fuente, no contra sí mismo.** Las tres
+reglas de arriba son de coherencia y de firma, y ninguna comprueba **la cifra**. Los dos gates que sí
+lo hacen **rehacen** el dato y lo diffean campo a campo, que es el mismo patrón que usa `normativa`
+con el BOE (gate G4):
+
+* **E5 · la talla es la de la norma.** Las **117** tallas del catálogo se reconstruyen desde
+  `data/normativa/tallas-minimas.json` —con la **misma** función que las publica, no con una segunda
+  lectura— y se comparan campo a campo, `medida` incluida. Hace falta porque la talla legal se
+  publica en **dos** superficies —esta ficha y la página de cada puerto— y hasta que existió el gate
+  el catálogo podía decir 12 cm donde el puerto decía 27, con todo en verde. Lo único que deja fuera
+  es la presencia de OBIS, que no se puede rehacer sin red.
+* **E6 · el taxón es el que contestó WoRMS.** Los **85** taxones se reconstruyen desde las **82
+  respuestas de WoRMS capturadas** en `data/pipeline/tests/fixtures/worms/` —una por consulta, byte a
+  byte, escritas por la propia ingesta para que no puedan quedarse viejas— pasándolas por el mismo
+  parser de producción, y **recomputando** con qué nombre se pregunta en vez de leerlo del artefacto.
+  Cubre `aphiaId`, `estado`, `aceptado`, `rango`, `cita` y el resto de la ficha: sin él, una fila
+  podía publicar el `AphiaID` de otra especie con su correspondencia intacta y nadie se enteraba.
+  La captura **no es un mirror** de WoRMS —su licencia lo prohíbe—: son los nombres que este real
+  decreto obliga a resolver, con la cita que la fuente devuelve para cada uno.
+
 ## Qué hay dentro
 
 ```
@@ -82,8 +102,9 @@ especies[]  nombreBoe · clave · nombreComun/nombresComunes · correspondencia 
 sinNombreCientifico[]   las filas del BOE que no dan latín (hoy, «Cigalas (colas)»)
 ```
 
-Censo de la última generación: **86 especies**, **85 resueltas** en WoRMS (68 especies, 15 géneros,
-1 familia —`Palinuridae`— y 1 subespecie) y **1 sin resolver**; **118 filas** del real decreto
+Censo de la última generación: **86 especies**, **85 resueltas** en WoRMS (68 especies, 15 filas
+de género sobre **14 géneros distintos** —`Mugil` sale dos veces, con la errata `Mugil spps` del
+Anexo II—, 1 familia —`Palinuridae`— y 1 subespecie) y **1 sin resolver**; **118 filas** del real decreto
 contadas (117 con nombre científico y la que no lo trae); **114 cifras de presencia**, de las cuales
 9 son un cero.
 

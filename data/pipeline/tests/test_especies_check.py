@@ -400,3 +400,244 @@ def test_la_ingesta_aborta_antes_de_escribir_si_un_mapeo_pierde_su_dueño(
     monkeypatch.setattr(especies, "errores_de_mapeo", lambda *_, **__: ["un mapeo sin dueño"])
     monkeypatch.setattr(especies, "volcar", lambda *_, **__: pytest.fail("no se debe escribir nada"))
     assert run.command_especies(argparse.Namespace(refresh=False)) == 1
+
+
+# =====================================================================================
+# E5 · la talla legal publicada es la que dice la norma
+# =====================================================================================
+
+
+def test_e5_rojo_si_la_talla_del_catalogo_contradice_a_la_norma(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """El sabotaje que medía el agujero: la merluza a 12 cm en sus dos caladeros.
+
+    Es el fallo que hacía falta cerrar y no un caso de laboratorio. Con esto puesto, el mismo
+    `dist/` decía «Merluza … 12 cm, el BOE imprime "12"» en el índice y «Merluza … 27 cm» en la
+    página de Vigo —dos superficies del mismo dato leyendo datasets distintos— con `run.py check`,
+    `pnpm --filter web build` y `pnpm test` los tres en verde.
+
+    El mensaje tiene que nombrar las cuatro cosas con las que se arregla: especie, caladero, cifra
+    publicada y cifra de la norma. Un «hay una diferencia» obliga a buscarla a mano.
+    """
+    dataset = _publicado()
+    for caladero in _especie(dataset, "Merluccius merluccius")["caladeros"]:
+        for talla in caladero["tallas"]:
+            talla["talla"]["cm"] = 12
+            talla["textoOriginal"] = "12"
+    _con(monkeypatch, dataset)
+    assert run.command_check(argparse.Namespace()) == 1
+    salida = capsys.readouterr().err
+    assert "✗ E5 · talla: «Merluccius merluccius» · cantabrico-noroeste-y-golfo-de-cadiz" in salida
+    assert "tallas[0].talla.cm: el catálogo publica 12 y la fuente dice 27" in salida
+    assert (
+        "«Merluccius merluccius» · mediterraneo.tallas[0].talla.cm: el catálogo publica 12 y la "
+        "fuente dice 20"
+    ) in salida
+
+
+def test_e5_rojo_si_una_talla_pierde_la_medida_que_dice_de_que_es_la_cifra(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """`Nephrops norvegicus` publica 2 cm y 7 cm en el mismo caladero, y `medida` es lo único que
+    dice que uno es longitud del cefalotórax y el otro longitud total.
+
+    Sin ella la fila publica dos cifras juntas sin nada que las distinga, que se lee peor que una
+    cifra mal: invita a quedarse con la pequeña. Por eso la reconstrucción compara la fila entera y
+    no los campos que a alguien le parecieron los importantes.
+    """
+    dataset = _publicado()
+    quitadas = 0
+    for caladero in _especie(dataset, "Nephrops norvegicus")["caladeros"]:
+        for talla in caladero["tallas"]:
+            quitadas += talla.pop("medida", None) is not None
+    assert quitadas == 4
+    _con(monkeypatch, dataset)
+    assert run.command_check(argparse.Namespace()) == 1
+    salida = capsys.readouterr().err
+    assert "«Nephrops norvegicus» · mediterraneo.tallas[0].medida" in salida
+    assert "la fuente lo trae y el catálogo no lo publica" in salida
+
+
+def test_e5_rojo_si_el_catalogo_le_inventa_un_caladero_a_una_especie(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """La otra forma de mentir con una talla: publicarla donde la norma no la fija.
+
+    Una talla de más no contradice ninguna cifra —todas las publicadas serían correctas— y aun así
+    dice que en ese caladero hay un mínimo que la norma no puso.
+    """
+    dataset = _publicado()
+    especie = _especie(dataset, "Merluccius merluccius")
+    inventado = copy.deepcopy(especie["caladeros"][0])
+    inventado["id"] = "canarias"
+    especie["caladeros"].append(inventado)
+    _con(monkeypatch, dataset)
+    assert run._check_especies() > 0
+    assert "publica el caladero canarias y el RD 560/1995 no le fija talla ahí" in capsys.readouterr().err
+
+
+def test_e5_no_mira_la_presencia_de_obis_porque_no_sale_del_boe() -> None:
+    """El alcance del gate, dicho como afirmación y no sólo en el docstring.
+
+    La presencia se pregunta a una API y no se puede rehacer sin red, así que E5 la deja fuera a
+    propósito. Que viaje con su recorte y su frase de sesgo lo cubre `errores_de_presencia`; que
+    un género no se pregunte como una especie, E3. Un gate con su alcance escrito vale; uno que
+    aparente cubrir lo que no cubre es peor que no tenerlo.
+    """
+    dataset = _publicado()
+    for especie in dataset["especies"]:
+        for caladero in especie["caladeros"]:
+            if caladero.get("presencia"):
+                caladero["presencia"]["registros"] = 999999
+    assert not especies.errores_de_tallas(dataset, normativa.cargar())
+
+
+# =====================================================================================
+# E6 · el taxón publicado es el que contestó WoRMS
+# =====================================================================================
+
+
+def test_e6_rojo_si_el_taxon_apunta_a_otra_especie_con_la_correspondencia_intacta(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """El sabotaje que medía el agujero, y ni siquiera hace falta tocar la correspondencia.
+
+    `Conger conger` conserva su correspondencia `literal`/`worms` —o sea, E2 la da por buena, y
+    hace bien: la decisión de con qué nombre preguntar sigue siendo la de la norma— y publica el
+    AphiaID de la sardina. Antes de E6 esto dejaba `run.py check`, `pytest` y `pnpm test` en verde:
+    de las 85 filas resueltas, ni el `aphiaId`, ni el `estado`, ni el `aceptado`, ni el `rango`, ni
+    la `cita` tenían quien los contrastara.
+    """
+    dataset = _publicado()
+    especie = _especie(dataset, "Conger conger")
+    assert especie["correspondencia"]["tipo"] == "literal"
+    especie["taxon"]["aphiaId"] = 126425
+    especie["taxon"]["aceptado"] = {
+        "aphiaId": 126425,
+        "nombre": "Sardina pilchardus",
+        "autoridad": "(Walbaum, 1792)",
+    }
+    _con(monkeypatch, dataset)
+    assert run.command_check(argparse.Namespace()) == 1
+    salida = capsys.readouterr().err
+    assert (
+        "✗ E6 · procedencia: «Conger conger» · taxon.aphiaId: el catálogo publica 126425 y la "
+        "fuente dice 126285"
+    ) in salida
+    assert (
+        "taxon.aceptado.nombre: el catálogo publica 'Sardina pilchardus' y la fuente dice "
+        "'Conger conger'"
+    ) in salida
+
+
+@pytest.mark.parametrize(
+    ("campo", "valor"),
+    [
+        ("estado", "accepted"),
+        ("rango", "especie"),
+        ("rangoWorms", "Species"),
+        ("cita", "Mareia (2026). Se lo hemos preguntado a nadie."),
+        ("url", "https://www.marinespecies.org/aphia.php?p=taxdetails&id=1"),
+        ("autoridad", "(Nadie, 2026)"),
+    ],
+)
+def test_e6_rojo_campo_a_campo_y_no_solo_en_el_aphiaid(campo: str, valor: str) -> None:
+    """Los otros campos de la procedencia, uno por uno.
+
+    `Trisopterus minutus capelanus` es una subespecie que WoRMS da por no aceptada: retocarle el
+    estado o el rango la convierte en otra cosa taxonómica distinta sin tocar ningún identificador,
+    y la `cita` es la atribución que la licencia de WoRMS obliga a publicar — una inventada no es
+    un adorno roto, es atribuirle a la fuente algo que no ha dicho.
+    """
+    dataset = _publicado()
+    especie = _especie(dataset, "Trisopterus minutus capelanus")
+    assert especie["taxon"][campo] != valor
+    especie["taxon"][campo] = valor
+    fallos = especies.errores_de_procedencia(dataset)
+    assert any(f"«Trisopterus minutus capelanus» · taxon.{campo}" in fallo for fallo in fallos)
+
+
+def test_e6_rojo_si_se_publica_un_taxon_de_una_consulta_que_worms_no_contesta(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Any
+) -> None:
+    """El 204 de WoRMS: cuando no encuentra nada responde **sin cuerpo**, y eso es un desenlace.
+
+    Una fila que publique taxón resuelto contra una consulta que no devuelve nada está publicando
+    una procedencia que la fuente no dio. La captura se sustituye por una donde esa respuesta está
+    vacía, que es exactamente lo que habría en disco si WoRMS dejara de conocer ese nombre.
+    """
+    captura = tmp_path / "worms"
+    captura.mkdir()
+    for fichero in especies.FUENTE_WORMS_CAPTURADA.glob("*.json"):
+        (captura / fichero.name).write_bytes(fichero.read_bytes())
+    (captura / especies.fichero_de_captura("conger conger")).write_bytes(b"")
+    monkeypatch.setattr(especies, "FUENTE_WORMS_CAPTURADA", captura)
+    assert run._check_especies() > 0
+    salida = capsys.readouterr().err
+    assert "«Conger conger» · taxon.resuelto: el catálogo publica True y la fuente dice False" in salida
+    assert "«Conger conger» · taxon.motivo: la fuente lo trae y el catálogo no lo publica" in salida
+    assert "«Conger conger» · taxon.aphiaId: el catálogo lo publica y la fuente no lo dice" in salida
+
+
+def test_e6_rojo_si_la_captura_no_trae_la_respuesta_de_una_fila(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Any
+) -> None:
+    """Y no se da por bueno lo que no se puede comprobar: sin la respuesta, no hay verde.
+
+    Es el modo de fallo barato de un gate que lee de disco —el fichero que falta— y el que más
+    fácil pasa desapercibido, porque no hay ninguna diferencia que listar.
+    """
+    captura = tmp_path / "worms"
+    captura.mkdir()
+    for fichero in especies.FUENTE_WORMS_CAPTURADA.glob("*.json"):
+        if fichero.name != especies.fichero_de_captura("merluccius merluccius"):
+            (captura / fichero.name).write_bytes(fichero.read_bytes())
+    monkeypatch.setattr(especies, "FUENTE_WORMS_CAPTURADA", captura)
+    assert run._check_especies() > 0
+    salida = capsys.readouterr().err
+    assert "«Merluccius merluccius» publica un taxón que sale de preguntar «merluccius merluccius»" in salida
+    assert "la captura no trae esa respuesta" in salida
+
+
+def test_e6_rojo_si_falta_la_captura_entera(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Any
+) -> None:
+    """Sin captura no hay nada que contrastar, y eso se cuenta como problema, no como verde."""
+    monkeypatch.setattr(especies, "FUENTE_WORMS_CAPTURADA", tmp_path / "no-existe")
+    assert run._check_especies() > 0
+    assert "no está la captura de WoRMS" in capsys.readouterr().err
+
+
+def test_e6_recomputa_la_consulta_en_vez_de_leerla_del_artefacto() -> None:
+    """La consulta con la que se rehace el taxón sale de `correspondencia_de`, no del JSON.
+
+    Si se leyera del artefacto, bastaría con reescribir `consultadoComo` para que el gate fuera a
+    buscar la respuesta que le da la razón al taxón falseado. Aquí el `consultadoComo` cambiado es
+    **una diferencia más**, no la instrucción de contra qué comparar.
+    """
+    dataset = _publicado()
+    especie = _especie(dataset, "Conger conger")
+    especie["correspondencia"]["consultadoComo"] = "sardina pilchardus"
+    fallos = especies.errores_de_procedencia(dataset)
+    assert any("correspondencia.consultadoComo" in fallo for fallo in fallos)
+    assert "conger conger" in " ".join(fallos)
+
+
+def test_e6_verde_sobre_el_artefacto_publicado() -> None:
+    """Las 86 fichas se rehacen desde la captura y coinciden: el dato de hoy está bien.
+
+    Se afirma aquí porque es la mitad que da sentido a los rojos de arriba: E5 y E6 son gates que
+    faltaban sobre un dato correcto, no la corrección de un dato falso.
+    """
+    dataset = especies.cargar()
+    assert not especies.errores_de_procedencia(dataset)
+    assert not especies.errores_de_tallas(dataset, normativa.cargar())
+    consultas = {
+        especies.correspondencia_de(e["nombreBoe"]).consulta for e in dataset["especies"]
+    }
+    consultas.discard(None)
+    assert len(consultas) == 82
+    assert {f.name for f in especies.FUENTE_WORMS_CAPTURADA.glob("*.json")} == {
+        especies.fichero_de_captura(consulta) for consulta in consultas
+    }

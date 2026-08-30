@@ -69,7 +69,8 @@ const SCHEMA = "especies/v1";
 const FICHERO_CATALOGO = `${DATA_DIR}/especies/catalogo.json`;
 
 /**
- * Los rangos que la norma nombra, **medidos sobre el dataset**: 68 especies, 15 géneros, la familia
+ * Los rangos que la norma nombra, **medidos sobre el dataset**: 68 especies, 15 filas de género
+ * (sobre 14 géneros distintos), la familia
  * `Palinuridae` y la subespecie `Trisopterus minutus capelanus`. Fuera de aquí, no se publica.
  */
 const RANGOS: readonly RangoDelNombre[] = ["especie", "genero", "familia", "subespecie"];

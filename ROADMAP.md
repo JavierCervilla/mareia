@@ -185,7 +185,7 @@
       veces, con la errata `Mugil spps` de la propia norma) más **6 erratas** de la norma—, con la
       correspondencia **declarada como nuestra**, y **1 no resuelve** y publica por qué; **11**
       tienen hoy un nombre aceptado distinto (`Solea vulgaris` → **Solea solea**). Se rotula todo lo
-      que **no es una especie**: los 15 géneros, la familia `Palinuridae` y la subespecie `Trisopterus
+      que **no es una especie**: esas 15 filas de género, la familia `Palinuridae` y la subespecie `Trisopterus
       minutus capelanus`, **17 rótulos sobre 86**. **No es un error del BOE**: la norma es de 1995 y la taxonomía se movió, así que se
       publican los dos nombres con su fuente y su `AphiaID` y **el legal no se sustituye nunca**. Los
       registros de OBIS se publican como lo que son —**esfuerzo de muestreo, no abundancia**: la
@@ -193,7 +193,10 @@
       la cifra sale siempre dentro de la frase que lleva el sesgo pegado, y sin registros se publica
       la ausencia con su motivo en vez de un cero. La sección de la página de puerto es **un enlace
       al catálogo filtrado por su caladero** (51 · 33 · 31 especies) y **no una segunda tabla**, que
-      serían dos superficies del mismo dato; **1.453 B** por página. Entra por el contrato
+      serían dos superficies del mismo dato; **1.453 B** por página. **El catálogo sí acabó siendo esa
+      segunda superficie** —copia la talla de `tallas-minimas.json` y la publica al lado de la del
+      puerto— y por eso lleva el gate **E5**, que es la mitigación que el argumento pedía y que no se
+      escribió a la primera. Entra por el contrato
       `AppModule` como módulo propio (**`ModuleId` se amplía por tercera vez, a seis**, porque el
       taxón y los registros **no salen del BOE** y la licencia de WoRMS prohíbe redistribuir la base
       entera), con `order: 35` y **sin política offline**, que aquí es una afirmación: el precacheo es
@@ -210,9 +213,17 @@
       **más el digest del literal** —sale sólo del nombre, así que no se mueve porque se muevan las
       demás— y hay dos gates que lo defienden, `run.py check` y el lector, los dos probados en rojo
       con el mismo sabotaje; y la cigala tiene **dos tallas en el mismo anexo**, que sin decir qué
-      mide cada una se leen como una contradicción. Medido con el comando de CI: `pnpm test` **651 en
-      verde**, `pnpm test:e2e` **61**, `pytest` **1.903**, catálogo de **105.902 B** (10.280
-      comprimidos) con cero scripts
+      mide cada una se leen como una contradicción. **Y las dos fuentes nuevas se contrastan contra lo
+      que dijeron, no contra sí mismas**, que es el patrón G4 llevado a las superficies nuevas: **E5**
+      rehace las **117** tallas del catálogo desde `tallas-minimas.json` y las diffea campo a campo
+      —`medida` incluida—, y **E6** rehace los **85** taxones desde las **82 respuestas de WoRMS
+      capturadas** y commiteadas (`data/pipeline/tests/fixtures/worms/`, 77 KB, que escribe la propia
+      ingesta para que no puedan desincronizarse), recomputando con qué nombre se pregunta. Los dos
+      **probados en rojo**: la merluza a **12 cm** —que contradecía a su propia página de puerto, que
+      dice **27**, con todo en verde—, la cigala sin `medida` —**2 cm y 7 cm** juntos sin nada que los
+      distinga— y `Conger conger` publicando el `AphiaID` de la sardina con su correspondencia
+      intacta. Medido con el comando de CI: `pnpm test` **651 en verde**, `pnpm test:e2e` **61**,
+      `pytest` **1.919**, catálogo de **105.902 B** (10.280 comprimidos) con cero scripts
 - [ ] T-14 · Metodología pública + QC navegable + dataset con su licencia por puerto declarada
       (el reparto real ya publicado en T-14A) + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario

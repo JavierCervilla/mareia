@@ -360,15 +360,26 @@ def _fuentes_a_json(tallas: dict[str, Any], *, consultado_en: dt.date) -> dict[s
     }
 
 
-def _caladeros_de(
-    nombre_boe: str,
-    tallas: dict[str, Any],
-    resolucion: worms.Resolucion,
-    presencias: dict[tuple[str, str], obis.Presencia],
-    *,
-    consultado_en: dt.date,
-) -> list[dict[str, Any]]:
-    """Los caladeros que regulan una especie, con sus tallas y su presencia."""
+#: Lo que en un caladero publicado **no** sale del BOE, sino de OBIS. Es lo que el gate E5 deja
+#: fuera de la reconstrucción: la presencia se pregunta a una API y no se puede rehacer sin red,
+#: y de que viaje con su sesgo y su recorte ya responde ``errores_de_presencia``.
+CAMPOS_QUE_NO_SON_DEL_BOE = ("presencia", "presenciaAusente")
+
+
+def caladeros_del_boe(nombre_boe: str, tallas: dict[str, Any]) -> list[dict[str, Any]]:
+    """Los caladeros que regulan una especie con **sólo** lo que sale de ``normativa/v1``.
+
+    Es el único sitio donde la talla legal se copia del dataset de normativa al catálogo, y por eso
+    la llaman los dos lados: ``construir_dataset`` para publicar y el gate E5
+    (``errores_de_tallas``) para comprobar que lo publicado es exactamente esto. Si el gate tuviera
+    su propia lectura de la norma, compararía el catálogo contra una **segunda interpretación** en
+    vez de contra la norma, y las dos podrían estar de acuerdo en lo mismo equivocado.
+
+    Devuelve la fila entera —``tallas`` con su ``talla``, su ``textoOriginal``, sus ``notas``, su
+    ``procedencia`` y su ``medida`` cuando la hay— y no una selección de campos: qué se compara lo
+    decide lo que la norma dice de esa especie, no una lista escrita a mano que se queda corta el
+    día que ``normativa/v1`` gane un campo.
+    """
     publicados: list[dict[str, Any]] = []
     for caladero in tallas["caladeros"]:
         filas = [e for e in caladero["especies"] if e.get("nombreCientifico") == nombre_boe]
@@ -384,6 +395,21 @@ def _caladeros_de(
         local = next((f["nombreLocalCanario"] for f in filas if "nombreLocalCanario" in f), None)
         if local:
             entrada["nombreLocalCanario"] = local
+        publicados.append(entrada)
+    return publicados
+
+
+def _caladeros_de(
+    nombre_boe: str,
+    tallas: dict[str, Any],
+    resolucion: worms.Resolucion,
+    presencias: dict[tuple[str, str], obis.Presencia],
+    *,
+    consultado_en: dt.date,
+) -> list[dict[str, Any]]:
+    """Los caladeros del BOE de una especie, más la presencia de OBIS de cada uno."""
+    publicados = caladeros_del_boe(nombre_boe, tallas)
+    for entrada in publicados:
         if resolucion.registro is None:
             entrada["presencia"] = None
             entrada["presenciaAusente"] = (
@@ -391,14 +417,13 @@ def _caladeros_de(
                 "acertar se lee como ausencia de la especie, y eso sería mentir sobre el mar."
             )
         else:
-            clave = (nombre_para_obis(resolucion.registro), caladero["id"])
+            clave = (nombre_para_obis(resolucion.registro), entrada["id"])
             if clave not in presencias:
                 raise ValueError(
                     f"falta la presencia de «{clave[0]}» en el caladero {clave[1]}: el dataset no "
                     "se construye a medias, porque una presencia ausente se lee como un cero"
                 )
             entrada["presencia"] = _presencia_a_json(presencias[clave], consultado_en=consultado_en)
-        publicados.append(entrada)
     return publicados
 
 
@@ -785,3 +810,281 @@ def errores_de_cobertura(dataset: dict[str, Any], tallas: dict[str, Any]) -> lis
             f"{filas_del_dataset}: hay filas que no aparecen por ninguna parte"
         )
     return fallos
+
+
+# --------------------------------------------------------------------------------------------
+# Reconstrucción: el catálogo es lo que dicen sus fuentes, no lo que él dice de sí mismo
+# --------------------------------------------------------------------------------------------
+
+#: Cuántas diferencias se listan antes de callar, por el mismo motivo que en ``normativa``: un
+#: catálogo regenerado de una fuente que cambió difiere en cientos de campos, y volcarlos todos
+#: esconde el primero, que es el que se lee.
+TOPE_DE_DIFERENCIAS = 20
+
+
+def _diferencias(publicado: Any, esperado: Any, camino: str, fallos: list[str]) -> None:
+    """Compara campo a campo y **nombra el camino** de cada diferencia.
+
+    Recorre la estructura entera en vez de una lista de campos: es lo que hace que un campo nuevo
+    de la fuente quede vigilado el día que aparezca, sin que nadie tenga que acordarse de añadirlo.
+    """
+    if len(fallos) >= TOPE_DE_DIFERENCIAS:
+        return
+    if isinstance(esperado, dict) and isinstance(publicado, dict):
+        for clave in sorted(set(esperado) | set(publicado)):
+            if clave not in publicado:
+                fallos.append(f"{camino}.{clave}: la fuente lo trae y el catálogo no lo publica")
+            elif clave not in esperado:
+                fallos.append(f"{camino}.{clave}: el catálogo lo publica y la fuente no lo dice")
+            else:
+                _diferencias(publicado[clave], esperado[clave], f"{camino}.{clave}", fallos)
+        return
+    if isinstance(esperado, list) and isinstance(publicado, list):
+        if len(esperado) != len(publicado):
+            fallos.append(
+                f"{camino}: el catálogo publica {len(publicado)} entradas y la fuente da "
+                f"{len(esperado)}"
+            )
+            return
+        for indice, (uno, otro) in enumerate(zip(publicado, esperado, strict=True)):
+            _diferencias(uno, otro, f"{camino}[{indice}]", fallos)
+        return
+    if publicado != esperado:
+        fallos.append(f"{camino}: el catálogo publica {publicado!r} y la fuente dice {esperado!r}")
+
+
+def _cortadas(fallos: list[str], regenerar: str) -> list[str]:
+    """La coletilla que se añade cuando la lista de diferencias llegó al tope."""
+    if len(fallos) >= TOPE_DE_DIFERENCIAS:
+        fallos.append(
+            f"… y más: la lista se corta en {TOPE_DE_DIFERENCIAS}. Regenera el catálogo con "
+            f"`{regenerar}` y mira el diff entero"
+        )
+    return fallos
+
+
+# --------------------------------------------------------------------------------------------
+# E5 · la talla legal publicada es la que dice la norma
+# --------------------------------------------------------------------------------------------
+
+
+def errores_de_tallas(dataset: dict[str, Any], tallas: dict[str, Any]) -> list[str]:
+    """**Gate E5**: las tallas del catálogo se **rehacen** desde ``normativa/v1`` y se diffean.
+
+    **Por qué existe.** La talla mínima de una especie se publica en **dos** superficies —la ficha
+    del catálogo y la sección de cada puerto— y las dos leen datasets distintos: el catálogo copia
+    la cifra de ``tallas-minimas.json`` en el momento de la ingesta y nadie volvía a contrastarla.
+    G4 cubre ``tallas-minimas.json`` contra el BOE capturado, pero no cubría la **copia**. Medido:
+    poner ``Merluccius merluccius`` a 12 cm en el catálogo dejaba el índice diciendo «12 cm, el BOE
+    imprime "12"» y la página de Vigo diciendo «27 cm» en el mismo ``dist/``, con `run.py check`, el
+    build y los tests en verde. Una cifra con consecuencia legal, atribuida al BOE, y contradicha
+    por el propio sitio.
+
+    **Qué compara.** Todo lo que en un caladero publicado viene del BOE: el caladero y su anexo, el
+    nombre común, y cada fila de ``tallas`` entera —``talla``, ``textoOriginal``, ``notas``,
+    ``procedencia`` y ``medida``—. ``medida`` no es un extra: sin ella ``Nephrops norvegicus``
+    publica 2 cm y 7 cm en el mismo caladero sin nada que distinga la longitud del cefalotórax de
+    la total, y eso también pasaba en verde. Lo único que se deja fuera es lo de OBIS
+    (``CAMPOS_QUE_NO_SON_DEL_BOE``), que no se puede rehacer sin red.
+
+    **Qué no puede cazar por construcción**: que ``tallas-minimas.json`` esté mal. De eso responde
+    G4, que lo contrasta contra la captura del BOE. Los dos hacen falta y ninguno cubre al otro:
+    G4 mira la norma contra su fuente y E5 mira la copia contra la norma.
+    """
+    fallos: list[str] = []
+    for especie in dataset["especies"]:
+        if len(fallos) >= TOPE_DE_DIFERENCIAS:
+            break
+        nombre = especie["nombreBoe"]
+        try:
+            esperados = {c["id"]: c for c in caladeros_del_boe(nombre, tallas)}
+        except KeyError as error:
+            # Un gate que revienta no es un gate: deja el check a medias y se lleva por delante a
+            # los que venían detrás. Si la norma publicada está incompleta lo dice G1, y aquí lo
+            # que toca decir es que sin ella no hay con qué contrastar esta fila.
+            fallos.append(
+                f"«{nombre}»: al RD 560/1995 publicado le falta {error} en alguna de sus filas, "
+                "así que no hay contra qué contrastar la talla que publica el catálogo"
+            )
+            continue
+        publicados: dict[str, dict[str, Any]] = {}
+        for indice, caladero in enumerate(especie.get("caladeros") or []):
+            clave = caladero.get("id") or f"#{indice}"
+            if clave in publicados:
+                fallos.append(
+                    f"«{nombre}» publica dos veces el caladero {clave}: la norma le da una tabla "
+                    "por caladero y dos filas para el mismo no se pueden contrastar"
+                )
+                continue
+            publicados[clave] = {
+                campo: valor
+                for campo, valor in caladero.items()
+                if campo not in CAMPOS_QUE_NO_SON_DEL_BOE
+            }
+        for falta in sorted(set(esperados) - set(publicados)):
+            fallos.append(
+                f"«{nombre}» tiene talla mínima en {falta} y el catálogo no publica ese caladero"
+            )
+        for sobra in sorted(set(publicados) - set(esperados)):
+            fallos.append(
+                f"«{nombre}» publica el caladero {sobra} y el RD 560/1995 no le fija talla ahí"
+            )
+        for clave in sorted(set(esperados) & set(publicados)):
+            _diferencias(publicados[clave], esperados[clave], f"«{nombre}» · {clave}", fallos)
+    return _cortadas(fallos, "python run.py especies")
+
+
+# --------------------------------------------------------------------------------------------
+# E6 · la procedencia taxonómica es la que contestó WoRMS
+# --------------------------------------------------------------------------------------------
+
+#: Las respuestas de WoRMS **capturadas** el día de la ingesta, una por consulta y byte a byte tal
+#: y como las sirve la API. Las escribe ``run.py especies`` junto al dataset —ver ``volcar_captura``
+#: — para que no puedan desincronizarse con él.
+#:
+#: Viven bajo ``tests/fixtures`` por el mismo motivo que las del BOE y las de RAMPE: es donde se
+#: capturan las fuentes de este pipeline y **no se duplican**, porque dos copias se desincronizan y
+#: la que se quedase vieja daría verde contra una fuente que ya nadie mira. Que un gate de
+#: producción lea de ``tests/`` es el precio de tener una sola copia.
+#:
+#: **No es un mirror de WoRMS**, que su licencia prohíbe: son los 82 nombres que el RD 560/1995
+#: obliga a resolver, con la cita que la propia fuente devuelve para cada uno — la misma extracción
+#: curada que ya publica ``catalogo.json``.
+FUENTE_WORMS_CAPTURADA = REPO_ROOT / "data" / "pipeline" / "tests" / "fixtures" / "worms"
+
+
+def fichero_de_captura(consulta: str) -> str:
+    """El nombre del fichero donde vive la respuesta a una consulta ya normalizada.
+
+    La consulta normalizada es minúsculas y blancos simples (``worms.normalizar``), así que el
+    guion sustituye al espacio y no colisiona con nada. ``volcar_captura`` lo comprueba en vez de
+    confiarlo: dos consultas en el mismo fichero dejarían a una fila contrastándose contra la
+    respuesta de otra.
+    """
+    return f"{consulta.replace(' ', '-')}.json"
+
+
+def volcar_captura(
+    cuerpos: dict[str, bytes], destino: Path = FUENTE_WORMS_CAPTURADA
+) -> list[Path]:
+    """Escribe la captura de WoRMS: un fichero por consulta, y **ninguno de más**.
+
+    Se llama desde la ingesta y no a mano, que es lo que garantiza que la captura y el dataset son
+    de la misma tanda: el gate E6 compara uno contra otra, y una captura vieja daría verde
+    describiendo un WoRMS que ya no es el que se publicó. Por eso también borra los ficheros que
+    sobran —una consulta que la norma deje de exigir no se queda ahí de adorno.
+    """
+    destino.mkdir(parents=True, exist_ok=True)
+    escritos: dict[str, str] = {}
+    for consulta, cuerpo in sorted(cuerpos.items()):
+        fichero = fichero_de_captura(consulta)
+        if fichero in escritos:
+            raise ValueError(
+                f"«{consulta}» y «{escritos[fichero]}» caen en el mismo fichero de captura "
+                f"({fichero}): dos consultas distintas no pueden compartir respuesta"
+            )
+        escritos[fichero] = consulta
+        (destino / fichero).write_bytes(cuerpo)
+    for viejo in destino.glob("*.json"):
+        if viejo.name not in escritos:
+            viejo.unlink()
+    return [destino / fichero for fichero in sorted(escritos)]
+
+
+def respuesta_capturada(consulta: str, origen: Path = FUENTE_WORMS_CAPTURADA) -> bytes | None:
+    """El cuerpo capturado de una consulta, o ``None`` si la captura no la trae."""
+    ruta = origen / fichero_de_captura(consulta)
+    return ruta.read_bytes() if ruta.is_file() else None
+
+
+def errores_de_procedencia(
+    dataset: dict[str, Any], origen: Path | None = None
+) -> list[str]:
+    """**Gate E6**: el taxón publicado se **rehace** desde la captura de WoRMS y se diffea.
+
+    **Por qué existe.** El taxón son 85 filas resueltas y hasta aquí no lo contrastaba nada: E2
+    audita de quién es la *decisión* de a qué nombre se pregunta, no *qué contestó* la fuente. El
+    hueco está medido: en ``Conger conger``, con la correspondencia ``literal``/``worms`` intacta,
+    cambiar el ``aphiaId`` a 126425 y el aceptado a ``Sardina pilchardus`` dejaba `run.py check`,
+    `pytest` y `pnpm test` en verde. Ni el ``aphiaId``, ni el ``estado``, ni el ``aceptado``, ni el
+    ``rango``, ni la ``cita`` tenían quien los mirara.
+
+    **Cómo se rehace.** Es el mismo camino que ``run.py especies`` con la descarga sustituida por
+    la captura: la consulta se **recomputa** con ``correspondencia_de`` —no se lee del artefacto,
+    que es justo lo que se puede falsear—, sus bytes se pasan por ``worms.leer_respuesta`` y el
+    resultado por ``_taxon_a_json``. Así los cuatro modos de fallo caen solos y sin lista de
+    campos: la consulta que no está en la captura, la respuesta vacía (el 204 de WoRMS, que
+    reconstruye ``resuelto: false`` y choca con cualquier taxón publicado), el ``aphiaId`` que no
+    es el que devuelve esa consulta, y ``estado``/``aceptado``/``rango`` campo a campo.
+
+    ``consultadoEn`` se toma de ``fuentes.worms.consultadoEn`` y por eso queda fuera de la
+    comparación **por definición**: es el sello del día en que se preguntó, no algo que diga la
+    respuesta. Lo que sí queda dentro es que las 86 fichas declaren ese mismo día.
+
+    **Qué no puede cazar por construcción**: que la captura y el dataset se falsifiquen juntos, o
+    que WoRMS haya cambiado de opinión desde la ingesta. Lo primero es el mismo límite que tienen
+    G4 y P6; lo segundo no es trabajo de un gate offline y determinista, que tiene que decir lo
+    mismo hoy que dentro de un año.
+
+    ``origen`` se resuelve **al llamar** y no al importar: apuntar el gate a otra captura es como
+    se comprueba que sabe ponerse rojo —una respuesta vaciada, un fichero que falta— sin tener que
+    tocar la que se publica.
+    """
+    origen = origen or FUENTE_WORMS_CAPTURADA
+    if not origen.is_dir():
+        return [
+            f"no está la captura de WoRMS ({origen}): sin ella no se puede comprobar que el taxón "
+            "publicado es el que contestó la fuente"
+        ]
+    sello = (dataset.get("fuentes", {}).get("worms") or {}).get("consultadoEn")
+    try:
+        consultado_en = dt.date.fromisoformat(str(sello))
+    except (TypeError, ValueError):
+        return [
+            f"el catálogo no dice cuándo se consultó a WoRMS ({sello!r}): sin esa fecha no se sabe "
+            "de qué día es la procedencia que publica"
+        ]
+    fallos: list[str] = []
+    for especie in dataset["especies"]:
+        if len(fallos) >= TOPE_DE_DIFERENCIAS:
+            break
+        nombre = especie["nombreBoe"]
+        correspondencia = correspondencia_de(nombre)
+        _diferencias(
+            especie.get("correspondencia") or {},
+            {
+                "tipo": correspondencia.tipo,
+                "origen": correspondencia.origen,
+                "consultadoComo": correspondencia.consulta,
+                "motivo": correspondencia.motivo,
+                "laNormaNoDiceEso": correspondencia.la_norma_no_dice_eso,
+            },
+            f"«{nombre}» · correspondencia",
+            fallos,
+        )
+        if correspondencia.consulta is None:
+            resolucion = sin_consultar(correspondencia)
+        else:
+            cuerpo = respuesta_capturada(correspondencia.consulta, origen)
+            if cuerpo is None:
+                fallos.append(
+                    f"«{nombre}» publica un taxón que sale de preguntar «{correspondencia.consulta}» "
+                    "a WoRMS y la captura no trae esa respuesta: regenera catálogo y captura con "
+                    "`python run.py especies`"
+                )
+                continue
+            try:
+                resolucion = worms.leer_respuesta(cuerpo, consultado=correspondencia.consulta)
+            except worms.ErrorWorms as error:
+                fallos.append(
+                    f"«{nombre}»: la respuesta capturada de «{correspondencia.consulta}» ya no se "
+                    f"puede leer con el parser de hoy: {error}"
+                )
+                continue
+        _diferencias(
+            especie.get("taxon") or {},
+            _taxon_a_json(resolucion, consultado_en=consultado_en),
+            f"«{nombre}» · taxon",
+            fallos,
+        )
+    return _cortadas(fallos, "python run.py especies")

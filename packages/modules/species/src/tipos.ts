@@ -44,7 +44,9 @@ import type { Talla } from "@mareia/module-regulations";
  * El rango taxonómico al que se resuelve el nombre que escribe la norma.
  *
  * **Cuatro valores, medidos sobre el dataset publicado** y no elegidos de antemano: la norma nombra
- * 68 especies, 15 géneros (`Sepia spp`, `Mullus spp`…), una **familia** (`Palinuridae`) y una
+ * 68 especies, 15 filas de género (`Sepia spp`, `Mullus spp`…) sobre **14 géneros distintos**
+ * —`Mugil` sale dos veces, con la errata `Mugil spps` del Anexo II—, una **familia**
+ * (`Palinuridae`) y una
  * **subespecie** (`Trisopterus minutus capelanus`). La primera versión de este tipo tenía dos, y no
  * era una simplificación deliberada: era una previsión escrita antes de que el dataset existiera.
  * Los dos casos raros son una fila cada uno y son exactamente los que un rango en dos valores

@@ -53,6 +53,34 @@ publica un número que **no significa lo que parece**.
   el caladero del puerto** —51 especies en el Cantábrico y golfo de Cádiz, 33 en el Mediterráneo, 31
   en el Canario— y ocupa **1.453 B** (753 B comprimidos). El mismo argumento decide el código: la
   talla no se vuelve a escribir aquí, se presta `textoDeTalla` de `regulations`.
+- **Y aun así el catálogo acabó siendo esa segunda superficie: el gate que faltaba (E5).** El
+  argumento de arriba era correcto y se aplicó a medias — la sección del puerto es un enlace, pero el
+  propio catálogo **copia** la talla de `tallas-minimas.json` y nada volvía a contrastar la copia.
+  Medido: poniendo `Merluccius merluccius` a **12 cm** en el catálogo, el mismo `dist/` decía «Merluza
+  … 12 cm, el BOE imprime "12"» en el índice y «Merluza … 27 cm» en la página de Vigo — una cifra con
+  **consecuencia legal**, atribuida al BOE, contradicha por el sitio, y `run.py check`, el build y los
+  tests los tres en verde. **E5** cierra el hueco con el patrón que ya usaba `normativa` (G4): las
+  **117** tallas del catálogo se **rehacen** desde `tallas-minimas.json` y se diffean **campo a
+  campo**, contra la misma función que las publica y no contra una segunda lectura de la norma. Entra
+  ahí `medida`, que tampoco tenía gate: sin ella la cigala publica **2 cm y 7 cm** en el mismo
+  caladero sin nada que diga que uno es cefalotórax y el otro longitud total, y eso se lee peor que
+  una cifra mal —invita a quedarse con la pequeña—. Probado en rojo con los tres sabotajes, y el
+  mensaje nombra especie, caladero, cifra publicada y cifra de la norma.
+- **Y la procedencia taxonómica tampoco se contrastaba: 85 filas y el gate que faltaba (E6).** El
+  gate E1 mira el nombre del BOE y el E2 **de quién es la decisión** de a qué nombre se pregunta;
+  ninguno miraba **qué contestó WoRMS**. Medido: en `Conger conger`, con la correspondencia
+  `literal`/`worms` intacta, cambiar el `AphiaID` al de la sardina y el aceptado a `Sardina
+  pilchardus` dejaba `run.py check`, `pytest` y `pnpm test` en verde. Ni el `aphiaId`, ni el `estado`,
+  ni el `aceptado`, ni el `rango`, ni la `cita` tenían quien los mirara. **E6** rehace el taxón desde
+  las **82 respuestas de WoRMS capturadas y commiteadas** —`data/pipeline/tests/fixtures/worms/`, 77
+  KB, al lado de las del BOE y por el mismo motivo: una sola copia de la fuente—, **recomputando** con
+  qué nombre se pregunta en vez de leerlo del artefacto, que es justo lo falseable. La captura **la
+  escribe la propia ingesta** junto al dataset, así que no hay forma de regenerar uno sin el otro y no
+  puede envejecer. **No es un mirror** de WoRMS, que su licencia prohíbe: son los 82 nombres que el RD
+  560/1995 obliga a resolver, con la cita que la fuente devuelve por registro — la misma extracción
+  curada que ya publica el catálogo. Y una comprobación que va con esto: los **85** taxones publicados
+  se rehacen desde la captura y coinciden **campo a campo**, o sea que el dato de hoy estaba bien; lo
+  que faltaba era el gate.
 - **El filtro por caladero es CSS puro, y usa `:target` en vez de los radios de la portada.** Un radio
   no se puede preseleccionar desde una URL sin JavaScript, y la sección de los **153** puertos tiene
   que enlazar al catálogo ya filtrado. Con `:target` el estado vive en el fragmento: los 153 enlaces
@@ -96,7 +124,7 @@ publica un número que **no significa lo que parece**.
   y no se sabía antes: el dataset resuelve **cuatro** rangos y no dos, y los dos raros son justo los
   que una unión de dos valores habría tenido que aplastar contra «especie».
 - **Medido al cerrar, con el comando de CI**: `pnpm test` **651 en verde** (268 de ellos contra el
-  `dist/`) · `pnpm test:e2e` **61 passed** · `pytest` **1.903 en verde** · `pnpm lint`,
+  `dist/`) · `pnpm test:e2e` **61 passed** · `pytest` **1.919 en verde** · `pnpm lint`,
   `pnpm typecheck`, `pnpm --filter web check`, `pnpm --filter web build`, `ruff` y `run.py check` en
   **0** · el catálogo son **105.902 B** de HTML (10.280 B comprimidos) con **86 filas** y **cero
   scripts** salvo el JSON-LD · **153** páginas de puerto con su enlace al catálogo filtrado,

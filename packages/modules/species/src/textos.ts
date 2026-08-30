@@ -120,7 +120,8 @@ export function remiteA(estado: string, aceptado: string): string {
 /**
  * Cómo se rotula el rango de una fila.
  *
- * **Se rotula todo lo que no es una especie**, que son 17 de las 86: 15 géneros, una familia
+ * **Se rotula todo lo que no es una especie**, que son 17 de las 86: 15 filas de género (sobre 14
+ * géneros distintos: `Mugil` sale dos veces), una familia
  * (`Palinuridae`, las langostas) y una subespecie (`Trisopterus minutus capelanus`). Son los casos
  * que cambian lo que la fila significa —a qué alcance se aplica la talla mínima— y por eso son los
  * que llevan rótulo; un «especie» en las otras 68 sería ruido que además le restaría fuerza a

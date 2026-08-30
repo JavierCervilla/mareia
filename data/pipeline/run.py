@@ -713,6 +713,13 @@ def _check_especies() -> int:
       cualquier slug en minúsculas convierte en una sola fila que nadie puede distinguir.
     * **Cobertura**: las especies del BOE están todas y las 118 filas de la norma están contadas
       (117 con nombre científico y la de «Cigalas (colas)», que no lo trae y se publica aparte).
+    * **E5 · la talla publicada es la de la norma.** Se **rehace** desde `tallas-minimas.json` y se
+      diffea campo a campo, `medida` incluida. La talla legal se publica en dos superficies —la
+      ficha y la página del puerto— y hasta aquí sólo una tenía quien la contrastara: el catálogo
+      copiaba la cifra en la ingesta y podía contradecir al puerto con todo en verde.
+    * **E6 · el taxón es el que contestó WoRMS.** Se **rehace** desde las respuestas capturadas,
+      recomputando con qué nombre se pregunta. E2 audita de quién es la decisión de preguntar; esto
+      audita la respuesta: `aphiaId`, `estado`, `aceptado`, `rango` y `cita`, que no los miraba nada.
     """
     problems = 0
     catalogo = json.loads(PORTS_JSON.read_text(encoding="utf-8"))
@@ -734,7 +741,8 @@ def _check_especies() -> int:
         )
         return problems + 1
     dataset = especies.cargar()
-    cobertura = especies.errores_de_cobertura(dataset, normativa.cargar())
+    tallas = normativa.cargar()
+    cobertura = especies.errores_de_cobertura(dataset, tallas)
     for error in cobertura:
         print(f"✗ cobertura: {error}", file=sys.stderr)
     problems += len(cobertura)
@@ -791,6 +799,26 @@ def _check_especies() -> int:
             f"✓ las {conteo} cifras de presencia publican su recorte y su frase de sesgo en el "
             "mismo objeto que el número"
         )
+    tallas_publicadas = especies.errores_de_tallas(dataset, tallas)
+    for error in tallas_publicadas:
+        print(f"✗ E5 · talla: {error}", file=sys.stderr)
+    problems += len(tallas_publicadas)
+    if not tallas_publicadas:
+        cifras = sum(len(c["tallas"]) for e in dataset["especies"] for c in e["caladeros"])
+        print(
+            f"✓ E5 · las {cifras} tallas que publica el catálogo son, campo a campo, las que dice "
+            f"{normativa.DATASET.relative_to(REPO_ROOT)}"
+        )
+    procedencia = especies.errores_de_procedencia(dataset)
+    for error in procedencia:
+        print(f"✗ E6 · procedencia: {error}", file=sys.stderr)
+    problems += len(procedencia)
+    if not procedencia:
+        resumen = dataset["resumen"]
+        print(
+            f"✓ E6 · los {resumen['resueltas']} taxones publicados se rehacen desde las respuestas "
+            "capturadas de WoRMS y coinciden campo a campo"
+        )
     return problems
 
 
@@ -799,8 +827,14 @@ def command_especies(args: argparse.Namespace) -> int:
 
     Necesita red y no corre en CI, igual que `build`, `normativa` y `areas-protegidas`: el dataset
     se commitea. Las consultas van **en serie** —OBIS lo pide expresamente— y con caché en disco.
-    Los gates E2 y E3 se pasan **antes** de escribir, así que un mapeo sin dueño o un género
-    convertido en especie no llegan ni al disco.
+    Los gates E2, E3 y E5 se pasan **antes** de escribir, así que un mapeo sin dueño, un género
+    convertido en especie o una talla que no es la de la norma no llegan ni al disco.
+
+    Escribe **dos** artefactos y en la misma tanda: el catálogo y la captura de las respuestas de
+    WoRMS (`especies.volcar_captura`). Son la pareja que compara E6, así que regenerar uno sin el
+    otro es lo único que no se puede hacer — y por eso no hay forma de hacerlo desde aquí. E6 corre
+    al final contra lo ya escrito: es la comprobación de que la captura que queda en disco
+    reconstruye, byte a byte y con el parser de hoy, el taxón que se acaba de publicar.
     """
     hoy = dt.datetime.now(dt.timezone.utc).date()
     tallas = normativa.cargar()
@@ -808,13 +842,19 @@ def command_especies(args: argparse.Namespace) -> int:
     print(f"{len(nombres)} nombres científicos en {normativa.DATASET.relative_to(REPO_ROOT)}")
 
     resoluciones: dict[str, worms.Resolucion] = {}
+    #: El cuerpo crudo de cada consulta, que es lo que se captura: el gate E6 rehace el taxón
+    #: pasando estos mismos bytes por el parser de hoy. Se guarda por consulta y no por nombre
+    #: porque dos grafías del BOE («Thunnus thynnus» y «Thunnus Thynnus») preguntan lo mismo.
+    cuerpos: dict[str, bytes] = {}
     for nombre in nombres:
         correspondencia = especies.correspondencia_de(nombre)
-        resoluciones[nombre] = (
-            especies.sin_consultar(correspondencia)
-            if correspondencia.consulta is None
-            else worms.resolver(correspondencia.consulta, refresh=args.refresh)
-        )
+        if correspondencia.consulta is None:
+            resoluciones[nombre] = especies.sin_consultar(correspondencia)
+            continue
+        consulta = correspondencia.consulta
+        if consulta not in cuerpos:
+            cuerpos[consulta] = worms.descargar(consulta, refresh=args.refresh)
+        resoluciones[nombre] = worms.leer_respuesta(cuerpos[consulta], consultado=consulta)
     reparto = Counter(resolucion.desenlace for resolucion in resoluciones.values())
     for desenlace, cuantos in sorted(reparto.items()):
         print(f"  WoRMS {desenlace:15} {cuantos}")
@@ -853,12 +893,27 @@ def command_especies(args: argparse.Namespace) -> int:
         *(f"E3 · género: {error}" for error in especies.errores_de_genero(dataset)),
         *(f"clave: {error}" for error in especies.errores_de_clave(dataset)),
         *(f"presencia: {error}" for error in especies.errores_de_presencia(dataset)),
+        *(f"E5 · talla: {error}" for error in especies.errores_de_tallas(dataset, tallas)),
     ]
     if errores:
         for error in errores:
             print(f"✗ {error}", file=sys.stderr)
         return 1
     especies.volcar(dataset)
+    # La captura se escribe **con** el dataset y en la misma tanda: es contra ella contra la que
+    # E6 rehace el taxón, y una captura de otro día daría verde describiendo un WoRMS que no es el
+    # que se publicó. Va después de `volcar` para que un dataset que no llega al disco tampoco
+    # deje una captura suya rondando.
+    capturados = especies.volcar_captura(cuerpos)
+    print(
+        f"  captura de WoRMS → {len(capturados)} respuestas en "
+        f"{especies.FUENTE_WORMS_CAPTURADA.relative_to(REPO_ROOT)}"
+    )
+    procedencia = especies.errores_de_procedencia(dataset)
+    if procedencia:
+        for error in procedencia:
+            print(f"✗ E6 · procedencia: {error}", file=sys.stderr)
+        return 1
     resumen = dataset["resumen"]
     print(
         f"  {resumen['resueltas']} resuelven en WoRMS ({resumen['aceptadas']} con el nombre "
