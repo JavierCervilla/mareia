@@ -123,10 +123,72 @@ publica un número que **no significa lo que parece**.
   adaptador que reescribe firmas publica una que no ha estampado nadie—. Lo que se midió al juntarlos
   y no se sabía antes: el dataset resuelve **cuatro** rangos y no dos, y los dos raros son justo los
   que una unión de dos valores habría tenido que aplastar contra «especie».
-- **Medido al cerrar, con el comando de CI**: `pnpm test` **651 en verde** (268 de ellos contra el
-  `dist/`) · `pnpm test:e2e` **61 passed** · `pytest` **1.919 en verde** · `pnpm lint`,
-  `pnpm typecheck`, `pnpm --filter web check`, `pnpm --filter web build`, `ruff` y `run.py check` en
-  **0** · el catálogo son **105.902 B** de HTML (10.280 B comprimidos) con **86 filas** y **cero
+- **El pase adversario encontró cinco roturas y las cinco estaban en el mismo sitio: la frontera
+  entre el dataset y la página.** No eran cinco defectos, era uno con cinco caras. E5 y E6 cerraron
+  el dataset y lo cerraron bien —el propio pase lo comprobó con una lectura independiente—, pero la
+  comparación **terminaba en el JSON**: `especies/v1` traía las notas al pie de cada talla, la fila
+  del BOE sin binomio y el binomio que WoRMS devolvió, y el contrato del módulo **no tenía dónde
+  ponerlos**, así que el adaptador los tiraba. Lo que se cae después del último gate no lo mira
+  nadie. Se ha arreglado la frontera y no cada síntoma:
+  - **Ninguna cifra legal se publica sin la excepción que la cambia.** Es la regla de T-19 —«la nota
+    viaja pegada a la cifra y se pinta con ella, siempre»— reintroducida en una superficie nueva: el
+    índice publicaba «Lubina · **36 cm** · el BOE imprime «36 (***)»» y la llamada aparecía **1 vez
+    mientras el texto de la nota aparecía 0** —`8a y 8b`: 0 ocurrencias; `44 cent`: 0—, o sea una
+    marca apuntando a nada, mientras la página de puerto del **mismo `dist/`** publicaba la nota
+    entera. Igual el boquerón (12 → **10 cm** en la división IX a) y el pulpo (1 kg, que **no rige en
+    Baleares**), que era el peor de los tres porque su literal es «1 kg» sin marca y no dejaba
+    rastro. El texto de la nota **no se hornea en `especies/v1`**: se resuelve contra `normativa/v1`,
+    que es el único sitio donde vive, porque dos copias de un pie legal se corrigen en una y no en la
+    otra — que es exactamente el defecto. Hoy las **9** tallas con llamada publican su pie **entero y
+    en el mismo bloque** que la cifra.
+  - **A WoRMS ya no se le atribuye lo que no dijo.** La columna tenía **tres** estados y sólo dos
+    modelados: faltaba «a WoRMS no se le preguntó este nombre», que son **22 de 86** —los 15 géneros
+    con `spp`, las 6 erratas del BOE y la celda con dos especies—. **20 filas** decían «WoRMS acepta
+    el nombre de la norma» sobre nombres que WoRMS nunca vio, y `Cáncer pagurus` se contradecía dos
+    líneas más abajo **en la misma celda**. Ahora **54** filas dicen que WoRMS acepta el nombre de la
+    norma —las que se preguntaron tal cual— y **21** dicen el tercer estado, nombrando **el registro
+    al que apunta la fila**: en las 6 erratas el binomio corregido (`Cancer pagurus`,
+    `Glyptocephalus cynoglossus`, `Microstomus kitt`, `Melanogrammus aeglefinus`,
+    `Penaeus kerathurus`, `Thunnus albacares`) no aparecía en **ninguna parte** de su fila. Y el
+    enlace deja de rotularse «Ficha **del nombre de la norma** en WoRMS», que en esas 22 filas era la
+    atribución al revés: ahora **nombra su registro**.
+  - **Las dos filas de un mismo taxón se enteran la una de la otra.** Tres registros (127029, 127027,
+    126032) se publican en dos filas cada uno, con las dos grafías que imprime el BOE. **Las filas no
+    se fusionan** —son dos nombres de la norma y el de la norma tiene consecuencia legal—, pero quien
+    buscaba el atún rojo por `Thunnus thynnus` leía dos caladeros y concluía que en Canarias no hay
+    talla mínima: la hay, **6,4 kg**, en la fila de al lado, bajo la `T` mayúscula del BOE. Las **6**
+    filas cruzan ahora a su hermana por su nombre del BOE.
+  - **La fila 118 se publica, y el catálogo deja de decir que está completo.** El Anexo I le fija
+    **3,7 cm** a «Cigalas (colas)» y esa fila no entra en la tabla porque la norma no escribe ahí
+    ningún latín — decisión tomada, razonada y guardada en `sinNombreCientifico`, que no llegaba a la
+    página mientras la entradilla afirmaba «ni sobra ninguna ni **falta ninguna por decisión
+    nuestra**». Se han hecho **las dos cosas**: la fila se publica al final de la página con su
+    caladero, su talla, su literal y su motivo, y la entradilla dice dónde está lo que no cabe en la
+    tabla en vez de afirmar una completitud que no tiene. No es cosmético: son **tres** medidas del
+    mismo animal en el mismo anexo (cefalotórax 2 cm, longitud total 7 cm, colas 3,7 cm) y se
+    publicaban dos.
+  - **La tercera frase dura de la columna de presencia vive ya en el código.** `presenciaAusente` era
+    texto libre del JSON que la vista imprimía tal cual: plantando ahí «Sin registros: OBIS confirma
+    que la especie no está presente en este caladero», los **siete** gates del pipeline y el build
+    salían verdes y la página lo publicaba. Es el hallazgo H-1 de T-21 en otro campo y se cierra
+    igual — del dato cruza ahora **si se preguntó o no**, un booleano, y la frase es
+    `NO_SE_PREGUNTO_A_OBIS`, constante del módulo. El dataset sigue guardando su motivo, porque es un
+    derivado publicable por sí mismo; lo que ya no hay es camino de ese texto a la página.
+- **Dos gates nuevos sobre el `dist/`, probados en rojo, y nueve recorridos que dejan de ser
+  fail-open.** **E7** exige que toda talla con nota publique el **texto entero** —no la marca— **en
+  el mismo bloque** que la cifra, y que ninguna llamada impresa se quede sin pie; lee las notas de
+  `normativa/v1` **por su cuenta**, sin pasar por el adaptador que las resuelve, para que un fallo en
+  esa resolución no se confirme a sí mismo. **E8** exige que toda fila del BOE que la tabla no
+  publique se nombre en la página con su motivo y su talla. Los dos, más el E4 corregido —que se
+  comparaba contra el propio valor que vigilaba y por eso no vio nada—, **medidos en rojo contra el
+  `dist/` anterior**: 9 cifras mudas, 8 marcas huérfanas y «Cigalas (colas): no se nombra en la
+  página». Y los **9 cuerpos** del pase adversario pierden su `test.fail()`: Playwright avisó de
+  «pasó lo que se esperaba que fallara» en los nueve antes de retirarlo, y sus **asserts canario** se
+  quedan, que es lo único que distingue «pasa porque está arreglado» de «pasa porque ya no mide».
+- **Medido al cerrar, con el comando de CI**: `pnpm test` **667 en verde** (283 de ellos contra el
+  `dist/`) · `pnpm test:e2e` **70 passed**, ahora los 70 midiendo de verdad · `pytest` **1.919 en
+  verde** · `pnpm lint`, `pnpm typecheck`, `pnpm --filter web build`, `ruff` y `run.py check` en
+  **0** · el catálogo son **111.516 B** de HTML (11.514 B comprimidos) con **86 filas** y **cero
   scripts** salvo el JSON-LD · **153** páginas de puerto con su enlace al catálogo filtrado,
   comprobado contra el `dist/`.
 

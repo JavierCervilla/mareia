@@ -263,6 +263,31 @@ const cargarNormativa = unaVez(async (): Promise<Normativa> => {
   return leerNormativa(FICHERO_NORMATIVA, crudo);
 });
 
+/**
+ * Las notas al pie de cada anexo, indexadas por caladero y marca. **La única fuente de ese texto.**
+ *
+ * Existe porque el catálogo de especies también publica cifras de la norma y también tiene que
+ * publicar la excepción que las cambia (hallazgo H-1 del pase adversario de T-20). Lo que **no** se
+ * hace es hornear el texto en `especies/v1`: dos copias del mismo pie legal se corrigen en un sitio
+ * y no en el otro, y eso es precisamente lo que estaba roto —la página del puerto publicaba «44
+ * centímetros» y la del catálogo no publicaba nada—. Así que el texto sigue viviendo en un solo
+ * derivado y la frontera lo resuelve para las dos superficies.
+ *
+ * Se cachea la promesa igual que el resto: el build pide esto una vez por proceso, aunque construya
+ * 153 páginas de puerto y el catálogo.
+ */
+export const cargarNotasDeLosAnexos = unaVez(
+  async (): Promise<ReadonlyMap<string, ReadonlyMap<string, string>>> => {
+    const normativa = await cargarNormativa();
+    return new Map(
+      normativa.caladeros.map((caladero) => [
+        caladero.id,
+        new Map(caladero.notas.map((nota) => [nota.marca, nota.texto])),
+      ]),
+    );
+  },
+);
+
 /** Lo que el catálogo dice de un puerto y esta sección necesita: qué tabla le toca y dónde está. */
 interface EncajeDelPuerto {
   readonly caladero: string;

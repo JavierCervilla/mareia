@@ -43,12 +43,21 @@ export function tituloDelCatalogo(especies: number): string {
  * Dice las tres cosas que cambian cómo se lee la tabla: que la lista **la fija la norma** y no
  * nosotros, que de cada especie se publican **dos nombres** y por qué, y que la talla que aparece
  * es la del caladero de esa fila y no una talla nacional.
+ *
+ * La frase decía «ni sobra ninguna ni falta ninguna **por decisión nuestra**», y era falsa: falta
+ * una por una decisión nuestra —«Cigalas (colas)», que la norma nombra sin ningún latín— (hallazgo
+ * H-4 del pase adversario de T-20). Se han hecho las dos cosas y no una: la fila **se publica**,
+ * con su talla y su motivo, al final de la página, y esta frase deja de afirmar una completitud
+ * que la tabla no tiene y dice en su lugar dónde está lo que no cabe en ella. Retirar sólo la
+ * afirmación habría dejado el hueco mudo; publicar sólo la fila habría dejado el literal mintiendo.
  */
 export const QUE_ES_ESTE_CATALOGO =
   "Las especies a las que el Real Decreto 560/1995 le fija una talla mínima de captura, con el " +
-  "nombre que usa la norma y el nombre que la ciencia acepta hoy. La lista la fija el BOE: ni " +
-  "sobra ninguna ni falta ninguna por decisión nuestra. La talla que se publica en cada fila es la " +
-  "del caladero que la fija, y la misma especie tiene cifras distintas en anexos distintos.";
+  "nombre que usa la norma y el nombre que la ciencia acepta hoy. La lista la fija el BOE: no " +
+  "sobra ninguna, y las filas de la norma que esta tabla no puede publicar como especie —porque el " +
+  "BOE no les escribe ningún nombre científico— están al final de la página, nombradas y con su " +
+  "talla. La talla que se publica en cada fila es la del caladero que la fija, y la misma especie " +
+  "tiene cifras distintas en anexos distintos.";
 
 /**
  * Por qué se publican dos nombres, dicho como lo que es y no como un error de nadie.
@@ -78,14 +87,20 @@ export const COLUMNA_CALADEROS = "Caladeros que la regulan";
 export const COLUMNA_PRESENCIA = "Registros en OBIS";
 
 /**
- * Cómo se rotula el enlace a la ficha de WoRMS.
+ * Cómo se rotula el enlace a la ficha de WoRMS: **con el nombre del registro al que lleva**.
  *
- * Dice **de qué nombre es la ficha**, y no es una precisión gratuita: en las 11 filas en las que
- * hay dos nombres y dos identificadores, un «AphiaID 127160» a secas no diría a cuál de los dos
+ * Dice de qué nombre es la ficha, y no es una precisión gratuita: en las 11 filas en las que hay
+ * dos nombres y dos identificadores, un «AphiaID 127160» a secas no diría a cuál de los dos
  * pertenece, y quien fuera a comprobarlo abriría el que no es.
+ *
+ * El rótulo decía «Ficha **del nombre de la norma** en WoRMS», y en 22 de las 86 filas eso era la
+ * atribución **al revés** (hallazgo H-2 del pase adversario de T-20): a WoRMS no se le preguntó el
+ * nombre de la norma —se le preguntó el que decidimos nosotros—, así que esa ficha es la del
+ * nombre corregido. Ahora el rótulo **nombra el registro**, que además es lo que hace comprobable
+ * la fila sin salir del sitio: quien lee ve a qué taxón apunta el identificador que tiene delante.
  */
-export function fichaEnWorms(aphiaId: number): string {
-  return `Ficha del nombre de la norma en WoRMS · AphiaID ${aphiaId}`;
+export function fichaEnWorms(nombreDelRegistro: string, aphiaId: number): string {
+  return `Ficha de «${nombreDelRegistro}» en WoRMS · AphiaID ${aphiaId}`;
 }
 
 /** Cómo se rotula el identificador del nombre aceptado, que es otro registro distinto. */
@@ -103,6 +118,39 @@ export function aphiaDelAceptado(aphiaId: number): string {
 export const MISMO_NOMBRE = "WoRMS acepta el nombre de la norma.";
 
 /**
+ * El **tercer** estado de la columna: a WoRMS nunca se le preguntó el nombre que escribe la norma.
+ *
+ * Son 22 de las 86 filas —los 15 géneros escritos con `spp`, las 6 erratas de imprenta del BOE y la
+ * celda que nombra dos especies— y hasta el pase adversario de T-20 caían en la rama de arriba: la
+ * página publicaba «WoRMS acepta el nombre de la norma» sobre `Sepia spp`, que no existe en ninguna
+ * nomenclatura, y sobre `Cáncer pagurus`, **contradiciéndose dos líneas más abajo** en la misma
+ * celda con «Correspondencia nuestra, no de WoRMS: el género es «Cancer»». Atribuirle a la fuente
+ * una frase que la fuente no ha dicho es de la misma familia que inventar una cifra.
+ *
+ * La frase nombra el registro que **sí** devolvió la consulta, y ahí está la mitad del arreglo del
+ * segundo cuerpo de ese hallazgo: el binomio corregido (`Cancer pagurus`, `Thunnus albacares`) no
+ * aparecía en ninguna parte de la fila, sólo su `AphiaID`. El estado va entrecomillado y en las
+ * palabras de WoRMS, como en `remiteA`: es una cita.
+ *
+ * `aceptado` arrastra la segunda mitad de la frase cuando el registro **además** remite a otro
+ * nombre. Es una sola fila —`Panaeux kerathurus`, la errata del Anexo I, cuyo registro es una
+ * combinación superada—, y las dos cosas son ciertas a la vez: ni se le preguntó el nombre de la
+ * norma, ni el registro que se encontró es el aceptado hoy. Contarlas en dos frases separadas
+ * dejaría al lector emparejando cuál se refiere a cuál.
+ */
+export function noSePreguntoEsteNombre(
+  nombreDelRegistro: string,
+  estado: string,
+  aceptado: string | null,
+): string {
+  return (
+    `A WoRMS no se le preguntó este nombre. El registro al que apunta esta fila es ` +
+    `${nombreDelRegistro}, que WoRMS registra como «${estado}»` +
+    `${aceptado === null ? "." : ` y remite a ${aceptado}.`}`
+  );
+}
+
+/**
  * Cómo se dice que el nombre aceptado difiere del de la norma.
  *
  * El verbo importa: WoRMS **remite** a otro nombre, no «corrige» el del BOE. El estado va
@@ -111,6 +159,52 @@ export const MISMO_NOMBRE = "WoRMS acepta el nombre de la norma.";
  */
 export function remiteA(estado: string, aceptado: string): string {
   return `WoRMS registra este nombre como «${estado}» y remite a ${aceptado}.`;
+}
+
+/**
+ * Que este mismo taxón está **en otra fila de la tabla**, con la otra grafía que imprime el BOE.
+ *
+ * Son tres pares y seis filas (hallazgo H-3 del pase adversario de T-20): el BOE escribe `Thunnus
+ * thynnus` en los Anexos I y II y `Thunnus Thynnus` en el III, `Thunnus albacares` en el I y
+ * `Thunnus aibacares` en el III, `Mugil spp` en el I y `Mugil spps` en el II. Las dos filas de cada
+ * par publican el mismo `AphiaID`, el mismo enlace y el mismo nombre común, **y ninguna decía que
+ * la otra existía**: quien buscaba el atún rojo por el binomio que la ciencia acepta encontraba una
+ * fila con dos caladeros y concluía que en Canarias no tiene talla mínima. La tiene: 6,4 kg, en la
+ * fila de al lado, bajo la `T` mayúscula del BOE.
+ *
+ * **Las filas no se fusionan**, y eso está decidido: son dos nombres de la norma y el nombre de la
+ * norma es el que tiene consecuencia legal, así que colapsarlos publicaría uno que el BOE no
+ * escribe. Lo que se hace es cruzarlas, que es lo que el lector necesita para no sacar la
+ * conclusión equivocada de una sola.
+ */
+export function tambienEnOtraFila(nombresDeLaNorma: readonly string[]): string {
+  const nombres = nombresDeLaNorma.map((nombre) => `«${nombre}»`).join(", ");
+  return (
+    `El BOE nombra a este mismo taxón también como ${nombres}, en ` +
+    `${nombresDeLaNorma.length === 1 ? "otra fila" : "otras filas"} de esta tabla: los caladeros y ` +
+    `las tallas que van ahí no están en ésta.`
+  );
+}
+
+// =================================================================================================
+// La nota al pie, que viaja pegada a la cifra
+// =================================================================================================
+
+/**
+ * Una nota del anexo, escrita **entera y junto a la cifra que modifica**.
+ *
+ * Es el mismo criterio que `regulations` aplica en las 153 páginas de puerto, y aquí faltaba: el
+ * catálogo publicaba «36 cm» y, dentro del literal citado, la llamada «36 (***)» sin ningún pie en
+ * toda la página (hallazgo H-1 del pase adversario de T-20). Una marca que no lleva a ninguna parte
+ * es **peor** que la cifra sola, porque la propia página señala que ahí falta algo y luego no hay
+ * nada; y el pulpo era el caso peor, porque su literal es «1 kg» sin marca y nada dejaba rastro de
+ * que en Baleares esa cifra no rige.
+ *
+ * El texto va **entero**: es lo que convierte 36 en 44, y resumirlo sería publicar una tercera
+ * cifra que no dice la norma.
+ */
+export function notaDeLaTalla(marca: string, texto: string): string {
+  return `${marca} ${texto}`;
 }
 
 // =================================================================================================
@@ -260,6 +354,28 @@ export const SIN_REGISTROS =
   "quiere decir que nadie lo ha anotado ahí.";
 
 /**
+ * El **tercer** texto de la columna de presencia: a OBIS no se le llegó a preguntar.
+ *
+ * Es una fila —`Lophius piscatorius, L. Budegassa`, dos especies en una celda del BOE—: sin taxón
+ * resuelto no hay nombre por el que consultar, y un cero de una búsqueda que no puede acertar se
+ * leería como ausencia de la especie. No es lo mismo que `SIN_REGISTROS`, que sí afirma algo sobre
+ * OBIS: que se le preguntó y no tenía nada.
+ *
+ * **Y es una constante del código, no una cadena del dataset, que es la corrección del hallazgo
+ * H-5 de T-20.** Antes esta frase viajaba en `presenciaAusente` y la vista la imprimía tal cual;
+ * plantando ahí «Sin registros: OBIS confirma que la especie no está presente en este caladero» la
+ * afirmación se publicaba con los siete gates del pipeline y el build en verde, porque lo único que
+ * la vigilaba era que no estuviera vacía y el gate E4 sólo mira donde hay una cifra. Es el hallazgo
+ * H-1 de T-21 en otro campo y se cierra con la misma regla, ya escrita en la cabecera de este
+ * fichero: **la frase que sostiene una promesa vive en el código**, donde cambiarla es un diff
+ * revisado. Con esto son tres las frases duras de esta columna, y las tres están aquí.
+ */
+export const NO_SE_PREGUNTO_A_OBIS =
+  "A OBIS no se le ha preguntado por esta especie: el nombre de la norma no resuelve en WoRMS, así " +
+  "que no hay taxón por el que consultar. No es que no haya registros; es que no hay consulta, y " +
+  "el cero de una búsqueda que no puede acertar se leería como ausencia de la especie.";
+
+/**
  * Que la caja con la que se consulta OBIS no es la costa, dicho donde se leen las cifras.
  *
  * El tradeoff está en el plan y se acepta con su precio a la vista: una demarcación marina real
@@ -287,6 +403,43 @@ export function cajaEscrita(
   const lat = (valor: number): string => `${numero(Math.abs(valor), 2)}° ${valor < 0 ? "S" : "N"}`;
   const lon = (valor: number): string => `${numero(Math.abs(valor), 2)}° ${valor < 0 ? "O" : "E"}`;
   return `de ${lat(caja.latMin)} a ${lat(caja.latMax)} y de ${lon(caja.lonMin)} a ${lon(caja.lonMax)}`;
+}
+
+// =================================================================================================
+// Las filas del BOE que la tabla no puede publicar como especie
+// =================================================================================================
+
+/** Rótulo del bloque. Nombra **cuántas son**, contadas del dataset, y no «otras filas». */
+export function rotuloSinBinomio(filas: number): string {
+  return filas === 1
+    ? "La fila del BOE que este catálogo no publica como especie"
+    : `Las ${filas} filas del BOE que este catálogo no publica como especie`;
+}
+
+/**
+ * Por qué esas filas no están en la tabla, dicho donde se echan en falta.
+ *
+ * El catálogo son las especies **con nombre científico**, porque la columna del taxón necesita uno
+ * al que preguntarle a WoRMS. La norma no siempre lo escribe: el Anexo I le fija 3,7 cm a «Cigalas
+ * (colas)» y ahí no hay ningún latín entre paréntesis. Inventárselo sería atribuirle a la norma un
+ * alcance que no tiene —y del lado que multa—, así que la fila se publica **como lo que es**: una
+ * talla legal de la norma sin especie a la que colgarla.
+ *
+ * Que la talla vaya aquí y no sólo el nombre no es adorno: **3,7 cm es una cifra con consecuencia
+ * legal** y es la tercera medida del mismo animal en el mismo anexo (2 cm de cefalotórax y 7 cm de
+ * longitud total, que sí están en la tabla, bajo `Nephrops norvegicus`). Publicar dos de tres sin
+ * decir que hay una tercera es lo que encontró el hallazgo H-4 de T-20.
+ */
+export const POR_QUE_NO_ESTAN_EN_LA_TABLA =
+  "La tabla de arriba necesita un nombre científico por fila: es el que se le pregunta a WoRMS y el " +
+  "que permite decir si la norma regula una especie o un género entero. Estas filas del Real " +
+  "Decreto 560/1995 no lo traen —la norma las nombra sólo en castellano—, y aquí no se les inventa " +
+  "uno. Su talla mínima es igual de obligatoria que las de arriba, así que se publican con ella y " +
+  "con el motivo por el que no están en la tabla.";
+
+/** Cómo se rotula el caladero de una de esas filas: nombrando **el anexo por su caladero**. */
+export function enElCaladero(nombreDelCaladero: string): string {
+  return `Caladero ${nombreDelCaladero}`;
 }
 
 // =================================================================================================

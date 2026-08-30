@@ -30,9 +30,19 @@
  * `taxon` se lee como `worms` porque cómo se llame el campo es cosa nuestra. En cambio el origen de
  * una correspondencia llega como `"mareia"` y se publica como `"mareia"`, sin traducirlo a un
  * «nuestro» más cómodo: es una **firma de procedencia**, y un adaptador que reescribe firmas acaba
- * publicando una que no estampó nadie. La única conversión que sí cambia un valor está acotada y
- * dicha donde ocurre: **cero registros de OBIS no es una cifra**, es la ausencia que `SIN_REGISTROS`
- * explica (ver `leerPresencia`).
+ * publicando una que no estampó nadie. Las conversiones que sí cambian un valor están acotadas y
+ * dichas donde ocurren, y son dos: **cero registros de OBIS no es una cifra**, es la ausencia que
+ * `SIN_REGISTROS` explica (ver `leerPresencia`), y **el motivo de no haberle preguntado a OBIS
+ * cruza como un booleano y no como su texto** (ver `leerCaladeroDeEspecie`), porque una frase que
+ * afirma algo sobre el mar no puede salir del dato.
+ *
+ * **La frontera se ensanchó en T-20 y conviene saber por qué**: el pase adversario encontró cinco
+ * roturas y las cinco caían exactamente aquí, después del último gate del dataset. `especies/v1`
+ * traía las notas al pie de cada talla, la fila del BOE sin binomio y el binomio que WoRMS devolvió;
+ * el contrato del módulo no tenía dónde ponerlos y este fichero los tiraba. Lo que se cae después
+ * del último gate no lo mira nadie, así que las tres cosas cruzan ahora —dos de ellas leyéndose de
+ * campos que ya estaban en el JSON, y la tercera resolviéndose contra `normativa/v1`, que es quien
+ * publica el texto de las notas (ver `leerNotasDeLaTalla`)—.
  */
 
 import { readFile } from "node:fs/promises";
@@ -43,10 +53,12 @@ import type {
   CriterioDelCatalogo,
   EspecieDelCatalogo,
   EspecieEnCaladero,
+  FilaDelBoeSinBinomio,
   FormatoDelCatalogo,
   FuenteDelCatalogo,
   FuentesDelCatalogo,
   NombreEnWorms,
+  NotaDeLaTalla,
   OrigenDeLaCorrespondencia,
   PresenciaObis,
   RangoDelNombre,
@@ -61,7 +73,7 @@ import { DATA_DIR } from "../../datos/deps.ts";
 import { numero } from "../../formato.ts";
 import { RUTA_ESPECIES } from "../../rutas.ts";
 import type { ContextoDeSeccion } from "../contexto.ts";
-import { cargarTablaDeTallas } from "../normativa.ts";
+import { cargarNotasDeLosAnexos, cargarTablaDeTallas } from "../normativa.ts";
 
 /** Versión de schema que este código sabe leer. Otra cosa no se interpreta: se rechaza. */
 const SCHEMA = "especies/v1";
@@ -228,13 +240,69 @@ function leerPresencia(valor: unknown, ruta: string): PresenciaObis | null {
   };
 }
 
-/** Una de las tallas que un anexo le fija a la especie: la cifra, qué mide y el literal del BOE. */
-function leerTallaDelAnexo(valor: unknown, ruta: string): TallaDelAnexo {
+/**
+ * Las notas al pie de cada anexo, por caladero y marca. Las publica **`normativa/v1`**, no éste.
+ *
+ * Entran como parámetro y no se leen aquí de disco por lo mismo que el catálogo del puerto: quien
+ * sabe abrir `tallas-minimas.json` es `normativa.ts`, y un segundo lector del mismo fichero es un
+ * segundo camino que puede discrepar.
+ */
+export type NotasDeLosAnexos = ReadonlyMap<string, ReadonlyMap<string, string>>;
+
+/**
+ * Las notas de una talla, **resueltas contra el pie del anexo**.
+ *
+ * Aquí ocurre la única lectura del adaptador que necesita el otro derivado, y es la costura que
+ * arregla el hallazgo H-1 de T-20: `especies/v1` guarda de cada talla las **marcas** que imprime el
+ * BOE (`["(***)"]`) y el texto de cada marca vive en `normativa/v1`, que es de donde lo copia la
+ * tabla de las 153 páginas de puerto. Sin esta resolución el catálogo publicaba «36 cm» —y, dentro
+ * del literal citado, la llamada «36 (***)»— sin ningún pie en toda la página, mientras la misma
+ * web publicaba la nota entera en la página del puerto: dos páginas del mismo sitio diciendo cosas
+ * distintas de la misma cifra legal.
+ *
+ * **Levanta si una marca no tiene pie**, exactamente como `filasDeTallas` en `regulations`: una
+ * cifra con una llamada que no lleva a ninguna parte se lee como un dato anotado y no lo está, y es
+ * peor que la cifra sola porque la propia página señala que ahí falta algo y luego no hay nada.
+ */
+function leerNotasDeLaTalla(
+  crudo: Record<string, unknown>,
+  notas: NotasDeLosAnexos,
+  caladero: string,
+  ruta: string,
+): readonly NotaDeLaTalla[] {
+  const delAnexo = notas.get(caladero);
+  return lista(crudo, "notas", ruta).map((valor, indice) => {
+    if (typeof valor !== "string" || valor.length === 0) {
+      throw new CatalogoMalFormado(`${ruta}.notas[${indice}] debería ser una marca del BOE`);
+    }
+    const pie = delAnexo?.get(valor);
+    if (pie === undefined) {
+      throw new CatalogoMalFormado(
+        `${ruta}.notas[${indice}] es la marca ${JSON.stringify(valor)} y el anexo del caladero ` +
+          `${JSON.stringify(caladero)} no publica ninguna nota con ella. Una cifra legal con una ` +
+          `llamada que no lleva a ningún pie se lee como un dato anotado, y no lo está.`,
+      );
+    }
+    return { marca: valor, texto: pie };
+  });
+}
+
+/**
+ * Una de las tallas que un anexo le fija a la especie: la cifra, qué mide, el literal del BOE y
+ * **las notas que la modifican**.
+ */
+function leerTallaDelAnexo(
+  valor: unknown,
+  notas: NotasDeLosAnexos,
+  caladero: string,
+  ruta: string,
+): TallaDelAnexo {
   const crudo = objeto(valor, ruta);
   return {
     medida: textoONulo(crudo, "medida", ruta),
     talla: leerTalla(crudo["talla"], `${ruta}.talla`),
     textoOriginal: texto(crudo, "textoOriginal", ruta),
+    notas: leerNotasDeLaTalla(crudo, notas, caladero, ruta),
   };
 }
 
@@ -244,11 +312,23 @@ function leerTallaDelAnexo(valor: unknown, ruta: string): TallaDelAnexo {
  * **Sin tallas no hay entrada**, y no es una comprobación de forma: el catálogo son exactamente las
  * especies a las que la norma les fija una talla, así que un caladero que aparece sin ninguna es un
  * caladero que se ha metido en la fila sin regularla.
+ *
+ * **`presenciaAusente` se lee como un hecho y no como un texto**, y ésa es la conversión que cierra
+ * el hallazgo H-5 de T-20: el dataset guarda ahí el motivo de no haberle preguntado a OBIS, el
+ * adaptador comprueba que lo trae —igual que antes— y lo que cruza la frontera es sólo **si se
+ * preguntó o no**. La frase que se publica es una constante del módulo. Plantar en ese campo «OBIS
+ * confirma que la especie no está presente en este caladero» ponía esa afirmación en la página con
+ * los siete gates del pipeline y el build en verde; ahora no llega, porque no hay camino.
  */
-function leerCaladeroDeEspecie(valor: unknown, ruta: string): EspecieEnCaladero {
+function leerCaladeroDeEspecie(
+  valor: unknown,
+  notas: NotasDeLosAnexos,
+  ruta: string,
+): EspecieEnCaladero {
   const crudo = objeto(valor, ruta);
+  const id = texto(crudo, "id", ruta);
   const tallas = lista(crudo, "tallas", ruta).map((talla, i) =>
-    leerTallaDelAnexo(talla, `${ruta}.tallas[${i}]`),
+    leerTallaDelAnexo(talla, notas, id, `${ruta}.tallas[${i}]`),
   );
   if (tallas.length === 0) {
     throw new CatalogoMalFormado(
@@ -257,12 +337,12 @@ function leerCaladeroDeEspecie(valor: unknown, ruta: string): EspecieEnCaladero 
     );
   }
   return {
-    id: texto(crudo, "id", ruta),
+    id,
     nombre: texto(crudo, "nombre", ruta),
     nombreComun: texto(crudo, "nombreComun", ruta),
     tallas,
     presencia: leerPresencia(crudo["presencia"], `${ruta}.presencia`),
-    presenciaAusente: textoONulo(crudo, "presenciaAusente", ruta),
+    seLePreguntoAObis: textoONulo(crudo, "presenciaAusente", ruta) === null,
   };
 }
 
@@ -344,7 +424,7 @@ function leerCorrespondencia(valor: unknown, ruta: string): Correspondencia {
  * declara sin resolver—. La tercera —correspondencia nuestra sin motivo— la hace el módulo, en
  * `filasDeEspecies`, porque es criterio de publicación y no de forma.
  */
-function leerEspecie(valor: unknown, indice: number): EspecieDelCatalogo {
+function leerEspecie(valor: unknown, indice: number, notas: NotasDeLosAnexos): EspecieDelCatalogo {
   const ruta = `$.especies[${indice}]`;
   const crudo = objeto(valor, ruta);
   const nombreBoe = texto(crudo, "nombreBoe", ruta);
@@ -368,7 +448,7 @@ function leerEspecie(valor: unknown, indice: number): EspecieDelCatalogo {
     );
   }
   const caladeros = lista(crudo, "caladeros", ruta).map((caladero, i) =>
-    leerCaladeroDeEspecie(caladero, `${ruta}.caladeros[${i}]`),
+    leerCaladeroDeEspecie(caladero, notas, `${ruta}.caladeros[${i}]`),
   );
   if (caladeros.length === 0) {
     throw new CatalogoMalFormado(
@@ -446,8 +526,30 @@ function leerCriterio(valor: unknown): CriterioDelCatalogo {
   return { cajas };
 }
 
-/** El dataset entero, validado. */
-export function leerCatalogo(crudo: unknown): CatalogoDeEspecies {
+/**
+ * Una fila del BOE con talla y **sin nombre científico**, que es la que la tabla no puede publicar
+ * como especie.
+ *
+ * El dataset la guarda aparte, con su motivo, desde que se construyó; lo que faltaba —hallazgo H-4
+ * de T-20— era que cruzara esta frontera. Sin ella el catálogo dejaba fuera 3,7 cm de una cifra
+ * legal en silencio, y encima afirmando de sí mismo que no le faltaba ninguna fila por decisión
+ * nuestra. **El motivo es obligatorio**: una ausencia sin motivo no se distingue de un fallo
+ * nuestro, y es exactamente la misma exigencia que ya se le hace a una especie sin taxón.
+ */
+function leerFilaSinBinomio(valor: unknown, indice: number): FilaDelBoeSinBinomio {
+  const ruta = `$.sinNombreCientifico[${indice}]`;
+  const crudo = objeto(valor, ruta);
+  return {
+    caladero: texto(crudo, "caladero", ruta),
+    nombreComun: texto(crudo, "nombreComun", ruta),
+    motivo: texto(crudo, "motivo", ruta),
+    talla: leerTalla(crudo["talla"], `${ruta}.talla`),
+    textoOriginal: texto(crudo, "textoOriginal", ruta),
+  };
+}
+
+/** El dataset entero, validado, con las notas del anexo ya a mano para resolver las marcas. */
+export function leerCatalogo(crudo: unknown, notas: NotasDeLosAnexos): CatalogoDeEspecies {
   const documento = objeto(crudo, "$");
   const schema = texto(documento, "schema", "$");
   if (schema !== SCHEMA) {
@@ -455,7 +557,9 @@ export function leerCatalogo(crudo: unknown): CatalogoDeEspecies {
       `$.schema debería ser ${JSON.stringify(SCHEMA)} y es ${JSON.stringify(schema)}`,
     );
   }
-  const especies = lista(documento, "especies", "$").map(leerEspecie);
+  const especies = lista(documento, "especies", "$").map((especie, indice) =>
+    leerEspecie(especie, indice, notas),
+  );
   if (especies.length === 0) {
     throw new CatalogoMalFormado("$.especies está vacío: un catálogo sin especies no es un catálogo");
   }
@@ -478,6 +582,7 @@ export function leerCatalogo(crudo: unknown): CatalogoDeEspecies {
     fuentes: leerFuentes(documento["fuentes"]),
     criterio: leerCriterio(documento["recortes"]),
     especies,
+    sinNombreCientifico: lista(documento, "sinNombreCientifico", "$").map(leerFilaSinBinomio),
   };
 }
 
@@ -502,9 +607,20 @@ function unaVez<T>(cargar: () => Promise<T>): () => Promise<T> {
   };
 }
 
-/** El catálogo de especies, leído del derivado commiteado. */
+/**
+ * El catálogo de especies, leído del derivado commiteado **y de las notas al pie de la norma**.
+ *
+ * Los dos derivados a la vez porque una talla del catálogo es una cifra de la norma y la nota que
+ * la excepciona vive donde vive la norma. Que el catálogo no se pueda leer sin `normativa/v1` no es
+ * un acoplamiento nuevo: el módulo `species` ya presta de `regulations` el criterio con el que se
+ * escribe una talla, y por la misma razón —dos formas de escribir una cifra legal se corrigen en
+ * una y no en la otra.
+ */
 export const cargarCatalogoDeEspecies = unaVez(async (): Promise<CatalogoDeEspecies> => {
-  const contenido = await readFile(FICHERO_CATALOGO, "utf8");
+  const [contenido, notas] = await Promise.all([
+    readFile(FICHERO_CATALOGO, "utf8"),
+    cargarNotasDeLosAnexos(),
+  ]);
   let crudo: unknown;
   try {
     crudo = JSON.parse(contenido);
@@ -513,7 +629,7 @@ export const cargarCatalogoDeEspecies = unaVez(async (): Promise<CatalogoDeEspec
       `no es JSON válido (${causa instanceof Error ? causa.message : "error desconocido"})`,
     );
   }
-  return leerCatalogo(crudo);
+  return leerCatalogo(crudo, notas);
 });
 
 // =================================================================================================

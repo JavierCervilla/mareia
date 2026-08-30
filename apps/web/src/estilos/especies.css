@@ -184,9 +184,11 @@
 .tabla-especies__estado,
 .tabla-especies__ficha,
 .tabla-especies__nuestro,
+.tabla-especies__hermana,
 .tabla-especies__ausencia,
 .tabla-especies__literal,
 .tabla-especies__medida,
+.tabla-especies__nota,
 .tabla-especies__presencia {
   display: block;
   font-size: var(--m-text-meta);
@@ -209,7 +211,8 @@
    de producto (anti-objetivo del brief, §3). */
 .tabla-especies__rango,
 .tabla-especies__ausencia,
-.tabla-especies__nuestro {
+.tabla-especies__nuestro,
+.tabla-especies__hermana {
   font-style: italic;
 }
 
@@ -238,12 +241,24 @@
   font-style: italic;
 }
 
-/* El literal del BOE, para poder comparar lo pintado con lo publicado, y la
-   presencia de OBIS, que es una frase con una cifra dentro y NUNCA una cifra
-   sola. Las dos en cuerpo pequeño: se consultan, no se leen de corrido. */
+/* El literal del BOE, para poder comparar lo pintado con lo publicado, la nota
+   al pie que excepciona la cifra y la presencia de OBIS, que es una frase con
+   una cifra dentro y NUNCA una cifra sola. Las tres en cuerpo pequeño: se
+   consultan, no se leen de corrido. */
 .tabla-especies__literal,
+.tabla-especies__nota,
 .tabla-especies__presencia {
   max-width: 62ch;
+}
+
+/* La nota va en la misma tinta que la cifra y no un peldaño por debajo como el
+   resto de la meta de la celda: no es un comentario sobre el número, es lo que
+   lo cambia —36 cm pasan a 44 en las divisiones 8a y 8b—, y en el sitio donde se
+   lee no puede pesar menos que la cifra que corrige. Sin color de aviso ni
+   fondo: el brief reserva la terracota, y una excepción legal se lee, no se
+   señala. */
+.tabla-especies__nota {
+  color: var(--m-ink);
 }
 
 /* Los nombres científicos son palabras largas sin espacios y la celda de la

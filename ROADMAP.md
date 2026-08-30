@@ -222,8 +222,33 @@
       **probados en rojo**: la merluza a **12 cm** —que contradecía a su propia página de puerto, que
       dice **27**, con todo en verde—, la cigala sin `medida` —**2 cm y 7 cm** juntos sin nada que los
       distinga— y `Conger conger` publicando el `AphiaID` de la sardina con su correspondencia
-      intacta. Medido con el comando de CI: `pnpm test` **651 en verde**, `pnpm test:e2e` **61**,
-      `pytest` **1.919**, catálogo de **105.902 B** (10.280 comprimidos) con cero scripts
+      intacta. **Y el pase adversario encontró cinco roturas, las cinco en el mismo sitio**: la
+      frontera `especies/v1` → página. E5 y E6 cierran el JSON y lo cierran bien, pero la comparación
+      terminaba ahí: el contrato del módulo no tenía campo para lo que el dataset sí traía —las notas
+      al pie de la talla, la fila del BOE sin binomio, el binomio que WoRMS devolvió— y el adaptador
+      lo tiraba. Arreglada la frontera y no cada síntoma: la **nota entera** viaja con su cifra (era
+      la regla de T-19 reintroducida en superficie nueva — el índice publicaba «36 cm» con la llamada
+      `(***)` **1 vez y el texto de la nota 0**, mientras la página de puerto del mismo `dist/` la
+      publicaba entera; el texto se resuelve contra `normativa/v1` y no se copia, porque dos copias
+      de un pie legal se corrigen en una y no en la otra); las **22 filas** a las que WoRMS nunca vio
+      el nombre de la norma dejan de decir que WoRMS lo acepta y **nombran su registro** (**54**
+      dicen ahora que lo acepta, **21** el tercer estado, y el enlace deja de rotularse «ficha del
+      nombre de la norma», que era la atribución al revés); las **6 filas** de los tres taxones que
+      el BOE escribe con dos grafías **se cruzan** —sin fusionarse, que son dos nombres de la
+      norma—, porque quien buscaba el atún rojo por `Thunnus thynnus` concluía que en Canarias no
+      hay talla y la hay, **6,4 kg**, en la fila de al lado; la **fila 118** («Cigalas (colas)», 3,7
+      cm) se publica con su motivo **y** la entradilla deja de afirmar que no falta ninguna por
+      decisión nuestra; y `presenciaAusente` deja de ser texto libre del JSON —plantar ahí «OBIS
+      confirma que la especie no está presente» pasaba los **siete** gates y el build y salía
+      publicado—, que es el H-1 de T-21 en otro campo y se cierra igual: **la frase vive en el
+      código**. Gates nuevos **E7** (la nota entera, no la marca, **en el bloque de la cifra**, con
+      las notas leídas de `normativa/v1` sin pasar por el adaptador que las resuelve) y **E8** (toda
+      fila del BOE fuera de la tabla, nombrada con su motivo y su talla), **probados en rojo** contra
+      el `dist/` anterior: 9 cifras mudas, 8 marcas huérfanas y «Cigalas (colas): no se nombra en la
+      página». Los **9 cuerpos** del pase pierden su `test.fail()` —Playwright avisó de «pasó lo que
+      se esperaba que fallara» en los nueve— y conservan su assert canario. Medido con el comando de
+      CI: `pnpm test` **667 en verde**, `pnpm test:e2e` **70** midiendo de verdad,
+      `pytest` **1.919**, catálogo de **111.516 B** (11.514 comprimidos) con cero scripts
 - [ ] T-14 · Metodología pública + QC navegable + dataset con su licencia por puerto declarada
       (el reparto real ya publicado en T-14A) + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario

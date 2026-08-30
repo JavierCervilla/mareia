@@ -68,10 +68,13 @@ const AFIRMACION_PLANTADA =
   "Sin registros: OBIS confirma que la especie no está presente en este caladero.";
 
 test("A6 · ninguna frase de la columna de presencia afirma qué hay en el mar", async ({ qa }) => {
-  // TRINQUETE · hallazgo ABIERTO: se espera que falle, así que `pnpm test:e2e` sigue en verde.
-  // El día que alguien lo arregle, Playwright avisará de que «pasó lo que se esperaba que fallara»
-  // → se quita esta línea y el ataque queda como gate permanente.
-  test.fail();
+  // TRINQUETE RETIRADO · hallazgo CERRADO. Playwright avisó de que «pasó lo que se esperaba
+  // que fallara» y aquí se quita el `test.fail()`: a partir de ahora este recorrido es un gate
+  // permanente y se pone ROJO si alguien lo vuelve a romper. El assert canario de más abajo —el
+  // que dice «el ataque no está midiendo nada»— se queda donde estaba: era lo único que
+  // distinguía «falla por el defecto» de «falla por otra cosa» mientras el hallazgo estaba
+  // abierto, y ahora es lo único que distingue «pasa porque está arreglado» de «pasa porque ya
+  // no mide».
 
   qa.step("comprobar que los gates del pipeline están verdes sobre el catálogo publicado");
   const limpio = dataDirEfimero(() => {});

@@ -24,9 +24,20 @@ import { readFileSync } from "node:fs";
 import { censoDelCatalogo, SIN_REGISTROS } from "@mareia/module-species";
 
 import { DATA_DIR } from "../../datos/deps.ts";
+import { cargarNotasDeLosAnexos } from "../normativa.ts";
 import { leerCatalogo } from "./catalogo.ts";
 
 const DATASET = `${DATA_DIR}/especies/catalogo.json`;
+
+/**
+ * Las notas al pie de los anexos, leídas de `normativa/v1` **por su propio lector**.
+ *
+ * Entran aquí porque la resolución marca→texto es parte de la frontera desde T-20: el dataset del
+ * catálogo trae de cada talla las marcas que imprime el BOE y el texto de cada una vive en el otro
+ * derivado. Se piden a `normativa.ts` y no se teclean ni se releen del JSON: un segundo lector del
+ * mismo fichero es un segundo camino que puede discrepar, y entonces el test mediría su propia copia.
+ */
+const NOTAS = await cargarNotasDeLosAnexos();
 
 /** El dataset recién parseado, para poder mutarlo sin que una prueba contamine a la siguiente. */
 function crudo(): Record<string, unknown> {
@@ -50,7 +61,7 @@ function primera(documento: Record<string, unknown>): Record<string, unknown> {
 // =================================================================================================
 
 test("el dataset se lee entero y trae las 86 especies que el BOE regula", () => {
-  const catalogo = leerCatalogo(crudo());
+  const catalogo = leerCatalogo(crudo(), NOTAS);
   assert.equal(catalogo.schema, "especies/v1");
   assert.equal(catalogo.especies.length, 86);
   const censo = censoDelCatalogo(catalogo);
@@ -68,7 +79,7 @@ test("el dataset se lee entero y trae las 86 especies que el BOE regula", () => 
 
 test("otro schema no se interpreta: se rechaza", () => {
   const documento = { ...crudo(), schema: "especies/v2" };
-  assert.throws(() => leerCatalogo(documento), /\$\.schema debería ser "especies\/v1"/u);
+  assert.throws(() => leerCatalogo(documento, NOTAS), /\$\.schema debería ser "especies\/v1"/u);
 });
 
 // =================================================================================================
@@ -83,11 +94,11 @@ test("dos especies con la misma clave son dos filas indistinguibles: rojo", () =
   const [una, otra] = especies(documento);
   assert.ok(una !== undefined && otra !== undefined);
   otra["clave"] = una["clave"];
-  assert.throws(() => leerCatalogo(documento), /repite la clave/u);
+  assert.throws(() => leerCatalogo(documento, NOTAS), /repite la clave/u);
 });
 
 test("las dos grafías del atún llegan como dos filas con dos claves", () => {
-  const catalogo = leerCatalogo(crudo());
+  const catalogo = leerCatalogo(crudo(), NOTAS);
   const claves = catalogo.especies
     .filter((especie) => especie.nombreBoe.toLowerCase() === "thunnus thynnus")
     .map((especie) => especie.clave);
@@ -106,7 +117,7 @@ test("las dos grafías del atún llegan como dos filas con dos claves", () => {
 test("una especie sin taxón y sin motivo no se publica", () => {
   const documento = crudo();
   primera(documento)["taxon"] = { resuelto: false };
-  assert.throws(() => leerCatalogo(documento), /no trae taxón de WoRMS y tampoco el motivo/u);
+  assert.throws(() => leerCatalogo(documento, NOTAS), /no trae taxón de WoRMS y tampoco el motivo/u);
 });
 
 test("una especie que dice no resolver y trae el registro que lo desmiente, tampoco", () => {
@@ -114,13 +125,13 @@ test("una especie que dice no resolver y trae el registro que lo desmiente, tamp
   const especie = primera(documento);
   const taxon = especie["taxon"] as Record<string, unknown>;
   especie["taxon"] = { ...taxon, resuelto: false, motivo: "no resuelve" };
-  assert.throws(() => leerCatalogo(documento), /trae el AphiaID .* lo desmiente/u);
+  assert.throws(() => leerCatalogo(documento, NOTAS), /trae el AphiaID .* lo desmiente/u);
 });
 
 test("una especie a la que no regula ningún caladero no sale de la norma: rojo", () => {
   const documento = crudo();
   primera(documento)["caladeros"] = [];
-  assert.throws(() => leerCatalogo(documento), /no la regula ningún caladero/u);
+  assert.throws(() => leerCatalogo(documento, NOTAS), /no la regula ningún caladero/u);
 });
 
 test("un caladero sin ninguna talla no tiene nada que hacer en la fila: rojo", () => {
@@ -129,7 +140,7 @@ test("un caladero sin ninguna talla no tiene nada que hacer en la fila: rojo", (
   const documento = crudo();
   const caladeros = primera(documento)["caladeros"] as Record<string, unknown>[];
   caladeros[0]!["tallas"] = [];
-  assert.throws(() => leerCatalogo(documento), /un caladero está en la fila porque le fija/u);
+  assert.throws(() => leerCatalogo(documento, NOTAS), /un caladero está en la fila porque le fija/u);
 });
 
 test("un rango taxonómico que el dataset no usa no se publica", () => {
@@ -138,13 +149,13 @@ test("un rango taxonómico que el dataset no usa no se publica", () => {
   const documento = crudo();
   const taxon = primera(documento)["taxon"] as Record<string, unknown>;
   taxon["rango"] = "orden";
-  assert.throws(() => leerCatalogo(documento), /solo puede ser especie o genero/u);
+  assert.throws(() => leerCatalogo(documento, NOTAS), /solo puede ser especie o genero/u);
 });
 
 test("sin los rectángulos de OBIS, ninguna cifra de presencia se puede interpretar: rojo", () => {
   const documento = crudo();
   documento["recortes"] = {};
-  assert.throws(() => leerCatalogo(documento), /sin el rectángulo con el que se consultó OBIS/u);
+  assert.throws(() => leerCatalogo(documento, NOTAS), /sin el rectángulo con el que se consultó OBIS/u);
 });
 
 // =================================================================================================
@@ -155,16 +166,16 @@ test("un CERO registros no se publica como cifra: llega como la ausencia que es"
   // El dataset publica los recuentos tal y como los devolvió OBIS, ceros incluidos. Un `0`
   // publicado como número se lee como «aquí no hay esa especie», que es justo lo que OBIS no puede
   // afirmar: lo que mide es si alguien fue a mirar y lo anotó.
-  const catalogo = leerCatalogo(crudo());
+  const catalogo = leerCatalogo(crudo(), NOTAS);
   const centollo = catalogo.especies.find((especie) => especie.nombreBoe === "Maja squinado");
   const cantabrico = centollo?.caladeros.find(
     (caladero) => caladero.id === "cantabrico-noroeste-y-golfo-de-cadiz",
   );
   assert.equal(cantabrico?.presencia, null);
-  assert.equal(cantabrico?.presenciaAusente, null, "sí se preguntó: la respuesta fue cero");
+  assert.equal(cantabrico?.seLePreguntoAObis, true, "sí se preguntó: la respuesta fue cero");
   const ceros = catalogo.especies.flatMap((especie) =>
     especie.caladeros.filter(
-      (caladero) => caladero.presencia === null && caladero.presenciaAusente === null,
+      (caladero) => caladero.presencia === null && caladero.seLePreguntoAObis,
     ),
   );
   assert.equal(ceros.length, 9);
@@ -175,14 +186,33 @@ test("no haber preguntado a OBIS viaja aparte del cero, porque no es lo mismo", 
   // `Lophius piscatorius, L. Budegassa` nombra dos especies en una celda y no se le pregunta a
   // WoRMS, así que tampoco hay taxón por el que preguntarle a OBIS. Publicar «nadie lo ha anotado
   // ahí» sería afirmar de la fuente algo que no hemos comprobado.
-  const catalogo = leerCatalogo(crudo());
+  const catalogo = leerCatalogo(crudo(), NOTAS);
   const rape = catalogo.especies.find(
     (especie) => especie.nombreBoe === "Lophius piscatorius, L. Budegassa",
   );
   assert.equal(rape?.worms, null);
   assert.match(rape?.sinResolver ?? "", /dos especies/u);
   assert.equal(rape?.caladeros[0]?.presencia, null);
-  assert.match(rape?.caladeros[0]?.presenciaAusente ?? "", /no se pregunta a OBIS/u);
+  // Y lo que cruza la frontera es el HECHO, no el texto del dataset: la frase que se publica es una
+  // constante del módulo desde el hallazgo H-5 del pase adversario de T-20, porque por ese campo de
+  // texto libre entraba una afirmación sobre lo que hay en el mar con toda la escalera en verde.
+  assert.equal(rape?.caladeros[0]?.seLePreguntoAObis, false);
+});
+
+test("el motivo de no haber preguntado a OBIS NO cruza la frontera como texto", () => {
+  // El sabotaje del pase adversario, medido en la frontera: se planta la afirmación en el campo del
+  // que salía y se comprueba que no queda ni un camino por el que llegue a una fila.
+  const documento = crudo();
+  const plantada = "Sin registros: OBIS confirma que la especie no está presente en este caladero.";
+  for (const especie of especies(documento)) {
+    for (const caladero of especie["caladeros"] as Record<string, unknown>[]) {
+      if (typeof caladero["presenciaAusente"] === "string") caladero["presenciaAusente"] = plantada;
+    }
+  }
+  const catalogo = leerCatalogo(documento, NOTAS);
+  const publicado = JSON.stringify(catalogo);
+  assert.ok(!publicado.includes(plantada), "la frase del dataset llega hasta el contrato del módulo");
+  assert.ok(!publicado.includes("OBIS confirma"));
 });
 
 test("una cifra que se contradice a sí misma sí se rechaza: registros de 0 conjuntos de datos", () => {
@@ -190,13 +220,13 @@ test("una cifra que se contradice a sí misma sí se rechaza: registros de 0 con
   const caladeros = primera(documento)["caladeros"] as Record<string, unknown>[];
   const presencia = caladeros[0]!["presencia"] as Record<string, unknown>;
   presencia["datasets"] = 0;
-  assert.throws(() => leerCatalogo(documento), /debería ser un entero mayor que cero/u);
+  assert.throws(() => leerCatalogo(documento, NOTAS), /debería ser un entero mayor que cero/u);
 });
 
 test("la firma de una correspondencia nuestra llega SIN traducir, como la escribe el dataset", () => {
   // El adaptador renombra campos y no reescribe valores: `mareia` es quien firma ese mapeo, y
   // convertirlo en un «nuestro» más cómodo publicaría una firma que no ha estampado nadie.
-  const catalogo = leerCatalogo(crudo());
+  const catalogo = leerCatalogo(crudo(), NOTAS);
   const errata = catalogo.especies.find((especie) => especie.nombreBoe === "Cáncer pagurus");
   assert.equal(errata?.worms?.origen, "mareia");
   assert.match(errata?.worms?.comoSeLlego ?? "", /el latín no lleva la tilde/u);
@@ -209,7 +239,7 @@ test("el nombre aceptado sólo viaja cuando DIFIERE del de la norma", () => {
   // El dataset publica el aceptado siempre que WoRMS lo dé, también en las 74 filas en que es el
   // mismo binomio. Repetirlo en la página perdería las 11 que de verdad difieren entre 74 celdas
   // idénticas, así que el adaptador lo deja en `null` cuando coincide.
-  const catalogo = leerCatalogo(crudo());
+  const catalogo = leerCatalogo(crudo(), NOTAS);
   const distinto = catalogo.especies.find((especie) => especie.nombreBoe === "Solea vulgaris");
   assert.equal(distinto?.worms?.aceptado?.nombre, "Solea solea");
   const mismo = catalogo.especies.find((especie) => especie.nombreBoe === "Boops boops");
@@ -222,7 +252,7 @@ test("las tallas cuelgan de su caladero y la presencia es UNA, como en el datase
   // La cigala tiene dos tallas en el mismo anexo —2 cm de cefalotórax y 7 de longitud total— y un
   // solo recuento de OBIS. Con una entrada por talla, ese recuento se publicaría dos veces en la
   // misma fila, que es una invitación a sumarlos.
-  const catalogo = leerCatalogo(crudo());
+  const catalogo = leerCatalogo(crudo(), NOTAS);
   const cigala = catalogo.especies.find((especie) => especie.nombreBoe === "Nephrops norvegicus");
   const cantabrico = cigala?.caladeros.find(
     (caladero) => caladero.id === "cantabrico-noroeste-y-golfo-de-cadiz",
@@ -237,10 +267,65 @@ test("las tallas cuelgan de su caladero y la presencia es UNA, como en el datase
   assert.equal(cigala?.caladeros.filter((caladero) => caladero.id === cantabrico?.id).length, 1);
 });
 
+test("las notas del BOE se resuelven contra el anexo y llegan con su texto entero", () => {
+  // El dataset guarda la MARCA («(***)») y el texto vive en `normativa/v1`. Sin esta resolución el
+  // catálogo publicaba «36 cm» y la llamada dentro del literal, sin ningún pie en toda la página,
+  // mientras la página del puerto publicaba la nota entera: dos páginas del mismo sitio diciendo
+  // cosas distintas de la misma cifra legal (H-1 del pase adversario de T-20).
+  const catalogo = leerCatalogo(crudo(), NOTAS);
+  const lubina = catalogo.especies.find((especie) => especie.nombreBoe === "Dicentrarchus labrax");
+  const talla = lubina?.caladeros
+    .find((caladero) => caladero.id === "cantabrico-noroeste-y-golfo-de-cadiz")
+    ?.tallas[0];
+  assert.equal(talla?.textoOriginal, "36 (***)");
+  assert.deepEqual(
+    talla?.notas.map((nota) => nota.marca),
+    ["(***)"],
+  );
+  assert.match(talla?.notas[0]?.texto ?? "", /divisiones 8a y 8b/u);
+  assert.match(talla?.notas[0]?.texto ?? "", /44 centímetros/u);
+  // Y el pulpo, que es el caso sin rastro: su literal es «1 kg», sin marca, así que quien leyera la
+  // fila no tenía forma de sospechar que en Baleares esa cifra no rige.
+  const pulpo = catalogo.especies.find((especie) => especie.nombreBoe === "Octopus vulgaris");
+  const mediterraneo = pulpo?.caladeros.find((caladero) => caladero.id === "mediterraneo");
+  assert.equal(mediterraneo?.tallas[0]?.textoOriginal, "1 kg");
+  assert.match(mediterraneo?.tallas[0]?.notas[0]?.texto ?? "", /Illes Balears/u);
+});
+
+test("una marca que no tiene pie en el anexo no se publica: rojo", () => {
+  // Es la misma exigencia que `regulations` hace en las 153 páginas de puerto: una cifra legal con
+  // una llamada que no lleva a ninguna parte se lee como un dato anotado, y no lo está.
+  const documento = crudo();
+  const caladeros = primera(documento)["caladeros"] as Record<string, unknown>[];
+  const tallas = caladeros[0]!["tallas"] as Record<string, unknown>[];
+  tallas[0]!["notas"] = ["(****)"];
+  assert.throws(() => leerCatalogo(documento, NOTAS), /no publica ninguna nota con ella/u);
+});
+
+test("la fila del BOE sin nombre científico cruza la frontera con su talla y su motivo", () => {
+  // El Anexo I le fija 3,7 cm a «Cigalas (colas)» y esa fila no entra en la tabla porque la norma no
+  // escribe ahí ningún latín. La decisión estaba tomada y razonada en el dataset; lo que no pasaba
+  // es que llegara a la página (H-4 del pase adversario de T-20).
+  const catalogo = leerCatalogo(crudo(), NOTAS);
+  assert.equal(catalogo.sinNombreCientifico.length, 1);
+  const [fila] = catalogo.sinNombreCientifico;
+  assert.equal(fila?.nombreComun, "Cigalas (colas)");
+  assert.equal(fila?.caladero, "cantabrico-noroeste-y-golfo-de-cadiz");
+  assert.deepEqual(fila?.talla, { tipo: "longitud_cm", cm: 3.7 });
+  assert.match(fila?.motivo ?? "", /no hay ningún nombre latino/u);
+});
+
+test("una fila sin binomio y sin motivo no se publica: una ausencia muda no se distingue de un fallo", () => {
+  const documento = crudo();
+  const fuera = documento["sinNombreCientifico"] as Record<string, unknown>[];
+  delete fuera[0]!["motivo"];
+  assert.throws(() => leerCatalogo(documento, NOTAS), /\.motivo debería ser una cadena no vacía/u);
+});
+
 test("los rectángulos se aplanan con su caladero dentro, y hay caladeros con varios", () => {
   // El caladero cantábrico-noroeste-golfo de Cádiz se consulta con tres rectángulos: uno solo que
   // fuera del Cantábrico a Cádiz se tragaría el mar de Alborán, que es de otro caladero.
-  const { criterio } = leerCatalogo(crudo());
+  const { criterio } = leerCatalogo(crudo(), NOTAS);
   const delCantabrico = criterio.cajas.filter(
     (caja) => caja.caladero === "cantabrico-noroeste-y-golfo-de-cadiz",
   );

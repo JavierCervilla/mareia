@@ -38,13 +38,16 @@ import {
   EL_GENERO_APLICA_A_TODO_EL_GENERO,
   FILTRO_TODAS,
   filasDeEspecies,
+  filasSinBinomio,
   LA_CAJA_NO_ES_LA_COSTA,
   LA_PRESENCIA_NO_ES_ABUNDANCIA,
   POR_QUE_DOS_NOMBRES,
+  POR_QUE_NO_ESTAN_EN_LA_TABLA,
   QUE_ES_ESTE_CATALOGO,
   ROTULO_CAJAS,
   ROTULO_FILTRO,
   ROTULO_FUENTES,
+  rotuloSinBinomio,
   anclaDeCaladero,
   aphiaDelAceptado,
   fichaEnWorms,
@@ -65,6 +68,15 @@ import { grafo, migasEstructuradas } from "../../../seo.ts";
 const catalogo = await cargarCatalogoDeEspecies();
 const censo = censoDelCatalogo(catalogo);
 const filas = filasDeEspecies(catalogo, FORMATO_DEL_CATALOGO);
+/**
+ * Las filas del BOE que la tabla no puede publicar como especie, con su talla y su motivo.
+ *
+ * Se pintan **en esta misma página** y no se quedan en el dataset porque la ausencia tiene
+ * consecuencia legal: «Cigalas (colas)» son 3,7 cm del Anexo I y es la tercera medida del mismo
+ * animal en ese anexo. El catálogo publicaba dos y afirmaba de sí mismo que no le faltaba ninguna
+ * fila por decisión nuestra (hallazgo H-4 del pase adversario de T-20).
+ */
+const sinBinomio = filasSinBinomio(catalogo, FORMATO_DEL_CATALOGO);
 
 /**
  * El ancla que devuelve la lista entera.
@@ -226,6 +238,16 @@ const migas = migasDeEspecies();
                 <span class="tabla-especies__boe">{fila.nombreBoe}</span>
                 <span class="tabla-especies__comun">{fila.nombresComunes.join(" · ")}</span>
                 {fila.rango !== null && <span class="tabla-especies__rango">{fila.rango}</span>}
+                {/*
+                  EL CRUCE CON LA FILA HERMANA. El BOE escribe tres taxones con dos grafías
+                  (`Thunnus thynnus` y `Thunnus Thynnus`) y son dos filas, porque son dos nombres
+                  de la norma; sin este aviso cada una se lee como si diera cuenta de todos los
+                  caladeros del taxón, y quien busca el atún rojo por el binomio bien escrito
+                  concluye que en Canarias no hay talla mínima. La hay, en la fila de al lado.
+                */}
+                {fila.tambienEn !== null && (
+                  <span class="tabla-especies__hermana">{fila.tambienEn}</span>
+                )}
               </th>
               <td>
                 {fila.taxon.tipo === "sin_resolver" ? (
@@ -242,7 +264,9 @@ const migas = migasDeEspecies();
                     )}
                     <span class="tabla-especies__estado">{fila.taxon.texto}</span>
                     <span class="tabla-especies__ficha">
-                      <a href={fila.taxon.ficha.url}>{fichaEnWorms(fila.taxon.ficha.aphiaId)}</a>
+                      <a href={fila.taxon.ficha.url}>
+                        {fichaEnWorms(fila.taxon.ficha.nombre, fila.taxon.ficha.aphiaId)}
+                      </a>
                     </span>
                     {fila.taxon.correspondencia !== null && (
                       <span class="tabla-especies__nuestro">{fila.taxon.correspondencia}</span>
@@ -277,6 +301,19 @@ const migas = migasDeEspecies();
                           <span class="tabla-especies__literal">
                             el BOE imprime «{talla.literal}»
                           </span>
+                          {/*
+                            LA NOTA, ENTERA Y JUNTO A SU CIFRA. Es la regla de T-19 —«la nota viaja
+                            pegada a la cifra y se pinta con ella, siempre»— y aquí faltaba: la
+                            lubina son 36 cm salvo en las divisiones 8a y 8b del CIEM, donde son
+                            44, y esta página publicaba el 36 y la llamada «(***)» sin ningún pie
+                            mientras la página del puerto publicaba la nota entera. No va en un pie
+                            de la página: un número sin su excepción es una cifra legal falsa para
+                            quien pesca en la zona excepcionada, y quien copia una fila se lleva lo
+                            que hay en ella.
+                          */}
+                          {talla.notas.map((nota) => (
+                            <span class="tabla-especies__nota">{nota}</span>
+                          ))}
                         </>
                       ))}
                       {/*
@@ -295,6 +332,42 @@ const migas = migasDeEspecies();
       </tbody>
     </table>
   </div>
+
+  {/*
+    LAS FILAS DEL BOE QUE ESTA TABLA NO PUEDE PUBLICAR COMO ESPECIE. Van después de la tabla y no
+    dentro: no son especies del catálogo —la norma no les escribe ningún nombre científico y aquí no
+    se les inventa uno—, pero su talla mínima es igual de obligatoria. Se pintan siempre que el
+    dataset declare alguna: si mañana la norma añade otra, aparece sola.
+  */}
+  {
+    sinBinomio.length > 0 && (
+      <section class="bloque" aria-labelledby="titulo-sin-binomio">
+        <h2 class="bloque__titulo" id="titulo-sin-binomio">
+          {rotuloSinBinomio(sinBinomio.length)}
+        </h2>
+        <p class="especies__intro">{POR_QUE_NO_ESTAN_EN_LA_TABLA}</p>
+        <div class="datos">
+          {sinBinomio.map((fila) => (
+            <p class="datos__fila" data-sin-binomio={fila.nombreComun}>
+              <span>
+                {fila.nombreComun}
+                <span class="tabla-especies__caladero">{fila.caladero}</span>
+                <span class="tabla-especies__ausencia">{fila.motivo}</span>
+              </span>
+              <span class="datos__valor">
+                <span
+                  class={fila.talla.hayCifra ? "tabla-especies__talla" : "tabla-especies__sin-talla"}
+                >
+                  {fila.talla.texto}
+                </span>
+                <span class="tabla-especies__literal">el BOE imprime «{fila.literal}»</span>
+              </span>
+            </p>
+          ))}
+        </div>
+      </section>
+    )
+  }
 
   <p class="datos__nota">
     {ROTULO_FUENTES} ·{" "}

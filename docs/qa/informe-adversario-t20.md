@@ -31,6 +31,24 @@
   hay que compartir. Las citas de comentarios que aparecen abajo son de **código publicado** y están
   porque son promesas comprobables, no porque expliquen una decisión.
 
+## Estado de los cinco hallazgos: **CERRADOS** (2026-08-30, en este mismo PR)
+
+Anotado aquí y no reescribiendo el informe: lo de arriba describe el `dist/` de `470cd87` y así se
+queda, que es lo que hace comparable el pase. Los cinco se arreglaron **en la frontera común que el
+propio informe señala** —«la comparación termina en el JSON»— y no síntoma a síntoma: `TallaDelAnexo`
+tiene ahora las notas (resueltas contra `normativa/v1`, sin copiar el texto), `CatalogoDeEspecies`
+tiene `sinNombreCientifico`, la columna del taxón tiene su **tercer** estado y publica el nombre del
+registro al que apunta, cada fila cruza a la que publica su mismo `AphiaID`, y el motivo de no haber
+preguntado a OBIS cruza como **booleano** con la frase en el código (`NO_SE_PREGUNTO_A_OBIS`).
+
+Los **nueve cuerpos** pierden su `test.fail()` —Playwright avisó de «pasó lo que se esperaba que
+fallara» en los nueve antes de retirarlo— y quedan como **gate permanente**, con sus asserts canario
+donde estaban. Se suman dos gates sobre el `dist/`: **E7** (la nota **entera**, no la marca, en el
+mismo bloque que la cifra, y ninguna llamada sin pie) y **E8** (toda fila del BOE fuera de la tabla,
+nombrada con su motivo y su talla); los dos, y el **E4** corregido —se comparaba contra el propio
+valor que vigilaba—, medidos **en rojo** contra el `dist/` anterior. El apunte del ledger sobre
+`test.fail()` **sigue abierto**: es del framework, no de T-20.
+
 ## Promesa
 
 > Mareia publica las 86 especies que el BOE regula: el nombre legal **literal**, el taxón aceptado

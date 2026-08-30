@@ -11,6 +11,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  NO_SE_PREGUNTO_A_OBIS,
   presenciaEscrita,
   SESGO_JUNTO_A_LA_CIFRA,
   SIN_REGISTROS,
@@ -27,6 +28,7 @@ import {
   CatalogoIncompleto,
   censoDelCatalogo,
   filasDeEspecies,
+  filasSinBinomio,
 } from "../vista.ts";
 
 /** El formato del sitio, prestado: coma decimal, como en la página. */
@@ -42,7 +44,7 @@ function enCaladero(parcial: Partial<EspecieEnCaladero> = {}): EspecieEnCaladero
     nombreComun: "Lisa",
     tallas: [conTalla()],
     presencia: { registros: 412, datasets: 3, desde: 2003, hasta: 2019 },
-    presenciaAusente: null,
+    seLePreguntoAObis: true,
     ...parcial,
   };
 }
@@ -52,6 +54,7 @@ function conTalla(parcial: Partial<TallaDelAnexo> = {}): TallaDelAnexo {
     medida: null,
     talla: { tipo: "longitud_cm", cm: 16 },
     textoOriginal: "16",
+    notas: [],
     ...parcial,
   };
 }
@@ -106,6 +109,7 @@ function catalogo(especies: readonly EspecieDelCatalogo[]): CatalogoDeEspecies {
       ],
     },
     especies,
+    sinNombreCientifico: [],
   };
 }
 
@@ -193,6 +197,175 @@ test("una correspondencia NUESTRA se publica firmada y con su motivo", () => {
   const [fila] = filasDeEspecies(catalogo([genero]), FORMATO);
   if (fila?.taxon.tipo !== "resuelto") throw new Error("debería resolver");
   assert.match(fila.taxon.correspondencia ?? "", /^Correspondencia nuestra, no de WoRMS: /u);
+});
+
+test("a un nombre que WoRMS nunca vio no se le atribuye que WoRMS lo acepte", () => {
+  // El tercer estado de la columna, el que faltaba (H-2 del pase adversario de T-20). `Sepia spp`
+  // no existe en ninguna nomenclatura: lo que se consultó fue «sepia», y decir que WoRMS acepta el
+  // nombre de la norma sobre él es atribuirle a la fuente una frase que no ha dicho —y contradecir
+  // dos líneas más abajo, en la misma celda, la correspondencia que firmamos nosotros—.
+  const genero = especie({
+    nombreBoe: "Sepia spp",
+    clave: "sepia-spp",
+    worms: {
+      aphiaId: 138477,
+      nombre: "Sepia",
+      estado: "accepted",
+      rango: "genero",
+      url: "https://www.marinespecies.org/aphia.php?p=taxdetails&id=138477",
+      aceptado: null,
+      origen: "mareia",
+      comoSeLlego: "la norma escribe «Sepia spp», que no es un binomio; se resuelve el género",
+    },
+  });
+  const [fila] = filasDeEspecies(catalogo([genero]), FORMATO);
+  if (fila?.taxon.tipo !== "resuelto") throw new Error("debería resolver");
+  assert.ok(!fila.taxon.texto.includes("WoRMS acepta el nombre de la norma"));
+  assert.match(fila.taxon.texto, /A WoRMS no se le preguntó este nombre/u);
+  // Y la fila publica el nombre del registro al que manda a comprobarla: un AphiaID sin el nombre
+  // al que apunta obliga a salir del sitio, que es lo que esta columna existe para evitar.
+  assert.match(fila.taxon.texto, /es Sepia,/u);
+  assert.equal(fila.taxon.ficha.nombre, "Sepia");
+});
+
+test("cuando además remite a otro nombre, las dos cosas se dicen en la misma frase", () => {
+  // Es una sola fila del catálogo, `Panaeux kerathurus`: ni se le preguntó el nombre de la norma ni
+  // el registro que se encontró es el aceptado hoy. Contarlo en dos frases dejaría al lector
+  // emparejando cuál se refiere a cuál.
+  const errata = especie({
+    nombreBoe: "Panaeux kerathurus",
+    clave: "panaeux-kerathurus",
+    worms: {
+      aphiaId: 246388,
+      nombre: "Penaeus kerathurus",
+      estado: "superseded combination",
+      rango: "especie",
+      url: "https://www.marinespecies.org/aphia.php?p=taxdetails&id=246388",
+      aceptado: { aphiaId: 107703, nombre: "Penaeus (Melicertus) kerathurus" },
+      origen: "mareia",
+      comoSeLlego: "la norma imprime «Panaeux»; el género es «Penaeus»",
+    },
+  });
+  const [fila] = filasDeEspecies(catalogo([errata]), FORMATO);
+  if (fila?.taxon.tipo !== "resuelto") throw new Error("debería resolver");
+  assert.match(fila.taxon.texto, /A WoRMS no se le preguntó este nombre/u);
+  assert.match(fila.taxon.texto, /remite a Penaeus \(Melicertus\) kerathurus\.$/u);
+});
+
+// =================================================================================================
+// H-1 · la nota viaja pegada a la cifra
+// =================================================================================================
+
+test("una cifra con excepción se publica CON la excepción, entera y en su misma talla", () => {
+  // La regla de T-19 —«la nota viaja pegada a la cifra y se pinta con ella, siempre»— aplicada a la
+  // superficie nueva: la lubina son 36 cm salvo en las divisiones 8a y 8b del CIEM, donde son 44, y
+  // el catálogo publicaba el 36 con la llamada «(***)» y ningún pie en toda la página.
+  const lubina = especie({
+    nombreBoe: "Dicentrarchus labrax",
+    clave: "dicentrarchus-labrax",
+    caladeros: [
+      enCaladero({
+        tallas: [
+          conTalla({
+            talla: { tipo: "longitud_cm", cm: 36 },
+            textoOriginal: "36 (***)",
+            notas: [
+              {
+                marca: "(***)",
+                texto:
+                  "Excepto en las divisiones 8a y 8b del Consejo Internacional para la " +
+                  "Exploración del Mar, tanto para la pesca profesional como para la pesca " +
+                  "recreativa, en las que la talla mínima es de 44 centímetros.",
+              },
+            ],
+          }),
+        ],
+      }),
+    ],
+  });
+  const [fila] = filasDeEspecies(catalogo([lubina]), FORMATO);
+  const talla = fila?.caladeros[0]?.tallas[0];
+  assert.equal(talla?.talla.texto, "36\u00a0cm");
+  // El texto ENTERO, no la marca: un resumen sería una tercera cifra que la norma no dice.
+  assert.equal(talla?.notas.length, 1);
+  assert.match(talla?.notas[0] ?? "", /^\(\*\*\*\) Excepto en las divisiones 8a y 8b/u);
+  assert.match(talla?.notas[0] ?? "", /44 centímetros\.$/u);
+});
+
+test("una talla sin llamada no se inventa ninguna nota", () => {
+  const [fila] = filasDeEspecies(catalogo([especie()]), FORMATO);
+  assert.deepEqual(fila?.caladeros[0]?.tallas[0]?.notas, []);
+});
+
+// =================================================================================================
+// H-3 · dos grafías del BOE, un solo taxón
+// =================================================================================================
+
+test("dos filas que publican el mismo AphiaID se nombran la una a la otra", () => {
+  // El BOE escribe `Thunnus thynnus` en los Anexos I y II y `Thunnus Thynnus` en el III: dos filas,
+  // porque son dos nombres de la norma y el de la norma es el que tiene consecuencia legal. Sin el
+  // cruce, quien busca el atún rojo por el binomio bien escrito ve una fila con dos caladeros y
+  // concluye que en Canarias no tiene talla mínima. La tiene: 6,4 kg, en la fila de al lado.
+  const worms = {
+    aphiaId: 127029,
+    nombre: "Thunnus thynnus",
+    estado: "accepted",
+    rango: "especie" as const,
+    url: "https://www.marinespecies.org/aphia.php?p=taxdetails&id=127029",
+    aceptado: null,
+    origen: "worms" as const,
+    comoSeLlego: null,
+  };
+  const filas = filasDeEspecies(
+    catalogo([
+      especie({ nombreBoe: "Thunnus thynnus", clave: "thunnus-thynnus-aaa", worms }),
+      especie({ nombreBoe: "Thunnus Thynnus", clave: "thunnus-thynnus-bbb", worms }),
+    ]),
+    FORMATO,
+  );
+  const minuscula = filas.find((fila) => fila.clave === "thunnus-thynnus-aaa");
+  const mayuscula = filas.find((fila) => fila.clave === "thunnus-thynnus-bbb");
+  assert.match(minuscula?.tambienEn ?? "", /«Thunnus Thynnus»/u);
+  assert.match(mayuscula?.tambienEn ?? "", /«Thunnus thynnus»/u);
+});
+
+test("una fila sin hermana no dice que la tenga", () => {
+  const [fila] = filasDeEspecies(catalogo([especie()]), FORMATO);
+  assert.equal(fila?.tambienEn, null);
+});
+
+// =================================================================================================
+// H-4 · la fila del BOE que no se puede publicar como especie
+// =================================================================================================
+
+test("una fila del BOE sin binomio se publica con su talla y su motivo, no se calla", () => {
+  // «Cigalas (colas)», Anexo I, 3,7 cm: la norma no escribe ahí ningún latín y aquí no se le
+  // inventa uno. Lo que no vale es dejarla fuera en silencio, que es lo que pasaba: son tres
+  // medidas del mismo animal en el mismo anexo y el catálogo publicaba dos.
+  const documento = {
+    ...catalogo([especie()]),
+    sinNombreCientifico: [
+      {
+        caladero: "mediterraneo",
+        nombreComun: "Cigalas (colas)",
+        motivo: "la norma escribe «Cigalas (colas)» y ahí no hay ningún nombre latino",
+        talla: { tipo: "longitud_cm" as const, cm: 3.7 },
+        textoOriginal: "3,7",
+      },
+    ],
+  };
+  const [fila] = filasSinBinomio(documento, FORMATO);
+  assert.equal(fila?.nombreComun, "Cigalas (colas)");
+  assert.equal(fila?.talla.texto, "3,7\u00a0cm");
+  assert.equal(fila?.literal, "3,7");
+  assert.match(fila?.motivo ?? "", /no hay ningún nombre latino/u);
+  // El caladero se escribe con SU nombre, resuelto contra las especies del catálogo: el dataset
+  // guarda aquí el identificador y teclearlo sería una segunda copia de ese nombre.
+  assert.equal(fila?.caladero, "Caladero Mediterráneo");
+});
+
+test("sin filas fuera del catálogo no se publica ningún bloque vacío", () => {
+  assert.deepEqual(filasSinBinomio(catalogo([especie()]), FORMATO), []);
 });
 
 test("un mapeo NUESTRO sin motivo no se publica: se lee como si lo firmase WoRMS", () => {
@@ -301,14 +474,14 @@ test("no haber preguntado a OBIS no se publica como «nadie lo ha anotado»", ()
     worms: null,
     sinResolver: "la celda nombra dos especies dentro de una sola fila",
     caladeros: [
-      enCaladero({
-        presencia: null,
-        presenciaAusente: "sin taxón resuelto no se pregunta a OBIS",
-      }),
+      enCaladero({ presencia: null, seLePreguntoAObis: false }),
     ],
   });
   const [fila] = filasDeEspecies(catalogo([noSePregunto]), FORMATO);
-  assert.equal(fila?.caladeros[0]?.presencia, "sin taxón resuelto no se pregunta a OBIS");
+  // La frase sale del CÓDIGO y no del dato: por el campo de texto libre del que salía antes entraba
+  // una afirmación sobre lo que hay en el mar con toda la escalera en verde (H-5 del pase de T-20).
+  assert.equal(fila?.caladeros[0]?.presencia, NO_SE_PREGUNTO_A_OBIS);
+  assert.match(NO_SE_PREGUNTO_A_OBIS, /no hay consulta/u);
   assert.equal(fila?.caladeros[0]?.hayCifra, false);
   // Y no se publica NINGUNA de las dos frases de más: ni la cifra ni la de cero registros.
   assert.ok(!(fila?.caladeros[0]?.presencia ?? "").includes(SIN_REGISTROS));

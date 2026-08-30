@@ -33,6 +33,16 @@
  *    que no tiene. La frase que lo dice **no está aquí**: es una constante del módulo
  *    (`textos.ts`), por el hallazgo H-1 de T-21.
  *
+ * **Lo mínimo no era tan poco: la frontera se ensanchó en T-20 y hay que decir por qué.** El pase
+ * adversario encontró cinco roturas y las cinco caían aquí, después del último gate del dataset:
+ * `especies/v1` traía las notas al pie de una talla, la fila del BOE sin binomio y el binomio que
+ * WoRMS devolvió, y este contrato no tenía dónde ponerlos, así que el adaptador los tiraba. Una
+ * cifra legal sin su excepción, una fila de la norma que desaparece en silencio y un `AphiaID` sin
+ * el nombre al que apunta **no son detalles de presentación**: son las tres formas de que la página
+ * publique menos verdad de la que el dato tiene. Lo que sigue siendo cierto es la regla: aquí sólo
+ * entra lo que hace falta para escribir una fila **sin mentir**, y por eso el motivo de la ausencia
+ * de OBIS entró como un booleano y no como el texto libre del JSON (ver `seLePreguntoAObis`).
+ *
  * Lo que este dataset **no** trae, y no es un olvido: coordenadas de los registros de OBIS. La
  * trayectoria no publica mapas de distribución —con 12 registros de dorada en Galicia, un mapa es
  * una mentira dibujada—, así que si algún día aparecieran no habría dónde escribirlas aquí.
@@ -144,7 +154,31 @@ export interface PresenciaObis {
 }
 
 /**
- * Una talla que un anexo le fija a una especie: la cifra, qué mide y el literal de la celda.
+ * Una nota al pie del anexo **ya resuelta**: la marca que imprime el BOE y su texto entero.
+ *
+ * Es el campo que faltaba y por el que se cayó el hallazgo H-1 del pase adversario de T-20. El
+ * dataset trae de cada talla las **marcas** (`["(***)"]`) y el texto de cada marca vive en
+ * `normativa/v1`, que es de donde lo copia la tabla de las 153 páginas de puerto; entre los dos no
+ * había contrato donde ponerlo, así que el catálogo publicaba «36 cm» y una llamada al pie que no
+ * llevaba a ningún pie mientras la página del puerto publicaba la nota entera. **Un número sin su
+ * excepción es una cifra legal falsa** para quien pesca en la zona excepcionada: la lubina son 36
+ * cm salvo en las divisiones 8a y 8b del CIEM, donde son 44.
+ *
+ * El texto **no se hornea en `especies/v1`**: se resuelve en la frontera (el adaptador de la web,
+ * que ya lee los dos derivados). Copiarlo al dataset del catálogo sería una segunda copia del
+ * mismo texto legal, y dos copias de una cifra legal se corrigen en un sitio y no en el otro, que
+ * es exactamente el defecto que este campo repara.
+ */
+export interface NotaDeLaTalla {
+  /** La llamada tal y como la imprime el BOE: `(*)`, `(**)`, `(***)`. */
+  readonly marca: string;
+  /** El pie **entero**, sin resumir: es lo que cambia la cifra, así que no se puede glosar. */
+  readonly texto: string;
+}
+
+/**
+ * Una talla que un anexo le fija a una especie: la cifra, qué mide, el literal de la celda y **las
+ * notas que la modifican**.
  *
  * `talla` es **la misma unión cerrada de cinco clases** de `normativa/v1` y se importa de
  * `@mareia/module-regulations` en vez de copiarse: ver la cabecera de `vista.ts`.
@@ -164,6 +198,13 @@ export interface TallaDelAnexo {
   readonly talla: Talla;
   /** El literal de la celda del BOE, para poder comparar lo pintado con lo publicado. */
   readonly textoOriginal: string;
+  /**
+   * Las notas del anexo que le aplican, **con su texto**. Vacío en las 108 tallas sin llamada.
+   *
+   * Viajan pegadas a la cifra y no en un pie de página al que haya que bajar, por lo mismo que en
+   * `regulations`: la nota es parte de la cifra, no un comentario sobre ella.
+   */
+  readonly notas: readonly NotaDeLaTalla[];
 }
 
 /**
@@ -191,16 +232,26 @@ export interface EspecieEnCaladero {
   /** Lo que OBIS registra dentro del recorte de ese caladero; `null` si no hay cifra que publicar. */
   readonly presencia: PresenciaObis | null;
   /**
-   * Por qué no hay cifra, cuando **no se llegó a preguntar**; `null` cuando sí se preguntó.
+   * Si a OBIS **se le llegó a preguntar** por esta especie en este caladero. Es un hecho, no un
+   * texto.
    *
    * Distingue los dos silencios que el dataset distingue y que no significan lo mismo: preguntarle
    * a OBIS y que no tenga ningún registro dentro del recorte (9 pares especie-caladero, y eso se
    * dice con `SIN_REGISTROS`) y **no haberle preguntado**, que es lo que pasa cuando el nombre no
    * resuelve en WoRMS y no hay taxón por el que consultar (una: `Lophius piscatorius, L.
-   * Budegassa`). Publicar «nadie lo ha anotado ahí» en el segundo caso sería afirmar algo sobre
-   * OBIS que no hemos comprobado.
+   * Budegassa`, y eso se dice con `NO_SE_PREGUNTO_A_OBIS`). Publicar «nadie lo ha anotado ahí» en
+   * el segundo caso sería afirmar algo sobre OBIS que no hemos comprobado.
+   *
+   * **Es un booleano y no la frase, y ésa es la corrección del hallazgo H-5 de T-20.** Antes viajaba
+   * aquí el texto libre `presenciaAusente` del JSON y la vista lo imprimía tal cual, así que
+   * plantando en ese campo «OBIS confirma que la especie no está presente en este caladero» la
+   * afirmación salía publicada con los siete gates del pipeline y el build en verde. Es el mismo
+   * hallazgo H-1 de T-21 en otro campo y se cierra igual: **la frase que sostiene la promesa vive
+   * en el código** (`textos.ts`), y del dato sólo cruza el hecho de si se preguntó o no. El dataset
+   * sigue guardando su motivo en `presenciaAusente` —es un derivado publicable por sí mismo y su
+   * gate `errores_de_presencia` lo exige—, pero ese texto ya no se publica.
    */
-  readonly presenciaAusente: string | null;
+  readonly seLePreguntoAObis: boolean;
 }
 
 /** Una de las 86 especies que el BOE regula. */
@@ -292,10 +343,47 @@ export interface CriterioDelCatalogo {
   readonly cajas: readonly CajaDelCaladero[];
 }
 
+/**
+ * Una fila del BOE a la que la norma le fija talla y **que este catálogo no puede publicar como
+ * especie**, porque en esa celda no hay ningún nombre científico.
+ *
+ * Hoy es una: «Cigalas (colas)», Anexo I, 3,7 cm. La decisión de dejarla fuera está tomada y
+ * razonada en el dataset (`sinNombreCientifico`), el pipeline la cuenta y `run.py check` la nombra;
+ * lo que faltaba —hallazgo H-4 del pase adversario de T-20— era que **llegara a la página**. Sin
+ * eso el catálogo dejaba fuera una cifra legal en silencio mientras afirmaba de sí mismo que no le
+ * faltaba ninguna fila por decisión nuestra, y encima con consecuencia: son **tres** medidas del
+ * mismo animal en el mismo anexo (cefalotórax 2 cm, longitud total 7 cm, colas 3,7 cm) y se
+ * publicaban dos.
+ *
+ * Es la misma doctrina que el `sinResolver` de una especie o el `motivo` de un puerto sin áreas
+ * protegidas: **una ausencia dice por qué lo es, o no se distingue de un fallo nuestro**. Lo que
+ * no se hace es inventarle un binomio a la norma.
+ */
+export interface FilaDelBoeSinBinomio {
+  /** Identificador del caladero cuyo anexo la fija, el mismo que usan las especies. */
+  readonly caladero: string;
+  /** El nombre común con el que la norma la nombra, literal («Cigalas (colas)»). */
+  readonly nombreComun: string;
+  /** Por qué no se publica como especie. Nunca un hueco mudo. */
+  readonly motivo: string;
+  /** La talla que el anexo le fija, en la clase que le corresponda. Es una cifra legal. */
+  readonly talla: Talla;
+  /** El literal de la celda del BOE, para poder comparar lo pintado con lo publicado. */
+  readonly textoOriginal: string;
+}
+
 /** El dataset entero. */
 export interface CatalogoDeEspecies {
   readonly schema: string;
   readonly fuentes: FuentesDelCatalogo;
   readonly criterio: CriterioDelCatalogo;
   readonly especies: readonly EspecieDelCatalogo[];
+  /**
+   * Las filas del BOE que se quedan fuera del catálogo y **por qué**. Hoy, una.
+   *
+   * Está en el contrato —y no sólo en el dataset— porque es lo que impide que el catálogo se
+   * declare completo cuando no lo está: si el día de mañana la norma añade otra fila sin binomio,
+   * la página la nombra sola.
+   */
+  readonly sinNombreCientifico: readonly FilaDelBoeSinBinomio[];
 }

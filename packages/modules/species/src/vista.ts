@@ -16,6 +16,15 @@
  *    `filasDeEspecies` **levanta** si una especie no resuelve y no trae motivo, o si trae una
  *    correspondencia nuestra sin decir cuál. Publicar eso en silencio es firmar con el nombre de
  *    WoRMS una decisión que hemos tomado nosotros.
+ * 4. **Ninguna cifra legal sale sin la excepción que la cambia.** Es la regla de T-19 —«la nota
+ *    viaja pegada a la cifra y se pinta con ella, siempre»— y aquí no estaba: el pase adversario de
+ *    T-20 encontró el catálogo publicando «36 cm» y una llamada `(***)` que no llevaba a ningún
+ *    pie, mientras la página de puerto del mismo sitio publicaba la nota entera. `TallaDeLaFila`
+ *    lleva ahora las notas escritas y `caladeroDeLaFila` las pone en el mismo bloque que la cifra.
+ *
+ * Y una que no es de composición pero se decide aquí: **cada fila dice qué otra fila publica su
+ * mismo taxón** (`tambienEn`), porque el BOE escribe tres animales con dos grafías y sin el cruce
+ * cada una de las seis filas se lee como si fuera la única.
  *
  * **La talla no se vuelve a escribir aquí: se presta el criterio de `regulations`** (`textoDeTalla`,
  * con su unión cerrada de cinco clases y su `never`). Es una dependencia de un módulo sobre otro y
@@ -35,11 +44,16 @@ import type { FormatoDeTallas, TallaEscrita } from "@mareia/module-regulations";
 
 import {
   correspondenciaNuestra,
+  enElCaladero,
   MISMO_NOMBRE,
+  NO_SE_PREGUNTO_A_OBIS,
+  notaDeLaTalla,
+  noSePreguntoEsteNombre,
   presenciaEscrita,
   rangoEscrito,
   remiteA,
   SIN_REGISTROS,
+  tambienEnOtraFila,
 } from "./textos.ts";
 import type {
   CatalogoDeEspecies,
@@ -71,11 +85,22 @@ export type TaxonDeLaFila =
        */
       readonly texto: string;
       /**
-       * El registro de WoRMS **del nombre que escribe la norma**, que es el que hay que poder abrir
-       * para comprobar la fila. El `AphiaID` que se publica y el enlace apuntan al mismo sitio: un
+       * El registro de WoRMS al que apunta la fila: **su nombre**, su `AphiaID` y su enlace. Es el
+       * que hay que poder abrir para comprobarla, y los tres campos apuntan al mismo sitio: un
        * identificador junto a un enlace que lleva a otro registro es peor que no publicar ninguno.
+       *
+       * El **nombre** entró con el hallazgo H-2 de T-20. En las 22 filas a las que WoRMS no vio el
+       * nombre de la norma, este registro es el del nombre **corregido** (`Cancer pagurus` por
+       * `Cáncer pagurus`) y no aparecía en ninguna parte de la fila: se publicaba el `AphiaID` a
+       * secas, rotulado además como si fuera la ficha del nombre de la norma. Quien quisiera
+       * comprobar la fila tenía que salir del sitio para saber a qué taxón apunta el identificador
+       * que estaba leyendo, que es justo lo que esta columna existe para evitar.
        */
-      readonly ficha: { readonly aphiaId: number; readonly url: string };
+      readonly ficha: {
+        readonly nombre: string;
+        readonly aphiaId: number;
+        readonly url: string;
+      };
       /**
        * El nombre aceptado hoy y su propio `AphiaID`, **solo cuando difiere del de la norma**.
        * **Se suma al del BOE; no lo sustituye.** Son 11 de las 86.
@@ -99,6 +124,16 @@ export interface TallaDeLaFila {
   readonly talla: TallaEscrita;
   /** El literal de la celda del BOE, para poder comparar lo pintado con lo publicado. */
   readonly literal: string;
+  /**
+   * Las notas del anexo que modifican esta cifra, **escritas enteras**; vacío si no lleva ninguna.
+   *
+   * Se pintan **con la cifra y en su mismo bloque**, no en un pie de la página: la nota es parte de
+   * la cifra. Un número sin su excepción es una cifra legal falsa para quien pesca en la zona
+   * excepcionada, y una llamada `(***)` sin pie es la propia página avisando de que falta algo y no
+   * diciendo qué (hallazgo H-1 de T-20; la doctrina es la de T-19 y la sección de tallas ya la
+   * cumple en las 153 páginas de puerto).
+   */
+  readonly notas: readonly string[];
 }
 
 /**
@@ -136,6 +171,15 @@ export interface FilaDeEspecie {
   readonly taxon: TaxonDeLaFila;
   /** «género, no especie» y sus dos hermanos, en las 17 filas que no son una especie; `null` en las demás. */
   readonly rango: string | null;
+  /**
+   * Que el mismo taxón está **en otra fila de la tabla**, con la otra grafía del BOE; `null` en las
+   * 80 filas que no tienen hermana.
+   *
+   * Son tres pares y seis filas, y sin este cruce cada una de las seis se lee como si fuera la
+   * única: quien busca el atún rojo por `Thunnus thynnus` ve dos caladeros y concluye que en
+   * Canarias no hay talla mínima, cuando la hay en la fila de al lado (hallazgo H-3 de T-20).
+   */
+  readonly tambienEn: string | null;
   readonly caladeros: readonly CaladeroDeLaFila[];
   /** Los identificadores de sus caladeros, que es de lo que se agarra el filtro sin JavaScript. */
   readonly idsDeCaladero: readonly string[];
@@ -172,11 +216,34 @@ function taxonDeLaFila(especie: EspecieDelCatalogo): TaxonDeLaFila {
   const aceptado = worms.aceptado;
   return {
     tipo: "resuelto",
-    texto: aceptado === null ? MISMO_NOMBRE : remiteA(worms.estado, aceptado.nombre),
-    ficha: { aphiaId: worms.aphiaId, url: worms.url },
+    texto: queDiceWorms(worms),
+    ficha: { nombre: worms.nombre, aphiaId: worms.aphiaId, url: worms.url },
     aceptado: aceptado === null ? null : { nombre: aceptado.nombre, aphiaId: aceptado.aphiaId },
     correspondencia: correspondenciaDe(nombreBoe, worms),
   };
+}
+
+/**
+ * Qué dice WoRMS de esta fila, en las **tres** situaciones que hay. Antes se contaban dos.
+ *
+ * La que faltaba —y es el hallazgo H-2 de T-20— son las 22 filas a las que **a WoRMS no se le
+ * preguntó el nombre de la norma**, porque el de la norma no resuelve y fuimos nosotros quienes
+ * decidimos qué preguntarle: los 15 géneros escritos con `spp`, las 6 erratas de imprenta y la
+ * celda que nombra dos especies. En 20 de ellas el nombre devuelto coincidía consigo mismo, el
+ * adaptador dejaba `aceptado` en `null` y la fila caía en «WoRMS acepta el nombre de la norma»
+ * sobre nombres que WoRMS nunca vio —`Sepia spp`, `Thunnus aibacares`—, contradiciéndose dos líneas
+ * más abajo con la correspondencia firmada por nosotros.
+ *
+ * El discriminante es `origen`, que es **un hecho del dataset y no una heurística**: vale `mareia`
+ * exactamente cuando la consulta la decidimos nosotros. No se compara el nombre consultado con el
+ * del BOE porque eso sería un segundo camino al mismo hecho, y un segundo camino puede discrepar.
+ */
+function queDiceWorms(worms: TaxonEnWorms): string {
+  const aceptado = worms.aceptado?.nombre ?? null;
+  if (worms.origen === "mareia") {
+    return noSePreguntoEsteNombre(worms.nombre, worms.estado, aceptado);
+  }
+  return aceptado === null ? MISMO_NOMBRE : remiteA(worms.estado, aceptado);
 }
 
 /** La correspondencia, cuando es nuestra y por tanto tiene que ir firmada; `null` cuando es de WoRMS. */
@@ -203,12 +270,48 @@ export function filasDeEspecies(
   catalogo: CatalogoDeEspecies,
   formato: FormatoDelCatalogo,
 ): readonly FilaDeEspecie[] {
+  const hermanas = filasDelMismoTaxon(catalogo);
   return [...catalogo.especies]
     .sort((una, otra) => una.nombreBoe.localeCompare(otra.nombreBoe, "es"))
-    .map((especie) => filaDeEspecie(especie, formato));
+    .map((especie) => filaDeEspecie(especie, formato, hermanas.get(especie.clave) ?? []));
 }
 
-function filaDeEspecie(especie: EspecieDelCatalogo, formato: FormatoDelCatalogo): FilaDeEspecie {
+/**
+ * Qué otras filas publican **el mismo registro de WoRMS**, indexado por clave.
+ *
+ * Se agrupa por `AphiaID` y no por nombre porque el `AphiaID` es la identidad del taxón para la
+ * fuente: son tres pares que el BOE escribe con dos grafías (`Thunnus thynnus` / `Thunnus Thynnus`,
+ * `Thunnus albacares` / `Thunnus aibacares`, `Mugil spp` / `Mugil spps`) y para WoRMS cada par es
+ * un solo animal. La clave con digest los mantiene como dos filas distintas, que es lo correcto
+ * —son dos nombres de la norma—, pero cada una tiene que **enterarse de la otra**: si no, la que
+ * lleva el nombre bien escrito se lee como si diera cuenta de todos los caladeros del taxón y deja
+ * fuera una talla legal sin decirlo (hallazgo H-3 de T-20).
+ */
+function filasDelMismoTaxon(catalogo: CatalogoDeEspecies): ReadonlyMap<string, readonly string[]> {
+  const porAphia = new Map<number, EspecieDelCatalogo[]>();
+  for (const especie of catalogo.especies) {
+    const aphiaId = especie.worms?.aphiaId;
+    if (aphiaId === undefined) continue;
+    porAphia.set(aphiaId, [...(porAphia.get(aphiaId) ?? []), especie]);
+  }
+  const hermanas = new Map<string, readonly string[]>();
+  for (const filas of porAphia.values()) {
+    if (filas.length < 2) continue;
+    for (const especie of filas) {
+      hermanas.set(
+        especie.clave,
+        filas.filter((otra) => otra.clave !== especie.clave).map((otra) => otra.nombreBoe),
+      );
+    }
+  }
+  return hermanas;
+}
+
+function filaDeEspecie(
+  especie: EspecieDelCatalogo,
+  formato: FormatoDelCatalogo,
+  hermanas: readonly string[],
+): FilaDeEspecie {
   if (especie.caladeros.length === 0) {
     throw new CatalogoIncompleto(
       especie.nombreBoe,
@@ -223,21 +326,27 @@ function filaDeEspecie(especie: EspecieDelCatalogo, formato: FormatoDelCatalogo)
     nombresComunes: [...new Set(especie.caladeros.map((caladero) => caladero.nombreComun))],
     taxon: taxonDeLaFila(especie),
     rango: especie.worms === null ? null : rangoEscrito(especie.worms.rango),
+    tambienEn: hermanas.length === 0 ? null : tambienEnOtraFila(hermanas),
     caladeros,
     idsDeCaladero: caladeros.map((caladero) => caladero.id),
   };
 }
 
 /**
- * Un caladero de la fila, listo para pintarse: sus tallas escritas y su presencia **como frase**.
+ * Un caladero de la fila, listo para pintarse: sus tallas escritas **con sus notas** y su presencia
+ * **como frase**.
  *
  * Aquí no se agrupa nada —el dataset ya publica una entrada por especie y caladero, con sus tallas
  * dentro— y la única decisión es cuál de los dos silencios se escribe cuando no hay cifra. Son dos y
  * no significan lo mismo: que se le preguntara a OBIS y no tuviera ningún registro en el recorte
  * (`SIN_REGISTROS`, que dice que nadie lo ha anotado ahí) y que **no se le preguntara**, porque el
- * nombre no resuelve en WoRMS y no hay taxón por el que consultar. Escribir el primero en el segundo
- * caso afirmaría sobre OBIS algo que no hemos comprobado, que es la misma clase de mentira que
- * publicar un cero.
+ * nombre no resuelve en WoRMS y no hay taxón por el que consultar (`NO_SE_PREGUNTO_A_OBIS`).
+ * Escribir el primero en el segundo caso afirmaría sobre OBIS algo que no hemos comprobado, que es
+ * la misma clase de mentira que publicar un cero.
+ *
+ * **Las dos frases son constantes de `textos.ts` y ninguna sale del dato**, que es la corrección del
+ * hallazgo H-5 de T-20: la del silencio sin consulta se imprimía tal cual desde `presenciaAusente`,
+ * y por ahí entraba una afirmación sobre lo que hay en el mar con toda la escalera en verde.
  */
 function caladeroDeLaFila(
   caladero: EspecieEnCaladero,
@@ -250,13 +359,58 @@ function caladeroDeLaFila(
       medida: entrada.medida,
       talla: textoDeTalla(entrada.talla, formato),
       literal: entrada.textoOriginal,
+      notas: entrada.notas.map((nota) => notaDeLaTalla(nota.marca, nota.texto)),
     })),
     presencia:
       caladero.presencia === null
-        ? (caladero.presenciaAusente ?? SIN_REGISTROS)
+        ? (caladero.seLePreguntoAObis ? SIN_REGISTROS : NO_SE_PREGUNTO_A_OBIS)
         : presenciaEscrita(caladero.presencia),
     hayCifra: caladero.presencia !== null,
   };
+}
+
+// =================================================================================================
+// Las filas del BOE que la tabla no puede publicar como especie
+// =================================================================================================
+
+/** Una fila de la norma sin binomio, lista para pintarse: su talla escrita y su motivo. */
+export interface FilaSinBinomioEscrita {
+  /** El nombre común con el que la norma la nombra, literal («Cigalas (colas)»). */
+  readonly nombreComun: string;
+  /** El caladero cuyo anexo la fija, escrito con su nombre y no con su identificador. */
+  readonly caladero: string;
+  /** La talla, escrita con el mismo criterio que las de la tabla. Es una cifra legal igual. */
+  readonly talla: TallaEscrita;
+  /** El literal de la celda del BOE, para poder comparar lo pintado con lo publicado. */
+  readonly literal: string;
+  /** Por qué no está en la tabla. Nunca un hueco mudo. */
+  readonly motivo: string;
+}
+
+/**
+ * Las filas del BOE que se quedan fuera de la tabla, listas para publicarse con su motivo.
+ *
+ * El nombre del caladero **se resuelve contra las especies del propio catálogo** y no se teclea: el
+ * dataset guarda aquí el identificador, y es el mismo que declaran las 86 filas. Si no lo conociera
+ * —lo que significaría que el catálogo y esta lista hablan de anexos distintos— se publica el
+ * identificador tal cual antes que inventarse un nombre.
+ */
+export function filasSinBinomio(
+  catalogo: CatalogoDeEspecies,
+  formato: FormatoDelCatalogo,
+): readonly FilaSinBinomioEscrita[] {
+  const nombres = new Map(
+    catalogo.especies.flatMap((especie) =>
+      especie.caladeros.map((caladero) => [caladero.id, caladero.nombre] as const),
+    ),
+  );
+  return catalogo.sinNombreCientifico.map((fila) => ({
+    nombreComun: fila.nombreComun,
+    caladero: enElCaladero(nombres.get(fila.caladero) ?? fila.caladero),
+    talla: textoDeTalla(fila.talla, formato),
+    literal: fila.textoOriginal,
+    motivo: fila.motivo,
+  }));
 }
 
 // =================================================================================================
