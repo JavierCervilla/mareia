@@ -82,7 +82,13 @@ export const SECCION_TALLAS: PageSection = {
 };
 
 /**
- * Política offline: **`cache-first`, o sea que sin cobertura la tabla se sigue leyendo.**
+ * Política offline: **`cache-first`, o sea que la copia guardada se sirve sin preguntar a la red.**
+ *
+ * Quién guarda la copia **no es este módulo**: es la caja de favoritos del core, que guarda la
+ * página de un puerto cuando el lector lo marca. Sin marcarlo no hay copia y sin red no hay tabla.
+ * Decirlo aquí no es una cautela: la versión anterior de este comentario y del aviso de la sección
+ * afirmaban que la tabla se guarda, a secas, y el pase adversario lo midió falso por defecto en las
+ * 153 páginas (hallazgo H-4). El aviso ya dice la condición; este comentario también.
  *
  * Es una decisión del humano **contra la recomendación del arquitecto**, que proponía ocultar la
  * sección sin red por lo mismo que la hace valiosa: una copia guardada no puede saber si la norma

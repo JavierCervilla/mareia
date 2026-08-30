@@ -90,15 +90,25 @@ export function avisoDeVigencia(estado: EstadoDeVigencia): string | null {
 /**
  * El aviso de lectura sin red, y es **duro a propósito**.
  *
- * El módulo declara `offline: cache-first`, o sea que sin cobertura esta tabla **se sigue leyendo**
- * —decisión del humano, frente a la recomendación de ocultarla— y lo que se lee puede ser una copia
- * de hace semanas. La sección no tiene JavaScript con el que enterarse de si hay red, así que el
- * aviso no se enciende: **está siempre**, escrito para que sea verdad en los dos casos. Es la única
- * forma honrada de sostener «se muestra sin red»: si la copia guardada no puede decir que es una
- * copia guardada, la fecha de comprobación de arriba se lee como si fuese de hoy.
+ * El módulo declara `offline: cache-first`, o sea que la copia guardada se sirve sin preguntar a la
+ * red —decisión del humano, frente a la recomendación de ocultar la tabla— y lo que se lee puede
+ * ser de hace semanas. La sección no tiene JavaScript con el que enterarse de si hay red ni de si
+ * este puerto está guardado, así que el aviso no se enciende: **está siempre**, escrito para que
+ * sea verdad en los dos casos.
+ *
+ * **La primera frase es condicional, y esa condición es la mitad del aviso.** La versión anterior
+ * empezaba diciendo «esta tabla se guarda para leerla sin cobertura» en las 153 páginas de puerto,
+ * y el pase adversario lo midió falso por defecto (hallazgo H-4): quien guarda la página de un
+ * puerto es la caja de favoritos del core —«un favorito guarda su página, sus constantes, el camino
+ * hasta ella y sus assets; nada más»—, así que sin marcar ese puerto no hay copia, y sin red no hay
+ * tabla sino el error de red del navegador. Se corrige **el texto y no el precacheo**: guardar 153
+ * páginas que nadie ha pedido es un coste que el modelo de favoritos rechaza a propósito. Una
+ * afirmación sobre lo que hace la aplicación tiene que ser verdad donde está escrita, y aquí está
+ * escrita en las 153.
  */
 export const AVISO_SIN_RED =
-  "Esta tabla se guarda para leerla sin cobertura, así que puedes estar viendo una copia de hace " +
+  "Si guardas este puerto, esta tabla se guarda con él y se puede leer sin cobertura; el resto " +
+  "del sitio no se guarda solo. Cuando la leas sin red puedes estar viendo una copia de hace " +
   "semanas: la fecha de comprobación de arriba es la del día en que se guardó, no la de hoy, y " +
   "desde entonces la norma ha podido cambiar o quedar derogada sin que esta página se entere. Una " +
   "talla derogada se lee igual de bien que la vigente.";

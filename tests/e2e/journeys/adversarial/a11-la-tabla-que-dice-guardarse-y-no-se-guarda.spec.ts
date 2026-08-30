@@ -29,55 +29,76 @@
  *
  * **Método.** El arnés de T-12: sitio construido, worker registrado, salida a internet cerrada de
  * verdad (`context.route`, no solo la bandera). Se hace lo que hace un lector normal —abrir el
- * puerto, leer, quedarse sin cobertura— **sin** guardar el puerto, porque el aviso no pide
+ * puerto, leer, quedarse sin cobertura— **sin** guardar el puerto, porque el aviso no pedía
  * guardarlo. La aserción es del comportamiento correcto, no del síntoma: o la tabla está sin red, o
  * la página no puede afirmar que se guarda.
+ *
+ * ---
+ *
+ * **ARREGLADO cambiando el texto, no el precacheo.** Precachear las 153 páginas es un coste que
+ * nadie ha pedido y el modelo de favoritos lo rechaza a propósito; lo que estaba mal era la frase.
+ * El aviso ahora empieza por su condición («Si guardas este puerto…»), así que este recorrido se
+ * queda como **gate permanente** y mide las dos mitades de esa condición, que es lo que impide que
+ * vuelva a colarse una afirmación sin comprobar:
+ *
+ * 1. la página **no** afirma sin condición que la tabla se guarda, y **sí** dice de qué depende;
+ * 2. cumplida la condición —el lector guarda el puerto— la tabla **está** sin cobertura.
+ *
+ * El caso que dio el hallazgo (no guardar y quedarse sin red) sigue midiéndose, pero ya como lo que
+ * es: el comportamiento que el aviso describe, no el que contradice.
  */
 
 import { expect, test } from "../../fixtures/qa-bundle";
 
-import { PAGINA, montarArnes, workerListo } from "./utiles-pwa";
+import { guardarPuerto, PAGINA, montarArnes, workerListo } from "./utiles-pwa";
 
-/** El aviso duro, tal y como lo hornea la sección. */
-const PROMESA = "Esta tabla se guarda para leerla sin cobertura";
+/** La afirmación incondicional que el hallazgo cazó: no puede volver a estar en la página. */
+const PROMESA_SIN_CONDICION = "Esta tabla se guarda para leerla sin cobertura";
+
+/** La condición de la que depende de verdad que la tabla esté sin red. */
+const CONDICION = "Si guardas este puerto";
 
 /** La sección de tallas, por su ancla del contrato `AppModule`. */
 const SECCION = "#tallas-minimas";
 
-test("A11 · la tabla que dice guardarse sola no está cuando se va la cobertura", async ({
+test("A11 · lo que la sección dice de guardarse tiene que ser lo que pasa al guardarla", async ({
   context,
   page,
   qa,
 }) => {
-  // TRINQUETE · Hallazgo ABIERTO (bundle cc0f8d87ecaa). Quítalo el día en que «se guarda» sea verdad
-  // en la página donde está escrito, o deje de estar escrito donde no lo es.
-  test.fail();
-
+  // TRINQUETE · Hallazgo ARREGLADO (bundle cc0f8d87ecaa). La cura es `AVISO_SIN_RED` en
+  // `packages/modules/regulations/src/textos.ts`: la frase empieza por su condición. Este
+  // recorrido se queda como gate permanente y ata el texto a la condición real: no se borra.
   const arnes = await montarArnes(context);
 
   qa.step("abrir la página de un puerto con cobertura y leer la sección de tallas");
   await page.goto(PAGINA);
   await expect(page.locator(SECCION)).toContainText("Talla mínima legal de captura");
 
-  qa.step("comprobar que la página promete DE VERDAD que la tabla se guarda");
-  // Sin esto la sonda mide su propio parche: si el aviso hubiese cambiado de texto, un rojo
-  // posterior no probaría nada sobre la promesa.
-  await expect(page.locator(SECCION)).toContainText(PROMESA);
+  qa.step("la sección NO puede afirmar sin condición que la tabla se guarda");
+  // Es la mitad del arreglo, y la que se pierde primero: cualquiera puede «simplificar» la frase
+  // en un commit de estilo y volver a publicar la afirmación falsa en las 153 páginas.
+  await expect(page.locator(SECCION)).not.toContainText(PROMESA_SIN_CONDICION);
+
+  qa.step("y sí tiene que decir de qué depende: guardar este puerto");
+  await expect(page.locator(SECCION)).toContainText(CONDICION);
 
   qa.step("dejar que el worker se instale, como en cualquier visita");
   await workerListo(page);
 
-  // NO se guarda el puerto: el aviso no lo pide, no lo menciona y no lo condiciona.
+  qa.step("cumplir la condición: el lector guarda el puerto");
+  await guardarPuerto(page);
+
   qa.step("se va la cobertura y el lector vuelve a la misma página");
   await arnes.cortar();
   await page.goto(PAGINA).catch(() => undefined);
 
-  // El comportamiento CORRECTO: la tabla que la página dijo tener guardada está. Da igual cómo se
-  // consiga —guardándola de verdad, o dejando de afirmarlo en las páginas donde no es cierto—, pero
-  // «se guarda» no puede ser falso en las 153 páginas de puerto por defecto.
+  // El comportamiento CORRECTO: cumplida la condición que la sección enuncia, la tabla está. Si un
+  // día el favorito dejara de guardar la página del puerto, la frase volvería a ser falsa —esta
+  // vez por el otro lado— y esto se pondría rojo.
   await expect(
     page.locator(SECCION),
-    "la página prometía que la tabla se guarda para leerla sin cobertura y sin cobertura no hay " +
-      "tabla: el worker solo guarda la página de un puerto si el lector lo marcó como favorito",
+    "la sección dice que si guardas este puerto la tabla se puede leer sin cobertura, y guardado " +
+      "el puerto y cortada la red no hay tabla",
   ).toContainText("Talla mínima legal de captura", { timeout: 15_000 });
 });

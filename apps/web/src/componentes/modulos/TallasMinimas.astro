@@ -15,9 +15,13 @@
  * 2. **De dónde salen**: la redacción en vigor con su fecha, la norma que la dio, el día en que una
  *    máquina comprobó que sigue viva (`verificadoEn`, que escribe el gate G2) y el enlace ELI. Van
  *    **antes** de la tabla porque califican todo lo que hay debajo.
- * 3. **Los dos avisos**: que solo el BOE es auténtico, y que sin cobertura esto puede ser una copia
- *    guardada hace semanas. El segundo está siempre escrito porque esta sección no tiene JavaScript
- *    con el que enterarse de si hay red — ver `OFFLINE_REGULATIONS`.
+ * 3. **Los avisos**: que solo el BOE es auténtico, y que si se ha guardado este puerto la tabla se
+ *    lee sin cobertura y entonces puede ser una copia de hace semanas. El segundo está siempre
+ *    escrito porque esta sección no tiene JavaScript con el que enterarse de si hay red ni de si
+ *    este puerto está guardado — ver `OFFLINE_REGULATIONS` y `AVISO_SIN_RED`, cuya primera frase es
+ *    condicional porque quien guarda la página es la caja de favoritos y solo si se le pide.
+ *    Cuando el sello de vigencia ha envejecido se suma un tercero, que es el que degrada la sección
+ *    (ver `vigencia.ts`).
  * 4. **La tabla**, con las cinco clases de talla y **cada nota pegada a su cifra**.
  * 5. **Las notas del anexo** enteras, y por qué van repetidas arriba.
  * 6. **La fuente**, con su licencia.

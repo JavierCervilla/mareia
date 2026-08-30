@@ -6,6 +6,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { AVISO_SIN_RED } from "../textos.ts";
 import {
   ATRIBUCIONES_REGULATIONS,
   ID_SECCION_TALLAS,
@@ -51,4 +52,22 @@ test("la atribución del BOE lleva su licencia real y el aviso de autenticidad d
   assert.match(boe.name, /solo el texto publicado en el BOE tiene carácter auténtico/iu);
   assert.equal(boe.license, "Reutilización de la legislación (art. 13 Ley 37/2007 y RD 1495/2011)");
   assert.equal(boe.url, "https://www.boe.es/eli/es/rd/1995/04/07/560");
+});
+
+test("el aviso de sin-red dice la CONDICIÓN, porque sin ella la frase es falsa en las 153 páginas", () => {
+  // El gate de H-4. El módulo declara `cache-first` pero no guarda nada: quien guarda la página de
+  // un puerto es la caja de favoritos del core, y solo la del puerto que el lector marque
+  // (`routes` vacío lo dice: este módulo no tiene ninguna URL propia que precachear). Un aviso que
+  // afirme «esta tabla se guarda» a secas es, por tanto, una afirmación sobre lo que hace la
+  // aplicación que es falsa por defecto en las 153 páginas donde va horneada.
+  assert.equal(OFFLINE_REGULATIONS.routes, undefined, "si el módulo precacheara rutas, revisa el aviso");
+  assert.match(AVISO_SIN_RED, /^Si guardas este puerto/u, "el aviso no empieza por su condición");
+  assert.ok(
+    !/^Esta tabla se guarda/u.test(AVISO_SIN_RED),
+    "el aviso vuelve a afirmar sin condición que la tabla se guarda (hallazgo H-4)",
+  );
+  // La segunda mitad es la advertencia y sigue siendo verdad: no se ha suavizado al corregir la
+  // primera. Es lo que sostiene que una copia guardada no puede saber si la norma sigue viva.
+  assert.match(AVISO_SIN_RED, /puedes estar viendo una copia de hace semanas/u);
+  assert.match(AVISO_SIN_RED, /Una talla derogada se lee igual de bien que la vigente/u);
 });
