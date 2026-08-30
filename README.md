@@ -33,7 +33,7 @@ fuente, su licencia y el código que lo calcula.
 | `packages/domain-core` | Dominio puro: motor de mareas, astronomía, solunar, coeficiente |
 | `packages/usecases` | Casos de uso + puertos (interfaces) |
 | `packages/module-contract` | Contrato `AppModule` que hace enchufables los módulos |
-| `packages/modules/*` | Módulos: `fishing` (solunar), `weather` (meteo marina), `regulations` (tallas mínimas del BOE), `protected-areas` (áreas marinas protegidas) |
+| `packages/modules/*` | Módulos: `fishing` (solunar), `weather` (meteo marina), `regulations` (tallas mínimas del BOE), `protected-areas` (áreas marinas protegidas), `species` (catálogo de especies) |
 | `packages/adapters` | Adapters: stations JSON, caché KV, Open-Meteo, AEMET |
 | `data/pipeline` | Pipeline Python offline: armónicos → JSON canónico por puerto |
 | `data/stations` | Dataset canónico de constituyentes por puerto (licencia por estación) |
@@ -66,6 +66,19 @@ usa) o si falta (usar un dato sin decir de dónde sale, que es la falta grave de
   módulo `protected-areas`: se publican **hechos derivados** —nombre oficial, figura, código y
   distancia aproximada— y **ninguna geometría**, que es justo lo que una licencia no declarada no
   deja redistribuir (ver `data/geo/README.md`).
+- Taxonomía de las especies:
+  [WoRMS · World Register of Marine Species](https://www.marinespecies.org/) — **CC-BY 4.0, con una
+  condición que da forma al módulo `species`**: sus términos de uso **no permiten redistribuir la
+  base de datos entera ni partes sustanciales de ella**. Lo que se publica es una **extracción
+  curada** —los 86 nombres que el BOE regula, con su `AphiaID`, su estado y el nombre aceptado hoy—
+  y no un espejo. Cuando WoRMS acepta un nombre distinto del que escribe la norma se publican **los
+  dos**: el del BOE es el que tiene consecuencia legal y no se sustituye nunca.
+- Presencia de especies:
+  [OBIS · Ocean Biodiversity Information System (COI-UNESCO)](https://obis.org/) — CC-BY 4.0. Se
+  publican **registros agregados por caladero**, no la base de registros, y **siempre con lo que la
+  cifra mide**: OBIS mide **esfuerzo de muestreo, no abundancia** (la dorada en toda la costa
+  gallega son 12 registros). Por eso ningún número de este portal se publica como abundancia, como
+  probabilidad de captura ni como mapa.
 
 **Evaluadas y no usadas.** Se nombran aquí, con su motivo, y no en la tabla de arriba: una
 atribución es una afirmación de procedencia, y acreditar una fuente de la que no sale ni un dato
