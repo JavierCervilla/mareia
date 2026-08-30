@@ -165,8 +165,16 @@ export function claveDeFila(especie: EspecieConTalla): string {
     .replace(/^-+|-+$/gu, "");
 }
 
-/** El nombre secundario, o el motivo por el que la norma no lo da. */
-function nombreSecundario(
+/**
+ * El nombre secundario, o el motivo por el que la norma no lo da.
+ *
+ * **Se exporta** desde T-23: la ficha de especie publica el nombre local canario en una retícula de
+ * campos fijos, donde una ausencia sin motivo sería un hueco en blanco. Decidir ahí por segunda vez
+ * qué hacer cuando faltan el valor y el motivo sería un segundo camino a la misma regla, y un
+ * segundo camino puede discrepar: éste **levanta**, y esa dureza es la que impide que una ausencia
+ * muda llegue a publicarse.
+ */
+export function nombreSecundario(
   valor: string | undefined,
   motivo: string | undefined,
   que: string,
