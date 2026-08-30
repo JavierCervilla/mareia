@@ -1,0 +1,205 @@
+/* =============================================================================
+ * La ficha de una especie — `/pesca/especies/<clave>/` (T-23).
+ *
+ * La importa el layout, como las demás hojas del sitio (design-brief, «dónde vive
+ * el CSS»: `.css` de verdad y no un `<style>` en la plantilla, porque el gate
+ * anti-slop escanea `.css` y no `.astro`).
+ *
+ * **La retícula se ve, y ése es todo el trabajo de esta hoja.** La página tiene
+ * siempre los mismos nueve campos y un campo vacío tiene que **notarse**: por eso
+ * cada uno es una fila con su filete y su rótulo en versalita a la izquierda, como
+ * las columnas de efemérides de un anuario. Un hueco así se ve desde lejos; el
+ * mismo hueco dentro de un párrafo corrido no se ve en absoluto, que es
+ * exactamente por lo que esta página no es un párrafo corrido.
+ *
+ * **Cero *juice*, y aquí no es una cuestión de gusto.** La ficha publica dos
+ * clases de número que aguantan mal el énfasis por motivos distintos: una talla
+ * legal —adornarla es pedirle crédito prestado a la ley— y un recuento de OBIS,
+ * que destacado se lee como abundancia. Ni animación, ni transición, ni sombra, ni
+ * esquina redondeada, ni degradado, ni mancha de terracota sobre ninguna cifra: el
+ * acento cálido cae **sólo** en los dos avisos, que es lo que el brief le reserva.
+ * Hay un gate (F4) que lo mide sobre esta hoja y sobre las 86 páginas.
+ *
+ * Ni un literal de color ni de fuente: todo sale de los tokens.
+ * ========================================================================== */
+
+.ficha {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Una fila de la retícula. El filete superior la separa de la anterior y es lo
+   que hace que un campo vacío se lea como una fila con respuesta corta y no como
+   el final de la página. */
+.ficha__campo {
+  display: grid;
+  gap: 2px 24px;
+  border-top: 1px solid var(--m-rule-soft);
+  padding: 12px 0;
+}
+
+/* En escritorio, rótulo a la izquierda y valor a la derecha: la composición de
+   una tabla de efemérides. En móvil se apilan, porque una columna de rótulos en
+   versalita a 360 px deja al valor sin sitio para una nota legal entera. */
+@media (min-width: 700px) {
+  .ficha__campo {
+    grid-template-columns: 15rem 1fr;
+  }
+}
+
+.ficha__rotulo {
+  font-weight: 400;
+}
+
+.ficha__valor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 68ch;
+}
+
+/* El nombre de la norma abre la página. Cursiva porque es un binomio, y en el
+   cuerpo de display del portal porque es el dato con consecuencia legal de esta
+   página — la jerarquía la marca la tipografía, no el orden de la retícula, que
+   es fijo. */
+.ficha__nombre-boe {
+  font-style: italic;
+}
+
+.ficha__dato {
+  font-size: var(--m-text-body);
+}
+
+/* Los binomios van en cursiva, los dos y en el mismo cuerpo: son dos nombres del
+   mismo rango —el de la ley y el de la ciencia—, no uno bueno y uno viejo. */
+.ficha__binomio {
+  font-style: italic;
+}
+
+/* Un hueco de la retícula: dice POR QUÉ está vacío, y se compone como se componen
+   las ausencias en el resto del portal —cursiva y cuerpo pequeño—. No lleva color
+   ni icono: no es un error, es una respuesta. */
+.ficha__hueco {
+  font-size: var(--m-text-meta);
+  font-style: italic;
+  color: var(--m-sub);
+}
+
+.ficha__nota-de-campo,
+.ficha__literal,
+.ficha__medida,
+.ficha__presencia,
+.ficha__espacio {
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+}
+
+.ficha__enlace {
+  font-size: var(--m-text-meta);
+}
+
+.ficha__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ficha__caladero {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ficha__nombre-caladero {
+  font-size: var(--m-text-body);
+}
+
+/* El bloque de UNA talla: la cifra, el literal del BOE y la nota entera. Van
+   juntos y con su propio sangrado porque son una unidad —la nota es parte de la
+   cifra, no un comentario sobre ella— y porque es el bloque que mide el gate F1. */
+.ficha__talla {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-inline-start: 1px solid var(--m-rule-soft);
+  padding-inline-start: 10px;
+}
+
+/* `tabular-nums` SOLO donde hay una magnitud, y sin peso ni color: una cifra legal
+   no gana por estar destacada, gana por estar completa. Sin `nowrap`: la cifra y
+   su unidad ya van pegadas con un espacio duro desde `regulations`, y el `nowrap`
+   de la celda es lo que desbordaba la página en los 80 puertos mediterráneos. */
+.ficha__cifra {
+  font-size: var(--m-text-lead);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Una frase alineada como número se lee como si lo fuera, así que la ausencia de
+   cifra no lleva `tabular-nums`: la norma no fija una talla, y eso no es un dato
+   numérico. */
+.ficha__sin-cifra {
+  font-size: var(--m-text-body);
+  font-style: italic;
+}
+
+/* La nota va en la misma tinta que la cifra y no un peldaño por debajo: no es un
+   comentario sobre el número, es lo que lo cambia —36 cm pasan a 44 en las
+   divisiones 8a y 8b—. Sin color de aviso ni fondo: una excepción legal se lee, no
+   se señala. */
+.ficha__nota-legal {
+  font-size: var(--m-text-meta);
+  color: var(--m-ink);
+}
+
+/* Los dos avisos de la página —que aquí no se puntúa nada y que esto no autoriza a
+   pescar— con el mismo filete de terracota que los avisos del puerto. Es el ÚNICO
+   sitio con color de la ficha, y no cae sobre ninguna cifra. */
+.ficha__aviso {
+  border-inline-start: 2px solid var(--m-terra);
+  padding-inline-start: 12px;
+  font-size: var(--m-text-body);
+}
+
+/* La figura de la foto. Sin marco, sin sombra y sin esquina redondeada: es una
+   ilustración citada, no una tarjeta. El ancho se acota para que una foto vertical
+   de Commons no empuje el resto de la retícula fuera de la pantalla. */
+.ficha__figura {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.ficha__foto {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+}
+
+/* El crédito, pegado a la imagen y dentro de su misma figura. Nunca en un pie
+   global de la página: hay seis licencias distintas en la muestra de 12 ficheros
+   del plan, así que un pie único sería falso para cinco de ellas. */
+.ficha__credito {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 62ch;
+  font-size: var(--m-text-meta);
+}
+
+/* Los binomios son palabras largas sin espacios y la columna del valor es estrecha
+   en un móvil: la misma cura que en la tabla del catálogo (`anywhere`, no
+   `break-word`: sólo aquélla reduce el tamaño mínimo de contenido). */
+.ficha__valor {
+  overflow-wrap: anywhere;
+}
+
+/* En papel se imprime entera, como la tabla de tallas: llevarse la talla mínima al
+   muelle es exactamente el uso que un almanaque tiene en un barco. Lo único que se
+   va es la foto, que en tinta no aporta y se come la página. */
+@media print {
+  .ficha__figura {
+    display: none;
+  }
+}

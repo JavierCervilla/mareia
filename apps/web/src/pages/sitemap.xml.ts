@@ -14,9 +14,11 @@ import type { APIRoute } from "astro";
 
 import { cargarCatalogo, puertosDeRegion } from "../datos/catalogo.ts";
 import { FECHA_DE_BUILD } from "../datos/fecha-build.ts";
+import { cargarCatalogoDeEspecies } from "../modulos/especies/catalogo.ts";
 import {
   RUTA_ESPECIES,
   RUTA_MAREAS,
+  rutaFichaDeEspecie,
   rutaProvincia,
   rutaPuerto,
   rutaRegion,
@@ -49,6 +51,17 @@ async function entradasDelSitio(): Promise<readonly Entrada[]> {
     // puerto: su contenido sólo cambia cuando cambia la norma o cuando se vuelve a preguntar a
     // WoRMS y a OBIS, no cada vez que se reconstruye el sitio.
     { ruta: RUTA_ESPECIES, frecuencia: "weekly", prioridad: "0.6" },
+    // Y las 86 fichas de especie (T-23), con la misma frecuencia y por el mismo motivo: su
+    // contenido cambia cuando cambia la norma o cuando se vuelve a preguntar a las fuentes, no cada
+    // vez que se reconstruye el sitio. Se enumeran del catálogo y no de una lista tecleada: si el
+    // BOE gana o pierde una especie, el sitemap cambia solo.
+    ...(await cargarCatalogoDeEspecies()).especies.map(
+      (especie): Entrada => ({
+        ruta: rutaFichaDeEspecie(especie.clave),
+        frecuencia: "weekly",
+        prioridad: "0.5",
+      }),
+    ),
   ];
   for (const region of regiones) {
     indices.push({ ruta: rutaRegion(region.slug), frecuencia: "weekly", prioridad: "0.5" });
