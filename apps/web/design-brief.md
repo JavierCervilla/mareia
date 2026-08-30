@@ -429,6 +429,81 @@ filtrado**.
   inventa un índice de una sola entrada para disimularlo. El día que cuelgue algo más de `/pesca/`,
   ese índice tendrá contenido y entrará con él.
 
+## 7 octies. Ampliación T-23 — la retícula fija de la ficha de especie, y el hueco como dato
+
+Esta sección **amplía el brief** (no abre otro), como las de T-19, T-20 y T-21: llegan las **86**
+páginas de `/pesca/especies/<clave>/`, una por especie del BOE, y con ellas la primera superficie del
+portal cuyo problema de diseño **no es cómo se enseña un dato sino cómo se enseña que falta**.
+
+- **La retícula es fija, y esa es toda la decisión.** Nueve campos, siempre los mismos y siempre en
+  el mismo orden —nombre del BOE · nombre común · nombre local canario · taxón aceptado y su estado ·
+  a qué alcanza la talla · talla por caladero con su nota entera · registros de OBIS con su sesgo ·
+  espacios protegidos de sus caladeros · foto con su licencia y su autor—, **también cuando no hay
+  nada que poner en uno**. Un pokédex ayuda a la honradez precisamente por eso: un campo vacío es
+  **visible** y dice «esto no lo sabemos». Un párrafo libre esconde el hueco, porque no se ve lo que
+  no se escribió. Tipográficamente se resuelve como las columnas de efemérides de §7 (ref. 2): rótulo
+  en versalita a la izquierda, valor a la derecha, un filete fino por fila. Así un hueco se ve desde
+  lejos, que es el requisito.
+- **Ningún hueco se deja en blanco ni se omite la fila: se rotula con su motivo.** Y los motivos
+  distinguen cosas que no son la misma: «la norma deja vacía la celda del nombre local» (3 filas del
+  Anexo III) no es «el Anexo III no nombra a esta especie» (55 de las 86), y «esta especie no tiene
+  foto en Wikidata» no es «el dataset de fotos todavía no se ha ingerido». El hueco se compone como
+  las ausencias del resto del portal —cursiva, cuerpo pequeño, `--m-sub`— y **sin color ni icono**: no
+  es un error, es una respuesta. Lo mide el gate **F3** sobre las 86 páginas, campo a campo.
+- **El orden de la retícula NO es el orden de importancia, y la jerarquía la marca la tipografía.**
+  La jerarquía de §1 sigue en pie —la talla mínima es *crítica*, el taxón y el rango son
+  *contextuales*, los registros de OBIS y los espacios protegidos son *consultables*— pero **no se
+  expresa reordenando**: una retícula que cambia de orden según lo que cada ficha tenga deja de ser
+  una retícula, y entonces el hueco ya no se delata por comparación con las demás fichas. Se expresa
+  con el cuerpo: el nombre de la norma abre en `--m-text-display` porque es el que tiene consecuencia
+  legal, la talla va en `--m-text-lead` con `tabular-nums`, y el resto baja a cuerpo de meta.
+- **Cero *juice*, y aquí es el límite duro de la trayectoria.** Una talla mínima **no parpadea, no
+  cuenta hacia arriba y no tiene halo**. El *juice* sobre un dato con consecuencia jurídica es
+  exactamente el mecanismo por el que una interfaz consigue que le crean más de lo que merece, y lo
+  que merece está escrito al lado con su fecha. Ni barras de 0-100, ni estrellas, ni rareza, ni
+  dificultad, ni puntos, ni «mejor cebo», ni «temporada ideal», ni descripción narrativa de cosecha
+  propia, ni ninguna ordenación que sugiera «mejores especies» —la única lista ordenada de una ficha
+  son las migas—. La página **lo dice de sí misma** en su cabecera, porque quien llega a una ficha de
+  especie viene acostumbrado a que le puntúen el animal y aquí eso es una decisión, no una carencia.
+  El gate **F4** lo mide **sobre el artefacto y no sobre la intención**: marcado (`<progress>`,
+  `<meter>`, `aria-valuenow`, `<canvas>`), vocabulario, listas ordenadas, y sobre la hoja la ausencia
+  de `@keyframes`/`animation`/`transition`/`box-shadow`/`border-radius`/degradados, la terracota sólo
+  en el aviso y `tabular-nums` sólo en la cifra.
+- **La nota legal va pegada a la cifra por tercera vez en el portal, y el gate nace con la página.**
+  T-19 la pegó en las **153** páginas de puerto; T-20 la reintrodujo como defecto en el catálogo y
+  hubo que arreglarla tras un pase adversario. La ficha es la **tercera** superficie de la misma
+  cifra, así que **no espera a que un adversario lo encuentre**: el gate **F1** exige el **texto
+  entero** de la nota —no la marca— dentro del `<div>` de su cifra, y está desde el primer commit de
+  la página.
+- **La foto lleva su crédito dentro de su misma `<figure>`, nunca en un pie global.** No es una
+  preferencia de composición: en la **muestra de 12 ficheros** que midió el plan —**una muestra, no un
+  censo de las 86**— salieron **seis licencias distintas** (CC BY-SA 4.0, dominio público, CC BY-SA
+  3.0, CC BY-SA 3.0 de, CC BY 4.0, CC BY 3.0), así que un «fotos de Wikimedia Commons» al pie sería
+  falso para cinco de ellas. En la figura van autor, licencia con enlace a su texto, enlace al fichero
+  en Commons, **quién identificó el taxón** (Wikidata `P18`, que no somos nosotros) y el aviso de que
+  **una foto no sirve para identificar una captura**. Sin marco, sin sombra y sin esquina redondeada:
+  es una ilustración citada, no una tarjeta. Lo mide el gate **F2**.
+- **Los espacios protegidos se cuentan por caladero, y la fila empieza diciendo que RAMPE no habla de
+  especies.** La fuente publica espacios y no dice qué especie está protegida en cada uno; el único
+  vínculo que se puede sostener es el caladero donde se aplica la talla. Así que lo que se publica es
+  un recuento de **puertos y espacios** —del caladero cantábrico-noroeste-golfo de Cádiz, **44 de 47**
+  puertos con algún espacio a menos de 30 km sobre **7** espacios distintos; del mediterráneo, **73
+  de 80** sobre **36**; del canario, **26 de 26** sobre **37**— y el aviso de T-21 va literal y del
+  módulo que lo escribió: esto dice dónde **no** se puede, nunca dónde sí.
+- **La URL lleva el digest del literal del BOE, y se paga a la vista.** El slug es la `clave` de T-20
+  (`thunnus-thynnus-4b2118`), que no es bonita y no se recorta bien de la barra: a cambio, `Thunnus
+  thynnus` y `Thunnus Thynnus` son **dos fichas**, que es lo que son en la norma. Un slug legible las
+  colapsaría en una y una talla legal —los **6,4 kg** del Anexo III— desaparecería de la URL sin que
+  nada se pusiera rojo. Cada ficha enlaza a su hermana, porque el aviso que las cruza no se puede
+  pulsar en el catálogo.
+- **Lo que pesa, medido.** Las 86 fichas ocupan **828.580 B** de HTML (media **9.634 B**, de 8.926 a
+  10.852; la de la lubina, **3.454 B** comprimidos), la hoja **6.873 B**, y el `dist/` pasa de 193 a
+  **279** páginas. **Ni un byte de JavaScript**: la ficha conserva el cero-JS del portal, porque no
+  tiene ningún estado que animar.
+- **En papel se imprime entera menos la foto.** Es la misma decisión que la tabla de tallas de §7
+  quinquies —llevarse la talla mínima al muelle es el uso que un almanaque tiene en un barco— y la
+  foto se va porque en tinta no aporta y se come la página.
+
 ## 8. Cómo se audita
 
 ```bash
