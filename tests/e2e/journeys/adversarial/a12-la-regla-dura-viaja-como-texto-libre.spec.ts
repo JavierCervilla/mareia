@@ -83,11 +83,9 @@ const SUENA_A_PERMISO = [/no hay veda/iu, /no hay ninguna limitación/iu];
 test("A12 · el aviso de la fuente se publica en las 153 páginas sin que nadie lea lo que dice", async ({
   qa,
 }) => {
-  // HALLAZGO ABIERTO. El `test.fail()` está para que CI no se quede en rojo mientras el defecto
-  // vive; el día que algo compruebe lo que dice el aviso, Playwright dirá «expected to fail, but
-  // passed» y habrá que quitarlo. El recorrido se queda entonces como gate permanente.
-  test.fail();
-
+  // ARREGLADO · TRINQUETE. La regla dura es `NO_AUTORIZA_A_PESCAR`, una constante del módulo, y la
+  // sección ya no pinta `fuente.aviso`. Sin el `test.fail()` este recorrido es el gate permanente
+  // del hallazgo: se pone rojo el día que alguien vuelva a llevar la frase al dato.
   qa.step("el derivado publicado trae el aviso bueno: si no, un rojo posterior no probaría nada");
   const publicado = derivadoPublicado();
   expect(publicado.fuente.aviso, "INCONCLUSO: el derivado ya no trae el aviso").toContain(
@@ -128,9 +126,8 @@ test("A12 · el aviso de la fuente se publica en las 153 páginas sin que nadie 
 test("A12 · y en los 10 puertos sin áreas el motivo es texto libre: sólo se exige que no esté vacío", async ({
   qa,
 }) => {
-  // HALLAZGO ABIERTO. Mismo trinquete que el cuerpo de arriba.
-  test.fail();
-
+  // ARREGLADO · TRINQUETE. Igual que el cuerpo de arriba: el «hasta dónde hemos mirado» de los 10
+  // puertos vacíos es `hastaDondeSeHaMirado`, del módulo, y `motivo` ya no llega al HTML.
   qa.step("Valencia es uno de los diez puertos que no listan ninguna área");
   const publicado = derivadoPublicado();
   const valencia = puertoDe(publicado, "valencia");

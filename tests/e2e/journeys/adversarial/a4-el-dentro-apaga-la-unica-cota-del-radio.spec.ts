@@ -51,9 +51,9 @@ const AREA = "555552484";
 test("A4 · una distancia publicada no puede pasar del radio que promete el título de la sección", async ({
   qa,
 }) => {
-  // HALLAZGO ABIERTO. El `test.fail()` mantiene CI en verde mientras el defecto vive.
-  test.fail();
-
+  // ARREGLADO · TRINQUETE. `proximidadDeArea` recibe el radio que publica el título: si el puerto
+  // cae dentro no se publica cota, y si está fuera y la cota pasa del radio levanta y rompe el
+  // build. Sin el `test.fail()` este recorrido es el gate permanente del hallazgo.
   qa.step("de partida: el criterio son 30 km y esa área está a 19,2");
   const publicado = derivadoPublicado();
   expect(publicado.criterio.radioKm, "INCONCLUSO: ha cambiado el radio").toBe(30);

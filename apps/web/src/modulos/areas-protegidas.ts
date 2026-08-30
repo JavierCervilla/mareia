@@ -161,9 +161,10 @@ function leerFuente(valor: unknown): FuenteDeAreas {
     organismo: texto(crudo, "organismo", ruta),
     url: texto(crudo, "url", ruta),
     paginaUrl: texto(crudo, "paginaUrl", ruta),
-    // La licencia y el aviso son los dos campos por los que esta sección se puede publicar. Si
-    // faltara cualquiera de los dos, se rompe el build antes que publicar la lista sin ellos: sin
-    // el aviso, una lista de áreas se lee como un mapa de dónde sí se puede.
+    // La licencia se publica: es un hecho sobre la fuente —aquí, un hueco de origen— y va con su
+    // atribución. El aviso ya NO llega a la página (la regla dura es `NO_AUTORIZA_A_PESCAR`, del
+    // módulo, desde el hallazgo H-1), pero se sigue exigiendo aquí: es el registro de lo que la
+    // ingesta escribió, y un derivado que deje de traerlo es un derivado que hay que mirar.
     licencia: texto(crudo, "licencia", ruta),
     aviso: texto(crudo, "aviso", ruta),
     descargadoEn: texto(crudo, "descargadoEn", ruta),

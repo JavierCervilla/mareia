@@ -14,13 +14,15 @@
  *    cada uno, y que esto **no dice dónde se puede pescar**. Una lista de nombres sin ese
  *    encabezado se lee como un mapa, y un mapa de zonas protegidas se lee por descarte como un mapa
  *    de zonas libres.
- * 2. **El aviso de la fuente**, que es la regla dura de esta trayectoria y viaja firmado dentro del
- *    dataset (`fuente.aviso`): *que no haya un área protegida cerca no autoriza a pescar*. Va
- *    **antes** de la lista, porque califica todo lo que hay debajo, y se imprime en las 153
- *    páginas: también —sobre todo— en las 10 que no listan ninguna área.
+ * 2. **La regla dura de esta trayectoria** (`NO_AUTORIZA_A_PESCAR`): *que no haya un área protegida
+ *    cerca no autoriza a pescar*. Va **antes** de la lista, porque califica todo lo que hay debajo,
+ *    y se imprime en las 153 páginas: también —sobre todo— en las 10 que no listan ninguna área.
+ *    Sale del módulo y **no** del dato, que es la corrección del hallazgo H-1: mientras esa frase
+ *    fue `fuente.aviso`, un JSON editado la sustituía por un permiso en las 153 páginas con toda la
+ *    escalera en verde.
  * 3. **Las áreas**, de la más cercana a la más lejana, con nombre oficial, figura glosada y
- *    distancia como cota. O, si no hay ninguna, **la frase que lo dice** y el motivo del dato, que
- *    es hasta dónde se ha mirado.
+ *    distancia como cota —o, si el puerto cae dentro, el hecho en vez de la cota (H-3)—. O, si no
+ *    hay ninguna, **la frase que lo dice** y hasta dónde se ha mirado.
  * 4. **Cómo se mide** esa distancia y **qué son las siglas**: las dos cosas que hacen que lo de
  *    arriba se pueda leer sin creerle de más.
  * 5. **El aviso de lectura sin red** y **la fuente con su licencia**, que aquí es un hueco
@@ -47,9 +49,11 @@ import {
   COLUMNA_FIGURA,
   COMO_SE_MIDE_LA_DISTANCIA,
   filasDeAreas,
+  hastaDondeSeHaMirado,
   ID_SECCION_AREAS,
   kmDelRadio,
   ningunaCerca,
+  NO_AUTORIZA_A_PESCAR,
   QUE_ES_ESTO,
   QUE_SON_LAS_SIGLAS,
   ROTULO_CODIGO,
@@ -67,10 +71,11 @@ interface Props {
 
 const { contexto } = Astro.props;
 
-const { fuente, criterio, areas, motivo } = await cargarAreasDelPuerto(contexto);
+const { fuente, criterio, areas } = await cargarAreasDelPuerto(contexto);
 // `filasDeAreas` no ordena: comprueba que el dato venga por proximidad y levanta si no. Ordenar
-// aquí taparía un fallo del derivado que nadie volvería a ver.
-const filas = filasDeAreas(areas);
+// aquí taparía un fallo del derivado que nadie volvería a ver. Y recibe el radio porque es el que
+// el título promete: una fila que lo contradijera levanta aquí, antes de publicarse (H-3).
+const filas = filasDeAreas(areas, criterio.radioKm);
 ---
 
 {/*
@@ -85,10 +90,11 @@ const filas = filasDeAreas(areas);
 
 {/*
   LA REGLA DURA DE T-21, y por eso va aquí arriba y en las 153 páginas: en ningún sitio, ni por
-  omisión, puede leerse que se pueda pescar. El texto no se copia en el módulo —viaja firmado con
-  el dato, en `fuente.aviso`— porque dos ejemplares del mismo aviso acaban diciendo cosas distintas.
+  omisión, puede leerse que se pueda pescar. Sale de una CONSTANTE DEL MÓDULO y no de `fuente.aviso`
+  —que es lo que hacía hasta el pase adversario— porque una frase que viaja en el dato la reescribe
+  cualquiera que edite el JSON, y lo único que la miraba eran ocho expresiones regulares (H-1).
 */}
-<p class="areas__aviso"><strong>{fuente.aviso}</strong></p>
+<p class="areas__aviso"><strong>{NO_AUTORIZA_A_PESCAR}</strong></p>
 
 {
   filas.length > 0 ? (
@@ -125,10 +131,15 @@ const filas = filasDeAreas(areas);
                 {fila.glosa !== null && <span class="tabla-areas__glosa">{fila.glosa}</span>}
               </td>
               <td>
-                <span class="tabla-areas__distancia">{fila.proximidad.texto}</span>
+                {fila.proximidad.texto !== null && (
+                  <span class="tabla-areas__distancia">{fila.proximidad.texto}</span>
+                )}
                 {/*
                   «Dentro» es un hecho distinto y más fuerte que una distancia corta, así que se
-                  dice aparte y con sus palabras en vez de disolverse en un «a menos de 1 km».
+                  dice aparte y con sus palabras en vez de disolverse en un «a menos de 1 km». Y
+                  cuando lo dice, **sustituye** a la cota en vez de acompañarla: la distancia al
+                  borde de un área en la que ya estás no se puede leer bajo un rótulo que promete un
+                  radio sin contradecirlo (H-3).
                 */}
                 {fila.proximidad.explicacion !== null && (
                   <span class="tabla-areas__dentro">{fila.proximidad.explicacion}</span>
@@ -145,14 +156,16 @@ const filas = filasDeAreas(areas);
     <>
       {/*
         LOS 10 PUERTOS SIN NINGUNA ÁREA. La sección no desaparece: una sección que desaparece se lee
-        como «no hay nada que saber», y ésta dice lo que sabemos —ninguna— y, con el motivo que
-        viaja en el propio dato, hasta dónde hemos mirado y que el límite es una decisión nuestra.
-        Lo mide el gate P3 sobre el `dist/`.
+        como «no hay nada que saber», y ésta dice lo que sabemos —ninguna— y hasta dónde hemos
+        mirado, que es que el límite es una decisión nuestra. Las dos frases son del módulo: la
+        segunda era `motivo`, texto libre del derivado, hasta que el pase adversario plantó ahí «no
+        hay ninguna limitación que consultar» y se publicó tal cual (H-1). Lo mide P3 sobre el
+        `dist/`.
       */}
       <p class="areas__ninguna" data-sin-areas="true">
         {ningunaCerca(criterio.radioKm)}
       </p>
-      <p class="datos__nota">{motivo}</p>
+      <p class="datos__nota">{hastaDondeSeHaMirado(criterio.radioKm)}</p>
     </>
   )
 }

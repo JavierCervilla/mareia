@@ -15,15 +15,25 @@
  *    la única jerarquía defendible es lo que tienes más cerca. Si el dato llegara desordenado,
  *    `filasDeAreas` **levanta** en vez de ordenarlo en silencio, porque ordenarlo taparía un fallo
  *    del pipeline que nadie volvería a ver.
+ * 3. **Ninguna fila puede contradecir el título de su propia sección.** Por eso `filasDeAreas`
+ *    recibe el `radioKm` que el título publica: una cota mayor que el radio levanta, y el caso en
+ *    que el puerto cae dentro del área no publica cota ninguna. Es la corrección del hallazgo H-3
+ *    del pase adversario, que sacó «a menos de 480 km» debajo de un rótulo que promete 30.
  */
 
-import { DENTRO_DEL_AREA, glosaDeTipo } from "./textos.ts";
+import { DENTRO_DEL_AREA, glosaDeTipo, kmDelRadio } from "./textos.ts";
 import type { AreaProtegida, TipoDeArea } from "./tipos.ts";
 
 /** Qué de cerca está el área, ya escrito. */
 export interface ProximidadEscrita {
-  /** La cota: «a menos de 9 km». Siempre en kilómetros enteros y siempre con la desigualdad. */
-  readonly texto: string;
+  /**
+   * La cota: «a menos de 9 km». Siempre en kilómetros enteros y siempre con la desigualdad.
+   *
+   * **`null` cuando el puerto cae dentro del área**, que es la corrección del hallazgo H-3: ahí la
+   * distancia al borde no dice lo lejos que está el área sino lo metido que está el puerto, y bajo
+   * un título que promete un radio se lee como su contrario. Ver `proximidadDeArea`.
+   */
+  readonly texto: string | null;
   /** `true` si el puerto cae dentro del área. Lo consume la plantilla para marcarlo aparte. */
   readonly dentro: boolean;
   /** Lo que hay que decir de más cuando cae dentro; `null` cuando no. */
@@ -70,13 +80,44 @@ export function distanciaEscrita(distanciaAproxKm: number): string {
   return `a menos de ${Math.max(1, Math.ceil(distanciaAproxKm))} km`;
 }
 
-/** La proximidad de un área, con el «dentro» dicho aparte y no disuelto en la distancia. */
-export function proximidadDeArea(area: AreaProtegida): ProximidadEscrita {
-  return {
-    texto: distanciaEscrita(area.distanciaAproxKm),
-    dentro: area.dentro,
-    explicacion: area.dentro ? DENTRO_DEL_AREA : null,
-  };
+/**
+ * La proximidad de un área, con el «dentro» dicho aparte y no disuelto en la distancia.
+ *
+ * **Ninguna fila puede publicar una cota que contradiga el título de la sección**, y esto es la
+ * corrección del hallazgo H-3. El título dice «Áreas marinas protegidas a menos de N km» con el
+ * mismo `radioKm` que llega aquí; el adversario puso una fila de Alicante a 480 km con
+ * `dentro: true` y la página publicó *«Reserva marina de la Isla de Tabarca · a menos de 480 km ·
+ * El punto de este puerto cae dentro de esta área»* bajo el rótulo de 30 km, con toda la escalera
+ * en verde: del lado del pipeline `dentro` apagaba la única comprobación numérica que ataba la
+ * distancia al radio, y del lado de la web no había segunda opinión.
+ *
+ * Se separan los dos casos porque son dos preguntas distintas:
+ *
+ * * **El puerto cae dentro** → no se publica cota, sólo el hecho. Es el caso legítimo que documenta
+ *   `criterio.dentro` —el puerto muy metido en un área muy grande, cuyo borde queda más allá del
+ *   radio—, y ahí la distancia al borde mide lo metido que está el puerto, no lo lejos que está el
+ *   área: escribirla bajo un título que promete un radio la convierte en su contrario. Hoy las 10
+ *   relaciones con `dentro` están todas a 0,1 km o menos, así que la cota que se deja de publicar
+ *   decía «a menos de 1 km» y no añadía nada al hecho que la sustituye.
+ * * **El puerto está fuera** → la cota, y **levanta** si pasa del radio. No es una comprobación de
+ *   más sobre el gate del pipeline: es la que no se puede apagar. Publicar «a menos de 480 km»
+ *   debajo de «a menos de 30 km» es media advertencia, y media advertencia es peor que ninguna;
+ *   romper el build es fail-safe, porque producción sigue sirviendo lo anterior.
+ */
+export function proximidadDeArea(area: AreaProtegida, radioKm: number): ProximidadEscrita {
+  if (area.dentro) {
+    return { texto: null, dentro: true, explicacion: DENTRO_DEL_AREA };
+  }
+  const texto = distanciaEscrita(area.distanciaAproxKm);
+  const cota = Math.max(1, Math.ceil(area.distanciaAproxKm));
+  if (cota > kmDelRadio(radioKm)) {
+    throw new Error(
+      `${area.codigo} se publicaría «${texto}» bajo un título que promete a menos de ` +
+        `${kmDelRadio(radioKm)} km, y el puerto no cae dentro del área: la fila contradiría al ` +
+        `rótulo que la encabeza.`,
+    );
+  }
+  return { texto, dentro: false, explicacion: null };
 }
 
 /**
@@ -86,7 +127,10 @@ export function proximidadDeArea(area: AreaProtegida): ProximidadEscrita {
  * leer la lista como si la primera fuese la más cercana cuando no lo es— y dos áreas con el mismo
  * código, que dejarían dos filas con la misma clave y una advertencia duplicada o perdida.
  */
-export function filasDeAreas(areas: readonly AreaProtegida[]): readonly FilaDeArea[] {
+export function filasDeAreas(
+  areas: readonly AreaProtegida[],
+  radioKm: number,
+): readonly FilaDeArea[] {
   const vistos = new Set<string>();
   let anterior = Number.NEGATIVE_INFINITY;
   return areas.map((area) => {
@@ -108,7 +152,7 @@ export function filasDeAreas(areas: readonly AreaProtegida[]): readonly FilaDeAr
       tipo: area.tipo,
       glosa: glosaDeTipo(area.tipo),
       codigo: area.codigo,
-      proximidad: proximidadDeArea(area),
+      proximidad: proximidadDeArea(area, radioKm),
     };
   });
 }

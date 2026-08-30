@@ -19,9 +19,13 @@ import { fileURLToPath } from "node:url";
 
 import {
   AVISO_SIN_RED,
+  DENTRO_DEL_AREA,
   distanciaEscrita,
+  hastaDondeSeHaMirado,
   ID_SECCION_AREAS,
+  kmDelRadio,
   ningunaCerca,
+  NO_AUTORIZA_A_PESCAR,
   QUE_ES_ESTO,
 } from "@mareia/module-protected-areas";
 import type { AreaProtegida } from "@mareia/module-protected-areas";
@@ -101,6 +105,7 @@ test("P3 · los 10 puertos sin ninguna área publican la frase y hasta dónde se
   }
   const { criterio, resumen } = await cargarResumenDeAreas();
   const frase = ningunaCerca(criterio.radioKm);
+  const hastaDonde = hastaDondeSeHaMirado(criterio.radioKm);
   const mudos: string[] = [];
   const sinArea: string[] = [];
   for (const { slug, seccion, areas, motivo } of await paginasConAreas()) {
@@ -108,12 +113,16 @@ test("P3 · los 10 puertos sin ninguna área publican la frase y hasta dónde se
     sinArea.push(slug);
     const leido = textoDe(seccion);
     // Las dos mitades, y hacen falta las dos. La frase dice **lo que sabemos** («ninguna a menos de
-    // 30 km»); el motivo dice **hasta dónde hemos mirado** y que el límite es una decisión nuestra
+    // 30 km»); la segunda dice **hasta dónde hemos mirado** y que el límite es una decisión nuestra
     // y no una ausencia de la fuente. Con la frase sola, quien lee no sabe si el radio es 3 km o
-    // 300; con el motivo solo, la respuesta se pierde dentro de un párrafo de método.
+    // 300; con la otra sola, la respuesta se pierde dentro de un párrafo de método.
     if (!leido.includes(frase)) mudos.push(`${slug}: no publica «${frase}» · «${leido}»`);
+    // Las dos salen del MÓDULO desde el hallazgo H-1. `motivo` sigue viajando en el derivado —es su
+    // registro y sus gates lo exigen— pero ya no es lo que se lee: mientras lo fue, un motivo
+    // plantado convertía «no hay áreas» en «no hay nada que consultar» en las 10 páginas que peor
+    // se leen, con toda la escalera en verde.
     assert.ok(motivo !== null, `${slug}: el derivado no trae motivo para un puerto sin áreas`);
-    if (!leido.includes(textoDe(motivo))) mudos.push(`${slug}: publica la frase pero no el motivo`);
+    if (!leido.includes(hastaDonde)) mudos.push(`${slug}: publica la frase pero no hasta dónde`);
     // Y la marca que hace medible el caso vacío en el artefacto, no solo en el texto. Va al mismo
     // saco y no a un `assert` propio: un gate que se para en el primer puerto cuenta uno de los
     // diez, y lo que hay que ver de un tirón es si el defecto es de una página o de la plantilla.
@@ -159,28 +168,45 @@ test("P3 · y la sección está en las 153 páginas: no desaparece en las 10 que
 // LA REGLA DURA · en ningún sitio, ni por omisión, puede leerse que se pueda pescar
 // =================================================================================================
 
-test("las 153 páginas publican el aviso de la fuente: la ausencia de área no es un permiso", async (t) => {
+test("las 153 páginas publican LITERAL la regla dura del módulo, y va antes de la lista", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
   }
-  const { fuente } = await cargarResumenDeAreas();
-  // Va **antes** de la lista porque califica todo lo que hay debajo, y sobre todo va en las 10 que
-  // no listan nada: es ahí donde el silencio se leería como vía libre.
-  assert.match(fuente.aviso, /no autoriza a pescar/u, "el dataset ha dejado de traer el aviso");
-  for (const { slug, seccion } of await paginasConAreas()) {
+  // **El gate del hallazgo H-1.** Hasta el pase adversario esta frase llegaba a la página desde
+  // `fuente.aviso`, un campo de texto libre del derivado, y lo único que la miraba eran ocho
+  // expresiones regulares y una subcadena: un aviso plantado que conservaba «no autoriza a pescar»
+  // y añadía «con licencia, en el resto no hay veda» se publicó en negrita, antes de la lista, en
+  // las 153 páginas, con `pnpm test`, `run.py check`, `pytest` y `ruff` en verde. Ahora la frase es
+  // una constante del módulo y lo que se exige es que aparezca **literal** en las 153 páginas: es
+  // la comprobación que ninguna redacción del dato puede satisfacer por casualidad ni esquivar.
+  const paginas = await paginasConAreas();
+  assert.equal(paginas.length, 153);
+  const sinLaRegla: string[] = [];
+  for (const { slug, seccion } of paginas) {
     const leido = textoDe(seccion);
-    assert.ok(leido.includes(fuente.aviso), `${slug}: la sección no publica el aviso de la fuente`);
+    if (!leido.includes(NO_AUTORIZA_A_PESCAR)) sinLaRegla.push(slug);
     assert.ok(leido.includes(QUE_ES_ESTO), `${slug}: falta el encabezado que dice qué es esto`);
-    // Y el aviso va antes que la primera área, no en un pie.
+    // Y la regla va antes que la primera área, no en un pie: califica todo lo que hay debajo.
     const primeraFila = seccion.indexOf("<tr data-area=");
     if (primeraFila >= 0) {
       assert.ok(
-        seccion.indexOf(fuente.aviso.slice(0, 40)) < primeraFila,
-        `${slug}: el aviso va después de la lista y llega tarde`,
+        seccion.indexOf(NO_AUTORIZA_A_PESCAR.slice(0, 40)) < primeraFila,
+        `${slug}: la regla dura va después de la lista y llega tarde`,
       );
     }
   }
+  assert.deepEqual(
+    sinLaRegla,
+    [],
+    "páginas que publican áreas protegidas sin la frase que dice que esto no autoriza a pescar",
+  );
+  // La otra mitad de H-1 —que la sección **no** pinte además el texto libre del derivado, porque si
+  // lo pintara el permiso plantado seguiría publicándose al lado— no se puede medir desde aquí: el
+  // texto de la constante y el que hoy trae `fuente.aviso` son el mismo, así que leyendo este
+  // `dist/` no se distingue de dónde salió. La mide el recorrido adversario
+  // `a12-la-regla-dura-viaja-como-texto-libre.spec.ts`, que construye el sitio contra un derivado
+  // con el aviso y el motivo plantados y comprueba que no llegan a la página.
 });
 
 test("ninguna página escribe una frase que suene a permiso", async (t) => {
@@ -242,12 +268,18 @@ test("las 348 relaciones se publican con su nombre, su figura y su cota, en orde
       // El nombre OFICIAL entero, sin abreviar: es lo que permite buscar el espacio en la fuente.
       if (!leido.includes(textoDe(area.nombre))) rotas.push(`${slug} → ${area.nombre}: sin nombre`);
       if (!leido.includes(area.tipo)) rotas.push(`${slug} → ${area.codigo}: sin la figura`);
-      if (!leido.includes(distanciaEscrita(area.distanciaAproxKm))) {
+      // Cota o hecho, nunca los dos: si el puerto cae dentro, la distancia al borde mide lo metido
+      // que está el puerto y no lo lejos que está el área, y bajo el rótulo de la sección se lee
+      // como su contrario (H-3). Fuera del área, la cota exacta que dice el derivado.
+      if (area.dentro) {
+        if (!leido.includes(textoDe(DENTRO_DEL_AREA))) {
+          rotas.push(`${slug} → ${area.codigo}: cae dentro y no lo dice`);
+        }
+        if (/a menos de \d+ km/u.test(leido)) {
+          rotas.push(`${slug} → ${area.codigo}: cae dentro y además publica una cota · «${leido}»`);
+        }
+      } else if (!leido.includes(distanciaEscrita(area.distanciaAproxKm))) {
         rotas.push(`${slug} → ${area.codigo}: sin la cota · «${leido}»`);
-      }
-      // Y el «dentro» dicho con sus palabras, que es un hecho más fuerte que una distancia corta.
-      if (area.dentro && !/cae dentro de esta área/u.test(leido)) {
-        rotas.push(`${slug} → ${area.codigo}: cae dentro y no lo dice`);
       }
     }
   }
@@ -265,16 +297,43 @@ test("la distancia se publica SIEMPRE como cota entera, nunca como la décima de
   // es. Se mide en el artefacto porque el error que importa —que alguien pinte
   // `{area.distanciaAproxKm} km` para «dar más detalle»— vive en la plantilla, no en la función.
   const decimales: string[] = [];
-  for (const { slug, seccion } of await paginasConAreas()) {
+  for (const { slug, seccion, areas } of await paginasConAreas()) {
     const leido = textoDe(seccion);
     for (const [suelto] of leido.matchAll(/\d+[.,]\d+\s*km/giu)) decimales.push(`${slug}: ${suelto}`);
     // Y la desigualdad va escrita: un «9 km» a secas es una medida, «a menos de 9 km» es lo que
-    // sabemos. Solo donde hay áreas, claro.
-    if (seccion.includes("<tr data-area=")) {
+    // sabemos. Solo donde hay alguna área que no sea de las que caen dentro, que no publican cota.
+    if (areas.some((area) => !area.dentro)) {
       assert.match(leido, /a menos de \d+ km/u, `${slug}: publica distancias sin la desigualdad`);
     }
   }
   assert.deepEqual(decimales, [], "distancias con decimales: fingen una precisión que no tenemos");
+});
+
+test("H-3 · ninguna cota publicada pasa del radio que promete el título de su sección", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  // El gate del hallazgo H-3, medido en el sitio construido y no en la función. El pase adversario
+  // publicó en Alicante «Reserva marina de la Isla de Tabarca · a menos de 480 km · El punto de
+  // este puerto cae dentro de esta área» **bajo el rótulo «Áreas marinas protegidas a menos de 30
+  // km»**, con toda la escalera en verde: en el pipeline `dentro: true` apagaba la única
+  // comprobación numérica que ataba la distancia al radio, y del lado de la web no había ninguna.
+  // Aquí se lee la tinta de las 153 páginas y se compara con el número del propio título.
+  const { criterio } = await cargarResumenDeAreas();
+  const tope = kmDelRadio(criterio.radioKm);
+  const excesos: string[] = [];
+  for (const { slug, seccion } of await paginasConAreas()) {
+    const leido = textoDe(seccion);
+    assert.ok(
+      leido.includes(`Áreas marinas protegidas a menos de ${tope} km`),
+      `${slug}: la sección no publica su título con el radio`,
+    );
+    for (const [, km] of leido.matchAll(/a menos de (\d+) km/gu)) {
+      if (Number(km) > tope) excesos.push(`${slug}: «a menos de ${km} km» bajo un título de ${tope}`);
+    }
+  }
+  assert.deepEqual(excesos, [], "una fila que contradice el rótulo que la encabeza");
 });
 
 test("las siglas llegan glosadas: ninguna figura se publica sola salvo la que ya está en palabras", async (t) => {
@@ -414,7 +473,7 @@ test("el peso de la sección en el dist/ es el que dice `module.ts`, y el máxim
   const menor = pesos.at(-1);
   assert.ok(mayor !== undefined && menor !== undefined, "no se ha medido ninguna página");
   assert.equal(mayor.slug, "guia-de-isora");
-  assert.equal(mayor.bytes, 4925);
+  assert.equal(mayor.bytes, 4866);
   assert.equal(menor.bytes, 1955);
   t.diagnostic(`sección: de ${menor.bytes} B (${menor.slug}) a ${mayor.bytes} B (${mayor.slug})`);
 });

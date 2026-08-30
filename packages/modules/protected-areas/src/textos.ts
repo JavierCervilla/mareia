@@ -7,11 +7,23 @@
  * texto escrito dentro del componente se puede suavizar en un commit de estilo sin que nadie lo
  * note.
  *
- * Lo que **no** vive aquí: el aviso que manda sobre todo lo demás («que no haya un área protegida
- * cerca no autoriza a pescar») y la licencia, que viajan firmados dentro del propio dataset
- * (`fuente.aviso`, `fuente.licencia`), y el motivo de los puertos sin ninguna área
- * (`AreasDelPuerto.motivo`), que es por puerto. Copiarlos aquí sería una segunda versión de algo
- * que ya viene con el dato, y las dos se desincronizarían.
+ * **Hasta el pase adversario de T-21, el aviso que manda sobre todo lo demás y el motivo de los
+ * puertos vacíos NO vivían aquí**: viajaban dentro del dataset (`fuente.aviso`,
+ * `AreasDelPuerto.motivo`) y la sección los imprimía tal cual, para no tener dos ejemplares del
+ * mismo texto. El hallazgo H-1 midió el precio de esa decisión: plantó en el JSON un aviso de los
+ * mismos 186 bytes que decía «…no autoriza a pescar **sin licencia; con ella, en el resto no hay
+ * veda**» y se publicó en negrita, antes de la lista, en las 153 páginas, con `pnpm test`,
+ * `run.py check`, `pytest` y `ruff` en verde. El filtro real de la regla dura eran ocho expresiones
+ * regulares y una subcadena, y ninguna decía nada de «no hay veda».
+ *
+ * Así que ahora **las dos frases son nuestras y viven aquí** (`NO_AUTORIZA_A_PESCAR`,
+ * `hastaDondeSeHaMirado`), y la sección las pinta venga lo que venga en el dato. El dataset sigue
+ * trayendo las suyas —son su registro de lo que se ingirió y sus gates las siguen exigiendo—, pero
+ * ya no son **el portador** de la regla de seguridad: el aviso que sostiene la promesa de la
+ * trayectoria no puede reescribirse editando un JSON.
+ *
+ * Lo que **sí** sigue viniendo del dato y se publica tal cual: la licencia (`fuente.licencia`), que
+ * es un hecho sobre la fuente y no una afirmación nuestra, y va junto a su atribución.
  */
 
 import type { TipoDeArea } from "./tipos.ts";
@@ -54,6 +66,28 @@ export const QUE_ES_ESTO =
   "una fuente que no tenemos.";
 
 /**
+ * **La regla dura de la trayectoria, y por eso es una constante del código y no un campo del dato.**
+ *
+ * Es la frase que sostiene la promesa entera —«en ningún caso, ni por omisión, se puede leer que se
+ * pueda pescar»—: califica todo lo que hay debajo, se pinta en las **153** páginas y va **antes**
+ * de la lista, también —sobre todo— en las 10 que no listan ninguna área, que son las que más
+ * riesgo tienen de leerse como un permiso por omisión.
+ *
+ * Hasta el pase adversario esta frase llegaba a la página desde `fuente.aviso`, un campo de texto
+ * libre del derivado. El texto es **el mismo** que el dataset publica hoy, palabra por palabra: lo
+ * que cambia no es lo que se lee sino **quién responde de ello**. Un aviso que viaja en el dato lo
+ * reescribe cualquiera que edite el JSON —o cualquier ingesta con una constante mal copiada— y lo
+ * único que lo miraba eran ocho expresiones regulares; una constante del código la cambia un diff
+ * revisado y hay un gate que la busca **literal** en las 153 páginas construidas.
+ *
+ * Que el dataset traiga además su propio aviso no sobra: es el registro de lo que se ingirió y sus
+ * gates lo siguen exigiendo. Lo que ya no hace es llegar a la página.
+ */
+export const NO_AUTORIZA_A_PESCAR =
+  "Solo la declaración oficial de cada espacio define sus límites y su régimen. Que no haya un " +
+  "área protegida cerca no autoriza a pescar: esto dice dónde NO se puede, nunca dónde sí.";
+
+/**
  * Lo que se lee en un puerto **sin ninguna área** a menos del radio, y es el punto con más criterio
  * de toda la sección.
  *
@@ -69,6 +103,29 @@ export const QUE_ES_ESTO =
  */
 export function ningunaCerca(radioKm: number): string {
   return `Ninguna a menos de ${kmDelRadio(radioKm)} km de este puerto.`;
+}
+
+/**
+ * La segunda mitad de lo que lee un puerto vacío: **hasta dónde se ha mirado**, y que el límite es
+ * una decisión nuestra y no un hueco de la fuente.
+ *
+ * Con `ningunaCerca` sola, quien lee no sabe si el radio es de 3 km o de 300; con esto sola, la
+ * respuesta se pierde dentro de un párrafo de método. Hacen falta las dos.
+ *
+ * Viene aquí por lo mismo que `NO_AUTORIZA_A_PESCAR`, y el pase adversario lo midió igual de bien:
+ * hasta T-21 esta frase era `AreasDelPuerto.motivo`, texto libre del derivado del que sólo se
+ * exigía que no estuviese vacío. Plantado en Valencia, la página publicaba «…y el puerto tampoco
+ * cae dentro de ninguna, **así que por este concepto no hay ninguna limitación que consultar antes
+ * de salir de este puerto**» con toda la escalera en verde. En los 10 puertos que no listan nada,
+ * que son los que peor se leen, la frase la escribimos nosotros. El texto es palabra por palabra el
+ * que el pipeline escribe hoy en `motivo` (`areas._sin_areas`).
+ */
+export function hastaDondeSeHaMirado(radioKm: number): string {
+  return (
+    `ninguna área marina protegida de RAMPE 2025 tiene su borde a menos de ${kmDelRadio(radioKm)} ` +
+    "km de este puerto, y el puerto tampoco cae dentro de ninguna. No mirar más lejos es una " +
+    "decisión nuestra, no una ausencia de la fuente."
+  );
 }
 
 /**
