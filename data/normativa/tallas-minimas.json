@@ -1,0 +1,1898 @@
+{
+  "schema": "normativa/v1",
+  "fuente": {
+    "norma": "Real Decreto 560/1995, de 7 de abril, por el que se establece las tallas mínimas de determinadas especies pesqueras.",
+    "identificador": "BOE-A-1995-8639",
+    "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560",
+    "textoConsolidado": "https://www.boe.es/buscar/act.php?id=BOE-A-1995-8639",
+    "fechaActualizacion": "2025-12-18",
+    "licencia": "Reutilización de la legislación (art. 13 Ley 37/2007 y RD 1495/2011)",
+    "licenciaUrl": "https://www.boe.es/informacion/aviso_legal/",
+    "aviso": "Solo el texto publicado en el BOE tiene carácter auténtico.",
+    "verificadoEn": "2026-08-30"
+  },
+  "caladeros": [
+    {
+      "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+      "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+      "anexo": "ANEXO I",
+      "bloque": "ani",
+      "titulo": "Tallas mínimas autorizadas para los caladeros del Cantábrico y noroeste y del golfo de Cádiz",
+      "fechaVigencia": "2025-11-02",
+      "fechaActualizacionBloque": "2025-11-01",
+      "normaModificadora": "BOE-A-2025-22024",
+      "notas": [
+        {
+          "marca": "(*)",
+          "texto": "Talla por determinar."
+        },
+        {
+          "marca": "(**)",
+          "texto": "Excepto en la división IX, a), en la que la talla mínima es de 10 centímetros."
+        },
+        {
+          "marca": "(***)",
+          "texto": "Excepto en las divisiones 8a y 8b del Consejo Internacional para la Exploración del Mar, tanto para la pesca profesional como para la pesca recreativa, en las que la talla mínima es de 44 centímetros."
+        }
+      ],
+      "especies": [
+        {
+          "nombreComun": "Abadejo",
+          "nombreCientifico": "Pollachius pollachius",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 30
+          },
+          "textoOriginal": "30",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Acedia",
+          "nombreCientifico": "Dicologoglossa cuneata",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 15
+          },
+          "textoOriginal": "15",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Aguja",
+          "nombreCientifico": "Belone belone",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 25
+          },
+          "textoOriginal": "25",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Anguila",
+          "nombreCientifico": "Anguilla anguilla",
+          "talla": {
+            "tipo": "por_determinar",
+            "segunNota": "(*)"
+          },
+          "textoOriginal": "(*)",
+          "notas": [
+            "(*)"
+          ],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Arenque",
+          "nombreCientifico": "Clupea harengus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 20
+          },
+          "textoOriginal": "20",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Atún rojo",
+          "nombreCientifico": "Thunnus thynnus",
+          "talla": {
+            "tipo": "peso_kg",
+            "kg": 6.4
+          },
+          "textoOriginal": "6,4 kg",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Bacalao",
+          "nombreCientifico": "Gadus morhua",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 35
+          },
+          "textoOriginal": "35",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Besugo",
+          "nombreCientifico": "Pagellus bogaraveo",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 25
+          },
+          "textoOriginal": "25",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Boga",
+          "nombreCientifico": "Boops boops",
+          "talla": {
+            "tipo": "sin_dato_legible",
+            "motivo": "la norma imprime «1 1», que no se lee como una talla en cm ni como un peso; se publica el literal porque corregir por inferencia una cifra legal es inventarla"
+          },
+          "textoOriginal": "1 1",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Boquerón",
+          "nombreCientifico": "Engraulis encrasicholus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 12
+          },
+          "textoOriginal": "12 (**)",
+          "notas": [
+            "(**)"
+          ],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Buey",
+          "nombreCientifico": "Cáncer pagurus",
+          "talla": {
+            "tipo": "por_determinar",
+            "segunNota": "(*)"
+          },
+          "textoOriginal": "(*)",
+          "notas": [
+            "(*)"
+          ],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Caballa, Estornino",
+          "nombreCientifico": "Scomber spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 20
+          },
+          "textoOriginal": "20",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Calamar",
+          "nombreCientifico": "Loligo vulgaris",
+          "talla": {
+            "tipo": "por_determinar",
+            "segunNota": "(*)"
+          },
+          "textoOriginal": "(*)",
+          "notas": [
+            "(*)"
+          ],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Carbonero",
+          "nombreCientifico": "Pollachius virens",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 35
+          },
+          "textoOriginal": "35",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Centolla",
+          "nombreCientifico": "Maja squinado",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 12
+          },
+          "textoOriginal": "12",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Cigala (entera)",
+          "nombreCientifico": "Nephrops norvegicus",
+          "medida": "Longitud cefalotórax",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 2
+          },
+          "textoOriginal": "2",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Cigala (entera)",
+          "nombreCientifico": "Nephrops norvegicus",
+          "medida": "Longitud total",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 7
+          },
+          "textoOriginal": "7",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Cigalas (colas)",
+          "nombreCientificoAusente": "la norma escribe «Cigalas (colas)» y ahí no hay ningún nombre latino entre paréntesis; no se infiere",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 3.7
+          },
+          "textoOriginal": "3,7",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Congrio",
+          "nombreCientifico": "Conger conger",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 58
+          },
+          "textoOriginal": "58",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Chopa",
+          "nombreCientifico": "Spondyliosoma cantharus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 23
+          },
+          "textoOriginal": "23",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Dorada",
+          "nombreCientifico": "Sparus aurata",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 19
+          },
+          "textoOriginal": "19",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Eglefino",
+          "nombreCientifico": "Melanogrammús aeglefinus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 30
+          },
+          "textoOriginal": "30",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Faneca",
+          "nombreCientifico": "Trisopterus luscus",
+          "talla": {
+            "tipo": "por_determinar",
+            "segunNota": "(*)"
+          },
+          "textoOriginal": "(*)",
+          "notas": [
+            "(*)"
+          ],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Gallos",
+          "nombreCientifico": "Lepidorhombus spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 20
+          },
+          "textoOriginal": "20",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Jibias",
+          "nombreCientifico": "Sepia spp",
+          "talla": {
+            "tipo": "por_determinar",
+            "segunNota": "(*)"
+          },
+          "textoOriginal": "(*)",
+          "notas": [
+            "(*)"
+          ],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Jurel",
+          "nombreCientifico": "Trachurus trachurus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 15
+          },
+          "textoOriginal": "15",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Lenguado",
+          "nombreCientifico": "Solea vulgaris",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 24
+          },
+          "textoOriginal": "24",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Limanda",
+          "nombreCientifico": "Limanda limanda",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 23
+          },
+          "textoOriginal": "23",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Lisas",
+          "nombreCientifico": "Mugil spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 20
+          },
+          "textoOriginal": "20",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Lubina",
+          "nombreCientifico": "Dicentrarchus labrax",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 36
+          },
+          "textoOriginal": "36 (***)",
+          "notas": [
+            "(***)"
+          ],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Maruca Azul",
+          "nombreCientifico": "Molva dypterygia",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 70
+          },
+          "textoOriginal": "70",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Maruca",
+          "nombreCientifico": "Molva molva",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 63
+          },
+          "textoOriginal": "63",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Mendo limón",
+          "nombreCientifico": "Microstommus kitt",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 25
+          },
+          "textoOriginal": "25",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Mendo",
+          "nombreCientifico": "Gliptocephalus cynoglossus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 28
+          },
+          "textoOriginal": "28",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Merlán",
+          "nombreCientifico": "Merlangus merlangus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 23
+          },
+          "textoOriginal": "23",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Merluza",
+          "nombreCientifico": "Merluccius merluccius",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 27
+          },
+          "textoOriginal": "27",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Palometa negra o japuta",
+          "nombreCientifico": "Brama brama",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 16
+          },
+          "textoOriginal": "16",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Pargo",
+          "nombreCientifico": "Pagrus pagrus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 15
+          },
+          "textoOriginal": "15",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Patudo",
+          "nombreCientifico": "Thunnus obesus",
+          "talla": {
+            "tipo": "peso_kg",
+            "kg": 3.2
+          },
+          "textoOriginal": "3,2 kg",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Platija",
+          "nombreCientifico": "Platichthys flesus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 25
+          },
+          "textoOriginal": "25",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Pulpo",
+          "nombreCientifico": "Octopus vulgaris",
+          "talla": {
+            "tipo": "peso_kg",
+            "kg": 1
+          },
+          "textoOriginal": "1 kg",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Rabil",
+          "nombreCientifico": "Thunnus albacares",
+          "talla": {
+            "tipo": "peso_kg",
+            "kg": 3.2
+          },
+          "textoOriginal": "3,2 kg",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Rape",
+          "nombreCientifico": "Lophius piscatorius, L. Budegassa",
+          "talla": {
+            "tipo": "por_determinar",
+            "segunNota": "(*)"
+          },
+          "textoOriginal": "(*)",
+          "notas": [
+            "(*)"
+          ],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Ramal",
+          "nombreCientifico": "Scophthalmus rhombus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 30
+          },
+          "textoOriginal": "30",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Rodaballo",
+          "nombreCientifico": "Psetta maxima",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 30
+          },
+          "textoOriginal": "30",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Sabalos",
+          "nombreCientifico": "Alosa spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 30
+          },
+          "textoOriginal": "30",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Salema",
+          "nombreCientifico": "Sarpa salpa",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 15
+          },
+          "textoOriginal": "15",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Salmón",
+          "nombreCientifico": "Salmo salar",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 50
+          },
+          "textoOriginal": "50",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Salmonete de roca",
+          "nombreCientifico": "Mullus surmuletus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 15
+          },
+          "textoOriginal": "15",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Sardina",
+          "nombreCientifico": "Sardina pilchardus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 11
+          },
+          "textoOriginal": "11",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Solla",
+          "nombreCientifico": "Pleuronectes platessa",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 25
+          },
+          "textoOriginal": "25",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Trucha marisca o reo",
+          "nombreCientifico": "Salmo trutta",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 25
+          },
+          "textoOriginal": "25",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Vieira",
+          "nombreCientifico": "Pecten maximus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 10
+          },
+          "textoOriginal": "10",
+          "notas": [],
+          "procedencia": {
+            "bloque": "ani",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        }
+      ]
+    },
+    {
+      "id": "mediterraneo",
+      "nombre": "Mediterráneo",
+      "anexo": "ANEXO II",
+      "bloque": "anii",
+      "titulo": "Tallas mínimas autorizadas para el caladero mediterráneo",
+      "fechaVigencia": "2025-11-02",
+      "fechaActualizacionBloque": "2025-11-01",
+      "normaModificadora": "BOE-A-2025-22024",
+      "notas": [
+        {
+          "marca": "(*)",
+          "texto": "La talla del pulpo (Octopus vulgaris) recogida en la presente tabla no es de aplicación en las aguas interiores y la plataforma continental de la Comunidad Autónoma de las Illes Balears."
+        }
+      ],
+      "especies": [
+        {
+          "nombreComun": "Aguja",
+          "nombreCientifico": "Belone belone",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 25
+          },
+          "textoOriginal": "25",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Almeja",
+          "nombreCientifico": "Venerupis spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 2.5
+          },
+          "textoOriginal": "2,5",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Atún rojo",
+          "nombreCientifico": "Thunnus thynnus",
+          "talla": {
+            "tipo": "longitud_o_peso",
+            "cm": 80,
+            "kg": 10
+          },
+          "textoOriginal": "80 cm o 10 kg de peso",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Bacaladilla",
+          "nombreCientifico": "Micromesistius poutassou",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 15
+          },
+          "textoOriginal": "15",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Boga",
+          "nombreCientifico": "Boops boops",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 11
+          },
+          "textoOriginal": "11",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Bogavante",
+          "nombreCientifico": "Homarus gammarus",
+          "medida": "Longitud cefalotórax",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 8.5
+          },
+          "textoOriginal": "8,5",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Boquerón",
+          "nombreCientifico": "Engraulis encrasicholus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 9
+          },
+          "textoOriginal": "9",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Caballa",
+          "nombreCientifico": "Scomber scombrus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 18
+          },
+          "textoOriginal": "18",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Capellán/mollera",
+          "nombreCientifico": "Trisopterus minutus capelanus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 11
+          },
+          "textoOriginal": "11",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Cigala",
+          "nombreCientifico": "Nephrops norvegicus",
+          "medida": "Longitud cefalotórax",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 2
+          },
+          "textoOriginal": "2",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Cigala",
+          "nombreCientifico": "Nephrops norvegicus",
+          "medida": "Longitud total",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 7
+          },
+          "textoOriginal": "7",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Cherna",
+          "nombreCientifico": "Polyprion americanus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 45
+          },
+          "textoOriginal": "45",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Chirla",
+          "nombreCientifico": "Venus spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 2.5
+          },
+          "textoOriginal": "2,5",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Dorada",
+          "nombreCientifico": "Sparus aurata",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 20
+          },
+          "textoOriginal": "20",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Estornino",
+          "nombreCientifico": "Scomber japonicus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 18
+          },
+          "textoOriginal": "18",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Gallo",
+          "nombreCientifico": "Lepidorhombus spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 15
+          },
+          "textoOriginal": "15",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Jurel",
+          "nombreCientifico": "Trachurus spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 12
+          },
+          "textoOriginal": "12",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Langosta",
+          "nombreCientifico": "Palinuridae",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 24
+          },
+          "textoOriginal": "24",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Langostino",
+          "nombreCientifico": "Panaeux kerathurus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 10
+          },
+          "textoOriginal": "10",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Lenguado",
+          "nombreCientifico": "Solea vulgaris",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 20
+          },
+          "textoOriginal": "20",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Lisa",
+          "nombreCientifico": "Mugil spps",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 16
+          },
+          "textoOriginal": "16",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Lubina",
+          "nombreCientifico": "Dicentrarchus labrax",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 23
+          },
+          "textoOriginal": "23",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Merluza",
+          "nombreCientifico": "Merluccius merluccius",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 20
+          },
+          "textoOriginal": "20",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Mero",
+          "nombreCientifico": "Epinephelus spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 45
+          },
+          "textoOriginal": "45",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Pagel, besugo",
+          "nombreCientifico": "Pagellus spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 12
+          },
+          "textoOriginal": "12",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Palometa negra o japuta",
+          "nombreCientifico": "Brama brama",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 16
+          },
+          "textoOriginal": "16",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Pargo",
+          "nombreCientifico": "Pagrus pagrus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 18
+          },
+          "textoOriginal": "18",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Pulpo",
+          "nombreCientifico": "Octopus vulgaris",
+          "talla": {
+            "tipo": "peso_kg",
+            "kg": 1
+          },
+          "textoOriginal": "1 kg",
+          "notas": [
+            "(*)"
+          ],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Rape",
+          "nombreCientifico": "Lophius spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 30
+          },
+          "textoOriginal": "30",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Salema",
+          "nombreCientifico": "Sarpa salpa",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 15
+          },
+          "textoOriginal": "15",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Salmonete",
+          "nombreCientifico": "Mullus spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 11
+          },
+          "textoOriginal": "11",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Sardina",
+          "nombreCientifico": "Sardina pilchardus",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 11
+          },
+          "textoOriginal": "11",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Sargo",
+          "nombreCientifico": "Diplodus spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 15
+          },
+          "textoOriginal": "15",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Vieira",
+          "nombreCientifico": "Pecten spp",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 10
+          },
+          "textoOriginal": "10",
+          "notas": [],
+          "procedencia": {
+            "bloque": "anii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        }
+      ]
+    },
+    {
+      "id": "canario",
+      "nombre": "Canario",
+      "anexo": "ANEXO III",
+      "bloque": "aniii",
+      "titulo": "Tallas mínimas autorizadas para el caladero canario",
+      "fechaVigencia": "2025-11-02",
+      "fechaActualizacionBloque": "2025-11-01",
+      "normaModificadora": "BOE-A-2025-22024",
+      "notas": [],
+      "especies": [
+        {
+          "nombreComun": "Aguja",
+          "nombreCientifico": "Belone belone",
+          "nombreLocalCanario": "Agujón",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 25
+          },
+          "textoOriginal": "25",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Aligote",
+          "nombreCientifico": "Pagellus acarne",
+          "nombreLocalCanario": "Besuguito aligote",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 20
+          },
+          "textoOriginal": "20",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Atún rojo",
+          "nombreCientifico": "Thunnus Thynnus",
+          "nombreLocalCanario": "Patudo",
+          "talla": {
+            "tipo": "peso_kg",
+            "kg": 6.4
+          },
+          "textoOriginal": "6,4 kg",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Boga",
+          "nombreCientifico": "Boops boops",
+          "nombreLocalCanario": "Boga",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 11
+          },
+          "textoOriginal": "11",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Boquerón",
+          "nombreCientifico": "Engraulis encrasicholus",
+          "nombreLocalCanario": "Boquerón, anchoa",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 9
+          },
+          "textoOriginal": "9",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Cabrilla",
+          "nombreCientifico": "Serranus cabrilla",
+          "nombreLocalCanario": "Cabrilla, cabrilla reina",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 19
+          },
+          "textoOriginal": "19",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Cachucho",
+          "nombreCientifico": "Dentex macrophtalmus",
+          "nombreLocalCanario": "Antoñito, dientón",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 22
+          },
+          "textoOriginal": "22",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Chopa",
+          "nombreCientifico": "Spondyliosoma cantharus",
+          "nombreLocalCanario": "Chopa, negrón",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 23
+          },
+          "textoOriginal": "23",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Dorada",
+          "nombreCientifico": "Sparus auratus",
+          "nombreLocalCanario": "Dorada, zapata morisca",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 19
+          },
+          "textoOriginal": "19",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Estornino",
+          "nombreCientifico": "Scomber japonicus",
+          "nombreLocalCanario": "Caballa",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 18
+          },
+          "textoOriginal": "18",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Gitano",
+          "nombreCientifico": "Mycteroperca fusca",
+          "nombreLocalCanario": "Abade, abadejo",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 35
+          },
+          "textoOriginal": "35",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Jureles",
+          "nombreCientifico": "Trachurus spp",
+          "nombreLocalCanario": "Chicharro",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 12
+          },
+          "textoOriginal": "12",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Lisa",
+          "nombreCientifico": "Mugil auratus",
+          "nombreLocalCanario": "Lisa amarilla",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 14
+          },
+          "textoOriginal": "14",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Vieja colorada",
+          "nombreCientifico": "Sparisoma cretense",
+          "nombreLocalCanario": "Vieja",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 22
+          },
+          "textoOriginal": "22",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Lubina",
+          "nombreCientifico": "Dicentrarchus labrax",
+          "nombreLocalCanario": "Lubina",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 22
+          },
+          "textoOriginal": "22",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Mero",
+          "nombreCientifico": "Epinephelus marginatus",
+          "nombreLocalCanario": "Mero",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 45
+          },
+          "textoOriginal": "45",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Mojarra",
+          "nombreCientifico": "Diplodus vulgaris",
+          "nombreLocalCanario": "Seifia, seifio",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 22
+          },
+          "textoOriginal": "22",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Morena negra",
+          "nombreCientifico": "Muraena augusti",
+          "nombreLocalCanarioAusente": "la norma deja vacía la celda de nombre local canario en esta fila",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 56
+          },
+          "textoOriginal": "56",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Murión",
+          "nombreCientifico": "Gymnothorax unicolor",
+          "nombreLocalCanarioAusente": "la norma deja vacía la celda de nombre local canario en esta fila",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 57
+          },
+          "textoOriginal": "57",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Pagel",
+          "nombreCientifico": "Pagellus erythrinus",
+          "nombreLocalCanario": "Breca",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 22
+          },
+          "textoOriginal": "22",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Palometa negra o japuta",
+          "nombreCientifico": "Brama brama",
+          "nombreLocalCanario": "Pez tontón",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 16
+          },
+          "textoOriginal": "16",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Pargo",
+          "nombreCientifico": "Pagrus pagrus",
+          "nombreLocalCanario": "Bocinegro",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 28
+          },
+          "textoOriginal": "28",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Patudo",
+          "nombreCientifico": "Thunnus obesus",
+          "nombreLocalCanario": "Tuna",
+          "talla": {
+            "tipo": "peso_kg",
+            "kg": 3.2
+          },
+          "textoOriginal": "3,2 kg",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Pulpo",
+          "nombreCientifico": "Octopus vulgaris",
+          "nombreLocalCanarioAusente": "la norma deja vacía la celda de nombre local canario en esta fila",
+          "talla": {
+            "tipo": "peso_kg",
+            "kg": 1
+          },
+          "textoOriginal": "1 kg",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Rabil",
+          "nombreCientifico": "Thunnus aibacares",
+          "nombreLocalCanario": "Rabil",
+          "talla": {
+            "tipo": "peso_kg",
+            "kg": 3.2
+          },
+          "textoOriginal": "3,2 kg",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Salema",
+          "nombreCientifico": "Sarpa salpa",
+          "nombreLocalCanario": "Salema, salpa",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 24
+          },
+          "textoOriginal": "24",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Salmonetes",
+          "nombreCientifico": "Mullus spp",
+          "nombreLocalCanario": "Salmón, salmonete",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 15
+          },
+          "textoOriginal": "15",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Sama de pluma",
+          "nombreCientifico": "Dentex filosus",
+          "nombreLocalCanario": "Sama, serruda, pargo macho",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 35
+          },
+          "textoOriginal": "35",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Sardina",
+          "nombreCientifico": "Sardina pilchardus",
+          "nombreLocalCanario": "Sardina",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 11
+          },
+          "textoOriginal": "11",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Sargo",
+          "nombreCientifico": "Diplodus sargus",
+          "nombreLocalCanario": "Sargo, sargo blanco",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 22
+          },
+          "textoOriginal": "22",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        },
+        {
+          "nombreComun": "Serrano imperial",
+          "nombreCientifico": "Serranus atricauda",
+          "nombreLocalCanario": "Cabrilla negra o cabrilla ruana",
+          "talla": {
+            "tipo": "longitud_cm",
+            "cm": 20
+          },
+          "textoOriginal": "20",
+          "notas": [],
+          "procedencia": {
+            "bloque": "aniii",
+            "fechaVigencia": "2025-11-02",
+            "eli": "https://www.boe.es/eli/es/rd/1995/04/07/560"
+          }
+        }
+      ]
+    }
+  ]
+}

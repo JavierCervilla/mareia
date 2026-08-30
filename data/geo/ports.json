@@ -15,6 +15,7 @@
       "lat": 38.3407,
       "lon": -0.483,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-a-alicante.json"
     },
     {
@@ -31,6 +32,7 @@
       "lat": 38.5894,
       "lon": -0.0548,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-a-altea.json"
     },
     {
@@ -47,6 +49,7 @@
       "lat": 38.5345,
       "lon": -0.1331,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-a-benidorm.json"
     },
     {
@@ -63,6 +66,7 @@
       "lat": 38.6345,
       "lon": 0.0348,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-a-calp.json"
     },
     {
@@ -79,6 +83,7 @@
       "lat": 38.8428,
       "lon": 0.1144,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-a-denia.json"
     },
     {
@@ -95,6 +100,7 @@
       "lat": 38.1081,
       "lon": -0.6458,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-a-guardamar-del-segura.json"
     },
     {
@@ -111,6 +117,7 @@
       "lat": 38.7973,
       "lon": 0.1864,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-a-javea.json"
     },
     {
@@ -127,6 +134,7 @@
       "lat": 37.8671,
       "lon": -0.7578,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-a-orihuela.json"
     },
     {
@@ -143,6 +151,7 @@
       "lat": 38.1895,
       "lon": -0.5613,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-a-santa-pola.json"
     },
     {
@@ -159,6 +168,7 @@
       "lat": 38.6864,
       "lon": 0.1368,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-a-teulada.json"
     },
     {
@@ -175,6 +185,7 @@
       "lat": 37.9699,
       "lon": -0.6828,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-a-torrevieja.json"
     },
     {
@@ -191,6 +202,7 @@
       "lat": 36.7454,
       "lon": -3.021,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-al-adra.json"
     },
     {
@@ -207,6 +219,7 @@
       "lat": 36.9908,
       "lon": -1.8976,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-al-carboneras.json"
     },
     {
@@ -223,6 +236,7 @@
       "lat": 37.2515,
       "lon": -1.7671,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-al-cuevas-del-almanzora.json"
     },
     {
@@ -239,6 +253,7 @@
       "lat": 37.1852,
       "lon": -1.8174,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-al-garrucha.json"
     },
     {
@@ -255,6 +270,7 @@
       "lat": 36.7625,
       "lon": -2.1026,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-al-nijar.json"
     },
     {
@@ -271,6 +287,7 @@
       "lat": 37.3667,
       "lon": -1.6667,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-al-pulpi.json"
     },
     {
@@ -287,6 +304,7 @@
       "lat": 36.7566,
       "lon": -2.6052,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-al-roquetas-de-mar.json"
     },
     {
@@ -303,6 +321,7 @@
       "lat": 41.5783,
       "lon": 2.5593,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-b-arenys-de-mar.json"
     },
     {
@@ -319,6 +338,7 @@
       "lat": 41.4351,
       "lon": 2.2425,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-b-badalona.json"
     },
     {
@@ -335,6 +355,7 @@
       "lat": 41.4134,
       "lon": 2.2292,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-b-barcelona.json"
     },
     {
@@ -351,6 +372,7 @@
       "lat": 41.2595,
       "lon": 1.9261,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-b-castelldefels.json"
     },
     {
@@ -367,6 +389,7 @@
       "lat": 41.4764,
       "lon": 2.313,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-b-el-masnou.json"
     },
     {
@@ -383,6 +406,7 @@
       "lat": 41.5301,
       "lon": 2.4468,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-b-mataro.json"
     },
     {
@@ -399,6 +423,7 @@
       "lat": 41.4891,
       "lon": 2.368,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-b-premia-de-mar.json"
     },
     {
@@ -415,6 +440,7 @@
       "lat": 41.2343,
       "lon": 1.8246,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-b-sitges.json"
     },
     {
@@ -431,6 +457,7 @@
       "lat": 41.213,
       "lon": 1.7331,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-b-vilanova-i-la-geltru.json"
     },
     {
@@ -447,6 +474,7 @@
       "lat": 43.4199,
       "lon": -2.7196,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-bi-bermeo.json"
     },
     {
@@ -463,6 +491,7 @@
       "lat": 43.355,
       "lon": -3.045,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-bi-bilbao.json"
     },
     {
@@ -479,6 +508,7 @@
       "lat": 43.4034,
       "lon": -2.6382,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-bi-elantxobe.json"
     },
     {
@@ -495,6 +525,7 @@
       "lat": 43.3639,
       "lon": -2.5023,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-bi-lekeitio.json"
     },
     {
@@ -511,6 +542,7 @@
       "lat": 43.4084,
       "lon": -2.6974,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-bi-mundaka.json"
     },
     {
@@ -527,6 +559,7 @@
       "lat": 43.3623,
       "lon": -8.3927,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-c-a-coruna.json"
     },
     {
@@ -543,6 +576,7 @@
       "lat": 42.6365,
       "lon": -8.9011,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-c-boiro.json"
     },
     {
@@ -559,6 +593,7 @@
       "lat": 43.4771,
       "lon": -8.2463,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-c-ferrol.json"
     },
     {
@@ -575,6 +610,7 @@
       "lat": 42.6077,
       "lon": -8.9342,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-c-pobra-do-caraminal.json"
     },
     {
@@ -591,6 +627,7 @@
       "lat": 42.6482,
       "lon": -8.8237,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-c-rianxo.json"
     },
     {
@@ -607,6 +644,7 @@
       "lat": 42.5204,
       "lon": -9.0177,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-c-ribeira.json"
     },
     {
@@ -623,6 +661,7 @@
       "lat": 43.3584,
       "lon": -8.2466,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-c-sada.json"
     },
     {
@@ -639,6 +678,7 @@
       "lat": 36.1302,
       "lon": -5.4415,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-ca-algeciras.json"
     },
     {
@@ -655,6 +695,7 @@
       "lat": 36.1847,
       "lon": -5.9307,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-ca-barbate.json"
     },
     {
@@ -671,6 +712,7 @@
       "lat": 36.534,
       "lon": -6.28,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-ca-cadiz.json"
     },
     {
@@ -687,6 +729,7 @@
       "lat": 36.3961,
       "lon": -6.2088,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-ca-chiclana-de-la-frontera.json"
     },
     {
@@ -703,6 +746,7 @@
       "lat": 36.7455,
       "lon": -6.4296,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-ca-chipiona.json"
     },
     {
@@ -719,6 +763,7 @@
       "lat": 36.295,
       "lon": -6.1367,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-ca-conil-de-la-frontera.json"
     },
     {
@@ -735,6 +780,7 @@
       "lat": 36.1583,
       "lon": -5.3573,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-ca-la-linea-de-la-concepcion.json"
     },
     {
@@ -751,6 +797,7 @@
       "lat": 36.6164,
       "lon": -6.3538,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-ca-rota.json"
     },
     {
@@ -767,6 +814,7 @@
       "lat": 36.2899,
       "lon": -5.2718,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-ca-san-roque.json"
     },
     {
@@ -783,6 +831,7 @@
       "lat": 36.8039,
       "lon": -6.3364,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-ca-sanlucar-de-barrameda.json"
     },
     {
@@ -799,6 +848,7 @@
       "lat": 36.0097,
       "lon": -5.606,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-ca-tarifa.json"
     },
     {
@@ -815,6 +865,7 @@
       "lat": 35.8939,
       "lon": -5.3211,
       "timezone": "Africa/Ceuta",
+      "caladero": "mediterraneo",
       "stationFile": "es-ce-ceuta.json"
     },
     {
@@ -831,6 +882,7 @@
       "lat": 39.8618,
       "lon": -0.0704,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-cs-borriana.json"
     },
     {
@@ -847,6 +899,7 @@
       "lat": 39.9716,
       "lon": 0.0175,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-cs-castellon-de-la-plana.json"
     },
     {
@@ -863,6 +916,7 @@
       "lat": 40.076,
       "lon": 0.1342,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-cs-oropesa-del-mar.json"
     },
     {
@@ -879,6 +933,7 @@
       "lat": 28.1009,
       "lon": -15.7123,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-agaete.json"
     },
     {
@@ -895,6 +950,7 @@
       "lat": 28.3923,
       "lon": -13.8555,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-antigua.json"
     },
     {
@@ -911,6 +967,7 @@
       "lat": 28.9709,
       "lon": -13.5295,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-arrecife.json"
     },
     {
@@ -927,6 +984,7 @@
       "lat": 29.2231,
       "lon": -13.4525,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-haria.json"
     },
     {
@@ -943,6 +1001,7 @@
       "lat": 28.0063,
       "lon": -15.8187,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-la-aldea-de-san-nicolas.json"
     },
     {
@@ -959,6 +1018,7 @@
       "lat": 28.7408,
       "lon": -13.8635,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-la-oliva.json"
     },
     {
@@ -975,6 +1035,7 @@
       "lat": 28.142,
       "lon": -15.413,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-las-palmas.json"
     },
     {
@@ -991,6 +1052,7 @@
       "lat": 27.7831,
       "lon": -15.7151,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-mogan.json"
     },
     {
@@ -1007,6 +1069,7 @@
       "lat": 28.4991,
       "lon": -13.8555,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-puerto-del-rosario.json"
     },
     {
@@ -1023,6 +1086,7 @@
       "lat": 27.7465,
       "lon": -15.6239,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-san-bartolome-de-tirajana.json"
     },
     {
@@ -1039,6 +1103,7 @@
       "lat": 27.9763,
       "lon": -15.3774,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-telde.json"
     },
     {
@@ -1055,6 +1120,7 @@
       "lat": 28.9207,
       "lon": -13.6728,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-tias.json"
     },
     {
@@ -1071,6 +1137,7 @@
       "lat": 28.2064,
       "lon": -14.027,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-tuineje.json"
     },
     {
@@ -1087,6 +1154,7 @@
       "lat": 28.8594,
       "lon": -13.8354,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-gc-yaiza.json"
     },
     {
@@ -1103,6 +1171,7 @@
       "lat": 36.7276,
       "lon": -3.7261,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-gr-almunecar.json"
     },
     {
@@ -1119,6 +1188,7 @@
       "lat": 36.723,
       "lon": -3.5218,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-gr-motril.json"
     },
     {
@@ -1135,6 +1205,7 @@
       "lat": 37.2114,
       "lon": -7.4067,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-h-ayamonte.json"
     },
     {
@@ -1151,6 +1222,7 @@
       "lat": 37.2159,
       "lon": -7.1293,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-h-cartaya.json"
     },
     {
@@ -1167,6 +1239,7 @@
       "lat": 37.13,
       "lon": -6.834,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-h-huelva.json"
     },
     {
@@ -1183,6 +1256,7 @@
       "lat": 37.1963,
       "lon": -7.3282,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-h-isla-cristina.json"
     },
     {
@@ -1199,6 +1273,7 @@
       "lat": 37.169,
       "lon": -6.9049,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-h-palos-de-la-frontera.json"
     },
     {
@@ -1215,6 +1290,7 @@
       "lat": 37.1803,
       "lon": -6.9565,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-h-punta-umbria.json"
     },
     {
@@ -1231,6 +1307,7 @@
       "lat": 43.5663,
       "lon": -7.2553,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-lu-foz.json"
     },
     {
@@ -1247,6 +1324,7 @@
       "lat": 43.6672,
       "lon": -7.595,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-lu-viveiro.json"
     },
     {
@@ -1263,6 +1341,7 @@
       "lat": 36.415,
       "lon": -5.1572,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-ma-estepona.json"
     },
     {
@@ -1279,6 +1358,7 @@
       "lat": 36.5429,
       "lon": -4.6177,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-ma-fuengirola.json"
     },
     {
@@ -1295,6 +1375,7 @@
       "lat": 36.713,
       "lon": -4.416,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-ma-malaga.json"
     },
     {
@@ -1311,6 +1392,7 @@
       "lat": 36.3558,
       "lon": -5.2297,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-ma-manilva.json"
     },
     {
@@ -1327,6 +1409,7 @@
       "lat": 36.5061,
       "lon": -4.8889,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-ma-marbella.json"
     },
     {
@@ -1343,6 +1426,7 @@
       "lat": 35.2889,
       "lon": -2.9348,
       "timezone": "Africa/Ceuta",
+      "caladero": "mediterraneo",
       "stationFile": "es-me-melilla.json"
     },
     {
@@ -1359,6 +1443,7 @@
       "lat": 37.405,
       "lon": -1.5729,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-mu-aguilas.json"
     },
     {
@@ -1375,6 +1460,7 @@
       "lat": 37.6338,
       "lon": -0.696,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-mu-cabo-de-palos.json"
     },
     {
@@ -1391,6 +1477,7 @@
       "lat": 37.5833,
       "lon": -1.0,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-mu-cartagena.json"
     },
     {
@@ -1407,6 +1494,7 @@
       "lat": 37.7333,
       "lon": -0.7167,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-mu-la-manga.json"
     },
     {
@@ -1423,6 +1511,7 @@
       "lat": 37.5569,
       "lon": -1.2738,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-mu-mazarron.json"
     },
     {
@@ -1439,6 +1528,7 @@
       "lat": 43.5373,
       "lon": -7.0236,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-o-castropol.json"
     },
     {
@@ -1455,6 +1545,7 @@
       "lat": 43.5458,
       "lon": -5.6669,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-o-gijon.json"
     },
     {
@@ -1471,6 +1562,7 @@
       "lat": 39.8391,
       "lon": 3.1352,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-alcudia.json"
     },
     {
@@ -1487,6 +1579,7 @@
       "lat": 39.5112,
       "lon": 2.468,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-calvia.json"
     },
     {
@@ -1503,6 +1596,7 @@
       "lat": 39.362,
       "lon": 2.954,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-campos.json"
     },
     {
@@ -1519,6 +1613,7 @@
       "lat": 40.0016,
       "lon": 3.8354,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-ciutadella-de-menorca.json"
     },
     {
@@ -1535,6 +1630,7 @@
       "lat": 39.8784,
       "lon": 4.2932,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-es-castell.json"
     },
     {
@@ -1551,6 +1647,7 @@
       "lat": 40.0549,
       "lon": 4.1311,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-es-mercadal.json"
     },
     {
@@ -1567,6 +1664,7 @@
       "lat": 39.4235,
       "lon": 3.2625,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-felanitx.json"
     },
     {
@@ -1583,6 +1681,7 @@
       "lat": 38.7339,
       "lon": 1.4148,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-formentera.json"
     },
     {
@@ -1599,6 +1698,7 @@
       "lat": 38.9122,
       "lon": 1.4482,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-ibiza.json"
     },
     {
@@ -1615,6 +1715,7 @@
       "lat": 39.501,
       "lon": 2.7475,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-llucmajor.json"
     },
     {
@@ -1631,6 +1732,7 @@
       "lat": 39.8908,
       "lon": 4.2642,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-mahon.json"
     },
     {
@@ -1647,6 +1749,7 @@
       "lat": 39.5393,
       "lon": 3.3346,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-manacor.json"
     },
     {
@@ -1663,6 +1766,7 @@
       "lat": 39.556,
       "lon": 2.63,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-palma.json"
     },
     {
@@ -1679,6 +1783,7 @@
       "lat": 39.9045,
       "lon": 3.0854,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-pollenca.json"
     },
     {
@@ -1695,6 +1800,7 @@
       "lat": 38.9767,
       "lon": 1.2978,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-sant-antoni-de-portmany.json"
     },
     {
@@ -1711,6 +1817,7 @@
       "lat": 38.984,
       "lon": 1.5398,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-santa-eularia-des-riu.json"
     },
     {
@@ -1727,6 +1834,7 @@
       "lat": 39.797,
       "lon": 2.6939,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-pm-soller.json"
     },
     {
@@ -1743,6 +1851,7 @@
       "lat": 42.1196,
       "lon": -8.8455,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-po-baiona.json"
     },
     {
@@ -1759,6 +1868,7 @@
       "lat": 42.3283,
       "lon": -8.7861,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-po-bueu.json"
     },
     {
@@ -1775,6 +1885,7 @@
       "lat": 42.5185,
       "lon": -8.8231,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-po-cambados.json"
     },
     {
@@ -1791,6 +1902,7 @@
       "lat": 42.3994,
       "lon": -8.6977,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-po-marin.json"
     },
     {
@@ -1807,6 +1919,7 @@
       "lat": 42.4969,
       "lon": -8.8604,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-po-o-grove.json"
     },
     {
@@ -1823,6 +1936,7 @@
       "lat": 42.4286,
       "lon": -8.705,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-po-poio.json"
     },
     {
@@ -1839,6 +1953,7 @@
       "lat": 42.2944,
       "lon": -8.6163,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-po-redondela.json"
     },
     {
@@ -1855,6 +1970,7 @@
       "lat": 42.398,
       "lon": -8.8036,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-po-sanxenxo.json"
     },
     {
@@ -1871,6 +1987,7 @@
       "lat": 42.2406,
       "lon": -8.7207,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-po-vigo.json"
     },
     {
@@ -1887,6 +2004,7 @@
       "lat": 42.5985,
       "lon": -8.7749,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-po-vilagarcia-de-arousa.json"
     },
     {
@@ -1903,6 +2021,7 @@
       "lat": 43.3835,
       "lon": -3.217,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-s-castro-urdiales.json"
     },
     {
@@ -1919,6 +2038,7 @@
       "lat": 43.4,
       "lon": -3.8149,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-s-el-astillero.json"
     },
     {
@@ -1935,6 +2055,7 @@
       "lat": 43.4623,
       "lon": -3.79,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-s-santander.json"
     },
     {
@@ -1951,6 +2072,7 @@
       "lat": 43.4369,
       "lon": -3.4264,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-s-santona.json"
     },
     {
@@ -1967,6 +2089,7 @@
       "lat": 37.3703,
       "lon": -5.9935,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-se-seville.json"
     },
     {
@@ -1983,6 +2106,7 @@
       "lat": 43.3228,
       "lon": -1.9885,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-ss-donostia.json"
     },
     {
@@ -1999,6 +2123,7 @@
       "lat": 43.3053,
       "lon": -2.2004,
       "timezone": "Europe/Madrid",
+      "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
       "stationFile": "es-ss-getaria.json"
     },
     {
@@ -2015,6 +2140,7 @@
       "lat": 41.1885,
       "lon": 1.6066,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-t-calafell.json"
     },
     {
@@ -2031,6 +2157,7 @@
       "lat": 41.1773,
       "lon": 1.5261,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-t-el-vendrell.json"
     },
     {
@@ -2047,6 +2174,7 @@
       "lat": 40.9286,
       "lon": 0.851,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-t-l-ametlla-de-mar.json"
     },
     {
@@ -2063,6 +2191,7 @@
       "lat": 40.7764,
       "lon": 0.7438,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-t-l-ampolla.json"
     },
     {
@@ -2079,6 +2208,7 @@
       "lat": 41.1686,
       "lon": 1.486,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-t-roda-de-bera.json"
     },
     {
@@ -2095,6 +2225,7 @@
       "lat": 41.108,
       "lon": 1.2521,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-t-tarragona.json"
     },
     {
@@ -2111,6 +2242,7 @@
       "lat": 41.1355,
       "lon": 1.4023,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-t-torredembarra.json"
     },
     {
@@ -2127,6 +2259,7 @@
       "lat": 40.9891,
       "lon": 0.9285,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-t-vandellos-i-l-hospitalet-de-l-infant.json"
     },
     {
@@ -2143,6 +2276,7 @@
       "lat": 28.0786,
       "lon": -16.7371,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-tf-adeje.json"
     },
     {
@@ -2159,6 +2293,7 @@
       "lat": 28.0271,
       "lon": -17.1976,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-tf-alajero.json"
     },
     {
@@ -2175,6 +2310,7 @@
       "lat": 28.0488,
       "lon": -16.7191,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-tf-arona.json"
     },
     {
@@ -2191,6 +2327,7 @@
       "lat": 28.3571,
       "lon": -16.3684,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-tf-candelaria.json"
     },
     {
@@ -2207,6 +2344,7 @@
       "lat": 27.6399,
       "lon": -17.9804,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-tf-el-pinar-de-el-hierro.json"
     },
     {
@@ -2223,6 +2361,7 @@
       "lat": 28.4009,
       "lon": -16.3219,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-tf-el-rosario.json"
     },
     {
@@ -2239,6 +2378,7 @@
       "lat": 28.2333,
       "lon": -16.3833,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-tf-fasnia.json"
     },
     {
@@ -2255,6 +2395,7 @@
       "lat": 28.3734,
       "lon": -16.7545,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-tf-garachico.json"
     },
     {
@@ -2271,6 +2412,7 @@
       "lat": 28.1795,
       "lon": -16.8148,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-tf-guia-de-isora.json"
     },
     {
@@ -2287,6 +2429,7 @@
       "lat": 28.0887,
       "lon": -17.1077,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-tf-san-sebastian-de-la-gomera.json"
     },
     {
@@ -2303,6 +2446,7 @@
       "lat": 28.478,
       "lon": -16.234,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-tf-santa-cruz-de-tenerife.json"
     },
     {
@@ -2319,6 +2463,7 @@
       "lat": 28.6445,
       "lon": -17.9435,
       "timezone": "Atlantic/Canary",
+      "caladero": "canario",
       "stationFile": "es-tf-tazacorte.json"
     },
     {
@@ -2335,6 +2480,7 @@
       "lat": 39.5111,
       "lon": -0.3167,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-v-alboraya.json"
     },
     {
@@ -2351,6 +2497,7 @@
       "lat": 39.6737,
       "lon": -0.2022,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-v-canet-d-en-berenguer.json"
     },
     {
@@ -2367,6 +2514,7 @@
       "lat": 38.9951,
       "lon": -0.156,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-v-gandia.json"
     },
     {
@@ -2383,6 +2531,7 @@
       "lat": 38.9322,
       "lon": -0.0948,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-v-oliva.json"
     },
     {
@@ -2399,6 +2548,7 @@
       "lat": 39.6458,
       "lon": -0.2146,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-v-sagunto.json"
     },
     {
@@ -2415,6 +2565,7 @@
       "lat": 39.3612,
       "lon": -0.39,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-v-silla.json"
     },
     {
@@ -2431,6 +2582,7 @@
       "lat": 39.2785,
       "lon": -0.2748,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-v-sueca.json"
     },
     {
@@ -2447,6 +2599,7 @@
       "lat": 39.4419,
       "lon": -0.3171,
       "timezone": "Europe/Madrid",
+      "caladero": "mediterraneo",
       "stationFile": "es-v-valencia.json"
     }
   ]
