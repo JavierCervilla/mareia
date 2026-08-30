@@ -7,6 +7,7 @@ import {
 import { fishingModule } from "@mareia/module-fishing";
 import { protectedAreasModule } from "@mareia/module-protected-areas";
 import { regulationsModule } from "@mareia/module-regulations";
+import { speciesModule } from "@mareia/module-species";
 import { WEATHER_UI_MODULE } from "@mareia/module-weather/ui";
 
 /**
@@ -21,10 +22,16 @@ import { WEATHER_UI_MODULE } from "@mareia/module-weather/ui";
  * servidor y sin JavaScript.
  *
  * `protectedAreasModule` (T-21) aporta las áreas marinas protegidas que el puerto tiene a menos de
- * 30 km: también dato de build, sin servidor y sin JavaScript, y **la primera de las cuatro
+ * 30 km: también dato de build, sin servidor y sin JavaScript, y **la primera de las cinco
  * secciones de módulo** (`order: 12`), porque es una advertencia y no una consulta.
  *
- * **Dar de baja cualquiera de los cuatro es borrar su línea**: la página sigue construyendo, sin esa
+ * `speciesModule` (T-20) es **la última** (`order: 35`) y la única que no publica una tabla: aporta
+ * un enlace al catálogo de especies filtrado por el caladero de este puerto. Va detrás de las
+ * tallas porque amplía lo que se acaba de leer, y no las repite —dos superficies del mismo dato se
+ * desincronizan—. Es también el único módulo **sin política offline**, y eso es una afirmación: lo
+ * que hay al otro lado del enlace no se guarda con el puerto, y la sección lo dice en la página.
+ *
+ * **Dar de baja cualquiera de los cinco es borrar su línea**: la página sigue construyendo, sin esa
  * sección, y quitando meteo se queda además **sin JavaScript de cliente**. Lo comprueba
  * `modules.config.test.ts`.
  */
@@ -33,6 +40,7 @@ export const activeModules: readonly AppModule[] = [
   WEATHER_UI_MODULE,
   regulationsModule,
   protectedAreasModule,
+  speciesModule,
 ];
 
 /**

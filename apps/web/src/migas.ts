@@ -28,6 +28,17 @@ export function migasDeMareas(): readonly Miga[] {
   return [INICIO, { ...MAREAS, ruta: undefined }];
 }
 
+/**
+ * Migas del catálogo de especies.
+ *
+ * **Dos escalones y no tres**, aunque la URL tenga dos tramos: `/pesca/` no es una página del
+ * portal (ver `RUTA_ESPECIES`), y una miga que enlazase ahí llevaría al 404. Una ruta de navegación
+ * que miente sobre lo que existe es peor que una corta.
+ */
+export function migasDeEspecies(): readonly Miga[] {
+  return [INICIO, { nombre: "Especies que regula el BOE", ruta: undefined }];
+}
+
 /** Migas de la página de una región. */
 export function migasDeRegion(region: Segmento, actual = true): readonly Miga[] {
   return [

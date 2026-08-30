@@ -1,0 +1,89 @@
+---
+/**
+ * La sección que aporta el módulo `species`: **un enlace al catálogo de especies filtrado por el
+ * caladero de este puerto**, y deliberadamente no una segunda tabla.
+ *
+ * Entra por donde tienen que entrar las secciones de módulo: el módulo declara su `PageSection`
+ * (una cadena), `src/secciones.ts` la traduce a este componente y `SeccionesDeModulos` lo coloca. El
+ * caladero se pide **por slug**, como manda `ContextoDeSeccion`, y se lo pide a `normativa.ts`, que
+ * es quien decide qué tabla de tallas publica la página: así el enlace no puede llevar al filtro de
+ * un caladero distinto del de la tabla que hay tres párrafos más arriba.
+ *
+ * **Por qué esto no es una tabla**, que es la decisión de forma de la trayectoria: las tallas de
+ * este puerto ya están arriba, salen del BOE y llevan sus notas pegadas a cada cifra. Repetirlas
+ * aquí con otra composición serían dos superficies del mismo dato, y dos superficies del mismo dato
+ * se desincronizan —basta con que una corrección entre por una y no por la otra— hasta publicar dos
+ * cifras legales distintas para la misma especie en la misma página. Lo que el catálogo añade no
+ * depende del puerto, así que vive en una página y no en 153.
+ *
+ * Lo que se pinta, en este orden y por este motivo:
+ *
+ * 1. **Qué añade el catálogo** y por qué no repite la tabla (`POR_QUE_UN_ENLACE`).
+ * 2. **El enlace**, con la cuenta de especies de este caladero horneada desde el propio dataset.
+ * 3. **Que sin cobertura no abre** (`SIN_RED_NO_ABRE`). Va aquí y no en un pie porque califica al
+ *    enlace: el módulo **no declara política offline** —el catálogo no se guarda con el puerto— y
+ *    una sección que promete lo contrario es lo que hubo que corregir en T-19 (hallazgo H-4).
+ * 4. **Las fuentes**, con la condición de WoRMS a la vista.
+ *
+ * Cero *juice*: aquí no hay ninguna cifra legal, pero sí una cuenta («las 52 especies de tu
+ * caladero») y un enlace, y el brief (§3) ya veta convertir un dato en un reclamo.
+ *
+ * Su hoja de estilos la importa el LAYOUT y no este componente, por lo medido en T-10: importada
+ * desde aquí, Astro no la mete en el bundle cuando el componente llega por el mapa de renderizadores
+ * y la sección se publica **sin estilos**, con todo en verde.
+ */
+import {
+  ATRIBUCIONES_SPECIES,
+  enlaceAlCatalogo,
+  ID_SECCION_ESPECIES,
+  POR_QUE_UN_ENLACE,
+  ROTULO_FUENTES,
+  SIN_RED_NO_ABRE,
+  tituloDeLaSeccion,
+} from "@mareia/module-species";
+
+import type { ContextoDeSeccion } from "../../modulos/contexto.ts";
+import {
+  cargarCatalogoDelPuerto,
+  rutaDelCatalogoFiltrado,
+} from "../../modulos/especies/catalogo.ts";
+
+interface Props {
+  contexto: ContextoDeSeccion;
+}
+
+const { contexto } = Astro.props;
+
+const caladero = await cargarCatalogoDelPuerto(contexto);
+---
+
+{/*
+  El `id` del título es `titulo-<id de la sección>` porque el `aria-labelledby` lo compone
+  `SeccionesDeModulos.astro`: sin esta convención la sección no se expone como región y el `id`
+  queda colgando. Lo caza `todaSeccionDeBloqueTieneNombreAccesible` (hallazgo A-13 de T-10).
+*/}
+<h2 class="bloque__titulo" id={`titulo-${ID_SECCION_ESPECIES}`}>
+  {tituloDeLaSeccion(caladero.nombre)}
+</h2>
+
+<p class="especies__intro">{POR_QUE_UN_ENLACE}</p>
+
+<p class="especies__enlace">
+  <a href={rutaDelCatalogoFiltrado(caladero.id)}>
+    {enlaceAlCatalogo(caladero.especies, caladero.nombre)}
+  </a>
+</p>
+
+<p class="especies__aviso">{SIN_RED_NO_ABRE}</p>
+
+<p class="datos__nota">
+  {ROTULO_FUENTES} ·{" "}
+  {
+    ATRIBUCIONES_SPECIES.map((atribucion, indice) => (
+      <>
+        {indice > 0 && <> · </>}
+        <a href={atribucion.url}>{atribucion.name}</a> ({atribucion.license})
+      </>
+    ))
+  }
+</p>

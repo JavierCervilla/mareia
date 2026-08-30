@@ -20,6 +20,18 @@ export interface PuertoUbicado {
 /** Raíz de la sección de mareas: el índice de regiones. */
 export const RUTA_MAREAS = "/mareas/";
 
+/**
+ * El catálogo de especies (T-20). **La ruta la decidió el humano**, y por eso está aquí escrita una
+ * sola vez: la usan la página, el sitemap y las 153 secciones de puerto que enlazan a ella.
+ *
+ * `/pesca/` **no es una página**: hoy sólo hay un contenido colgando de ese tramo. Es la única URL
+ * del portal cuyo padre no se puede recortar en la barra de direcciones, y se deja dicho aquí en vez
+ * de disimularse con un índice inventado de una sola entrada. Las migas del catálogo tampoco lo
+ * enlazan, que sería enlazar a un 404. El día que cuelgue algo más de `/pesca/`, ese índice tendrá
+ * contenido y entrará con él.
+ */
+export const RUTA_ESPECIES = "/pesca/especies/";
+
 export function rutaRegion(regionSlug: string): string {
   return `${RUTA_MAREAS}${regionSlug}/`;
 }

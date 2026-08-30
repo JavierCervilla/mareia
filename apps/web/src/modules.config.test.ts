@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import type { AppModule } from "@mareia/module-contract";
 import { SECCION_AREAS_PROTEGIDAS } from "@mareia/module-protected-areas";
 import { SECCION_TALLAS_MINIMAS } from "@mareia/module-regulations";
+import { SECCION_CATALOGO_DE_ESPECIES } from "@mareia/module-species";
 import { METEO_SECTION_COMPONENT, WEATHER_UI_MODULE } from "@mareia/module-weather/ui";
 
 import { activeModules, sectionsForPort } from "./modules.config.ts";
@@ -36,17 +37,19 @@ const DUMMY: AppModule = {
   ],
 };
 
-test("el registry de producción publica los cuatro módulos y sus secciones, en orden", () => {
-  // Los cuatro, y en el orden que fija `order`: la unión es lo que rompía el merge de T-10 con
+test("el registry de producción publica los cinco módulos y sus secciones, en orden", () => {
+  // Los cinco, y en el orden que fija `order`: la unión es lo que rompía el merge de T-10 con
   // T-11, así que se afirma aquí en vez de dejar que cada trayectoria compruebe solo la suya.
   assert.deepEqual(
     activeModules.map((modulo) => modulo.id),
-    ["fishing", "weather", "regulations", "protected-areas"],
+    ["fishing", "weather", "regulations", "protected-areas", "species"],
   );
   // El orden es el de `order` y cuenta una decisión de diseño entera: las áreas protegidas van a
   // 12 —las primeras, porque son una advertencia y no una consulta—,
-  // solunar y meteo empatan a 20 (contextual) y las tallas van a 30 porque son consultables. Ver
-  // los TSDoc de `SECCION_AREAS` y `SECCION_TALLAS`.
+  // solunar y meteo empatan a 20 (contextual), las tallas van a 30 porque son consultables y el
+  // catálogo de especies va a 35, el último, porque es un enlace que amplía lo que se acaba de
+  // leer y puesto delante ofrecería irse de la página antes de enseñar la tabla. Ver los TSDoc de
+  // `SECCION_AREAS`, `SECCION_TALLAS` y `SECCION_ESPECIES`.
   assert.deepEqual(
     sectionsForPort(CORUNA).map((seccion) => [seccion.id, seccion.renderMode]),
     [
@@ -54,7 +57,12 @@ test("el registry de producción publica los cuatro módulos y sus secciones, en
       ["actividad-solunar", "static"],
       ["meteo", "island"],
       ["tallas-minimas", "static"],
+      ["especies", "static"],
     ],
+  );
+  assert.equal(
+    sectionsForPort(CORUNA).find((seccion) => seccion.id === "especies")?.component,
+    SECCION_CATALOGO_DE_ESPECIES,
   );
   assert.equal(
     sectionsForPort(CORUNA).find((seccion) => seccion.id === "areas-protegidas")?.component,

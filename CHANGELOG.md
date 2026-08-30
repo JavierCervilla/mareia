@@ -2,6 +2,82 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-30 — T-20 · Las 86 especies que el BOE regula, con los dos nombres que tienen
+
+El portal estrena página: **`/pesca/especies/`**, el catálogo de las **86 especies** a las que el RD
+560/1995 le fija una talla mínima, con el nombre que usa la norma, el que la ciencia acepta hoy, los
+caladeros que la regulan con su talla y los registros de presencia de OBIS. Es la primera vez que el
+proyecto publica un dato de **dos fuentes internacionales** (WoRMS y OBIS) y la primera vez que
+publica un número que **no significa lo que parece**.
+
+- **Los dos nombres, y el de la norma no se sustituye nunca.** La norma es de 1995 y la taxonomía se
+  ha movido: de los 86 nombres, **64 resuelven en WoRMS tal y como los escribe el BOE**, **15 son un
+  género** (`Sepia spp`, `Mullus spp`…) que se resuelve al género con una **correspondencia declarada
+  como nuestra**, y **7 no resuelven** —son grafías del propio BOE (`Cáncer pagurus`,
+  `Melanogrammús aeglefinus`, `Thunnus aibacares`…)— y publican por qué. De los que resuelven, **10
+  tienen hoy un nombre aceptado distinto** (`Solea vulgaris` → **Solea solea**, `Psetta maxima` →
+  **Scophthalmus maximus**, `Sparus auratus` → **Sparus aurata**…). **No es un error del BOE que haya
+  que arreglar**: el nombre de la norma es el que tiene consecuencia legal y el aceptado es el que
+  sirve para buscar la especie en cualquier otra base, así que se publican los dos, cada uno con su
+  fuente y su `AphiaID`, y la fila dice **por qué** difieren. El gate **E1** exige el nombre del BOE
+  **literal en las 86 filas** del `dist/`; probado en rojo publicando sólo el aceptado, que nombra
+  las 10 filas afectadas.
+- **Un género no se convierte en especie.** Las **15** filas `spp` publican su rango («género, no
+  especie») y ninguna nombra una especie concreta: que la talla aplique al género entero es un hecho
+  jurídico, y elegirle una especie sería estrecharle a la norma un alcance que la norma no estrecha.
+  Son 15 nombres del BOE sobre **14 géneros distintos**: `Mugil` sale dos veces, como `Mugil spp` en
+  el Anexo I y como `Mugil spps` —con la errata de la propia norma— en el II, y las dos se publican
+  tal cual.
+- **Los registros de OBIS son esfuerzo de muestreo, no abundancia, y ninguna cifra sale sin decirlo.**
+  La dorada en toda la costa gallega son **12 registros**, de 3 conjuntos de datos; la misma especie
+  en el conjunto de OBIS pasa de 18.000. Así que en esta página **no existe el elemento «número»**:
+  la cifra sale siempre dentro de una frase que lleva el sesgo pegado, en el mismo elemento, y la
+  explicación larga va antes de la primera cifra. El gate **E4** lo mide en el **bloque más interno**
+  que contiene cada número —no «en la página»—, sobre **todos** los HTML construidos: **114 cifras**,
+  todas con su sesgo al lado. Probado en rojo quitándole la coletilla a la frase: **113 cifras
+  desnudas** con la explicación larga todavía en la página, o sea que un gate a nivel de página
+  habría seguido verde. Y el cero no se publica como cifra: sin registros, la presencia es una
+  ausencia con su motivo (`0 registros` se leería como una ausencia medida, que es lo que OBIS no
+  puede afirmar).
+- **La sección de la página de puerto es UN ENLACE, no una segunda tabla.** Las tallas ya las publica
+  `regulations` con sus notas pegadas a cada cifra; repetirlas serían **dos superficies del mismo
+  dato**, y dos superficies del mismo dato se desincronizan hasta publicar dos cifras legales
+  distintas para la misma especie en la misma página. La sección enlaza al catálogo **ya filtrado por
+  el caladero del puerto** —51 especies en el Cantábrico y golfo de Cádiz, 33 en el Mediterráneo, 31
+  en el Canario— y ocupa **1.453 B** (753 B comprimidos). El mismo argumento decide el código: la
+  talla no se vuelve a escribir aquí, se presta `textoDeTalla` de `regulations`.
+- **El filtro por caladero es CSS puro, y usa `:target` en vez de los radios de la portada.** Un radio
+  no se puede preseleccionar desde una URL sin JavaScript, y la sección de los **153** puertos tiene
+  que enlazar al catálogo ya filtrado. Con `:target` el estado vive en el fragmento: los 153 enlaces
+  funcionan, el estado es compartible y la página conserva su **cero bytes de JavaScript**. Como un
+  selector de atributo no puede leer un identificador que sale del dataset, los tres caladeros están
+  escritos a mano en la hoja y **un gate exige que todo caladero del catálogo tenga sus reglas**, para
+  que un cuarto no rompa el filtro en silencio.
+- **`ModuleId` se amplía por tercera vez, a seis.** `species` no cuelga de `regulations` aunque hable
+  de lo mismo: lo que añade **no sale del BOE**, sale de WoRMS y de OBIS, y una de esas licencias trae
+  una condición —**no se puede redistribuir la base entera ni partes sustanciales de ella**— que hay
+  que poder leer sola y no diluida entre la reutilización de la legislación española. Lo que
+  publicamos es una **extracción curada**, y eso está escrito en el campo de licencia de la
+  atribución, no en un comentario. Va con `order: 35`, la última de las cinco secciones de módulo, y
+  es **el único módulo sin política offline**: el precacheo de esta PWA es **por favorito** y el
+  catálogo no está en lo que guarda un favorito, así que en vez de prometerlo la sección dice lo
+  contrario («este enlace necesita cobertura»).
+- **Dos hallazgos que salieron de medir y no de leer.** El gate E1 se puso rojo en su primera pasada
+  con una fila real: el BOE escribe **`Thunnus thynnus`** en los Anexos I y II y **`Thunnus Thynnus`**
+  en el III, dos nombres que cualquier slug en minúsculas colapsa en uno —y con la clave repetida, el
+  gate encuentra siempre la primera fila y la segunda puede publicarse a medias en verde—. No se
+  corrige la ortografía de la norma: son dos entradas, y el lector **rechaza el dataset si dos
+  especies comparten clave**. Y la cigala (`Nephrops norvegicus`) tiene **dos tallas en el mismo
+  anexo** —2 cm de cefalotórax y 7 cm de longitud total—: sin decir qué mide cada una, las dos cifras
+  se leen como una contradicción, y publicadas como dos entradas repetían el mismo recuento de OBIS
+  dos veces en la misma fila, que es una invitación a sumarlos. Ahora las tallas cuelgan de su
+  caladero (varias) y la presencia es una sola, y el lector **levanta si dos entradas del mismo
+  caladero traen presencias distintas**.
+- **Medido al cerrar el carril de interfaz**: `pnpm test` **641 en verde** · `pnpm lint`,
+  `pnpm typecheck`, `pnpm --filter web check` y `pnpm --filter web build` en 0 · el catálogo son
+  **99.289 B** de HTML (8.935 B comprimidos) con **86 filas** y **cero scripts** salvo el JSON-LD ·
+  **153** páginas de puerto con su enlace al catálogo filtrado, comprobado contra el `dist/`.
+
 ## 2026-08-30 — T-21 · Áreas marinas protegidas: 348 avisos, 10 «ninguna» y ni un vértice
 
 La página de puerto publica los espacios marinos protegidos que tiene a menos de **30 km** —nombre

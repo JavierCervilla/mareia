@@ -1,0 +1,3443 @@
+{
+ "schema": "especies/v1",
+ "fuentes": {
+  "worms": {
+   "nombre": "WoRMS · World Register of Marine Species",
+   "url": "https://www.marinespecies.org/",
+   "licencia": "CC-BY-4.0 (no permite redistribuir la base entera)",
+   "consultadoEn": "2026-08-30"
+  },
+  "obis": {
+   "nombre": "OBIS · Ocean Biodiversity Information System",
+   "url": "https://obis.org/",
+   "licencia": "CC-BY-4.0",
+   "consultadoEn": "2026-08-30"
+  }
+ },
+ "criterio": {
+  "cajas": [
+   {
+    "caladero": "cantabrico-noroeste-y-golfo-de-cadiz",
+    "latMin": 35.9,
+    "latMax": 44.4,
+    "lonMin": -9.6,
+    "lonMax": -1.7
+   },
+   {
+    "caladero": "mediterraneo",
+    "latMin": 35.1,
+    "latMax": 42.5,
+    "lonMin": -5.6,
+    "lonMax": 4.6
+   },
+   {
+    "caladero": "canario",
+    "latMin": 27.5,
+    "latMax": 29.5,
+    "lonMin": -18.3,
+    "lonMax": -13.3
+   }
+  ]
+ },
+ "especies": [
+  {
+   "nombreBoe": "Alosa spp",
+   "clave": "alosa-spp",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Sabalos",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 30
+     },
+     "textoOriginal": "30",
+     "presencia": {
+      "registros": 888,
+      "datasets": 2,
+      "desde": 2014,
+      "hasta": 2019
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -1,
+    "nombre": "Alosa",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-1",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Alosa spp», que no es un binomio; se ha resuelto el género «Alosa», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Anguilla anguilla",
+   "clave": "anguilla-anguilla",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Anguila",
+     "medida": null,
+     "talla": {
+      "tipo": "por_determinar",
+      "segunNota": "(*)"
+     },
+     "textoOriginal": "(*)",
+     "presencia": {
+      "registros": 251,
+      "datasets": 4,
+      "desde": 2003,
+      "hasta": 2008
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -2,
+    "nombre": "Anguilla anguilla",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-2",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Belone belone",
+   "clave": "belone-belone",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Aguja",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 25
+     },
+     "textoOriginal": "25",
+     "presencia": {
+      "registros": 836,
+      "datasets": 3,
+      "desde": 2019,
+      "hasta": 2020
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Aguja",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 25
+     },
+     "textoOriginal": "25",
+     "presencia": {
+      "registros": 239,
+      "datasets": 4,
+      "desde": 2004,
+      "hasta": 2010
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Aguja",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 25
+     },
+     "textoOriginal": "25",
+     "presencia": {
+      "registros": 899,
+      "datasets": 4,
+      "desde": 2011,
+      "hasta": 2016
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -3,
+    "nombre": "Belone belone",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-3",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Boops boops",
+   "clave": "boops-boops",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Boga",
+     "medida": null,
+     "talla": {
+      "tipo": "sin_dato_legible",
+      "motivo": "la norma imprime «1 1», que no se lee como una talla en cm ni como un peso; se publica el literal porque corregir por inferencia una cifra legal es inventarla"
+     },
+     "textoOriginal": "1 1",
+     "presencia": {
+      "registros": 289,
+      "datasets": 2,
+      "desde": 2019,
+      "hasta": 2024
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Boga",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 11
+     },
+     "textoOriginal": "11",
+     "presencia": {
+      "registros": 890,
+      "datasets": 3,
+      "desde": 2010,
+      "hasta": 2016
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Boga",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 11
+     },
+     "textoOriginal": "11",
+     "presencia": {
+      "registros": 255,
+      "datasets": 4,
+      "desde": 2011,
+      "hasta": 2021
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -4,
+    "nombre": "Boops boops",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-4",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Brama brama",
+   "clave": "brama-brama",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Palometa negra o japuta",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 16
+     },
+     "textoOriginal": "16",
+     "presencia": {
+      "registros": 558,
+      "datasets": 5,
+      "desde": 2017,
+      "hasta": 2018
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Palometa negra o japuta",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 16
+     },
+     "textoOriginal": "16",
+     "presencia": {
+      "registros": 819,
+      "datasets": 1,
+      "desde": 2009,
+      "hasta": 2010
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Palometa negra o japuta",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 16
+     },
+     "textoOriginal": "16",
+     "presencia": {
+      "registros": 333,
+      "datasets": 5,
+      "desde": 2010,
+      "hasta": 2016
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -5,
+    "nombre": "Brama brama",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-5",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Clupea harengus",
+   "clave": "clupea-harengus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Arenque",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 20
+     },
+     "textoOriginal": "20",
+     "presencia": {
+      "registros": 305,
+      "datasets": 1,
+      "desde": 2011,
+      "hasta": 2016
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -6,
+    "nombre": "Clupea harengus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-6",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Conger conger",
+   "clave": "conger-conger",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Congrio",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 58
+     },
+     "textoOriginal": "58",
+     "presencia": {
+      "registros": 877,
+      "datasets": 2,
+      "desde": 2002,
+      "hasta": 2007
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -7,
+    "nombre": "Conger conger",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-7",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Cáncer pagurus",
+   "clave": "cancer-pagurus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Buey",
+     "medida": null,
+     "talla": {
+      "tipo": "por_determinar",
+      "segunNota": "(*)"
+     },
+     "textoOriginal": "(*)",
+     "presencia": {
+      "registros": 972,
+      "datasets": 6,
+      "desde": 1999,
+      "hasta": 2003
+     }
+    }
+   ],
+   "worms": null,
+   "sinResolver": "WoRMS no encuentra este nombre: la norma escribe «Cáncer» con una tilde que el latín no lleva."
+  },
+  {
+   "nombreBoe": "Dentex filosus",
+   "clave": "dentex-filosus",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Sama de pluma",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 35
+     },
+     "textoOriginal": "35",
+     "presencia": {
+      "registros": 902,
+      "datasets": 2,
+      "desde": 2008,
+      "hasta": 2015
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -9,
+    "nombre": "Dentex filosus",
+    "estado": "unaccepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-9",
+    "aceptado": {
+     "aphiaId": -1009,
+     "nombre": "Dentex gibbosus"
+    },
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Dentex macrophtalmus",
+   "clave": "dentex-macrophtalmus",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Cachucho",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 22
+     },
+     "textoOriginal": "22",
+     "presencia": {
+      "registros": 616,
+      "datasets": 1,
+      "desde": 2007,
+      "hasta": 2014
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -10,
+    "nombre": "Dentex macrophtalmus",
+    "estado": "unaccepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-10",
+    "aceptado": {
+     "aphiaId": -1010,
+     "nombre": "Dentex macrophthalmus"
+    },
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Dicentrarchus labrax",
+   "clave": "dicentrarchus-labrax",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Lubina",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 36
+     },
+     "textoOriginal": "36 (***)",
+     "presencia": {
+      "registros": 339,
+      "datasets": 1,
+      "desde": 2007,
+      "hasta": 2017
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Lubina",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 23
+     },
+     "textoOriginal": "23",
+     "presencia": {
+      "registros": 1120,
+      "datasets": 3,
+      "desde": 2004,
+      "hasta": 2005
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Lubina",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 22
+     },
+     "textoOriginal": "22",
+     "presencia": {
+      "registros": 423,
+      "datasets": 5,
+      "desde": 2016,
+      "hasta": 2024
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -11,
+    "nombre": "Dicentrarchus labrax",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-11",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Dicologoglossa cuneata",
+   "clave": "dicologoglossa-cuneata",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Acedia",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 15
+     },
+     "textoOriginal": "15",
+     "presencia": {
+      "registros": 1069,
+      "datasets": 5,
+      "desde": 2003,
+      "hasta": 2005
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -12,
+    "nombre": "Dicologoglossa cuneata",
+    "estado": "unaccepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-12",
+    "aceptado": {
+     "aphiaId": -1012,
+     "nombre": "Dicologlossa cuneata"
+    },
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Diplodus sargus",
+   "clave": "diplodus-sargus",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Sargo",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 22
+     },
+     "textoOriginal": "22",
+     "presencia": {
+      "registros": 715,
+      "datasets": 2,
+      "desde": 2002,
+      "hasta": 2003
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -13,
+    "nombre": "Diplodus sargus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-13",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Diplodus spp",
+   "clave": "diplodus-spp",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Sargo",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 15
+     },
+     "textoOriginal": "15",
+     "presencia": {
+      "registros": 537,
+      "datasets": 1,
+      "desde": 2015,
+      "hasta": 2024
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -14,
+    "nombre": "Diplodus",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-14",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Diplodus spp», que no es un binomio; se ha resuelto el género «Diplodus», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Diplodus vulgaris",
+   "clave": "diplodus-vulgaris",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Mojarra",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 22
+     },
+     "textoOriginal": "22",
+     "presencia": {
+      "registros": 814,
+      "datasets": 2,
+      "desde": 2001,
+      "hasta": 2001
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -15,
+    "nombre": "Diplodus vulgaris",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-15",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Engraulis encrasicholus",
+   "clave": "engraulis-encrasicholus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Boquerón",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 12
+     },
+     "textoOriginal": "12 (**)",
+     "presencia": {
+      "registros": 92,
+      "datasets": 5,
+      "desde": 2007,
+      "hasta": 2012
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Boquerón",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 9
+     },
+     "textoOriginal": "9",
+     "presencia": {
+      "registros": 983,
+      "datasets": 4,
+      "desde": 2010,
+      "hasta": 2016
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Boquerón",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 9
+     },
+     "textoOriginal": "9",
+     "presencia": {
+      "registros": 1050,
+      "datasets": 6,
+      "desde": 2002,
+      "hasta": 2009
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -16,
+    "nombre": "Engraulis encrasicholus",
+    "estado": "unaccepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-16",
+    "aceptado": {
+     "aphiaId": -1016,
+     "nombre": "Engraulis encrasicolus"
+    },
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Epinephelus marginatus",
+   "clave": "epinephelus-marginatus",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Mero",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 45
+     },
+     "textoOriginal": "45",
+     "presencia": {
+      "registros": 887,
+      "datasets": 5,
+      "desde": 2000,
+      "hasta": 2002
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -17,
+    "nombre": "Epinephelus marginatus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-17",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Epinephelus spp",
+   "clave": "epinephelus-spp",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Mero",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 45
+     },
+     "textoOriginal": "45",
+     "presencia": {
+      "registros": 744,
+      "datasets": 1,
+      "desde": 2003,
+      "hasta": 2011
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -18,
+    "nombre": "Epinephelus",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-18",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Epinephelus spp», que no es un binomio; se ha resuelto el género «Epinephelus», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Gadus morhua",
+   "clave": "gadus-morhua",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Bacalao",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 35
+     },
+     "textoOriginal": "35",
+     "presencia": {
+      "registros": 918,
+      "datasets": 1,
+      "desde": 2018,
+      "hasta": 2023
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -19,
+    "nombre": "Gadus morhua",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-19",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Gliptocephalus cynoglossus",
+   "clave": "gliptocephalus-cynoglossus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Mendo",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 28
+     },
+     "textoOriginal": "28",
+     "presencia": null
+    }
+   ],
+   "worms": null,
+   "sinResolver": "WoRMS no encuentra este nombre: la norma escribe «Gliptocephalus» donde el género se escribe con «y»."
+  },
+  {
+   "nombreBoe": "Gymnothorax unicolor",
+   "clave": "gymnothorax-unicolor",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Murión",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 57
+     },
+     "textoOriginal": "57",
+     "presencia": {
+      "registros": 97,
+      "datasets": 4,
+      "desde": 2005,
+      "hasta": 2005
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -21,
+    "nombre": "Gymnothorax unicolor",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-21",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Homarus gammarus",
+   "clave": "homarus-gammarus",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Bogavante",
+     "medida": "Longitud cefalotórax",
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 8.5
+     },
+     "textoOriginal": "8,5",
+     "presencia": {
+      "registros": 269,
+      "datasets": 3,
+      "desde": 2013,
+      "hasta": 2018
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -22,
+    "nombre": "Homarus gammarus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-22",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Lepidorhombus spp",
+   "clave": "lepidorhombus-spp",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Gallos",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 20
+     },
+     "textoOriginal": "20",
+     "presencia": {
+      "registros": 951,
+      "datasets": 2,
+      "desde": 2018,
+      "hasta": 2025
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Gallo",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 15
+     },
+     "textoOriginal": "15",
+     "presencia": {
+      "registros": 756,
+      "datasets": 4,
+      "desde": 1998,
+      "hasta": 2007
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -23,
+    "nombre": "Lepidorhombus",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-23",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Lepidorhombus spp», que no es un binomio; se ha resuelto el género «Lepidorhombus», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Limanda limanda",
+   "clave": "limanda-limanda",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Limanda",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 23
+     },
+     "textoOriginal": "23",
+     "presencia": {
+      "registros": 1014,
+      "datasets": 5,
+      "desde": 2004,
+      "hasta": 2009
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -24,
+    "nombre": "Limanda limanda",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-24",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Loligo vulgaris",
+   "clave": "loligo-vulgaris",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Calamar",
+     "medida": null,
+     "talla": {
+      "tipo": "por_determinar",
+      "segunNota": "(*)"
+     },
+     "textoOriginal": "(*)",
+     "presencia": {
+      "registros": 47,
+      "datasets": 2,
+      "desde": 2016,
+      "hasta": 2022
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -25,
+    "nombre": "Loligo vulgaris",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-25",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Lophius piscatorius, L. Budegassa",
+   "clave": "lophius-piscatorius-l-budegassa",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Rape",
+     "medida": null,
+     "talla": {
+      "tipo": "por_determinar",
+      "segunNota": "(*)"
+     },
+     "textoOriginal": "(*)",
+     "presencia": {
+      "registros": 398,
+      "datasets": 6,
+      "desde": 2008,
+      "hasta": 2014
+     }
+    }
+   ],
+   "worms": null,
+   "sinResolver": "WoRMS no encuentra este nombre: la norma mete dos especies en una sola celda y eso no es un binomio."
+  },
+  {
+   "nombreBoe": "Lophius spp",
+   "clave": "lophius-spp",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Rape",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 30
+     },
+     "textoOriginal": "30",
+     "presencia": {
+      "registros": 244,
+      "datasets": 3,
+      "desde": 2016,
+      "hasta": 2025
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -27,
+    "nombre": "Lophius",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-27",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Lophius spp», que no es un binomio; se ha resuelto el género «Lophius», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Maja squinado",
+   "clave": "maja-squinado",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Centolla",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 12
+     },
+     "textoOriginal": "12",
+     "presencia": null
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -28,
+    "nombre": "Maja squinado",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-28",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Melanogrammús aeglefinus",
+   "clave": "melanogrammus-aeglefinus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Eglefino",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 30
+     },
+     "textoOriginal": "30",
+     "presencia": {
+      "registros": 317,
+      "datasets": 3,
+      "desde": 2018,
+      "hasta": 2025
+     }
+    }
+   ],
+   "worms": null,
+   "sinResolver": "WoRMS no encuentra este nombre: la norma lo escribe con una tilde que el latín no lleva."
+  },
+  {
+   "nombreBoe": "Merlangus merlangus",
+   "clave": "merlangus-merlangus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Merlán",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 23
+     },
+     "textoOriginal": "23",
+     "presencia": {
+      "registros": 415,
+      "datasets": 2,
+      "desde": 2004,
+      "hasta": 2013
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -30,
+    "nombre": "Merlangus merlangus",
+    "estado": "unaccepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-30",
+    "aceptado": {
+     "aphiaId": -1030,
+     "nombre": "Merlangius merlangus"
+    },
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Merluccius merluccius",
+   "clave": "merluccius-merluccius",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Merluza",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 27
+     },
+     "textoOriginal": "27",
+     "presencia": {
+      "registros": 952,
+      "datasets": 5,
+      "desde": 2007,
+      "hasta": 2016
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Merluza",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 20
+     },
+     "textoOriginal": "20",
+     "presencia": {
+      "registros": 1087,
+      "datasets": 2,
+      "desde": 2006,
+      "hasta": 2014
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -31,
+    "nombre": "Merluccius merluccius",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-31",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Micromesistius poutassou",
+   "clave": "micromesistius-poutassou",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Bacaladilla",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 15
+     },
+     "textoOriginal": "15",
+     "presencia": {
+      "registros": 933,
+      "datasets": 2,
+      "desde": 1999,
+      "hasta": 2003
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -32,
+    "nombre": "Micromesistius poutassou",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-32",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Microstommus kitt",
+   "clave": "microstommus-kitt",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Mendo limón",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 25
+     },
+     "textoOriginal": "25",
+     "presencia": {
+      "registros": 32,
+      "datasets": 2,
+      "desde": 2008,
+      "hasta": 2010
+     }
+    }
+   ],
+   "worms": null,
+   "sinResolver": "WoRMS no encuentra este nombre: la norma escribe el género con doble «m»."
+  },
+  {
+   "nombreBoe": "Molva dypterygia",
+   "clave": "molva-dypterygia",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Maruca Azul",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 70
+     },
+     "textoOriginal": "70",
+     "presencia": {
+      "registros": 1037,
+      "datasets": 4,
+      "desde": 2004,
+      "hasta": 2008
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -34,
+    "nombre": "Molva dypterygia",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-34",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Molva molva",
+   "clave": "molva-molva",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Maruca",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 63
+     },
+     "textoOriginal": "63",
+     "presencia": {
+      "registros": 176,
+      "datasets": 4,
+      "desde": 2012,
+      "hasta": 2015
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -35,
+    "nombre": "Molva molva",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-35",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Mugil auratus",
+   "clave": "mugil-auratus",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Lisa",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 14
+     },
+     "textoOriginal": "14",
+     "presencia": {
+      "registros": 543,
+      "datasets": 1,
+      "desde": 1999,
+      "hasta": 1999
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -36,
+    "nombre": "Mugil auratus",
+    "estado": "unaccepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-36",
+    "aceptado": {
+     "aphiaId": -1036,
+     "nombre": "Chelon auratus"
+    },
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Mugil spp",
+   "clave": "mugil-spp",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Lisas",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 20
+     },
+     "textoOriginal": "20",
+     "presencia": {
+      "registros": 833,
+      "datasets": 6,
+      "desde": 2002,
+      "hasta": 2002
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -37,
+    "nombre": "Mugil",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-37",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Mugil spp», que no es un binomio; se ha resuelto el género «Mugil», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Mugil spps",
+   "clave": "mugil-spps",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Lisa",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 16
+     },
+     "textoOriginal": "16",
+     "presencia": {
+      "registros": 1099,
+      "datasets": 4,
+      "desde": 2011,
+      "hasta": 2016
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -38,
+    "nombre": "Mugil",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-38",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Mugil spps», que no es un binomio; se ha resuelto el género «Mugil», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Mullus spp",
+   "clave": "mullus-spp",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Salmonete",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 11
+     },
+     "textoOriginal": "11",
+     "presencia": {
+      "registros": 51,
+      "datasets": 4,
+      "desde": 2002,
+      "hasta": 2010
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Salmonetes",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 15
+     },
+     "textoOriginal": "15",
+     "presencia": {
+      "registros": 723,
+      "datasets": 1,
+      "desde": 2003,
+      "hasta": 2007
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -39,
+    "nombre": "Mullus",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-39",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Mullus spp», que no es un binomio; se ha resuelto el género «Mullus», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Mullus surmuletus",
+   "clave": "mullus-surmuletus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Salmonete de roca",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 15
+     },
+     "textoOriginal": "15",
+     "presencia": {
+      "registros": 386,
+      "datasets": 5,
+      "desde": 2018,
+      "hasta": 2025
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -40,
+    "nombre": "Mullus surmuletus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-40",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Muraena augusti",
+   "clave": "muraena-augusti",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Morena negra",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 56
+     },
+     "textoOriginal": "56",
+     "presencia": {
+      "registros": 930,
+      "datasets": 1,
+      "desde": 2011,
+      "hasta": 2011
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -41,
+    "nombre": "Muraena augusti",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-41",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Mycteroperca fusca",
+   "clave": "mycteroperca-fusca",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Gitano",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 35
+     },
+     "textoOriginal": "35",
+     "presencia": {
+      "registros": 367,
+      "datasets": 5,
+      "desde": 2006,
+      "hasta": 2006
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -42,
+    "nombre": "Mycteroperca fusca",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-42",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Nephrops norvegicus",
+   "clave": "nephrops-norvegicus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Cigala (entera)",
+     "medida": "Longitud cefalotórax",
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 2
+     },
+     "textoOriginal": "2",
+     "presencia": {
+      "registros": 950,
+      "datasets": 2,
+      "desde": 2011,
+      "hasta": 2014
+     }
+    },
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Cigala (entera)",
+     "medida": "Longitud total",
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 7
+     },
+     "textoOriginal": "7",
+     "presencia": {
+      "registros": 950,
+      "datasets": 2,
+      "desde": 2011,
+      "hasta": 2014
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Cigala",
+     "medida": "Longitud cefalotórax",
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 2
+     },
+     "textoOriginal": "2",
+     "presencia": {
+      "registros": 337,
+      "datasets": 6,
+      "desde": 2007,
+      "hasta": 2017
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Cigala",
+     "medida": "Longitud total",
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 7
+     },
+     "textoOriginal": "7",
+     "presencia": {
+      "registros": 337,
+      "datasets": 6,
+      "desde": 2007,
+      "hasta": 2017
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -43,
+    "nombre": "Nephrops norvegicus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-43",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Octopus vulgaris",
+   "clave": "octopus-vulgaris",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Pulpo",
+     "medida": null,
+     "talla": {
+      "tipo": "peso_kg",
+      "kg": 1
+     },
+     "textoOriginal": "1 kg",
+     "presencia": {
+      "registros": 950,
+      "datasets": 2,
+      "desde": 2010,
+      "hasta": 2018
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Pulpo",
+     "medida": null,
+     "talla": {
+      "tipo": "peso_kg",
+      "kg": 1
+     },
+     "textoOriginal": "1 kg",
+     "presencia": {
+      "registros": 924,
+      "datasets": 1,
+      "desde": 2016,
+      "hasta": 2018
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Pulpo",
+     "medida": null,
+     "talla": {
+      "tipo": "peso_kg",
+      "kg": 1
+     },
+     "textoOriginal": "1 kg",
+     "presencia": {
+      "registros": 199,
+      "datasets": 2,
+      "desde": 2004,
+      "hasta": 2004
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -44,
+    "nombre": "Octopus vulgaris",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-44",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Pagellus acarne",
+   "clave": "pagellus-acarne",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Aligote",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 20
+     },
+     "textoOriginal": "20",
+     "presencia": {
+      "registros": 1095,
+      "datasets": 5,
+      "desde": 2017,
+      "hasta": 2024
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -45,
+    "nombre": "Pagellus acarne",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-45",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Pagellus bogaraveo",
+   "clave": "pagellus-bogaraveo",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Besugo",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 25
+     },
+     "textoOriginal": "25",
+     "presencia": {
+      "registros": 531,
+      "datasets": 6,
+      "desde": 2011,
+      "hasta": 2015
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -46,
+    "nombre": "Pagellus bogaraveo",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-46",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Pagellus erythrinus",
+   "clave": "pagellus-erythrinus",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Pagel",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 22
+     },
+     "textoOriginal": "22",
+     "presencia": {
+      "registros": 87,
+      "datasets": 2,
+      "desde": 2012,
+      "hasta": 2021
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -47,
+    "nombre": "Pagellus erythrinus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-47",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Pagellus spp",
+   "clave": "pagellus-spp",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Pagel, besugo",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 12
+     },
+     "textoOriginal": "12",
+     "presencia": {
+      "registros": 1122,
+      "datasets": 3,
+      "desde": 2019,
+      "hasta": 2020
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -48,
+    "nombre": "Pagellus",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-48",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Pagellus spp», que no es un binomio; se ha resuelto el género «Pagellus», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Pagrus pagrus",
+   "clave": "pagrus-pagrus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Pargo",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 15
+     },
+     "textoOriginal": "15",
+     "presencia": {
+      "registros": 875,
+      "datasets": 6,
+      "desde": 1999,
+      "hasta": 2008
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Pargo",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 18
+     },
+     "textoOriginal": "18",
+     "presencia": {
+      "registros": 469,
+      "datasets": 2,
+      "desde": 2019,
+      "hasta": 2025
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Pargo",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 28
+     },
+     "textoOriginal": "28",
+     "presencia": {
+      "registros": 799,
+      "datasets": 3,
+      "desde": 2019,
+      "hasta": 2025
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -49,
+    "nombre": "Pagrus pagrus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-49",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Palinuridae",
+   "clave": "palinuridae",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Langosta",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 24
+     },
+     "textoOriginal": "24",
+     "presencia": {
+      "registros": 1157,
+      "datasets": 6,
+      "desde": 2017,
+      "hasta": 2017
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -50,
+    "nombre": "Palinuridae",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-50",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Panaeux kerathurus",
+   "clave": "panaeux-kerathurus",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Langostino",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 10
+     },
+     "textoOriginal": "10",
+     "presencia": {
+      "registros": 388,
+      "datasets": 6,
+      "desde": 2001,
+      "hasta": 2001
+     }
+    }
+   ],
+   "worms": null,
+   "sinResolver": "WoRMS no encuentra este nombre: la grafía de la norma no coincide con ningún género registrado."
+  },
+  {
+   "nombreBoe": "Pecten maximus",
+   "clave": "pecten-maximus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Vieira",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 10
+     },
+     "textoOriginal": "10",
+     "presencia": {
+      "registros": 494,
+      "datasets": 5,
+      "desde": 2011,
+      "hasta": 2017
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -52,
+    "nombre": "Pecten maximus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-52",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Pecten spp",
+   "clave": "pecten-spp",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Vieira",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 10
+     },
+     "textoOriginal": "10",
+     "presencia": {
+      "registros": 732,
+      "datasets": 1,
+      "desde": 1998,
+      "hasta": 2004
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -53,
+    "nombre": "Pecten",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-53",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Pecten spp», que no es un binomio; se ha resuelto el género «Pecten», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Platichthys flesus",
+   "clave": "platichthys-flesus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Platija",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 25
+     },
+     "textoOriginal": "25",
+     "presencia": {
+      "registros": 1122,
+      "datasets": 5,
+      "desde": 2019,
+      "hasta": 2021
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -54,
+    "nombre": "Platichthys flesus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-54",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Pleuronectes platessa",
+   "clave": "pleuronectes-platessa",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Solla",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 25
+     },
+     "textoOriginal": "25",
+     "presencia": {
+      "registros": 701,
+      "datasets": 1,
+      "desde": 2011,
+      "hasta": 2021
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -55,
+    "nombre": "Pleuronectes platessa",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-55",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Pollachius pollachius",
+   "clave": "pollachius-pollachius",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Abadejo",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 30
+     },
+     "textoOriginal": "30",
+     "presencia": {
+      "registros": 971,
+      "datasets": 1,
+      "desde": 2019,
+      "hasta": 2019
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -56,
+    "nombre": "Pollachius pollachius",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-56",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Pollachius virens",
+   "clave": "pollachius-virens",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Carbonero",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 35
+     },
+     "textoOriginal": "35",
+     "presencia": {
+      "registros": 358,
+      "datasets": 3,
+      "desde": 2012,
+      "hasta": 2018
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -57,
+    "nombre": "Pollachius virens",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-57",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Polyprion americanus",
+   "clave": "polyprion-americanus",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Cherna",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 45
+     },
+     "textoOriginal": "45",
+     "presencia": {
+      "registros": 542,
+      "datasets": 6,
+      "desde": 1999,
+      "hasta": 2001
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -58,
+    "nombre": "Polyprion americanus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-58",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Psetta maxima",
+   "clave": "psetta-maxima",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Rodaballo",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 30
+     },
+     "textoOriginal": "30",
+     "presencia": {
+      "registros": 266,
+      "datasets": 1,
+      "desde": 2001,
+      "hasta": 2008
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -59,
+    "nombre": "Psetta maxima",
+    "estado": "unaccepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-59",
+    "aceptado": {
+     "aphiaId": -1059,
+     "nombre": "Scophthalmus maximus"
+    },
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Salmo salar",
+   "clave": "salmo-salar",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Salmón",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 50
+     },
+     "textoOriginal": "50",
+     "presencia": {
+      "registros": 114,
+      "datasets": 1,
+      "desde": 2001,
+      "hasta": 2011
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -60,
+    "nombre": "Salmo salar",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-60",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Salmo trutta",
+   "clave": "salmo-trutta",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Trucha marisca o reo",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 25
+     },
+     "textoOriginal": "25",
+     "presencia": {
+      "registros": 811,
+      "datasets": 5,
+      "desde": 2007,
+      "hasta": 2013
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -61,
+    "nombre": "Salmo trutta",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-61",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Sardina pilchardus",
+   "clave": "sardina-pilchardus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Sardina",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 11
+     },
+     "textoOriginal": "11",
+     "presencia": {
+      "registros": 70,
+      "datasets": 2,
+      "desde": 2004,
+      "hasta": 2006
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Sardina",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 11
+     },
+     "textoOriginal": "11",
+     "presencia": {
+      "registros": 1112,
+      "datasets": 5,
+      "desde": 2012,
+      "hasta": 2017
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Sardina",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 11
+     },
+     "textoOriginal": "11",
+     "presencia": {
+      "registros": 367,
+      "datasets": 2,
+      "desde": 1999,
+      "hasta": 2009
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -62,
+    "nombre": "Sardina pilchardus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-62",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Sarpa salpa",
+   "clave": "sarpa-salpa",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Salema",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 15
+     },
+     "textoOriginal": "15",
+     "presencia": {
+      "registros": 438,
+      "datasets": 3,
+      "desde": 1998,
+      "hasta": 2004
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Salema",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 15
+     },
+     "textoOriginal": "15",
+     "presencia": {
+      "registros": 110,
+      "datasets": 5,
+      "desde": 2014,
+      "hasta": 2015
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Salema",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 24
+     },
+     "textoOriginal": "24",
+     "presencia": null
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -63,
+    "nombre": "Sarpa salpa",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-63",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Scomber japonicus",
+   "clave": "scomber-japonicus",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Estornino",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 18
+     },
+     "textoOriginal": "18",
+     "presencia": {
+      "registros": 129,
+      "datasets": 5,
+      "desde": 2006,
+      "hasta": 2013
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Estornino",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 18
+     },
+     "textoOriginal": "18",
+     "presencia": {
+      "registros": 151,
+      "datasets": 6,
+      "desde": 2007,
+      "hasta": 2017
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -64,
+    "nombre": "Scomber japonicus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-64",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Scomber scombrus",
+   "clave": "scomber-scombrus",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Caballa",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 18
+     },
+     "textoOriginal": "18",
+     "presencia": {
+      "registros": 1038,
+      "datasets": 6,
+      "desde": 2009,
+      "hasta": 2015
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -65,
+    "nombre": "Scomber scombrus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-65",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Scomber spp",
+   "clave": "scomber-spp",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Caballa, Estornino",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 20
+     },
+     "textoOriginal": "20",
+     "presencia": {
+      "registros": 664,
+      "datasets": 4,
+      "desde": 2010,
+      "hasta": 2017
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -66,
+    "nombre": "Scomber",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-66",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Scomber spp», que no es un binomio; se ha resuelto el género «Scomber», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Scophthalmus rhombus",
+   "clave": "scophthalmus-rhombus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Ramal",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 30
+     },
+     "textoOriginal": "30",
+     "presencia": null
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -67,
+    "nombre": "Scophthalmus rhombus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-67",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Sepia spp",
+   "clave": "sepia-spp",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Jibias",
+     "medida": null,
+     "talla": {
+      "tipo": "por_determinar",
+      "segunNota": "(*)"
+     },
+     "textoOriginal": "(*)",
+     "presencia": {
+      "registros": 561,
+      "datasets": 1,
+      "desde": 2014,
+      "hasta": 2019
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -68,
+    "nombre": "Sepia",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-68",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Sepia spp», que no es un binomio; se ha resuelto el género «Sepia», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Serranus atricauda",
+   "clave": "serranus-atricauda",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Serrano imperial",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 20
+     },
+     "textoOriginal": "20",
+     "presencia": {
+      "registros": 356,
+      "datasets": 5,
+      "desde": 2018,
+      "hasta": 2025
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -69,
+    "nombre": "Serranus atricauda",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-69",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Serranus cabrilla",
+   "clave": "serranus-cabrilla",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Cabrilla",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 19
+     },
+     "textoOriginal": "19",
+     "presencia": {
+      "registros": 835,
+      "datasets": 5,
+      "desde": 2015,
+      "hasta": 2024
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -70,
+    "nombre": "Serranus cabrilla",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-70",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Solea vulgaris",
+   "clave": "solea-vulgaris",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Lenguado",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 24
+     },
+     "textoOriginal": "24",
+     "presencia": {
+      "registros": 958,
+      "datasets": 5,
+      "desde": 2015,
+      "hasta": 2021
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Lenguado",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 20
+     },
+     "textoOriginal": "20",
+     "presencia": {
+      "registros": 64,
+      "datasets": 6,
+      "desde": 2012,
+      "hasta": 2021
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -71,
+    "nombre": "Solea vulgaris",
+    "estado": "unaccepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-71",
+    "aceptado": {
+     "aphiaId": -1071,
+     "nombre": "Solea solea"
+    },
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Sparisoma cretense",
+   "clave": "sparisoma-cretense",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Vieja colorada",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 22
+     },
+     "textoOriginal": "22",
+     "presencia": {
+      "registros": 456,
+      "datasets": 4,
+      "desde": 2002,
+      "hasta": 2008
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -72,
+    "nombre": "Sparisoma cretense",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-72",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Sparus aurata",
+   "clave": "sparus-aurata",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Dorada",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 19
+     },
+     "textoOriginal": "19",
+     "presencia": {
+      "registros": 103,
+      "datasets": 4,
+      "desde": 2005,
+      "hasta": 2014
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Dorada",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 20
+     },
+     "textoOriginal": "20",
+     "presencia": {
+      "registros": 1053,
+      "datasets": 1,
+      "desde": 1999,
+      "hasta": 2003
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -73,
+    "nombre": "Sparus aurata",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-73",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Sparus auratus",
+   "clave": "sparus-auratus",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Dorada",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 19
+     },
+     "textoOriginal": "19",
+     "presencia": {
+      "registros": 1008,
+      "datasets": 4,
+      "desde": 2006,
+      "hasta": 2009
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -74,
+    "nombre": "Sparus auratus",
+    "estado": "unaccepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-74",
+    "aceptado": {
+     "aphiaId": -1074,
+     "nombre": "Sparus aurata"
+    },
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Spondyliosoma cantharus",
+   "clave": "spondyliosoma-cantharus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Chopa",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 23
+     },
+     "textoOriginal": "23",
+     "presencia": {
+      "registros": 220,
+      "datasets": 5,
+      "desde": 2003,
+      "hasta": 2011
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Chopa",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 23
+     },
+     "textoOriginal": "23",
+     "presencia": {
+      "registros": 525,
+      "datasets": 6,
+      "desde": 2006,
+      "hasta": 2016
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -75,
+    "nombre": "Spondyliosoma cantharus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-75",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Thunnus Thynnus",
+   "clave": "thunnus-thynnus-2",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Atún rojo",
+     "medida": null,
+     "talla": {
+      "tipo": "peso_kg",
+      "kg": 6.4
+     },
+     "textoOriginal": "6,4 kg",
+     "presencia": {
+      "registros": 131,
+      "datasets": 2,
+      "desde": 2002,
+      "hasta": 2007
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -76,
+    "nombre": "Thunnus Thynnus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-76",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Thunnus aibacares",
+   "clave": "thunnus-aibacares",
+   "caladeros": [
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Rabil",
+     "medida": null,
+     "talla": {
+      "tipo": "peso_kg",
+      "kg": 3.2
+     },
+     "textoOriginal": "3,2 kg",
+     "presencia": {
+      "registros": 1062,
+      "datasets": 2,
+      "desde": 2011,
+      "hasta": 2021
+     }
+    }
+   ],
+   "worms": null,
+   "sinResolver": "WoRMS no encuentra este nombre: la norma escribe «aibacares» con «i»."
+  },
+  {
+   "nombreBoe": "Thunnus albacares",
+   "clave": "thunnus-albacares",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Rabil",
+     "medida": null,
+     "talla": {
+      "tipo": "peso_kg",
+      "kg": 3.2
+     },
+     "textoOriginal": "3,2 kg",
+     "presencia": {
+      "registros": 986,
+      "datasets": 4,
+      "desde": 2008,
+      "hasta": 2018
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -78,
+    "nombre": "Thunnus albacares",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-78",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Thunnus obesus",
+   "clave": "thunnus-obesus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Patudo",
+     "medida": null,
+     "talla": {
+      "tipo": "peso_kg",
+      "kg": 3.2
+     },
+     "textoOriginal": "3,2 kg",
+     "presencia": {
+      "registros": 217,
+      "datasets": 4,
+      "desde": 2000,
+      "hasta": 2006
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Patudo",
+     "medida": null,
+     "talla": {
+      "tipo": "peso_kg",
+      "kg": 3.2
+     },
+     "textoOriginal": "3,2 kg",
+     "presencia": {
+      "registros": 314,
+      "datasets": 5,
+      "desde": 2005,
+      "hasta": 2008
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -79,
+    "nombre": "Thunnus obesus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-79",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Thunnus thynnus",
+   "clave": "thunnus-thynnus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Atún rojo",
+     "medida": null,
+     "talla": {
+      "tipo": "peso_kg",
+      "kg": 6.4
+     },
+     "textoOriginal": "6,4 kg",
+     "presencia": {
+      "registros": 997,
+      "datasets": 1,
+      "desde": 2005,
+      "hasta": 2007
+     }
+    },
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Atún rojo",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_o_peso",
+      "cm": 80,
+      "kg": 10
+     },
+     "textoOriginal": "80 cm o 10 kg de peso",
+     "presencia": {
+      "registros": 330,
+      "datasets": 3,
+      "desde": 2004,
+      "hasta": 2008
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -80,
+    "nombre": "Thunnus thynnus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-80",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Trachurus spp",
+   "clave": "trachurus-spp",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Jurel",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 12
+     },
+     "textoOriginal": "12",
+     "presencia": {
+      "registros": 231,
+      "datasets": 1,
+      "desde": 2000,
+      "hasta": 2010
+     }
+    },
+    {
+     "id": "canario",
+     "nombre": "Canario",
+     "nombreComun": "Jureles",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 12
+     },
+     "textoOriginal": "12",
+     "presencia": {
+      "registros": 839,
+      "datasets": 5,
+      "desde": 2012,
+      "hasta": 2015
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -81,
+    "nombre": "Trachurus",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-81",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Trachurus spp», que no es un binomio; se ha resuelto el género «Trachurus», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Trachurus trachurus",
+   "clave": "trachurus-trachurus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Jurel",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 15
+     },
+     "textoOriginal": "15",
+     "presencia": {
+      "registros": 584,
+      "datasets": 1,
+      "desde": 2017,
+      "hasta": 2024
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -82,
+    "nombre": "Trachurus trachurus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-82",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Trisopterus luscus",
+   "clave": "trisopterus-luscus",
+   "caladeros": [
+    {
+     "id": "cantabrico-noroeste-y-golfo-de-cadiz",
+     "nombre": "Cantábrico y noroeste y golfo de Cádiz",
+     "nombreComun": "Faneca",
+     "medida": null,
+     "talla": {
+      "tipo": "por_determinar",
+      "segunNota": "(*)"
+     },
+     "textoOriginal": "(*)",
+     "presencia": {
+      "registros": 779,
+      "datasets": 3,
+      "desde": 1998,
+      "hasta": 1999
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -83,
+    "nombre": "Trisopterus luscus",
+    "estado": "accepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-83",
+    "aceptado": null,
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Trisopterus minutus capelanus",
+   "clave": "trisopterus-minutus-capelanus",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Capellán/mollera",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 11
+     },
+     "textoOriginal": "11",
+     "presencia": {
+      "registros": 449,
+      "datasets": 6,
+      "desde": 2012,
+      "hasta": 2021
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -84,
+    "nombre": "Trisopterus minutus capelanus",
+    "estado": "unaccepted",
+    "rango": "especie",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-84",
+    "aceptado": {
+     "aphiaId": -1084,
+     "nombre": "Trisopterus capelanus"
+    },
+    "origen": "worms",
+    "comoSeLlego": null
+   }
+  },
+  {
+   "nombreBoe": "Venerupis spp",
+   "clave": "venerupis-spp",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Almeja",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 2.5
+     },
+     "textoOriginal": "2,5",
+     "presencia": {
+      "registros": 489,
+      "datasets": 1,
+      "desde": 2014,
+      "hasta": 2024
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -85,
+    "nombre": "Venerupis",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-85",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Venerupis spp», que no es un binomio; se ha resuelto el género «Venerupis», que es lo que la norma regula"
+   }
+  },
+  {
+   "nombreBoe": "Venus spp",
+   "clave": "venus-spp",
+   "caladeros": [
+    {
+     "id": "mediterraneo",
+     "nombre": "Mediterráneo",
+     "nombreComun": "Chirla",
+     "medida": null,
+     "talla": {
+      "tipo": "longitud_cm",
+      "cm": 2.5
+     },
+     "textoOriginal": "2,5",
+     "presencia": {
+      "registros": 556,
+      "datasets": 6,
+      "desde": 2016,
+      "hasta": 2023
+     }
+    }
+   ],
+   "sinResolver": null,
+   "worms": {
+    "aphiaId": -86,
+    "nombre": "Venus",
+    "estado": "accepted",
+    "rango": "genero",
+    "url": "https://www.marinespecies.org/aphia.php?p=taxdetails&id=-86",
+    "aceptado": null,
+    "origen": "nuestro",
+    "comoSeLlego": "la norma escribe «Venus spp», que no es un binomio; se ha resuelto el género «Venus», que es lo que la norma regula"
+   }
+  }
+ ]
+}

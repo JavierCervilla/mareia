@@ -18,6 +18,7 @@
     "@mareia/module-contract": "workspace:*",
     "@mareia/module-protected-areas": "workspace:*",
     "@mareia/module-regulations": "workspace:*",
+    "@mareia/module-species": "workspace:*",
     "@mareia/module-weather": "workspace:*",
     "@mareia/ui": "workspace:*",
     "@mareia/usecases": "workspace:*",

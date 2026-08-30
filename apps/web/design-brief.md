@@ -366,6 +366,69 @@ km**, de RAMPE 2025 (MITECO)— y eso mueve dos reglas, una de colocación y otr
   derivados** —nombre oficial, figura, código, distancia— y **ninguna geometría**, ni siquiera
   simplificada, que es justo lo que una licencia no declarada no deja redistribuir.
 
+## 7 septies. Ampliación T-20 — dos nombres para la misma especie, y una cifra que no se puede leer sola
+
+Esta sección **amplía el brief** (no abre otro), como las de T-19 y T-21. Llega la primera **página
+nueva** del portal desde T-13 —`/pesca/especies/`, el catálogo de las **86** especies que el BOE
+regula— y con ella tres cosas que el brief no había tenido que decidir todavía: qué hacer cuando el
+mismo objeto tiene **dos nombres igual de válidos**, cómo se compone una cifra que **no significa lo
+que parece**, y cómo se filtra sin JavaScript algo a lo que **otra página tiene que poder enlazar ya
+filtrado**.
+
+- **Los dos nombres se publican, y ninguno de los dos es la letra pequeña del otro.** La norma es de
+  1995 y la taxonomía se ha movido: **10 de las 86** especies tienen hoy en WoRMS un nombre aceptado
+  distinto del que escribe el BOE (`Solea vulgaris` → **Solea solea**, `Psetta maxima` →
+  **Scophthalmus maximus**…). Tipográficamente eso se resuelve **no resolviéndolo**: los dos van en
+  cursiva, en el mismo cuerpo y en columnas distintas —el del BOE en la cabecera de fila, el
+  aceptado en la suya—, y entre ellos hay una frase que dice **por qué** difieren. Poner uno en
+  cuerpo pequeño o entre paréntesis sería contar con el estilo una decisión que no es nuestra: el
+  del BOE es el que tiene consecuencia legal, el aceptado es el que sirve para buscar la especie en
+  cualquier otra base, y ninguno de los dos «gana». El gate **E1** mide sobre el `dist/` que el
+  nombre de la norma esté literal en las 86 filas.
+- **Ninguna cifra de OBIS aparece sin lo que es, y eso es una regla de composición además de una de
+  redacción.** Los registros miden **esfuerzo de muestreo, no abundancia** —la dorada en toda la
+  costa gallega son **12 registros**—, así que en esta página no existe el elemento «número». La
+  cifra sale siempre dentro de una frase (`presenciaEscrita`) que lleva el sesgo pegado, en el mismo
+  `<span>`, y la explicación larga va **antes** de la primera cifra de la página. Es la misma
+  doctrina con la que T-19 pega cada nota a su talla en vez de mandarla a un pie: lo que va en un
+  pie no viaja con la fila que alguien copia. Y por eso tampoco hay `tabular-nums` sobre estas
+  cifras ni ninguna forma de destacarlas: alinear como número una cifra que no es una medida es
+  prestarle una precisión que no tiene. El gate **E4** lo mide en el elemento **más interno** que
+  contiene cada número, no «en la página».
+- **El filtro por caladero usa `:target`, y no los radios de la portada.** El patrón sin JavaScript
+  del portal (T-14B) son radios ocultos y reglas de hermano; aquí no sirve, y no por gusto: la
+  sección de cada página de puerto tiene que **enlazar al catálogo ya filtrado por su caladero**, y
+  un radio no se puede preseleccionar desde una URL sin JavaScript. Con `:target` el estado vive en
+  el fragmento, así que los **153** enlaces funcionan, el estado es compartible y el navegador deja
+  al lector justo encima de la lista filtrada. Se paga en tres sitios y se dice: el estado se ve en
+  la barra de direcciones, cada opción necesita su ancla —incluida «Todas»— y los tres
+  identificadores de caladero están escritos a mano en la hoja, porque un selector de atributo no
+  puede leer un valor del dataset. Para que un cuarto caladero no rompa el filtro **en silencio**,
+  un gate comprueba que todo caladero del catálogo tiene sus reglas en `especies.css`. Lo que no
+  cambia es la composición: mismas etiquetas de 44 px, mismo filete bajo la activa, misma cuenta
+  horneada al lado de cada opción.
+- **La sección de la página de puerto es un enlace y no una tabla, y eso también es diseño.** La
+  tabla de tallas ya está arriba: repetirla aquí con otra composición serían dos superficies del
+  mismo dato, que se desincronizan a la primera corrección. Va la **última** de las secciones de
+  módulo (`order: 35`, detrás de las tallas en 30) porque es lo que amplía lo que se acaba de leer;
+  puesta delante, ofrecería irse a otra página a quien todavía no ha visto lo que ya tiene aquí
+  horneado y sin cobertura. Ocupa **1.453 B** en la página de puerto (753 B comprimidos).
+- **Y dice que no se guarda.** El módulo **no declara política offline**, porque el precacheo de esta
+  PWA es **por favorito** —un favorito guarda la página del puerto, sus constantes, el camino hasta
+  ella y sus assets— y el catálogo no está en esa lista. En vez de prometerlo, la sección escribe lo
+  contrario: «este enlace necesita cobertura». Es la corrección de H-4 de T-19 aplicada antes de
+  publicar y no después.
+- **Cero *juice* sobre dos clases de cifra a la vez.** La página publica tallas legales y recuentos
+  de muestreo, y las dos aguantan mal el énfasis por motivos distintos: adornar una talla es pedirle
+  crédito prestado a la ley, y destacar un recuento es convertirlo en abundancia. La hoja no tiene
+  animación, transición, sombra ni esquina redondeada, y la única mancha de terracota del módulo cae
+  en su aviso —nunca sobre un número—; hay un test que lo mide.
+- **Lo que la ruta se deja por el camino, dicho aquí y no escondido.** `/pesca/especies/` la decidió
+  el humano; `/pesca/` **no es una página**, así que es la única URL del portal cuyo padre no se
+  puede recortar en la barra de direcciones. Las migas no lo enlazan —enlazarían a un 404— y no se
+  inventa un índice de una sola entrada para disimularlo. El día que cuelgue algo más de `/pesca/`,
+  ese índice tendrá contenido y entrará con él.
+
 ## 8. Cómo se audita
 
 ```bash
