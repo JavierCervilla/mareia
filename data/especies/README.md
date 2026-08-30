@@ -164,6 +164,106 @@ Un caladero con dos fachadas se consulta con un **MULTIPOLYGON y en una sola pet
 recuentos de `datasets` y `species` **no son sumables**: medido con la dorada, el Cantábrico da 5
 datasets y el golfo de Cádiz 3, y los dos juntos devuelven **5**, no 8.
 
+## Las fotos (`fotos.json`, `fotos/v1`)
+
+El segundo fichero de esta carpeta es **la foto de cada especie con su autor y su licencia**, y el
+motivo por escrito de cada una que no la tiene. Lo genera `python run.py fotos` desde el catálogo de
+aquí al lado y se commitea, como todo lo demás: regenerarlo necesita red y no corre en CI.
+
+```
+schema        "fotos/v1"
+consultadoEn  el día en que se preguntó, arriba y a la vista
+fotos{}       por clave de especie: fichero · url · descripcion · autor · licencia · licenciaUrl
+              · identificadaPor{fuente, entidad, propiedad}
+sinFoto{}     por clave de especie: motivo
+```
+
+`consultadoEn` está a la vista porque los metadatos **se congelan** el día de la ingesta: si mañana
+en Commons le cambian la licencia a una foto, lo que dice este fichero es lo que la fuente decía ese
+día, y la fecha es lo único que permite darse cuenta.
+
+### La foto se coge por `P18`, no buscándola por el nombre
+
+Buscar el nombre científico en Commons **funciona**, y ése es el problema: **devuelve siempre algo**.
+Lo primero que sale puede ser un mapa de distribución, un grabado del XIX, un sello o directamente
+otra especie. [`P18`](https://www.wikidata.org/wiki/Property:P18) es la imagen que alguien vinculó
+**a mano** al ítem del taxón en Wikidata, así que la identificación es una decisión editorial
+citable y con dueño en vez de una conjetura nuestra sobre una cadena de búsqueda. **Sin `P18`, no
+hay foto**, y el hueco se rotula.
+
+Llegar al ítem sigue siendo una búsqueda de texto, así que **se comprueba el destino**: se lee el
+`P225` que el propio ítem declara —su nombre científico— y si no es aquel por el que se preguntaba,
+no se publica nada. No es teórico: de los 81 taxones consultados, **3 llevan a otro sitio**. `Mugil`
+lleva a `Q234014`, que declara ser *Mugil cephalus* —una especie concreta donde la norma regula el
+género entero—; `Sepia` lleva a `Q286026`, que declara ser *Sapia*; y `Venus` lleva a `Q47652`, que
+no declara ningún nombre científico porque no es un animal. Las tres habrían publicado una foto con
+todos los campos bien puestos y el animal equivocado.
+
+### Ninguna especie se queda sin foto por no tener imagen: se quedan por los metadatos
+
+Censo de la ingesta del **2026-08-30**, contado sobre lo publicado: **63 de las 86 especies publican
+foto** y las otras **23 publican el motivo de no tenerla**.
+
+| Por qué no hay foto | Especies |
+|---|---|
+| su imagen no publica autor o licencia en Commons | 17 |
+| la búsqueda lleva a otro taxón (`Mugil` ×2, `Sepia`, `Venus`) | 4 |
+| Wikidata no tiene ítem para ese nombre (`Penaeus (Melicertus) kerathurus`) | 1 |
+| el catálogo no resuelve esa fila a ningún taxón (`Lophius piscatorius, L. Budegassa`) | 1 |
+
+**Ninguna cae por falta de `P18`**: las 80 especies que llegan a mirarlo tienen al menos una imagen
+vinculada. El hueco no lo abre Wikidata, lo abren los metadatos de Commons — y **15 de esas 17** son
+el mismo caso: su imagen es de **dominio público** y Commons no da entonces ninguna `LicenseUrl`, así
+que la entrada no puede cumplir el contrato y la especie cae con su motivo. Es caro en cobertura y es
+la decisión correcta mientras el contrato pida enlazar las condiciones de uso: publicar una foto sin
+poder decir bajo qué condiciones se reutiliza es lo que este dataset no hace.
+
+### No existe «la licencia de las fotos»: son siete en 63 ficheros
+
+<!-- gate:licencias-de-fotos -->
+
+| Licencia | Ficheros |
+|---|---|
+| `CC BY-SA 4.0` | 26 |
+| `CC BY 4.0` | 16 |
+| `CC BY-SA 3.0` | 12 |
+| `CC BY 3.0` | 5 |
+| `CC BY 2.5` | 2 |
+| `CC BY-SA 2.5` | 1 |
+| `CC0` | 1 |
+
+<!-- /gate:licencias-de-fotos -->
+
+Esto **sí es un censo** de las 63 fotos publicadas, y lo recuenta un gate de la suite sobre el
+propio `fotos.json`: si el dataset cambia y esta tabla no, se pone en rojo. (La tabla de seis
+licencias en doce ficheros del plan de T-23 era **una muestra**, medida para saber si la variedad
+existía; no decía cuántas hay de cada una, y no es la misma cosa.)
+
+De ahí la consecuencia de diseño: **`autor`, `licencia` y `licenciaUrl` van dentro de cada entrada**
+y se muestran junto a su foto, nunca en un pie global. Un pie que dijera «fotos de Wikimedia
+Commons» sería falso para las siete a la vez, y no acreditaría a ninguna de las **37 personas
+distintas** que firman estas 63 fotos. Cinco de las 63 traen su `licenciaUrl` en `http` —la forma que
+imprimen las plantillas viejas de Commons— y se publica tal cual: reescribirla a `https` sería
+cambiar lo que la fuente dice sobre sus propias condiciones.
+
+### La identificación es de Wikidata, y se cita
+
+Cada foto publica `identificadaPor: { fuente: "Wikidata", entidad: "Q…", propiedad: "P18" }`. Quien
+dude de que esa foto es de ese animal tiene el ítem exacto al que ir, y la respuesta no es nuestra.
+De las **15 filas `spp`** —las que regulan un género entero— **8 publican foto**, y en las 8 el
+nombre del fichero nombra una especie concreta de ese género (`File:Alosa fallax.jpg` para `Alosa
+spp`): lo que Wikidata identifica ahí es **el ítem del género**, así que la ficha tiene que decir
+eso y no convertir la foto en la especie, que es la regla 2 de este catálogo.
+
+### Lo que las fotos no hacen
+
+1. **No se mirrorea Commons**: se guardan los metadatos y se enlaza el fichero, que sigue estando
+   donde estaba y con su licencia.
+2. **No se busca una foto por texto** cuando no hay `P18`. El hueco rotulado es barato y una foto
+   equivocada es cara.
+3. **No se publica ninguna imagen sin autor y sin licencia**, aunque exista y esté vinculada al
+   taxón. Lo comprueba el **gate F2** sobre el artefacto, en cada ejecución de CI.
+
 ## Licencias, fuente por fuente
 
 **BOE · RD 560/1995** (nombres, tallas y caladeros). Reutilización de la legislación (art. 13 de la
@@ -193,9 +293,22 @@ va en `fuentes.obis.atribucion`:
 > OBIS (2026). Ocean Biodiversity Information System. Intergovernmental Oceanographic Commission of
 > UNESCO. https://obis.org
 
+**Wikidata · la identificación** (qué imagen corresponde a qué taxón). Los datos estructurados de
+Wikidata están bajo [CC0](https://www.wikidata.org/wiki/Wikidata:Copyright), o sea que la vinculación
+`P18` no impone condiciones; se cita igualmente **ítem a ítem** en `identificadaPor`, porque la
+decisión de que esa foto es de ese animal no es nuestra y quien lea la ficha tiene derecho a saber
+de quién es.
+
+**Wikimedia Commons · las fotos**. Aquí **no hay una licencia**: son siete distintas en 63 ficheros
+(ver arriba) y cada foto viaja con la suya, con su autor y con el enlace a sus condiciones, tal y
+como los devuelve el `extmetadata` de Commons el día de la ingesta. Commons **no se mirrorea**: se
+enlaza el fichero. Quien reutilice `fotos.json` hereda la licencia **de cada imagen**, no una común,
+y las condiciones de casi todas incluyen acreditar a su autor.
+
 ## Lo que este dataset no hace
 
-1. No trae ficha individual de especie (hábitat, profundidad, fotos): eso es otra trayectoria.
+1. No trae hábitat, profundidad ni talla máxima (eso es otra trayectoria). La foto de cada especie
+   sí está, en `fotos.json`, y con su licencia por fichero.
 2. No publica mapas de distribución ni abundancia. Ver arriba.
 3. No mirrorea WoRMS ni OBIS.
 4. No inventa una especie donde la norma dice género.
