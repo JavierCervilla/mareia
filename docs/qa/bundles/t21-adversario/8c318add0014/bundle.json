@@ -1,0 +1,48 @@
+{
+  "snapshotId": "8c318add0014",
+  "runId": "t21-adversario",
+  "test": {
+    "title": "adversarial/a4-el-dentro-apaga-la-unica-cota-del-radio.spec.ts > A4 · una distancia publicada no puede pasar del radio que promete el título de la sección",
+    "file": "/home/user/mareia/tests/e2e/journeys/adversarial/a4-el-dentro-apaga-la-unica-cota-del-radio.spec.ts",
+    "line": 51,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 32004,
+  "urlAtFailure": "about:blank",
+  "error": {
+    "message": "Error: la sección publica una cota fuera del radio: [30,30,2,9,480,9]\n\nexpect(received).toBeLessThanOrEqual(expected)\n\nExpected: <= 30\nReceived:    480",
+    "stack": "Error: la sección publica una cota fuera del radio: [30,30,2,9,480,9]\n\nexpect(received).toBeLessThanOrEqual(expected)\n\nExpected: <= 30\nReceived:    480\n    at /home/user/mareia/tests/e2e/journeys/adversarial/a4-el-dentro-apaga-la-unica-cota-del-radio.spec.ts:90:7"
+  },
+  "events": [
+    {
+      "at": 8,
+      "kind": "step",
+      "text": "de partida: el criterio son 30 km y esa área está a 19,2"
+    },
+    {
+      "at": 16,
+      "kind": "step",
+      "text": "mandar esa área a 480 km y marcarla como «dentro»"
+    },
+    {
+      "at": 18,
+      "kind": "step",
+      "text": "construir y leer la sección de Alicante"
+    },
+    {
+      "at": 31918,
+      "kind": "step",
+      "text": "el título sigue prometiendo 30 km"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}
