@@ -129,7 +129,13 @@
       donde son 44. Entra por el contrato `AppModule` como módulo propio (`ModuleId` se amplía a
       cuatro), en `static` y con **cero JavaScript**; ver `docs/adr/ADR-03`, hermano de ADR-01 para
       el dato que no caduca pero se deroga. G2 vigila la vigencia a diario con **tres desenlaces**
-      (verde escribe el sello, rojo rompe CI, ámbar no toca la fecha y la página degrada sola)
+      (verde escribe el sello, rojo rompe CI, ámbar no toca la fecha y la página degrada sola: dos
+      umbrales con nombre —**7** días y **60**— y tres estados que cambian lo que se publica, no
+      solo el rótulo). El pase adversario cazó **cinco** roturas, **tres de ellas afirmaciones
+      falsas**; se arreglaron cuatro y la quinta se documentó como tradeoff en el ADR: **G4**
+      regenera las 118 cifras desde la fuente capturada y las diffea (G3 miraba 6), **G5** impide
+      publicar un cero, el aviso de sin-red dice ahora **su condición** y la excepción balear **se
+      resuelve** en los 17 puertos que excepciona y en los 63 que no
 - [ ] T-14 · Metodología pública + QC navegable + dataset con su licencia por puerto declarada
       (el reparto real ya publicado en T-14A) + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario

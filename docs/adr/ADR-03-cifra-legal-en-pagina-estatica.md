@@ -172,6 +172,55 @@ de arriba es la del día en que se guardó, no la de hoy … Una talla derogada 
 la vigente»—. Es la única forma honrada de sostener «se muestra sin red»: si la copia guardada no
 puede decir que es una copia guardada, el sello se lee como si fuese de hoy.
 
+### El tradeoff que más caro sale: la normativa puede tomar de rehén al almanaque
+
+Es el hallazgo H-3 del pase adversario y **se documenta en vez de arreglarse**. Lo que se acepta,
+medido aquí y reproducido para escribir esto (no citado del informe):
+
+Poniéndole al «Salmonete» del Anexo II una marca `(**)` que ese anexo no publica —el Anexo II solo
+tiene la `(*)` del pulpo—, `astro build` sale con **código 1** en la primera página mediterránea por
+orden alfabético (`/mareas/andalucia/almeria/adra/`) y el `dist/` se queda con **2 páginas de puerto
+más el `404.html`**, de las 191 que publica el sitio. Con ellas caen la portada, el sitemap, el
+`sw.js` y las **153 tablas de marea**, que son a lo que viene la gente, por una fila de la sección
+que va la última y que el propio módulo declara **consultable** (`order: 30`).
+
+La causa no es que `filasDeTallas` levante: es **dónde** levanta. Levanta a propósito —una marca de
+nota que no lleva a ninguna parte se lee como una cifra anotada y no lo está— pero lo hace en medio
+del render de una página, dentro del build, donde no hay degradación posible.
+
+**A favor de dejarlo como está: fallar el build es *fail-safe*.** Un build que se cae no se
+despliega, y producción sigue sirviendo la construcción anterior — que es *infinitamente* mejor que
+publicar una cifra legal rota. Es la misma decisión que ya toma todo el módulo: un puerto sin
+caladero, un `schema` desconocido o una clase de talla fuera de la unión **levantan nombrando el
+campo**, porque publicar la tabla de otro mar se lee igual de bien que la correcta. Degradar aquí
+—pintar la sección vacía y seguir— sería exactamente el silencio que el resto de este ADR existe
+para impedir, y el día que pasara nadie se enteraría.
+
+**En contra: el radio de explosión.** Lo que se cae no es la sección: es el sitio. Y el disparador
+vive fuera de la revisión de nadie, porque el dataset lo escribe un pipeline que lee el BOE y hay un
+job programado que lo reescribe y lo commitea con `[skip ci]`.
+
+**Lo que acota el riesgo hoy, medido:** el disparador concreto de este ataque **no llega al build en
+CI**. La marca colgando la caza `run.py check` antes de construir —G1: «*mediterraneo · Salmonete:
+remite a la nota (**), que el caladero no publica*», y desde T-19 también G4, que regenera el
+dataset desde la fuente y ve la nota de más—. El adversario lo reprodujo pasándole el dataset mutado
+**solo** al build, que es un camino que CI no tiene. Lo que se acepta, por tanto, no es este defecto
+concreto sino su **clase**: cualquier avería del dataset que se les escape a los gates y solo se
+manifieste al renderizar se lleva por delante el almanaque entero.
+
+**Mitigación barata, propuesta y no implementada** (se dice en vez de hacerla a escondidas): un
+**preflight de datos antes de `astro build`** —cargar el dataset y llamar a `filasDeTallas` una vez
+por caladero, tres iteraciones y ningún render— convertiría ese fallo en un error de 200 ms **antes**
+de que Astro vacíe `dist/`, con el mismo mensaje y el mismo desenlace (no se despliega), pero sin
+dejar un `dist/` a medias que un despliegue descuidado podría publicar. No reduce el «no se publica
+nada»: eso es la decisión, no el defecto. Queda como propuesta porque no es de esta trayectoria y
+porque su valor real depende de si el despliegue mira el código de salida, que es donde hay que
+mirarlo.
+
+El recorrido `a10-la-normativa-toma-de-rehen-la-marea.spec.ts` **se queda con su `test.fail()`**: no
+es un hallazgo pendiente de arreglo sino la medida permanente de este tradeoff. El día que alguien
+cambie la decisión, Playwright dirá «expected to fail, but passed» y obligará a volver aquí.
+
 ## Consecuencias comprobables
 
 - **La excepción balear se resuelve en las 80 páginas del caladero mediterráneo**, y por las dos

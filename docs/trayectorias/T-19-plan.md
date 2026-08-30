@@ -214,6 +214,15 @@ una decisión consciente, que es para lo que está cerrada (§7.3.8 del design d
 G3 se escribe contra el JSON construido, no contra `boe.py`. Un trinquete que mide una copia del
 instrumento deja de morder en cuanto el instrumento cambia — lección pagada en T-13.
 
+**Dos gates más, del pase adversario (H-2).** G3 fija seis especies elegidas a mano y la fila de al
+lado no la miraba nadie: plantando merluza a 7 cm, salmonete a 3, vieja colorada a 5 y sardina a 0 y
+a −11, los cinco gates deterministas salían verdes.
+
+| Gate | Qué mide | Cuándo falla |
+|---|---|---|
+| **G4 · reconstrucción** | Regenera el dataset entero desde las respuestas del BOE **capturadas** (`data/pipeline/tests/fixtures/boe`) —mismo parser, misma selección de versión, mismo constructor— y lo diffea campo a campo contra el JSON commiteado. Cubre las **118** tallas, las notas, los literales y las procedencias, **sin red** | Cualquier campo publicado que no sea el que sale de la fuente. `verificadoEn` se excluye: lo escribe G2, no la fuente |
+| **G5 · rango sano** | Ninguna magnitud publicada (`cm`, `kg`) puede ser cero ni negativa | Un `0` no se lee como un error: se lee como que esa especie **no tiene mínimo** |
+
 ### 6. Documentación
 
 - `docs/adr/ADR-03-cifra-legal-en-pagina-estatica.md` — hermano del ADR-01, para el dato que no

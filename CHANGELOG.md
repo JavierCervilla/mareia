@@ -38,9 +38,11 @@ a quien se fía; mayor, solo un pez— y el adorno deja de ser una cuestión de 
   número para puertos de este portal**: la lubina son 36 cm salvo en las divisiones 8a y 8b del CIEM
   —el golfo de Vizcaya, o sea los puertos cantábricos— donde son **44**; el boquerón, 12 salvo en la
   división IX a) donde son **10**; y la talla del pulpo **no se aplica** en aguas interiores de Illes
-  Balears, y ahí hay **17** puertos del catálogo. **No se resuelven por puerto** y es una decisión de
-  alcance: exige saber en qué división CIEM cae cada dársena —geometría— y asignarla mal da un número
-  **seguro y falso**. Una excepción visible es honrada; un número seguro y equivocado, no.
+  Balears, y ahí hay **17** puertos del catálogo. Las **dos del CIEM no se resuelven por puerto** y es
+  una decisión de alcance: exige saber en qué división cae cada dársena —geometría— y asignarla mal
+  da un número **seguro y falso**. Una excepción visible es honrada; un número seguro y equivocado,
+  no. **La balear sí se resuelve**, porque su criterio es administrativo y el portal ya sabe la
+  comunidad de cada puerto (ver el pase adversario, más abajo).
 - **Los 153 puertos declaran su caladero: 47 · 80 · 26.** El campo lo **genera** el pipeline en cada
   `make build` (un campo tecleado en `ports.json` duraría una ejecución), y sale de la provincia en
   141 de los 153. Los otros doce se curan uno a uno **con su motivo publicado**, porque Cádiz es la
@@ -61,8 +63,10 @@ a quien se fía; mayor, solo un pez— y el adorno deja de ser una cuestión de 
   frente a la recomendación del arquitecto de ocultarla: ocultarla la haría inútil justo el día que
   sirve —un teléfono en la orilla, con la pieza en la mano—. El precio no se disimula: la sección no
   tiene JavaScript con el que enterarse de si hay red, así que el aviso duro va **horneado siempre**
-  y redactado para ser verdad en los dos casos («puedes estar viendo una copia de hace semanas … una
-  talla derogada se lee igual de bien que la vigente»).
+  y redactado para ser verdad en los dos casos («… puedes estar viendo una copia de hace semanas …
+  una talla derogada se lee igual de bien que la vigente»). Y empieza por **su condición** —«si
+  guardas este puerto»—: quien guarda la página es la caja de favoritos, y sin marcar el puerto no
+  hay copia (ver el pase adversario).
 - **G2 vigila la vigencia a diario, y tiene tres desenlaces y tres colores** — que es la pieza que lo
   hace sostenible. **Verde**: nada ha cambiado, se escribe `fuente.verificadoEn` y se commitea; es el
   **único sitio** desde el que se escribe esa fecha, porque tecleada a mano no diría nada. **Rojo**:
@@ -90,10 +94,44 @@ a quien se fía; mayor, solo un pez— y el adorno deja de ser una cuestión de 
   sus tres notas repetidas dentro de ellas. La hoja de estilos añade **1.287 B** al bundle común
   (17.384 → 18.671, +7,4 %) y el `dist/` entero pasa de 5,62 a 7,67 MB (+36,5 %). **Ni un byte de
   JavaScript**: esta sección conserva el cero-JS del core, al revés que la de meteo.
+- **El pase adversario encontró cinco roturas, y tres eran afirmaciones falsas.** Se arreglaron
+  cuatro y la quinta se documentó como tradeoff:
+  - **El sello de vigencia envejecía sin degradar nada.** El workflow de G2 prometía dos veces que
+    en su rama ámbar «la página degrada sola»; construyendo con `verificadoEn` = `2019-04-07` la
+    sección publicada era **idéntica salvo la cadena de la fecha**, y el único gate que miraba ese
+    campo comprobaba su *formato*. Ahora hay dos umbrales con nombre y su porqué escrito —**7 días**
+    (G2 pregunta a diario: siete días ya no es un mal día del BOE, son siete intentos fallidos) y
+    **60** (a los dos meses nadie puede sostener que lo publicado esté verificado)— y **tres
+    estados**: la sección cambia de rótulo, publica `data-vigencia` y añade un aviso que solo existe
+    cuando hay algo que decir. Los avisos dicen «hace **más de** N días», una **cota inferior**,
+    porque el HTML se queda en el teléfono de quien lo abrió y una cuenta exacta sería mentira
+    mañana.
+  - **El trinquete de cifras miraba 6 de las 118, y en 1 de los 3 caladeros.** Plantando merluza a
+    7 cm (47 puertos), salmonete a 3 (80), vieja colorada a 5 (26, **en la misma tabla que G3
+    vigila**) y sardina a 0 y a −11, los cinco gates deterministas salían verdes. **G4 ·
+    reconstrucción**: el dataset se regenera entero desde las respuestas del BOE capturadas y se
+    diffea campo a campo contra el JSON commiteado —**118 tallas, 3 anexos**, notas, literales y
+    procedencias, sin salir a la red—. **G5 · rango sano**: ninguna magnitud publicada puede ser
+    cero ni negativa, porque un cero no se lee como un error sino como que **no hay mínimo**. G3 se
+    queda: sigue siendo el trinquete específico de la selección de versión.
+  - **«Esta tabla se guarda para leerla sin cobertura» era falso en las 153 páginas.** El precacheo
+    es **por favorito**: sin marcar el puerto no hay copia y sin red no hay tabla. Se corrigió el
+    **texto y no el precacheo** —inflarlo a 153 páginas es un coste que nadie ha pedido—: el aviso
+    empieza ahora por su condición, y un recorrido ata la frase a la condición real (guardar el
+    puerto y cortar la red).
+  - **Los 17 puertos de Balears leían la talla del pulpo idéntica a Valencia**, con una coartada que
+    describía a otra nota. La excepción del pulpo es **administrativa** —la Comunidad Autónoma— y el
+    portal ya sabe la de cada puerto: ahora se resuelve **por las dos ramas** (17 leen que ahí no se
+    aplica, 63 que sí) **añadiendo** la respuesta debajo de la nota entera, nunca en su lugar.
+  - **Una fila mal anotada deja el `dist/` en 2 páginas de puerto de 191**: se documenta como
+    tradeoff explícito en ADR-03 —fallar el build es *fail-safe*, y el disparador lo caza
+    `run.py check` antes de construir— con su radio de explosión escrito y una mitigación barata
+    propuesta y **no** implementada. Su recorrido conserva el `test.fail()` como medida permanente
+    de esa decisión.
 - **Lo que este dataset no publica**, dicho para que no se busque: vedas y cupos (no hay fuente
   estructurada; el art. 5 del RD 347/2011 solo habilita al Ministerio a fijarlos por orden), zonas de
-  pesca (no existe la fuente), normativa autonómica (es otra trayectoria) y las notas resueltas por
-  puerto (exigen división CIEM).
+  pesca (no existe la fuente), normativa autonómica (es otra trayectoria) y las **dos notas del CIEM
+  resueltas por puerto** (exigen geometría marina que este portal no calcula).
 
 ## 2026-08-29 — T-15 · el API en producción, `/health` fuera del enrutado público y el sitio que no envejece solo
 

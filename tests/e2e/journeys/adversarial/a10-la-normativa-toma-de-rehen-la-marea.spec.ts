@@ -53,8 +53,13 @@ const PAGINAS = {
 test("A10 · una marca de nota colgando en el Anexo II no puede dejar sin publicar la marea", async ({
   qa,
 }) => {
-  // TRINQUETE · Hallazgo ABIERTO (bundle 141d616fcbbf). Quítalo el día en que la marea se publique
-  // aunque la tabla de tallas no pueda pintarse.
+  // TRINQUETE · **TRADEOFF ACEPTADO Y DOCUMENTADO** (bundle 141d616fcbbf), no un hallazgo
+  // pendiente: ver `docs/adr/ADR-03-cifra-legal-en-pagina-estatica.md`, «El tradeoff que más caro
+  // sale». Fallar el build es fail-safe —no se despliega y producción sigue sirviendo lo
+  // anterior—, y el disparador de este ataque lo caza `run.py check` (G1 y G4) antes de construir.
+  // Lo que se acepta es el radio de explosión de la clase de fallo que se les escape a los gates.
+  // El `test.fail()` se queda: es la medida permanente de ese tradeoff, así que el día que alguien
+  // cambie la decisión Playwright dirá «expected to fail, but passed» y obligará a volver al ADR.
   test.fail();
 
   qa.step("una fila del Anexo II queda apuntando a una nota que ese anexo no publica");
