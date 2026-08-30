@@ -1,0 +1,48 @@
+{
+  "snapshotId": "8c682eb6ac5d",
+  "runId": "run-2026-08-30T05-06-46-575Z",
+  "test": {
+    "title": "adversarial/a12-el-trinquete-de-cifras-mira-seis-de-118.spec.ts > A12 · cambiar la talla de Vieja colorada (26 puertos) tiene que poner algún gate en rojo",
+    "file": "/home/user/mareia/tests/e2e/journeys/adversarial/a12-el-trinquete-de-cifras-mira-seis-de-118.spec.ts",
+    "line": 105,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 713,
+  "urlAtFailure": "about:blank",
+  "error": {
+    "message": "Error: Vieja colorada se publica a 5 cm en 26 puertos y ningún gate lo ve (G1/G3 sin errores, gate de la web con código 0)\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false",
+    "stack": "Error: Vieja colorada se publica a 5 cm en 26 puertos y ningún gate lo ve (G1/G3 sin errores, gate de la web con código 0)\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n    at /home/user/mareia/tests/e2e/journeys/adversarial/a12-el-trinquete-de-cifras-mira-seis-de-118.spec.ts:137:9"
+  },
+  "events": [
+    {
+      "at": 4,
+      "kind": "step",
+      "text": "los gates tienen que estar vivos: verdes sobre el dataset publicado"
+    },
+    {
+      "at": 110,
+      "kind": "step",
+      "text": "plantar Vieja colorada = 5 cm en canario"
+    },
+    {
+      "at": 110,
+      "kind": "step",
+      "text": "correr G1 + G3, los mismos que corre `run.py check`"
+    },
+    {
+      "at": 204,
+      "kind": "step",
+      "text": "correr el gate de contenido de la web sobre ese mismo dataset"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

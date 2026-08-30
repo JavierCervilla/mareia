@@ -1,0 +1,1053 @@
+<?xml version="1.0" encoding="utf-8"?>
+<response>
+  <status>
+    <code>200</code>
+    <text>ok</text>
+  </status>
+  <data>
+    <bloque id="aniii" tipo="encabezado" titulo="ANEXO III">
+      <version id_norma="BOE-A-1995-8639" fecha_publicacion="19950408" fecha_vigencia="19950409">
+        <p class="anexo_num">ANEXO III</p>
+        <p class="anexo_tit">Tallas mínimas autorizadas para el caladero canario</p>
+        <table class="tabla" border="0">
+          <tbody>
+            <tr>
+              <td>
+                <p class="cabeza_tabla">Especie</p>
+              </td>
+              <td>
+                <p class="cabeza_tabla">Nombre local canario</p>
+              </td>
+              <td>
+                <p class="cabeza_tabla">Talla (en cm)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Aguja (Belone belone)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Agujón</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Aligote (Pagellus acarne)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Besugo</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Atún rojo (Thunnus Thynnus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Patudo</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">6,4 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boga (Boops boops)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Boga</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boquerón (Engraulis encrasicholus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Boquerón, anchoa</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">9</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cabrilla (Serranus cabrilla)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Cabrilla, cabrilla rubia</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cachucho (Dentex macrophtalmus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Antoñito, calé, dientón</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">18</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Chopa (Spondyliosoma cantharus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Chopa, negrón</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">19</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Dorada (Sparus auratus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Dorada, zapata morisca</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">19</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Estornino (Scomber japonicus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Caballa</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">18</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Gitano (Mycteroperca fusca)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Abade, abadejo</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">35</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Jureles (Trachurus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Chicharro</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lisa (Mugil auratus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Lisa amarilla</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">14</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lobo viejo (Sparisoma cretense)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Vieja</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lubina (Dicentrarchus labrax)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Lubina</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Mero (Epinephelus marginatus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Mero</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">45</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Mojarra (Diplodus vulgaris)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Seifia, seifio</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pagel (Pagellus erythrinus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Breca</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Palometa negra o japuta (Brama brama)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Pez tontón</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">16</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pargo (Pagrus pagrus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Bocinegro, pargo, palleta</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">33</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Patudo (Thunnus obesus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Tuna</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">3,2 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Rabil (Thunnus aibacares)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Rabil</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">3,2 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salema (Sarpa salpa)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Salema, salpa</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">24</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salmonetes (Mullus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Salmón, salmonete</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sama de pluma (Dentex filosus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Sama, serruda, pargo macho</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">35</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sardina (Sardina pilchardus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Sardina</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sargo (Diplodus sargus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Sargo, sargo blanco</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Serrano imperial (Serranus atricauda)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Cabrilla, cabrilla reina</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <blockquote>
+          <p class="nota_pie">Redactado conforme a la corrección de erratas publicada en BOE núm. 112, de 11 de mayo de 1995. <a class="refPost">Ref. BOE-A-1995-11261</a></p>
+        </blockquote>
+      </version>
+      <version id_norma="BOE-A-2015-12897" fecha_publicacion="20151128" fecha_vigencia="20151130">
+        <p class="anexo_num">ANEXO III</p>
+        <p class="anexo_tit">Tallas mínimas autorizadas para el caladero canario</p>
+        <table class="tabla" border="0">
+          <tbody>
+            <tr>
+              <td>
+                <p class="cabeza_tabla">Especie</p>
+              </td>
+              <td>
+                <p class="cabeza_tabla">Nombre local canario</p>
+              </td>
+              <td>
+                <p class="cabeza_tabla">Talla (en cm)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Aguja (Belone belone)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Agujón</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Aligote (Pagellus acarne)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Besuguito aligote</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Atún rojo (Thunnus Thynnus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Patudo</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">6,4 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boga (Boops boops)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Boga</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boquerón (Engraulis encrasicholus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Boquerón, anchoa</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">9</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cabrilla (Serranus cabrilla)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Cabrilla, cabrilla reina</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">19</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cachucho (Dentex macrophtalmus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Antoñito, dientón</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Chopa (Spondyliosoma cantharus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Chopa, negrón</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">23</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Dorada (Sparus auratus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Dorada, zapata morisca</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">19</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Estornino (Scomber japonicus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Caballa</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">18</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Gitano (Mycteroperca fusca)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Abade, abadejo</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">35</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Jureles (Trachurus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Chicharro</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lisa (Mugil auratus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Lisa amarilla</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">14</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Vieja colorada (Sparisoma cretense)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Vieja</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lubina (Dicentrarchus labrax)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Lubina</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Mero (Epinephelus marginatus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Mero</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">45</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Mojarra (Diplodus vulgaris)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Seifia, seifio</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Morena negra (Muraena augusti)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq"> </p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">56</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Murión (Gymnothorax unicolor)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq"> </p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">57</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pagel (Pagellus erythrinus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Breca</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Palometa negra o japuta (Brama brama)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Pez tontón</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">16</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pargo (Pagrus pagrus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Bocinegro</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">28</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Patudo (Thunnus obesus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Tuna</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">3,2 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Rabil (Thunnus aibacares)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Rabil</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">3,2 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salema (Sarpa salpa)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Salema, salpa</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">24</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salmonetes (Mullus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Salmón, salmonete</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sama de pluma (Dentex filosus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Sama, serruda, pargo macho</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">35</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sardina (Sardina pilchardus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Sardina</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sargo (Diplodus sargus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Sargo, sargo blanco</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Serrano imperial (Serranus atricauda)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Cabrilla negra o cabrilla ruana</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <blockquote>
+          <p class="nota_pie">Se modifica por el art. 2.2 y 3 del Real Decreto 1076/2015, de 27 de noviembre. <a class="refPost">Ref. BOE-A-2015-12897</a>.</p>
+          <p class="nota_pie">Redactado conforme a la corrección de erratas publicada en BOE núm. 112, de 11 de mayo de 1995. <a class="refPost">Ref. BOE-A-1995-11261</a></p>
+        </blockquote>
+      </version>
+      <version id_norma="BOE-A-2025-22024" fecha_publicacion="20251101" fecha_vigencia="20251102">
+        <p class="anexo_num">ANEXO III</p>
+        <p class="anexo_tit">Tallas mínimas autorizadas para el caladero canario</p>
+        <table border="0" class="tabla">
+          <tbody>
+            <tr>
+              <td>
+                <p class="cabeza_tabla">Especie</p>
+              </td>
+              <td>
+                <p class="cabeza_tabla">Nombre local canario</p>
+              </td>
+              <td>
+                <p class="cabeza_tabla">Talla (en cm)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Aguja (Belone belone)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Agujón</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Aligote (Pagellus acarne)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Besuguito aligote</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Atún rojo (Thunnus Thynnus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Patudo</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">6,4 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boga (Boops boops)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Boga</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boquerón (Engraulis encrasicholus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Boquerón, anchoa</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">9</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cabrilla (Serranus cabrilla)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Cabrilla, cabrilla reina</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">19</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cachucho (Dentex macrophtalmus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Antoñito, dientón</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Chopa (Spondyliosoma cantharus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Chopa, negrón</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">23</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Dorada (Sparus auratus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Dorada, zapata morisca</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">19</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Estornino (Scomber japonicus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Caballa</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">18</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Gitano (Mycteroperca fusca)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Abade, abadejo</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">35</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Jureles (Trachurus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Chicharro</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lisa (Mugil auratus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Lisa amarilla</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">14</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Vieja colorada (Sparisoma cretense)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Vieja</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lubina (Dicentrarchus labrax)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Lubina</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Mero (Epinephelus marginatus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Mero</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">45</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Mojarra (Diplodus vulgaris)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Seifia, seifio</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Morena negra (Muraena augusti)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq"> </p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">56</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Murión (Gymnothorax unicolor)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq"> </p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">57</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pagel (Pagellus erythrinus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Breca</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Palometa negra o japuta (Brama brama)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Pez tontón</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">16</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pargo (Pagrus pagrus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Bocinegro</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">28</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Patudo (Thunnus obesus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Tuna</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">3,2 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td class="cuerpo_tabla_izq">Pulpo <em>(Octopus vulgaris)</em></td>
+              <td class="cuerpo_tabla_izq"> </td>
+              <td class="cuerpo_tabla_der">1 kg</td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Rabil (Thunnus aibacares)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Rabil</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">3,2 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salema (Sarpa salpa)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Salema, salpa</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">24</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salmonetes (Mullus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Salmón, salmonete</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sama de pluma (Dentex filosus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Sama, serruda, pargo macho</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">35</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sardina (Sardina pilchardus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Sardina</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sargo (Diplodus sargus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Sargo, sargo blanco</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">22</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Serrano imperial (Serranus atricauda)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Cabrilla negra o cabrilla ruana</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <blockquote>
+          <p class="nota_pie">Se modifica por el art. único.3 del Real Decreto 936/2025, de 21 de octubre. <a class="refPost">Ref. BOE-A-2025-22024</a></p>
+          <p class="nota_pie">Se modifica por el art. 2.2 y 3 del Real Decreto 1076/2015, de 27 de noviembre. <a class="refPost">Ref. BOE-A-2015-12897</a>.</p>
+          <p class="nota_pie">Redactado conforme a la corrección de erratas publicada en BOE núm. 112, de 11 de mayo de 1995. <a class="refPost">Ref. BOE-A-1995-11261</a></p>
+        </blockquote>
+      </version>
+    </bloque>
+  </data>
+</response>

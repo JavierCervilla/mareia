@@ -1,0 +1,4 @@
+{"at":4,"kind":"step","text":"los gates tienen que estar vivos: verdes sobre el dataset publicado"}
+{"at":106,"kind":"step","text":"plantar Merluza = 7 cm en cantabrico-noroeste-y-golfo-de-cadiz"}
+{"at":106,"kind":"step","text":"correr G1 + G3, los mismos que corre `run.py check`"}
+{"at":199,"kind":"step","text":"correr el gate de contenido de la web sobre ese mismo dataset"}

@@ -1,0 +1,158 @@
+/* =============================================================================
+ * Sección «Tallas mínimas» — la UI del módulo `regulations` (T-19).
+ *
+ * La importa el layout, como las demás hojas del sitio (design-brief, «dónde
+ * vive el CSS»: `.css` de verdad y no un `<style>` en la plantilla, porque el
+ * gate anti-slop escanea `.css` y no `.astro`). Se sigue el mismo camino que
+ * `actividad-solunar.css` por lo medido en T-10: importada desde el componente,
+ * Astro no la incluye en el bundle cuando la sección llega por el mapa de
+ * renderizadores, y se publicaría sin estilos con el build en verde.
+ *
+ * **Aquí no hay ni un adorno sobre una cifra**: ni relleno, ni mancha de
+ * terracota, ni peso extra, ni tamaño de titular. Es información
+ * **consultable** en la jerarquía del brief (§1) —se viene a esta página a por
+ * la marea— y además es una cifra legal: destacarla tipográficamente sería
+ * pedirle crédito prestado a la marea. Lo único que se compone con cuidado es
+ * lo que hace que el número no se lea solo: la nota pegada debajo, el literal
+ * del BOE al lado y los dos avisos.
+ *
+ * Ni un literal de color ni de fuente: todo sale de los tokens.
+ * ========================================================================== */
+
+.tallas__intro {
+  font-size: var(--m-text-body);
+}
+
+/* --- Los dos avisos ------------------------------------------------------- */
+/* Filete lateral en el acento cálido —el brief lo reserva al coeficiente y a los
+   avisos, y esto son avisos— con el texto en tinta: se ven sin gritar más que el
+   «No apto para navegación» del pie. Son los dos únicos sitios de la sección con
+   color, y ninguno cae sobre una cifra. */
+.tallas__aviso {
+  border-inline-start: 2px solid var(--m-terra);
+  padding-inline-start: 12px;
+  font-size: var(--m-text-body);
+}
+
+/* --- La tabla ------------------------------------------------------------- */
+.tabla-tallas {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--m-text-body);
+  text-align: left;
+}
+
+.tabla-tallas th,
+.tabla-tallas td {
+  padding: var(--m-gap-fila) 10px var(--m-gap-fila) 0;
+  border-top: 1px solid var(--m-rule-soft);
+  vertical-align: baseline;
+}
+
+.tabla-tallas thead th {
+  font-size: var(--m-text-eyebrow);
+  font-weight: 400;
+  letter-spacing: var(--m-track-label);
+  text-transform: uppercase;
+  color: var(--m-sub);
+  border-top: 0;
+  border-bottom: 1px solid var(--m-rule);
+}
+
+/* El nombre común manda en la fila; el binomio, la medida y el nombre canario
+   son meta y bajan un peldaño. Nada de negrita: la cabecera de fila ya la
+   identifica. */
+.tabla-tallas tbody th {
+  font-weight: 400;
+}
+
+.tabla-tallas__medida,
+.tabla-tallas__cientifico,
+.tabla-tallas__local,
+.tabla-tallas__ausencia {
+  display: block;
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+}
+
+.tabla-tallas__cientifico {
+  font-style: italic;
+}
+
+/* Una ausencia no se disimula, pero tampoco compite: dice su motivo en el mismo
+   cuerpo pequeño que el resto de la meta. */
+.tabla-tallas__ausencia {
+  font-style: italic;
+}
+
+/* `tabular-nums` SOLO donde hay una magnitud. Alinear como cifra una frase
+   —«La norma no fija talla»— la haría parecer un dato numérico, que es
+   exactamente lo que la norma no dice. */
+/* Sin `nowrap`: la cifra y su unidad ya van pegadas con un espacio duro desde `vista.ts`, así que
+   lo único que este `nowrap` añadía era impedir que la disyunción del atún rojo —«80 cm o 10 kg de
+   peso», el literal más largo del Anexo II— partiera por el «o». Con él, esa celda le imponía a la
+   tabla un ancho que desbordaba la página en los 80 puertos mediterráneos. */
+.tabla-tallas__cifra {
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla-tallas__sin-cifra {
+  font-style: italic;
+}
+
+/* La nota, pegada debajo de su cifra y dentro de la misma celda: no es un pie al
+   que haya que bajar, es parte del número. Se compone en cuerpo pequeño porque
+   es larga, no porque sea secundaria. */
+.tabla-tallas__nota,
+.tabla-tallas__explicacion {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--m-text-meta);
+}
+
+.tabla-tallas__marca {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Lo que la nota significa para ESTE puerto, cuando se puede saber (excepciones
+   administrativas: ver `excepciones.ts`). Renglón propio debajo de la nota, en su
+   mismo cuerpo. Sin color ni peso: es la respuesta a la excepción, no una alarma,
+   y sobre una cifra legal el adorno consigue que se le crea más de lo que merece. */
+.tabla-tallas__resolucion {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--m-text-meta);
+}
+
+/* El literal del BOE es lo que permite comparar lo que pintamos con lo que dice
+   la norma. Va al lado y en cuerpo pequeño: se consulta, no se lee.
+
+   SIN `white-space: nowrap`, y no es un olvido. Lo llevaba, y el literal más largo del Anexo II
+   —«80 cm o 10 kg de peso», la disyunción del atún rojo— le imponía a la tabla un ancho mínimo que
+   desbordaba la página 77 px a 320: medido, `scrollWidth` 397 en Valencia contra 320 de ventana, y
+   con él los 80 puertos del caladero mediterráneo. Vigo y Telde salían limpios porque el Anexo I y
+   el III no tienen ningún literal largo, y el recorrido A5 corre sobre Vigo: un trinquete que mira
+   una sola de las 153 páginas no ve un defecto que vive en las otras 80. El literal es prosa con
+   espacios y parte bien; lo que no puede partirse es la cifra, y esa va en `__cifra`, que sí
+   conserva su `nowrap`. */
+.tabla-tallas__literal {
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+  font-variant-numeric: tabular-nums;
+}
+
+/* El ELI se imprime entero como texto del enlace —es la dirección canónica de la norma y el lector
+ * tiene que poder copiarla o teclearla—, y eso mete una «palabra» de 44 caracteres sin espacios en
+ * una fila `flex`, donde el mínimo de contenido de un hijo es su palabra más larga. Medido a 320 px:
+ * la página entera se desplazaba 33 px en horizontal.
+ *
+ * Es el MISMO defecto que el pase A5 encontró en el boletín de AEMET y que H-5 curó en dos
+ * selectores; ésta es la tercera superficie que lo trae, y por el mismo motivo: texto que no
+ * partimos nosotros. Se aplica la misma cura del repo (`overflow-wrap: anywhere`, no `break-word`:
+ * solo aquélla reduce el tamaño mínimo de contenido, que es lo que empuja al `flex`) y `min-width`
+ * a cero, porque un hijo de `flex` no baja de su `auto` por sí solo. */
+#tallas-minimas .datos__valor {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

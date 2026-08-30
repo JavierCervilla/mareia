@@ -1,0 +1,939 @@
+<?xml version="1.0" encoding="utf-8"?>
+<response>
+  <status>
+    <code>200</code>
+    <text>ok</text>
+  </status>
+  <data>
+    <bloque id="anii" tipo="encabezado" titulo="ANEXO II">
+      <version id_norma="BOE-A-1995-8639" fecha_publicacion="19950408" fecha_vigencia="19950409">
+        <p class="anexo_num">ANEXO II</p>
+        <p class="anexo_tit">Tallas mínimas autorizadas para el caladero mediterráneo</p>
+        <table class="tabla" border="0">
+          <tbody>
+            <tr>
+              <td>
+                <p class="cabeza_tabla">Especie</p>
+              </td>
+              <td>
+                <p class="cabeza_tabla">Talla (en cm)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Aguja (Belone belone)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Almejas (Venerupis spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">2,5</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Atún rojo (thunnus thynnus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">70</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_centro"> </p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">ó (6,4 kg)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Bacaladilla (Micromesistius poutassou)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boga (Boops boops)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Bogavante (Homarus gammarus):</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_centro"> </p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Longitud cefalotórax</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">8,5</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Longitud total</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">24</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boquerón (Engraulis encrasicholus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">9</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Caballa (Scomber scombrus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">18</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Capellán/mollera (Trisopterus minutus capelanus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cigala (Nephrops norvegicus):</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_centro"> </p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Longitud cefalotórax</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">2</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Longitud total</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">7</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cherna (Polyprion americanus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">45</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Chirla (Venus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">2,5</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Dorada (Sparus aurata)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Estornino (Scomber japonicus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">18</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Gallo Lepidorhombus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Jureles (Trachurus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Langosta (Palinuridae)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">24</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Langostino (Panaeux kerathurus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">10</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lenguado (Solea vulgaris)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lisas (Mugil spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">16</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lubina (Dicentrarchus Iabrax)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">23</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Merluza (Merluccius merluccius)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Meros (Epinephelus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">45</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pageles, besugos (Pagellus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Palometa negra o japuta (Brama brama)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">16</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pargo (Pagrus pagrus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">18</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pez Espada (Xiphias gladius)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">120 (*)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Rapes (Lophius spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">30</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salema (Sarpa salpa)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salmonetes (Mullus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sardina (Sardina pilchardus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sargos (Diplodus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Vieiras (Pacten spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">10</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="cita">(*) Desde la punta del maxilar interior al extremo posterior del radio más pequeño de la aleta caudal.</p>
+        <blockquote>
+          <p class="nota_pie">Redactado conforme a las correcciones de erratas publicadas en BOE núms. 112, de 11 de mayo de 1995. <a class="refPost">Ref. BOE-A-1995-11261</a> y 120, de 20 de mayo de 1995. <a class="refPost">Ref. BOE-A-1995-11968</a></p>
+        </blockquote>
+      </version>
+      <version id_norma="BOE-A-2006-756" fecha_publicacion="20060119" fecha_vigencia="20060120">
+        <p class="anexo_num">ANEXO II</p>
+        <p class="anexo_tit">Tallas mínimas autorizadas para el caladero mediterráneo</p>
+        <table class="tabla" border="0" summary="Tabla de datos">
+          <tbody>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Especie</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Talla</p>
+                <p class="cuerpo_tabla_izq">(en cm)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Aguja (Belone belone)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Almeja (Venerupis spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">2,5</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Atún rojo (Thunnus thynnus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">80 cm o 10 kg de peso</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Bacaladilla (Micromesistius poutassou).</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boga (Boops boops)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Bogavante (Homarus gammarus):</p>
+              </td>
+              <td/>
+            </tr>
+            <tr>
+              <td>
+                <p class="sangrado">Longitud cefalotórax</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">8,5</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boquerón (Engraulis encrasicholus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">9</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Caballa (Scomber scombrus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">18</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Capellán/mollera (Trisopterus minutus capelanus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cigala (Nephrops norvegicus):</p>
+              </td>
+              <td/>
+            </tr>
+            <tr>
+              <td>
+                <p class="sangrado">Longitud cefalotórax</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">2</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="sangrado">Longitud total</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">7</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cherna (Polyprion americanus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">45</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Chirla (Venus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">2,5</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Dorada (Sparus aurata)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Estornino (Scomber japonicus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">18</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Gallo (Lepidorhombus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Jurel (Trachurus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Langosta (Palinuridae)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">24</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Langostino (Panaeux kerathurus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">10</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lenguado (Solea vulgaris)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lisa (Mugil spps)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">16</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lubina (Dicentrarchus labrax)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">23</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Merluza (Merluccius merluccius)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Mero (Epinephelus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">45</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pagel, besugo (Pagellus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Palometa negra o japuta (Brama brama).</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">16</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pargo (Pagrus pagrus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">18</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Rape (Lophius spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">30</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salema (Sarpa salpa)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salmonete (Mullus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sardina (Sardina pilchardus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sargo (Diplodus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Vieira (Pecten spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">10</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <blockquote>
+          <p class="nota_pie">Se modifica por el art. único del Real Decreto 1615/2005, de 30 de diciembre. <a class="refPost">Ref. BOE-A-2006-756</a></p>
+          <p class="nota_pie">Redactado conforme a las correcciones de erratas publicadas en BOE núms. 112, de 11 de mayo de 1995. <a class="refPost">Ref. BOE-A-1995-11261</a> y 120, de 20 de mayo de 1995. <a class="refPost">Ref. BOE-A-1995-11968</a></p>
+        </blockquote>
+      </version>
+      <version id_norma="BOE-A-2025-22024" fecha_publicacion="20251101" fecha_vigencia="20251102">
+        <p class="anexo_num">ANEXO II</p>
+        <p class="anexo_tit">Tallas mínimas autorizadas para el caladero mediterráneo</p>
+        <table border="0" class="tabla" summary="Tabla de datos">
+          <tbody>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Especie</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">Talla</p>
+                <p class="cuerpo_tabla_izq">(en cm)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Aguja (Belone belone)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Almeja (Venerupis spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">2,5</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Atún rojo (Thunnus thynnus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_izq">80 cm o 10 kg de peso</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Bacaladilla (Micromesistius poutassou).</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boga (Boops boops)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Bogavante (Homarus gammarus):</p>
+              </td>
+              <td> </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="sangrado">Longitud cefalotórax</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">8,5</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boquerón (Engraulis encrasicholus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">9</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Caballa (Scomber scombrus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">18</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Capellán/mollera (Trisopterus minutus capelanus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cigala (Nephrops norvegicus):</p>
+              </td>
+              <td> </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="sangrado">Longitud cefalotórax</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">2</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="sangrado">Longitud total</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">7</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cherna (Polyprion americanus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">45</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Chirla (Venus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">2,5</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Dorada (Sparus aurata)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Estornino (Scomber japonicus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">18</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Gallo (Lepidorhombus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Jurel (Trachurus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Langosta (Palinuridae)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">24</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Langostino (Panaeux kerathurus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">10</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lenguado (Solea vulgaris)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lisa (Mugil spps)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">16</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lubina (Dicentrarchus labrax)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">23</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Merluza (Merluccius merluccius)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Mero (Epinephelus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">45</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pagel, besugo (Pagellus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Palometa negra o japuta (Brama brama).</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">16</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pargo (Pagrus pagrus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">18</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pulpo <em>(Octopus vulgaris)</em> *</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">1 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Rape (Lophius spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">30</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salema (Sarpa salpa)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salmonete (Mullus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sardina (Sardina pilchardus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sargo (Diplodus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Vieira (Pecten spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">10</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="cita">(*) La talla del pulpo <em>(Octopus vulgaris)</em> recogida en la presente tabla no es de aplicación en las aguas interiores y la plataforma continental de la Comunidad Autónoma de las Illes Balears.</p>
+        <blockquote>
+          <p class="nota_pie">Se modifica por el art. único.2 del Real Decreto 936/2025, de 21 de octubre. <a class="refPost">Ref. BOE-A-2025-22024</a></p>
+          <p class="nota_pie">Se modifica por el art. único del Real Decreto 1615/2005, de 30 de diciembre. <a class="refPost">Ref. BOE-A-2006-756</a></p>
+          <p class="nota_pie">Redactado conforme a las correcciones de erratas publicadas en BOE núms. 112, de 11 de mayo de 1995. <a class="refPost">Ref. BOE-A-1995-11261</a> y 120, de 20 de mayo de 1995. <a class="refPost">Ref. BOE-A-1995-11968</a></p>
+        </blockquote>
+      </version>
+    </bloque>
+  </data>
+</response>

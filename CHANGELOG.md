@@ -2,6 +2,137 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-30 — T-19 · Tallas mínimas por caladero: 118 cifras del BOE, y ninguna sin su excepción
+
+La página de puerto publica la talla mínima legal de captura del caladero al que pertenece, con la
+fecha de la redacción en vigor, el día en que una máquina comprobó que la norma sigue viva y el
+enlace ELI. Es la primera sección del portal que publica un dato **con consecuencia jurídica**, y eso
+cambia dos reglas: el error es asimétrico —publicar una talla menor de la vigente le cuesta una multa
+a quien se fía; mayor, solo un pez— y el adorno deja de ser una cuestión de gusto.
+
+- **El texto consolidado del BOE no es una tabla: son tres apiladas.** Cada bloque de anexo conserva
+  las redacciones históricas envueltas en `<version fecha_vigencia>` —`ani` trae la de 19950409 (54
+  filas), 20230721 (54) y 20251102 (55)—, y **solo la última está en vigor**. Un parser que leyera
+  todos los `<tr>` del bloque publicaría en el caladero canario **seis cifras derogadas, cinco del
+  lado que multa**: aligote 12 en vez de 20, cabrilla 15 en vez de 19, cachucho 18 en vez de 22,
+  chopa 19 en vez de 23, serrano imperial 15 en vez de 20 (y el pargo, 33 en vez de 28, conservador).
+  El parser selecciona por `fecha_vigencia` y **aborta** si no hay ninguna `<version>`, en vez de
+  caer hacia atrás a «leer el bloque». El trinquete G3 fija esas seis y mide **el JSON publicado**,
+  no la función del parser — lección pagada en T-13.
+- **118 tallas publicadas: 53 del Anexo I, 34 del II y 31 del III.** Y **17 no son un entero de
+  centímetros**, aunque la columna se titule «Talla (en cm)»: 9 son un **peso** (`6,4 kg` del atún
+  rojo, `1 kg` del pulpo), 6 son «talla **por determinar**» —la norma declara que no la ha fijado—,
+  1 es una disyunción (`80 cm o 10 kg de peso`) y 1 es **ilegible en origen**. Con las cuatro
+  decimales (`3,7` en las colas de cigala, `2,5` en la almeja y la chirla, `8,5` en el cefalotórax
+  del bogavante), **21 de las 118** no son un entero. `talla: number` habría sido un tipo falso que
+  obliga a inventarse un número 17 veces: es una **unión cerrada de cinco clases**, cada celda
+  conserva su literal del BOE y el `switch` que las escribe **no tiene `default`** —cierra con
+  `never`—, así que la rama que pintaría un «por determinar» como si fuera un número no existe.
+- **El `1 1` de la boga no se corrige.** El BOE imprime `1 1` donde casi con seguridad quiso decir
+  `11`. Corregir por inferencia una cifra legal es inventarla: se publica el literal, con el motivo a
+  la vista y el enlace al texto auténtico. Hay un recorrido cuya única función es que nadie lo
+  «arregle» sin darse cuenta.
+- **Las 9 especies con excepción llevan su nota entera y pegada a la cifra**, no en un pie al que
+  haya que bajar. Son las 6 «por determinar» del Anexo I con su `(*)`, el boquerón con su `(**)`, la
+  lubina con su `(***)` y el pulpo del Anexo II con su `(*)`. Y tres de esas notas **cambian el
+  número para puertos de este portal**: la lubina son 36 cm salvo en las divisiones 8a y 8b del CIEM
+  —el golfo de Vizcaya, o sea los puertos cantábricos— donde son **44**; el boquerón, 12 salvo en la
+  división IX a) donde son **10**; y la talla del pulpo **no se aplica** en aguas interiores de Illes
+  Balears, y ahí hay **17** puertos del catálogo. Las **dos del CIEM no se resuelven por puerto** y es
+  una decisión de alcance: exige saber en qué división cae cada dársena —geometría— y asignarla mal
+  da un número **seguro y falso**. Una excepción visible es honrada; un número seguro y equivocado,
+  no. **La balear sí se resuelve**, porque su criterio es administrativo y el portal ya sabe la
+  comunidad de cada puerto (ver el pase adversario, más abajo).
+- **Los 153 puertos declaran su caladero: 47 · 80 · 26.** El campo lo **genera** el pipeline en cada
+  `make build` (un campo tecleado en `ports.json` duraría una ejecución), y sale de la provincia en
+  141 de los 153. Los otros doce se curan uno a uno **con su motivo publicado**, porque Cádiz es la
+  única provincia española que cruza el límite entre dos caladeros —Punta Marroquí—: siete al golfo
+  de Cádiz, tres al Mediterráneo, Sevilla al Atlántico por ser un puerto fluvial 80 km Guadalquivir
+  arriba, y **Tarifa**, que está *sobre* el límite y se resuelve al Atlántico **diciendo que es una
+  decisión y no un dato**. Un gate compara la lista con el README: una curación sin motivo publicado
+  es una opinión que nadie puede revisar.
+- **Módulo propio, no una sección de pesca.** `ModuleId` pasa a cuatro (`fishing | weather |
+  navigation | regulations`): la unión está cerrada para que dar de alta un módulo se vea en el diff
+  del contrato, y esta es la primera vez que se ejerce esa puerta. Colgarlo de `fishing` «para no
+  tocar el contrato» habría dado dos módulos con una identidad, una versión y las atribuciones
+  mezcladas —la teoría solunar y la Agencia Estatal en la misma lista—, y darlos de baja por separado
+  dejaría de ser borrar una línea. Una sección `static`, `order: 30` (consultable: se viene a esta
+  página a por la marea), **cero JavaScript de cliente** y la sección **pide su caladero por slug**,
+  como pesca y meteo: `ContextoDeSeccion` no cambia.
+- **Sin cobertura la tabla se muestra, y lo dice.** `offline: cache-first`, decisión del humano
+  frente a la recomendación del arquitecto de ocultarla: ocultarla la haría inútil justo el día que
+  sirve —un teléfono en la orilla, con la pieza en la mano—. El precio no se disimula: la sección no
+  tiene JavaScript con el que enterarse de si hay red, así que el aviso duro va **horneado siempre**
+  y redactado para ser verdad en los dos casos («… puedes estar viendo una copia de hace semanas …
+  una talla derogada se lee igual de bien que la vigente»). Y empieza por **su condición** —«si
+  guardas este puerto»—: quien guarda la página es la caja de favoritos, y sin marcar el puerto no
+  hay copia (ver el pase adversario).
+- **G2 vigila la vigencia a diario, y tiene tres desenlaces y tres colores** — que es la pieza que lo
+  hace sostenible. **Verde**: nada ha cambiado, se escribe `fuente.verificadoEn` y se commitea; es el
+  **único sitio** desde el que se escribe esa fecha, porque tecleada a mano no diría nada. **Rojo**:
+  la norma está derogada o el texto consolidado ha cambiado → CI en rojo y acción crítica en el
+  dashboard. **Ámbar**: no se ha podido preguntar (red, BOE caído) → `verificadoEn` **no se toca**, el
+  sello envejece a la vista y la página degrada sola. Confundir el ámbar con el rojo es como se
+  consigue que un gate acabe desactivado el primer día que el BOE tenga un mal día.
+- **Cero *juice* sobre una cifra legal.** Ni barra, ni estrella, ni rareza, ni contador, ni orden por
+  «mejores especies», ni la mancha de terracota sobre ningún número. No es una preferencia estética:
+  el adorno consigue que se le crea al número más de lo que merece, y lo que merece está escrito
+  encima con la fecha en la que se comprobó. Hay un gate que lo mide sobre la hoja de estilos —sin
+  `@keyframes`, `animation`, `transition`, `box-shadow` ni `border-radius`, y la única regla con
+  `--m-terra` es la de los avisos—. La ampliación del design brief (§7 quinquies) lo escribe como
+  regla, no como gusto.
+- **El gate de la trayectoria, probado en rojo.** «Ninguna cifra sin su nota» se mide sobre el
+  `dist/`: se busca la fila de cada especie con excepción en las **153 páginas construidas** y se
+  exige el **texto entero de la nota dentro de esa misma fila** — 8 especies del Anexo I × 47 puertos
+  + el pulpo del Anexo II × 80 = **456 comprobaciones**. Se probó dejando en la fila solo la marca
+  `(***)` y reconstruyendo: las 456 salieron listadas con su puerto y su especie. Un gate que
+  exigiera «la fila menciona la nota» habría pasado en verde publicando «36 cm (***)» en Bilbao,
+  donde son 44.
+- **Lo que pesa, medido.** La página de puerto pasa de **29.167 a 46.580 B** en el Anexo I (+60 %;
+  comprimida, de **8.598 a 11.664 B**, +36 %), de 29.925 a 41.461 B en el Mediterráneo (+39 %) y de
+  30.733 a 42.550 B en el canario (+38 %). El Anexo I es el que más crece porque tiene 53 filas **y**
+  sus tres notas repetidas dentro de ellas. La hoja de estilos añade **1.287 B** al bundle común
+  (17.384 → 18.671, +7,4 %) y el `dist/` entero pasa de 5,62 a 7,67 MB (+36,5 %). **Ni un byte de
+  JavaScript**: esta sección conserva el cero-JS del core, al revés que la de meteo.
+- **El pase adversario encontró cinco roturas, y tres eran afirmaciones falsas.** Se arreglaron
+  cuatro y la quinta se documentó como tradeoff:
+  - **El sello de vigencia envejecía sin degradar nada.** El workflow de G2 prometía dos veces que
+    en su rama ámbar «la página degrada sola»; construyendo con `verificadoEn` = `2019-04-07` la
+    sección publicada era **idéntica salvo la cadena de la fecha**, y el único gate que miraba ese
+    campo comprobaba su *formato*. Ahora hay dos umbrales con nombre y su porqué escrito —**7 días**
+    (G2 pregunta a diario: siete días ya no es un mal día del BOE, son siete intentos fallidos) y
+    **60** (a los dos meses nadie puede sostener que lo publicado esté verificado)— y **tres
+    estados**: la sección cambia de rótulo, publica `data-vigencia` y añade un aviso que solo existe
+    cuando hay algo que decir. Los avisos dicen «hace **más de** N días», una **cota inferior**,
+    porque el HTML se queda en el teléfono de quien lo abrió y una cuenta exacta sería mentira
+    mañana.
+  - **El trinquete de cifras miraba 6 de las 118, y en 1 de los 3 caladeros.** Plantando merluza a
+    7 cm (47 puertos), salmonete a 3 (80), vieja colorada a 5 (26, **en la misma tabla que G3
+    vigila**) y sardina a 0 y a −11, los cinco gates deterministas salían verdes. **G4 ·
+    reconstrucción**: el dataset se regenera entero desde las respuestas del BOE capturadas y se
+    diffea campo a campo contra el JSON commiteado —**118 tallas, 3 anexos**, notas, literales y
+    procedencias, sin salir a la red—. **G5 · rango sano**: ninguna magnitud publicada puede ser
+    cero ni negativa, porque un cero no se lee como un error sino como que **no hay mínimo**. G3 se
+    queda: sigue siendo el trinquete específico de la selección de versión.
+  - **«Esta tabla se guarda para leerla sin cobertura» era falso en las 153 páginas.** El precacheo
+    es **por favorito**: sin marcar el puerto no hay copia y sin red no hay tabla. Se corrigió el
+    **texto y no el precacheo** —inflarlo a 153 páginas es un coste que nadie ha pedido—: el aviso
+    empieza ahora por su condición, y un recorrido ata la frase a la condición real (guardar el
+    puerto y cortar la red).
+  - **Los 17 puertos de Balears leían la talla del pulpo idéntica a Valencia**, con una coartada que
+    describía a otra nota. La excepción del pulpo es **administrativa** —la Comunidad Autónoma— y el
+    portal ya sabe la de cada puerto: ahora se resuelve **por las dos ramas** (17 leen que ahí no se
+    aplica, 63 que sí) **añadiendo** la respuesta debajo de la nota entera, nunca en su lugar.
+  - **Una fila mal anotada deja el `dist/` en 2 páginas de puerto de 191**: se documenta como
+    tradeoff explícito en ADR-03 —fallar el build es *fail-safe*, y el disparador lo caza
+    `run.py check` antes de construir— con su radio de explosión escrito y una mitigación barata
+    propuesta y **no** implementada. Su recorrido conserva el `test.fail()` como medida permanente
+    de esa decisión.
+- **Lo que este dataset no publica**, dicho para que no se busque: vedas y cupos (no hay fuente
+  estructurada; el art. 5 del RD 347/2011 solo habilita al Ministerio a fijarlos por orden), zonas de
+  pesca (no existe la fuente), normativa autonómica (es otra trayectoria) y las **dos notas del CIEM
+  resueltas por puerto** (exigen geometría marina que este portal no calcula).
+
 ## 2026-08-29 — T-15 · el API en producción, `/health` fuera del enrutado público y el sitio que no envejece solo
 
 `mareia.cervilla.es` servía las 192 páginas desde T-17, pero **`/v1` devolvía 502**: `mareia-api` no

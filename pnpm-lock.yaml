@@ -47,6 +47,9 @@ importers:
       '@mareia/module-fishing':
         specifier: workspace:*
         version: link:../../packages/modules/fishing
+      '@mareia/module-regulations':
+        specifier: workspace:*
+        version: link:../../packages/modules/regulations
       '@mareia/module-weather':
         specifier: workspace:*
         version: link:../../packages/modules/weather
@@ -93,6 +96,12 @@ importers:
       '@mareia/domain-core':
         specifier: workspace:*
         version: link:../../domain-core
+      '@mareia/module-contract':
+        specifier: workspace:*
+        version: link:../../module-contract
+
+  packages/modules/regulations:
+    dependencies:
       '@mareia/module-contract':
         specifier: workspace:*
         version: link:../../module-contract

@@ -1,0 +1,241 @@
+---
+/**
+ * La sección que aporta el módulo `regulations`: las tallas mínimas de captura del caladero al que
+ * pertenece este puerto (RD 560/1995, texto consolidado del BOE).
+ *
+ * Entra por donde tienen que entrar las secciones de módulo: el módulo declara su `PageSection`
+ * (una cadena), `src/secciones.ts` la traduce a este componente y `SeccionesDeModulos` lo coloca.
+ * La página de puerto no la nombra en ninguna línea, y **el caladero se pide por slug** —no llega
+ * inyectado desde la plantilla—, que es la regla de `ContextoDeSeccion`.
+ *
+ * Lo que se pinta, en este orden y por este motivo:
+ *
+ * 1. **Qué es esto**: que son tallas **legales de captura** y que la tabla es la de este caladero.
+ *    Una tabla de cifras sin ese encabezado se lee como una recomendación de pesca.
+ * 2. **De dónde salen**: la redacción en vigor con su fecha, la norma que la dio, el día en que una
+ *    máquina comprobó que sigue viva (`verificadoEn`, que escribe el gate G2) y el enlace ELI. Van
+ *    **antes** de la tabla porque califican todo lo que hay debajo.
+ * 3. **Los avisos**: que solo el BOE es auténtico, y que si se ha guardado este puerto la tabla se
+ *    lee sin cobertura y entonces puede ser una copia de hace semanas. El segundo está siempre
+ *    escrito porque esta sección no tiene JavaScript con el que enterarse de si hay red ni de si
+ *    este puerto está guardado — ver `OFFLINE_REGULATIONS` y `AVISO_SIN_RED`, cuya primera frase es
+ *    condicional porque quien guarda la página es la caja de favoritos y solo si se le pide.
+ *    Cuando el sello de vigencia ha envejecido se suma un tercero, que es el que degrada la sección
+ *    (ver `vigencia.ts`).
+ * 4. **La tabla**, con las cinco clases de talla y **cada nota pegada a su cifra**.
+ * 5. **Las notas del anexo** enteras, y por qué van repetidas arriba.
+ * 6. **La fuente**, con su licencia.
+ *
+ * **Cero *juice*, y es la regla que manda sobre la estética aquí**: no hay barra, ni estrella, ni
+ * contador, ni orden por «mejores especies», ni la mancha de terracota sobre ninguna cifra. El
+ * design brief ya prohíbe la gamificación del dato (§3); sobre una cifra con consecuencia jurídica
+ * el argumento es más fuerte: adornarla es conseguir que se le crea más de lo que merece, y lo que
+ * merece está escrito arriba con su fecha de comprobación.
+ *
+ * Su hoja de estilos (`estilos/tallas-minimas.css`) la importa el LAYOUT y no este componente, por
+ * lo medido en T-10: importada desde aquí, Astro no la mete en el bundle cuando el componente llega
+ * por el mapa de renderizadores y la sección se publica **sin estilos**, con todo en verde.
+ */
+import {
+  ATRIBUCIONES_REGULATIONS,
+  avisoDeVigencia,
+  AVISO_SIN_RED,
+  COLUMNA_ESPECIE,
+  COLUMNA_LITERAL,
+  COLUMNA_TALLA,
+  filasDeTallas,
+  ID_SECCION_TALLAS,
+  POR_QUE_LA_NOTA_VA_PEGADA,
+  QUE_ES_ESTO,
+  ROTULO_FUENTES,
+  ROTULO_NOMBRE_LOCAL,
+  ROTULO_NOTAS,
+  resolucionDeNota,
+  ROTULO_PROCEDENCIA,
+  rotuloDeVigencia,
+  estadoDeVigencia,
+  tituloDeLaSeccion,
+} from "@mareia/module-regulations";
+
+import { fechaLarga } from "../../formato.ts";
+import type { ContextoDeSeccion } from "../../modulos/contexto.ts";
+import { cargarTablaDeTallas, FORMATO_DE_TALLAS } from "../../modulos/normativa.ts";
+
+interface Props {
+  contexto: ContextoDeSeccion;
+}
+
+const { contexto } = Astro.props;
+
+const { fuente, caladero, comunidad } = await cargarTablaDeTallas(contexto);
+const filas = filasDeTallas(caladero, FORMATO_DE_TALLAS, comunidad);
+
+// El sello de G2 se compara con **el día que publica esta página** (`contexto.fechaIso`, el
+// `BUILD_DATE`), que es el único «hoy» que un HTML estático conoce. Cuando G2 se queda en su rama
+// ámbar —no se pudo preguntar al BOE— `verificadoEn` deja de moverse, y a partir de aquí eso tiene
+// consecuencias visibles en vez de ser una promesa escrita en el workflow: ver `vigencia.ts`.
+const vigencia = estadoDeVigencia(fuente.verificadoEn, contexto.fechaIso);
+const avisoVigencia = avisoDeVigencia(vigencia);
+---
+
+{/*
+  El `id` del título es `titulo-<id de la sección>` porque el `aria-labelledby` lo compone
+  `SeccionesDeModulos.astro`: sin esta convención la sección no se expone como región y el `id`
+  queda colgando. Lo caza `todaSeccionDeBloqueTieneNombreAccesible` (hallazgo A-13 de T-10).
+*/}
+<h2 class="bloque__titulo" id={`titulo-${ID_SECCION_TALLAS}`}>
+  {tituloDeLaSeccion(caladero.nombre)}
+</h2>
+<p class="tallas__intro">{QUE_ES_ESTO}</p>
+
+<h3 class="etiqueta">{ROTULO_PROCEDENCIA}</h3>
+<div class="datos">
+  <p class="datos__fila">
+    <span>Norma</span>
+    <span class="datos__valor">{fuente.norma} ({fuente.identificador})</span>
+  </p>
+  <p class="datos__fila">
+    <span>Anexo que aplica a este puerto</span>
+    <span class="datos__valor">{caladero.anexo} · {caladero.titulo}</span>
+  </p>
+  <p class="datos__fila">
+    <span>Redacción en vigor desde</span>
+    <span class="datos__valor">
+      {fechaLarga(caladero.fechaVigencia)}, por {caladero.normaModificadora}
+    </span>
+  </p>
+  {/*
+    `data-vigencia` no es un gancho de estilo: es lo que hace **medible en el artefacto** que la
+    sección degrada. El gate del `dist/` lo lee en las 153 páginas y lo compara con el estado que
+    le toca al sello del dataset, y el recorrido adversario A2 construye el sitio con un sello de
+    2019 y exige que lo publicado sea distinto.
+  */}
+  <p class="datos__fila" data-vigencia={vigencia}>
+    <span>{rotuloDeVigencia(vigencia)}</span>
+    <span class="datos__valor">{fechaLarga(fuente.verificadoEn)}</span>
+  </p>
+  <p class="datos__fila">
+    <span>Texto auténtico</span>
+    <span class="datos__valor"><a href={fuente.eli}>{fuente.eli}</a></span>
+  </p>
+</div>
+
+{
+  /*
+    Va **pegado al sello** y antes que el aviso de autenticidad porque es lo que califica la fila
+    de arriba: sin él, «última comprobación: 7 de abril de 2019» se lee como un dato de archivo y
+    no como lo que es. Y sólo existe cuando hay algo que decir: un aviso permanente que dice «puede
+    que no esté comprobado» se aprende a ignorar el primer día, y entonces no avisa el día que
+    importa.
+  */
+  avisoVigencia !== null && <p class="tallas__aviso">{avisoVigencia}</p>
+}
+
+<p class="tallas__aviso">
+  <strong>{fuente.aviso}</strong> Esto es un derivado para consulta: antes de quedarse una pieza, la
+  referencia es el <a href={fuente.textoConsolidado}>texto consolidado del BOE</a>, no esta tabla.
+</p>
+<p class="tallas__aviso">{AVISO_SIN_RED}</p>
+
+<table class="tabla-tallas">
+  <caption class="solo-lectores">
+    Tallas mínimas de captura del caladero {caladero.nombre}, que es el que aplica en {
+      contexto.nombre
+    }
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">{COLUMNA_ESPECIE}</th>
+      <th scope="col">{COLUMNA_TALLA}</th>
+      <th scope="col">{COLUMNA_LITERAL}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      filas.map((fila) => (
+        <tr data-especie={fila.clave}>
+          <th scope="row">
+            {fila.nombreComun}
+            {fila.medida !== null && <span class="tabla-tallas__medida">{fila.medida}</span>}
+            {fila.cientifico.tipo === "nombre" ? (
+              <span class="tabla-tallas__cientifico">{fila.cientifico.valor}</span>
+            ) : (
+              <span class="tabla-tallas__ausencia">{fila.cientifico.motivo}</span>
+            )}
+            {fila.local !== null &&
+              (fila.local.tipo === "nombre" ? (
+                <span class="tabla-tallas__local">
+                  {ROTULO_NOMBRE_LOCAL}: {fila.local.valor}
+                </span>
+              ) : (
+                <span class="tabla-tallas__ausencia">{fila.local.motivo}</span>
+              ))}
+          </th>
+          <td>
+            <span class={fila.talla.hayCifra ? "tabla-tallas__cifra" : "tabla-tallas__sin-cifra"}>
+              {fila.talla.texto}
+            </span>
+            {fila.talla.explicacion !== null && (
+              <span class="tabla-tallas__explicacion">{fila.talla.explicacion}</span>
+            )}
+            {/*
+              La nota va AQUÍ, pegada a la cifra, y no solo en el pie. El boquerón son 12 cm salvo
+              en la división IX a) —de Galicia sur al golfo de Cádiz, donde sí hay puertos nuestros—,
+              donde son 10; el pulpo del Anexo II no aplica en aguas interiores de Baleares, y ahí
+              hay 17 puertos del catálogo. (La de la lubina, 44 cm en 8.a/8.b, es la de mayor
+              diferencia pero no toca a ningún puerto del portal: la costa española es 8.c.) Un número sin su excepción es una cifra legal falsa para quien
+              pesca en la zona excepcionada, y una marca sola es una promesa de nota que hay que ir
+              a buscar. `filasDeTallas` levanta si una marca se queda sin texto.
+            */}
+            {fila.notas.map((nota) => (
+              <span class="tabla-tallas__nota">
+                <span class="tabla-tallas__marca">{nota.marca}</span> {nota.texto}
+                {/*
+                  Y si la excepción se puede resolver para este puerto, se resuelve: la del pulpo
+                  del Anexo II es de la Comunidad Autónoma de las Illes Balears —criterio
+                  administrativo— y el portal sabe en cuál está el lector. Va DESPUÉS de la nota
+                  entera y nunca en su lugar: si la regla se equivocara, lo que queda a la vista
+                  sigue siendo el literal del BOE. Las notas del CIEM no se resuelven y aquí no
+                  escriben nada.
+                */}
+                {resolucionDeNota(nota.resolucion) !== null && (
+                  <span class="tabla-tallas__resolucion">{resolucionDeNota(nota.resolucion)}</span>
+                )}
+              </span>
+            ))}
+          </td>
+          <td class="tabla-tallas__literal">{fila.literal}</td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>
+
+{
+  caladero.notas.length > 0 && (
+    <>
+      <h3 class="etiqueta">{ROTULO_NOTAS}</h3>
+      <div class="datos">
+        {caladero.notas.map((nota) => (
+          <p class="datos__fila">
+            <span class="tabla-tallas__marca">{nota.marca}</span>
+            <span class="datos__valor">{nota.texto}</span>
+          </p>
+        ))}
+      </div>
+      <p class="datos__nota">{POR_QUE_LA_NOTA_VA_PEGADA}</p>
+    </>
+  )
+}
+
+<p class="datos__nota">
+  {ROTULO_FUENTES} ·{" "}
+  {
+    ATRIBUCIONES_REGULATIONS.map((atribucion, indice) => (
+      <>
+        {indice > 0 && <> · </>}
+        <a href={atribucion.url}>{atribucion.name}</a> ({atribucion.license})
+      </>
+    ))
+  }
+</p>

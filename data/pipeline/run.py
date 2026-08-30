@@ -4,6 +4,8 @@
     python run.py fetch      # sólo descarga (calienta la caché)
     python run.py build      # descarga + reconcilia + valida + escribe JSON e informe QC
     python run.py check      # valida los JSON ya commiteados contra el schema station/v1
+    python run.py normativa  # ingesta del RD 560/1995 del BOE → data/normativa/tallas-minimas.json
+    python run.py verificar-normativa   # gate G2: ¿sigue en vigor lo que publicamos?
 
 Todas las fuentes son públicas y anónimas: el pipeline no lee ninguna credencial.
 """
@@ -15,13 +17,15 @@ import datetime as dt
 import json
 import sys
 import time
+import urllib.error
+from collections import Counter
 from pathlib import Path
 
-from mareia_pipeline import catalog, report, schema
+from mareia_pipeline import catalog, normativa, report, schema
 from mareia_pipeline import grade as grading
 from mareia_pipeline.ports import PILOT_PORTS, Port
 from mareia_pipeline.reconcile import Selection, select, to_station_v1
-from mareia_pipeline.sources import geonames, ioc
+from mareia_pipeline.sources import boe, geonames, ioc
 from mareia_pipeline.sources.tide_database import GaugeRecord, load_gauges
 from mareia_pipeline.tides.predict import Harmonic
 from mareia_pipeline.validate import Metrics, evaluate
@@ -181,6 +185,12 @@ def _ports_json(ports: list[Port]) -> dict[str, object]:
 
     El orden de publicación (región → provincia → puerto, alfabético en español) lo pone el caso de
     uso `listPorts`, no este fichero: aquí manda que dos ejecuciones produzcan el mismo texto.
+
+    El ``caladero`` sale de ``normativa.caladero_de_puerto`` y no de una columna escrita a mano
+    porque este fichero se **regenera** entero en cada `build`: un campo tecleado aquí duraría
+    hasta la siguiente ejecución. Si un puerto nuevo cae en una provincia sin caladero asignado,
+    esto levanta y el catálogo no se publica — antes que publicarle a un puerto la tabla de tallas
+    de otro mar.
     """
     entries = []
     for port in sorted((p for p in ports if p.in_catalogue), key=lambda p: p.id):
@@ -194,6 +204,7 @@ def _ports_json(ports: list[Port]) -> dict[str, object]:
                 "lat": port.lat,
                 "lon": port.lon,
                 "timezone": port.timezone,
+                "caladero": normativa.caladero_de_puerto(port.slug, province.slug),
                 "stationFile": Path(port.output).name,
             }
         )
@@ -342,6 +353,7 @@ def command_check(_: argparse.Namespace) -> int:
                 print(f"    {error}", file=sys.stderr)
     print(f"✓ {len(files) - failures} de {len(files)} estaciones validan contra station/v1")
     failures += _check_catalogue()
+    failures += _check_normativa()
     return 1 if failures else 0
 
 
@@ -368,6 +380,144 @@ def _check_catalogue() -> int:
     return problems
 
 
+def _check_normativa() -> int:
+    """Gate G1 (procedencia) sobre el dataset de normativa y el caladero de cada puerto.
+
+    Offline y en el mismo `check` que ya corre CI: una cifra legal sin origen declarado no llega a
+    publicarse, y un puerto sin caladero tampoco. Si el dataset todavía no existe no se inventa un
+    verde: se dice que falta y se cuenta como fallo, porque el módulo `regulations` lo necesita.
+    """
+    problems = 0
+    if not normativa.DATASET.exists():
+        print(
+            f"✗ falta {normativa.DATASET.relative_to(REPO_ROOT)}: genéralo con "
+            "`python run.py normativa`",
+            file=sys.stderr,
+        )
+        problems += 1
+    else:
+        dataset = normativa.cargar()
+        errores = normativa.errores_de_procedencia(dataset)
+        for error in errores:
+            print(f"✗ procedencia: {error}", file=sys.stderr)
+        problems += len(errores)
+        if not errores:
+            especies = sum(len(c["especies"]) for c in dataset["caladeros"])
+            print(
+                f"✓ G1 · las {especies} tallas de los {len(dataset['caladeros'])} caladeros "
+                "declaran bloque, fecha de vigencia y ELI"
+            )
+        derogadas = normativa.errores_de_trinquete(dataset)
+        for error in derogadas:
+            print(f"✗ trinquete: {error}", file=sys.stderr)
+        problems += len(derogadas)
+        if not derogadas:
+            print(
+                f"✓ G3 · las {len(normativa.TRINQUETE_CANARIO)} especies canarias que movió el RD "
+                "936/2025 publican su talla vigente y no la de 1995"
+            )
+        # G4 · las cifras publicadas son las que dice la fuente. G3 fija seis especies elegidas
+        # a mano; esto regenera el dataset entero desde las respuestas capturadas del BOE y lo
+        # diffea, así que cubre las 118 tallas de los tres anexos sin salir a la red.
+        regeneradas = normativa.errores_de_reconstruccion(dataset)
+        for error in regeneradas:
+            print(f"✗ reconstrucción: {error}", file=sys.stderr)
+        problems += len(regeneradas)
+        if not regeneradas:
+            especies = sum(len(c["especies"]) for c in dataset["caladeros"])
+            print(
+                f"✓ G4 · las {especies} tallas publicadas son, campo a campo, las que salen de la "
+                "fuente capturada del BOE"
+            )
+        fuera_de_rango = normativa.errores_de_rango(dataset)
+        for error in fuera_de_rango:
+            print(f"✗ rango: {error}", file=sys.stderr)
+        problems += len(fuera_de_rango)
+        if not fuera_de_rango:
+            print("✓ G5 · ninguna talla publicada es cero ni negativa")
+    catalogo = json.loads(PORTS_JSON.read_text(encoding="utf-8"))
+    errores = normativa.errores_de_caladeros_de_puertos(catalogo)
+    for error in errores:
+        print(f"✗ caladero: {error}", file=sys.stderr)
+    problems += len(errores)
+    if not errores:
+        print(f"✓ los {len(catalogo['ports'])} puertos del catálogo declaran su caladero")
+    return problems
+
+
+def command_normativa(args: argparse.Namespace) -> int:
+    """Ingesta del RD 560/1995: BOE → `data/normativa/tallas-minimas.json`.
+
+    Necesita red y no corre en CI, igual que `build`: el dataset se commitea. El gate G1 se pasa
+    **antes** de escribir, así que un documento sin procedencia no llega ni al disco.
+    """
+    hoy = dt.datetime.now(dt.timezone.utc).date()
+    metadatos, anexos = boe.descargar_anexos(hoy=hoy, refresh=args.refresh)
+    print(f"{metadatos.identificador} · {metadatos.titulo}")
+    print(f"  vigente: derogación={metadatos.estatus_derogacion} agotada={metadatos.vigencia_agotada}")
+    # `verificado_en` lo pone `sellar_verificacion`, que es el único sitio desde el que se escribe:
+    # esta ejecución acaba de comprobar contra el BOE lo mismo que comprueba el gate diario.
+    dataset = normativa.sellar_verificacion(
+        normativa.construir_dataset(metadatos, anexos, verificado_en=hoy), hoy
+    )
+    errores = normativa.errores_de_procedencia(dataset)
+    if errores:
+        for error in errores:
+            print(f"✗ procedencia: {error}", file=sys.stderr)
+        return 1
+    for caladero, anexo in zip(dataset["caladeros"], anexos, strict=True):
+        reparto = Counter(especie["talla"]["tipo"] for especie in caladero["especies"])
+        ligadas = sum(1 for especie in caladero["especies"] if especie["notas"])
+        print(
+            f"  {caladero['anexo']:9} {caladero['id']:34} en vigor desde "
+            f"{caladero['fechaVigencia']} por {caladero['normaModificadora']} · "
+            f"{len(anexo.especies)} especies · {len(anexo.notas)} notas ({ligadas} ligadas)"
+        )
+        for tipo, cuantas in sorted(reparto.items()):
+            print(f"      {tipo:18} {cuantas}")
+    normativa.volcar(dataset)
+    print(f"normativa → {normativa.DATASET.relative_to(REPO_ROOT)}")
+    return 0
+
+
+def command_verificar_normativa(_: argparse.Namespace) -> int:
+    """Gate G2: ¿lo que publicamos sigue siendo lo que dice el BOE hoy?
+
+    Tres desenlaces y tres códigos de salida, porque son tres cosas distintas:
+
+    * **0** — sigue en vigor y nada ha cambiado. Se reescribe `verificadoEn` y sólo aquí.
+    * **1** — la norma está derogada o el texto consolidado ha cambiado. Rojo: el portal está
+      publicando cifras que ya no son las de la norma.
+    * **2** — no se ha podido preguntar (la red, el BOE caído). Ámbar: `verificadoEn` **no se
+      toca**, la página degrada sola al envejecer el sello y el despliegue no se rompe por una
+      caída ajena. Confundir este caso con el anterior es o romper el deploy cada vez que el BOE
+      tenga un mal día, o dejar pasar una derogación en silencio.
+    """
+    dataset = normativa.cargar()
+    try:
+        metadatos = boe.descargar_metadatos(refresh=True)
+        indice = boe.descargar_indice(refresh=True)
+    except (urllib.error.URLError, TimeoutError, OSError) as error:
+        print(f"⚠ no se ha podido consultar el BOE: {error}", file=sys.stderr)
+        print(
+            "  verificadoEn NO se toca: sigue en "
+            f"{dataset['fuente']['verificadoEn']} y la página degradará sola al envejecer.",
+            file=sys.stderr,
+        )
+        return 2
+    resultado = normativa.comparar_vigencia(dataset, metadatos, indice)
+    if resultado.estado == normativa.CAMBIO:
+        print(f"✗ {resultado.motivo}", file=sys.stderr)
+        for diferencia in resultado.diferencias:
+            print(f"    {diferencia}", file=sys.stderr)
+        return 1
+    hoy = dt.datetime.now(dt.timezone.utc).date()
+    normativa.volcar(normativa.sellar_verificacion(dataset, hoy))
+    print(f"✓ {resultado.motivo}")
+    print(f"  verificadoEn ← {hoy.isoformat()} en {normativa.DATASET.relative_to(REPO_ROOT)}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -384,6 +534,10 @@ def main(argv: list[str] | None = None) -> int:
         help="commit de tide-database a citar en el informe (por defecto, el fijado en el código)",
     )
     subparsers.add_parser("check", help="valida los JSON commiteados contra station/v1")
+    subparsers.add_parser("normativa", help="ingesta del RD 560/1995 del BOE (tallas mínimas)")
+    subparsers.add_parser(
+        "verificar-normativa", help="gate G2: comprueba que el RD 560/1995 sigue en vigor"
+    )
 
     args = parser.parse_args(argv)
     if getattr(args, "commit", None) is None:
@@ -391,7 +545,13 @@ def main(argv: list[str] | None = None) -> int:
 
         args.commit = PINNED_COMMIT
 
-    handlers = {"fetch": command_fetch, "build": command_build, "check": command_check}
+    handlers = {
+        "fetch": command_fetch,
+        "build": command_build,
+        "check": command_check,
+        "normativa": command_normativa,
+        "verificar-normativa": command_verificar_normativa,
+    }
     return handlers[args.command](args)
 
 

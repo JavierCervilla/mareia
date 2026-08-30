@@ -1,0 +1,115 @@
+{
+  "snapshotId": "357b20089027",
+  "runId": "run-2026-08-30T05-05-48-639Z",
+  "test": {
+    "title": "adversarial/a4-la-excepcion-balear-no-se-resuelve-y-si-se-sabe.spec.ts > A4 · en un puerto balear la talla del pulpo no puede leerse igual que en uno peninsular",
+    "file": "/home/user/mareia/tests/e2e/journeys/adversarial/a4-la-excepcion-balear-no-se-resuelve-y-si-se-sabe.spec.ts",
+    "line": 60,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 25464,
+  "urlAtFailure": "http://127.0.0.1:4321/mareas/illes-balears/illes-balears/palma-de-mallorca/",
+  "error": {
+    "message": "Error: la página de un puerto balear publica la talla del pulpo con exactamente el mismo texto que la de Valencia, aunque su propia nota diga que en Balears no es de aplicación\n\nexpect(received).not.toBe(expected) // Object.is equality\n\nExpected: not \"1 kg de peso(*) La talla del pulpo (Octopus vulgaris) recogida en la presente tabla no es de aplicación en las aguas interiores y la plataforma continental de la Comunidad Autónoma de las Illes Balears.\"",
+    "stack": "Error: la página de un puerto balear publica la talla del pulpo con exactamente el mismo texto que la de Valencia, aunque su propia nota diga que en Balears no es de aplicación\n\nexpect(received).not.toBe(expected) // Object.is equality\n\nExpected: not \"1 kg de peso(*) La talla del pulpo (Octopus vulgaris) recogida en la presente tabla no es de aplicación en las aguas interiores y la plataforma continental de la Comunidad Autónoma de las Illes Balears.\"\n    at /home/user/mareia/tests/e2e/journeys/adversarial/a4-la-excepcion-balear-no-se-resuelve-y-si-se-sabe.spec.ts:80:9"
+  },
+  "events": [
+    {
+      "at": 4,
+      "kind": "step",
+      "text": "abrir Valencia, un puerto del Anexo II donde la talla del pulpo SÍ rige"
+    },
+    {
+      "at": 31,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/comunitat-valenciana/valencia/valencia/"
+    },
+    {
+      "at": 12549,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12549,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12586,
+      "kind": "httperror",
+      "text": "HTTP 404 GET http://127.0.0.1:4321/v1/modules/weather/weather?port=valencia"
+    },
+    {
+      "at": 12586,
+      "kind": "console",
+      "text": "[error] Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "at": 12586,
+      "kind": "httperror",
+      "text": "HTTP 404 GET http://127.0.0.1:4321/v1/modules/weather/bulletin?port=valencia"
+    },
+    {
+      "at": 12586,
+      "kind": "console",
+      "text": "[error] Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "at": 12710,
+      "kind": "step",
+      "text": "abrir Palma de Mallorca, uno de los 17 puertos que la nota excepciona"
+    },
+    {
+      "at": 12737,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/illes-balears/illes-balears/palma-de-mallorca/"
+    },
+    {
+      "at": 25274,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 25274,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 25298,
+      "kind": "httperror",
+      "text": "HTTP 404 GET http://127.0.0.1:4321/v1/modules/weather/weather?port=palma-de-mallorca"
+    },
+    {
+      "at": 25298,
+      "kind": "console",
+      "text": "[error] Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "at": 25299,
+      "kind": "httperror",
+      "text": "HTTP 404 GET http://127.0.0.1:4321/v1/modules/weather/bulletin?port=palma-de-mallorca"
+    },
+    {
+      "at": 25299,
+      "kind": "console",
+      "text": "[error] Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "at": 25398,
+      "kind": "step",
+      "text": "comprobar que la nota que excepciona está de verdad ahí (el gate de T-19 lo asegura)"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

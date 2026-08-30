@@ -1,0 +1,1352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<response>
+  <status>
+    <code>200</code>
+    <text>ok</text>
+  </status>
+  <data>
+    <bloque id="ani" tipo="encabezado" titulo="ANEXO I">
+      <version id_norma="BOE-A-1995-8639" fecha_publicacion="19950408" fecha_vigencia="19950409">
+        <p class="anexo_num">ANEXO I</p>
+        <p class="anexo_tit">Tallas mínimas autorizadas para los caladeros del Cantábrico y noroeste y del golfo de Cádiz</p>
+        <table class="tabla">
+          <tr>
+            <td>
+              <p class="cabeza_tabla">Especie</p>
+            </td>
+            <td>
+              <p class="cabeza_tabla">Talla (en cm)</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Abadejo (Pollachius pollachius)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">30</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Acedia (Dicologoglossa cuneata)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">15</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Aguja (Belone belone)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">25</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Anguila (Anguilla anguilla)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">(*)</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Arenque (Clupea harengus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">20</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Atún rojo (Thunnus thynnus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">6,4 kg</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Bacalao (Gadus morhua)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">35</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Besugo (Pagellus bogaraveo)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">25</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Boga (Boops boops)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">1 1</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Boquerón (Engraulis encrasicholus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">12 (**)</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Buey (Cáncer pagurus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">(*)</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Caballa, Estornino (Scomber spp)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">20</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Calamar (Loligo vulgaris)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">(*)</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Carbonero (Pollachius virens)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">35</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Centolla (Maja squinado)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">12</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Cigala (entera) (Nephrops norvegicus):</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_centro"> </p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">     Longitud cefalotórax</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">2</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">     Longitud total</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">7</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Cigalas (colas)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">3,7</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Congrio (Conger conger)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">58</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Chopa (Spondyliosoma cantharus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">23</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Dorada (Sparus aurata)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">19</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Eglefino (Melanogrammús aeglefinus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">30</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Faneca (Trisopterus luscus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">(*)</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Gallos (Lepidorhombus spp)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">20</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Jibias (Sepia spp)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">(*)</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Jurel (Trachurus trachurus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">15</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Lenguado (Solea vulgaris)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">24</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Limanda (Limanda limanda)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">23</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Lisas (Mugil spp)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">20</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Lubina (Dicentrarchus labrax)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">36</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Maruca Azul (Molva dypterygia)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">70</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Maruca (Molva molva)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">63</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Mendo limón (Microstommus kitt)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">25</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Mendo (Gliptocephalus cynoglossus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">28</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Merlán (Merlangus merlangus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">23</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Merluza (Merluccius merluccius)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">27</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Palometa negra o japuta (Brama brama)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">16</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Pargo (Pagrus pagrus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">15</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Patudo (Thunnus obesus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">3,2 kg</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Platija (Platichthys flesus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">25</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Rabil (Thunnus albacares)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">3,2 kg</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Rape (Lophius piscatorius, L. Budegassa)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">(*)</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Ramal (Scophthalmus rhombus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">30</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Rodaballo (Psetta maxima)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">30</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Sabalos (Alosa spp)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">30</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Salema (Sarpa salpa)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">15</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Salmón (Salmo salar)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">50</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Salmonete de roca (Mullus surmuletus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">15</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Sardina (Sardina pilchardus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">11</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Solla (Pleuronectes platessa)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">25</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Trucha marisca o reo (Salmo trutta)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">25</p>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p class="cuerpo_tabla_izq">Vieira (Pecten maximus)</p>
+            </td>
+            <td>
+              <p class="cuerpo_tabla_der">10</p>
+            </td>
+          </tr>
+        </table>
+        <p class="cita">(*) Talla por determinar.</p>
+        <p class="cita">(**) Excepto en la división IX, a), en la que la talla mínima es de 10 centímetros.</p>
+      </version>
+      <version id_norma="BOE-A-2023-16726" fecha_publicacion="20230720" fecha_vigencia="20230721">
+        <p class="anexo_num">ANEXO I</p>
+        <p class="anexo_tit">Tallas mínimas autorizadas para los caladeros del Cantábrico y noroeste y del golfo de Cádiz</p>
+        <table class="tabla">
+          <tbody>
+            <tr>
+              <td>
+                <p class="cabeza_tabla">Especie</p>
+              </td>
+              <td>
+                <p class="cabeza_tabla">Talla (en cm)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Abadejo (Pollachius pollachius)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">30</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Acedia (Dicologoglossa cuneata)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Aguja (Belone belone)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Anguila (Anguilla anguilla)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">(*)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Arenque (Clupea harengus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Atún rojo (Thunnus thynnus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">6,4 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Bacalao (Gadus morhua)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">35</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Besugo (Pagellus bogaraveo)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boga (Boops boops)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">1 1</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boquerón (Engraulis encrasicholus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12 (**)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Buey (Cáncer pagurus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">(*)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Caballa, Estornino (Scomber spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Calamar (Loligo vulgaris)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">(*)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Carbonero (Pollachius virens)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">35</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Centolla (Maja squinado)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cigala (entera) (Nephrops norvegicus):</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_centro"> </p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">     Longitud cefalotórax</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">2</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">     Longitud total</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">7</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cigalas (colas)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">3,7</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Congrio (Conger conger)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">58</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Chopa (Spondyliosoma cantharus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">23</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Dorada (Sparus aurata)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">19</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Eglefino (Melanogrammús aeglefinus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">30</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Faneca (Trisopterus luscus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">(*)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Gallos (Lepidorhombus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Jibias (Sepia spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">(*)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Jurel (Trachurus trachurus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lenguado (Solea vulgaris)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">24</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Limanda (Limanda limanda)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">23</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lisas (Mugil spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lubina (Dicentrarchus labrax)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">36 (***)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Maruca Azul (Molva dypterygia)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">70</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Maruca (Molva molva)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">63</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Mendo limón (Microstommus kitt)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Mendo (Gliptocephalus cynoglossus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">28</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Merlán (Merlangus merlangus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">23</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Merluza (Merluccius merluccius)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">27</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Palometa negra o japuta (Brama brama)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">16</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pargo (Pagrus pagrus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Patudo (Thunnus obesus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">3,2 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Platija (Platichthys flesus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Rabil (Thunnus albacares)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">3,2 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Rape (Lophius piscatorius, L. Budegassa)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">(*)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Ramal (Scophthalmus rhombus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">30</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Rodaballo (Psetta maxima)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">30</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sabalos (Alosa spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">30</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salema (Sarpa salpa)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salmón (Salmo salar)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">50</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salmonete de roca (Mullus surmuletus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sardina (Sardina pilchardus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Solla (Pleuronectes platessa)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Trucha marisca o reo (Salmo trutta)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Vieira (Pecten maximus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">10</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="cita">(*) Talla por determinar.</p>
+        <p class="cita">(**) Excepto en la división IX, a), en la que la talla mínima es de 10 centímetros.</p>
+        <p class="cita">(***) Excepto en las divisiones 8a y 8b del Consejo Internacional para la Exploración del Mar, tanto para la pesca profesional como para la pesca recreativa, en las que la talla mínima es de 44 centímetros.</p>
+        <blockquote>
+          <p class="nota_pie">Se modifca la fila relativa a la lubina y se añade una nueva nota por la disposición final 1 del Real Decreto 664/2023, de 18 de julio. <a class="refPost">Ref. BOE-A-2023-16726</a></p>
+        </blockquote>
+      </version>
+      <version id_norma="BOE-A-2025-22024" fecha_publicacion="20251101" fecha_vigencia="20251102">
+        <p class="anexo_num">ANEXO I</p>
+        <p class="anexo_tit">Tallas mínimas autorizadas para los caladeros del Cantábrico y noroeste y del golfo de Cádiz</p>
+        <table class="tabla">
+          <tbody>
+            <tr>
+              <td>
+                <p class="cabeza_tabla">Especie</p>
+              </td>
+              <td>
+                <p class="cabeza_tabla">Talla (en cm)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Abadejo (Pollachius pollachius)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">30</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Acedia (Dicologoglossa cuneata)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Aguja (Belone belone)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Anguila (Anguilla anguilla)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">(*)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Arenque (Clupea harengus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Atún rojo (Thunnus thynnus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">6,4 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Bacalao (Gadus morhua)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">35</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Besugo (Pagellus bogaraveo)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boga (Boops boops)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">1 1</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Boquerón (Engraulis encrasicholus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12 (**)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Buey (Cáncer pagurus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">(*)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Caballa, Estornino (Scomber spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Calamar (Loligo vulgaris)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">(*)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Carbonero (Pollachius virens)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">35</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Centolla (Maja squinado)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">12</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cigala (entera) (Nephrops norvegicus):</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_centro"> </p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq"> Longitud cefalotórax</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">2</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq"> Longitud total</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">7</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Cigalas (colas)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">3,7</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Congrio (Conger conger)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">58</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Chopa (Spondyliosoma cantharus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">23</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Dorada (Sparus aurata)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">19</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Eglefino (Melanogrammús aeglefinus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">30</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Faneca (Trisopterus luscus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">(*)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Gallos (Lepidorhombus spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Jibias (Sepia spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">(*)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Jurel (Trachurus trachurus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lenguado (Solea vulgaris)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">24</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Limanda (Limanda limanda)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">23</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lisas (Mugil spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">20</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Lubina (Dicentrarchus labrax)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">36 (***)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Maruca Azul (Molva dypterygia)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">70</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Maruca (Molva molva)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">63</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Mendo limón (Microstommus kitt)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Mendo (Gliptocephalus cynoglossus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">28</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Merlán (Merlangus merlangus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">23</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Merluza (Merluccius merluccius)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">27</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Palometa negra o japuta (Brama brama)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">16</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pargo (Pagrus pagrus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Patudo (Thunnus obesus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">3,2 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Platija (Platichthys flesus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Pulpo <em>(Octopus vulgaris)</em></p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">1 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Rabil (Thunnus albacares)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">3,2 kg</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Rape (Lophius piscatorius, L. Budegassa)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">(*)</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Ramal (Scophthalmus rhombus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">30</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Rodaballo (Psetta maxima)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">30</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sabalos (Alosa spp)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">30</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salema (Sarpa salpa)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salmón (Salmo salar)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">50</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Salmonete de roca (Mullus surmuletus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">15</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Sardina (Sardina pilchardus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">11</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Solla (Pleuronectes platessa)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Trucha marisca o reo (Salmo trutta)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">25</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="cuerpo_tabla_izq">Vieira (Pecten maximus)</p>
+              </td>
+              <td>
+                <p class="cuerpo_tabla_der">10</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="cita">(*) Talla por determinar.</p>
+        <p class="cita">(**) Excepto en la división IX, a), en la que la talla mínima es de 10 centímetros.</p>
+        <p class="cita">(***) Excepto en las divisiones 8a y 8b del Consejo Internacional para la Exploración del Mar, tanto para la pesca profesional como para la pesca recreativa, en las que la talla mínima es de 44 centímetros.</p>
+        <blockquote>
+          <p class="nota_pie">Se modifica por el art. único.1 del Real Decreto 936/2025, de 21 de octubre. <a class="refPost">Ref. BOE-A-2025-22024</a></p>
+          <p class="nota_pie">Se modifca la fila relativa a la lubina y se añade una nueva nota por la disposición final 1 del Real Decreto 664/2023, de 18 de julio. <a class="refPost">Ref. BOE-A-2023-16726</a></p>
+        </blockquote>
+      </version>
+    </bloque>
+  </data>
+</response>

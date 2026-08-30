@@ -1,0 +1,75 @@
+{
+  "snapshotId": "cc0f8d87ecaa",
+  "runId": "run-2026-08-30T05-08-59-264Z",
+  "test": {
+    "title": "adversarial/a11-la-tabla-que-dice-guardarse-y-no-se-guarda.spec.ts > A11 · la tabla que dice guardarse sola no está cuando se va la cobertura",
+    "file": "/home/user/mareia/tests/e2e/journeys/adversarial/a11-la-tabla-que-dice-guardarse-y-no-se-guarda.spec.ts",
+    "line": 47,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 15460,
+  "urlAtFailure": "chrome-error://chromewebdata/",
+  "error": {
+    "message": "Error: la página prometía que la tabla se guarda para leerla sin cobertura y sin cobertura no hay tabla: el worker solo guarda la página de un puerto si el lector lo marcó como favorito\n\nexpect(locator).toContainText(expected) failed\n\nLocator: locator('#tallas-minimas')\nExpected substring: \"Talla mínima legal de captura\"\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - la página prometía que la tabla se guarda para leerla sin cobertura y sin cobertura no hay tabla: el worker solo guarda la página de un puerto si el lector lo marcó como favorito with timeout 15000ms\n  - waiting for locator('#tallas-minimas')\n",
+    "stack": "Error: la página prometía que la tabla se guarda para leerla sin cobertura y sin cobertura no hay tabla: el worker solo guarda la página de un puerto si el lector lo marcó como favorito\n\nexpect(locator).toContainText(expected) failed\n\nLocator: locator('#tallas-minimas')\nExpected substring: \"Talla mínima legal de captura\"\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n  - la página prometía que la tabla se guarda para leerla sin cobertura y sin cobertura no hay tabla: el worker solo guarda la página de un puerto si el lector lo marcó como favorito with timeout 15000ms\n  - waiting for locator('#tallas-minimas')\n\n    at /home/user/mareia/tests/e2e/journeys/adversarial/a11-la-tabla-que-dice-guardarse-y-no-se-guarda.spec.ts:78:5"
+  },
+  "events": [
+    {
+      "at": 16,
+      "kind": "step",
+      "text": "abrir la página de un puerto con cobertura y leer la sección de tallas"
+    },
+    {
+      "at": 50,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"
+    },
+    {
+      "at": 74,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 74,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_FAILED"
+    },
+    {
+      "at": 272,
+      "kind": "step",
+      "text": "comprobar que la página promete DE VERDAD que la tabla se guarda"
+    },
+    {
+      "at": 287,
+      "kind": "step",
+      "text": "dejar que el worker se instale, como en cualquier visita"
+    },
+    {
+      "at": 322,
+      "kind": "step",
+      "text": "se va la cobertura y el lector vuelve a la misma página"
+    },
+    {
+      "at": 351,
+      "kind": "requestfailed",
+      "text": "GET http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/",
+      "detail": "net::ERR_FAILED"
+    },
+    {
+      "at": 391,
+      "kind": "navigation",
+      "text": "chrome-error://chromewebdata/"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}
