@@ -12,6 +12,7 @@
  * segunda versión de algo que ya viene firmado con el dato, y las dos se desincronizarían.
  */
 
+import type { ResolucionDeNota } from "./excepciones.ts";
 import { DIAS_SELLO_CORRIENTE, DIAS_SELLO_RANCIO } from "./vigencia.ts";
 import type { EstadoDeVigencia } from "./vigencia.ts";
 
@@ -117,17 +118,46 @@ export const AVISO_SIN_RED =
 export const ROTULO_NOTAS = "Notas de la norma";
 
 /**
- * Por qué las notas se repiten pegadas a cada cifra en vez de quedarse solo en el pie.
+ * Por qué las notas se repiten pegadas a cada cifra, y por qué unas se resuelven y otras no.
  *
- * Es la decisión de alcance de T-19 dicha en la página: resolver la excepción por puerto exige
- * saber en qué división CIEM cae cada dársena —geometría, que esta trayectoria no hace— y asignarla
- * mal daría un número seguro y falso.
+ * La versión anterior daba un solo motivo para las tres —«exige saber en qué división del CIEM cae
+ * cada dársena»— y el pase adversario lo midió falso para una de ellas (H-5): la excepción del
+ * pulpo es de la **Comunidad Autónoma** de las Illes Balears, un criterio administrativo, y la
+ * comunidad de cada puerto ya está en el catálogo. El motivo describía a las otras dos. Ahora el
+ * texto dice la verdad de las dos clases, que es lo que permite resolver una sin prometer las
+ * otras: ver `excepciones.ts`.
  */
 export const POR_QUE_LA_NOTA_VA_PEGADA =
   "Cuando una cifra tiene excepción, la excepción va escrita junto a ella y no solo aquí abajo: " +
   "hay especies cuya talla cambia según la zona, y el número sin su excepción es una cifra falsa " +
-  "para quien pesca en la zona excepcionada. No se resuelve por puerto porque eso exige saber en " +
-  "qué división del CIEM cae cada dársena, y asignarla mal daría un número seguro y equivocado.";
+  "para quien pesca en la zona excepcionada. Las que dependen de la comunidad autónoma sí se " +
+  "resuelven para este puerto, porque el portal sabe en cuál está; las que dependen de la " +
+  "división del CIEM en que cae cada dársena no, porque eso es geometría marina que aquí no se " +
+  "calcula y asignarla mal daría un número seguro y equivocado. Esas últimas las resuelve quien " +
+  "lee, y por eso van enteras.";
+
+/**
+ * Lo que se escribe debajo de una nota que **sí** se ha podido resolver para este puerto.
+ *
+ * Se dice en la fila, junto a la cifra y a la nota entera, y **nunca en lugar de la nota**: si la
+ * regla se equivocase, lo que queda a la vista sigue siendo la excepción literal del BOE. Las dos
+ * ramas se escriben, no solo la que excepciona: publicar «aquí no aplica» en Palma y **nada** en
+ * Valencia le dejaría a quien lee en Valencia el mismo trabajo de antes.
+ */
+export function resolucionDeNota(resolucion: ResolucionDeNota): string | null {
+  switch (resolucion.tipo) {
+    case "no_aplica_aqui":
+      return `En este puerto no se aplica: está en ${resolucion.comunidad}.`;
+    case "aplica_aqui":
+      return `En este puerto sí se aplica: la excepción es solo para ${resolucion.comunidad}.`;
+    case "sin_resolver":
+      return null;
+    default: {
+      const imposible: never = resolucion;
+      throw new Error(`resolución de nota no contemplada: ${JSON.stringify(imposible)}`);
+    }
+  }
+}
 
 /** Cabeceras de la tabla. */
 export const COLUMNA_ESPECIE = "Especie";

@@ -98,10 +98,29 @@ portal**:
 | `(**)` Anexo I | el boquerón son 12 cm salvo en la división IX a), donde son **10** | golfo de Cádiz y Atlántico ibérico |
 | `(*)` Anexo II | la talla del pulpo **no se aplica** en aguas interiores de Illes Balears | **17** puertos del catálogo |
 
-**No se resuelven por puerto**, y es una decisión de alcance: resolverlas exige saber en qué división
-CIEM cae cada dársena —geometría, que T-19 no hace— y asignar mal una división da un número **seguro
-y falso**, que es peor que una excepción visible. Así que la nota viaja pegada a la cifra y se
-renderiza junto a ella, **siempre**, en la misma celda.
+La nota viaja pegada a la cifra y se renderiza junto a ella, **siempre**, en la misma celda. Sobre
+si además se **resuelve** para el puerto de la página, la decisión original de T-19 fue que no, con
+un único motivo: «resolverlas exige saber en qué división CIEM cae cada dársena —geometría, que
+T-19 no hace— y asignar mal una división da un número seguro y falso». **Ese motivo describe a dos
+de las tres**, y el pase adversario lo midió (hallazgo H-5). Corregido:
+
+- Las dos primeras hablan de **divisiones del CIEM**: eso es geometría marina que este portal no
+  calcula, y una división mal asignada da un número seguro y falso. **Se publican enteras y sin
+  resolver**, y la sección dice por qué.
+- La del pulpo excepciona a la **Comunidad Autónoma de las Illes Balears**: el criterio es
+  **administrativo**, y el portal ya sabe la comunidad de cada puerto —está en `data/geo/ports.json`,
+  se usa para construir la propia URL en la que el lector está y es con lo que el pipeline decide
+  qué anexo le toca—. **Se resuelve**, en los 17 puertos baleares y en los otros 63 del caladero:
+  con «aquí no se aplica» y «aquí sí, la excepción es solo para Illes Balears». Publicar solo la
+  primera dejaría a quien lee en Valencia el mismo trabajo de antes.
+
+Y se resuelve **añadiendo, nunca quitando**: la nota entera se sigue publicando en las 80 páginas,
+y la resolución va debajo. Si la regla se equivocara, lo que queda a la vista sigue siendo la
+excepción literal del BOE — el fallo posible es un renglón de más, no una cifra desnuda. La regla,
+además, **describe a una nota y no a un topónimo**: exige que el texto traiga el efecto *y* el
+sujeto («no es de aplicación» *y* «Illes Balears»), así que una redacción futura que fijase allí
+otra talla en vez de excepcionarla no se resolvería mal — se publicaría entera, como hoy las del
+CIEM. Vive en `packages/modules/regulations/src/excepciones.ts`.
 
 Y se renderiza **entera**, no como marca. Una marca (`36 (***)`) es una promesa de nota que hay que
 ir a buscar al pie, y en un móvil al sol nadie la busca: publicaría «36» a secas en Bilbao, donde
@@ -155,6 +174,10 @@ puede decir que es una copia guardada, el sello se lee como si fuese de hoy.
 
 ## Consecuencias comprobables
 
+- **La excepción balear se resuelve en las 80 páginas del caladero mediterráneo**, y por las dos
+  ramas: 17 puertos leen que ahí esa talla no rige y 63 que sí. El gate lo mide en el `dist/`,
+  puerto a puerto y contra la comunidad que declara el catálogo; probado en rojo cambiando la
+  resolución de Palma por la peninsular.
 - **Ninguna especie con nota se publica sin el texto de su nota, en su propia fila.** El gate busca
   la fila de cada especie en las **153** páginas construidas y exige la nota **entera dentro de esa
   fila**: 8 especies del Anexo I × 47 puertos + el pulpo del Anexo II × 80 = **456 comprobaciones**.

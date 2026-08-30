@@ -19,6 +19,8 @@
  * tomada en `apps/web/src/formato.ts`.
  */
 
+import type { ComunidadDelPuerto, ResolucionDeNota } from "./excepciones.ts";
+import { resolverNota } from "./excepciones.ts";
 import {
   ROTULO_NOMBRE_LOCAL,
   SIN_TALLA_FIJADA,
@@ -36,6 +38,14 @@ export interface FormatoDeTallas {
 export interface NotaVisible {
   readonly marca: string;
   readonly texto: string;
+  /**
+   * Si la excepción afecta o no al puerto de esta página, cuando se puede saber.
+   *
+   * Es `sin_resolver` para las notas que dependen de geometría marina (las divisiones del CIEM) y
+   * está resuelta para las administrativas, que dependen de la comunidad autónoma —dato que el
+   * portal ya tiene—. La nota entera se pinta en los dos casos: esto se suma, no sustituye.
+   */
+  readonly resolucion: ResolucionDeNota;
 }
 
 /**
@@ -174,11 +184,19 @@ function nombreSecundario(
  * Las notas de una especie, resueltas contra el pie del anexo.
  *
  * **Levanta si una marca no tiene nota.** Es el caso que rompe la promesa entera de la sección: la
- * lubina son 36 cm salvo en las divisiones 8a y 8b del CIEM —el golfo de Vizcaya, o sea los puertos
- * cantábricos de este portal—, donde son 44. Publicar «36 (***)» con el pie perdido son 8 cm de
- * error del lado que multa, y encima con aspecto de dato anotado.
+ * lubina son 36 cm salvo en las divisiones 8a y 8b del CIEM, donde son 44. Publicar «36 (***)» con
+ * el pie perdido son 8 cm de error del lado que multa, y encima con aspecto de dato anotado.
+ *
+ * Además de traerla entera, **resuelve la nota para este puerto cuando se puede** (`excepciones.ts`):
+ * la del pulpo del Anexo II excepciona a una comunidad autónoma y el portal sabe en cuál está el
+ * lector, así que no hay motivo para pasarle a él ese trabajo. Las que dependen de la división del
+ * CIEM se quedan sin resolver y se publican igual que siempre.
  */
-function notasDe(especie: EspecieConTalla, notas: readonly NotaDeCaladero[]): readonly NotaVisible[] {
+function notasDe(
+  especie: EspecieConTalla,
+  notas: readonly NotaDeCaladero[],
+  comunidad: ComunidadDelPuerto,
+): readonly NotaVisible[] {
   return especie.notas.map((marca) => {
     const nota = notas.find((candidata) => candidata.marca === marca);
     if (nota === undefined) {
@@ -187,7 +205,7 @@ function notasDe(especie: EspecieConTalla, notas: readonly NotaDeCaladero[]): re
           `marca que no lleva a ninguna parte se lee como una cifra anotada, y no lo está.`,
       );
     }
-    return { marca: nota.marca, texto: nota.texto };
+    return { marca: nota.marca, texto: nota.texto, resolucion: resolverNota(nota.texto, comunidad) };
   });
 }
 
@@ -197,13 +215,18 @@ function notasDe(especie: EspecieConTalla, notas: readonly NotaDeCaladero[]): re
  * Se conserva **el orden del dataset**, que es el del BOE (alfabético por nombre común). No se
  * reordena por talla, ni por «mejores especies», ni por nada: ordenar una tabla legal por otro
  * criterio inventa una jerarquía que la norma no tiene.
+ *
+ * La `comunidad` es obligatoria y no opcional a propósito: es lo que permite decirle a quien lee si
+ * la excepción de su tabla le afecta, y un parámetro que se puede omitir se omite. La página ya
+ * sabe en qué puerto está —construye su URL con ese dato—, así que pedírsela no le cuesta nada.
  */
 export function filasDeTallas(
   caladero: Caladero,
   formato: FormatoDeTallas,
+  comunidad: ComunidadDelPuerto,
 ): readonly FilaDeTalla[] {
   return caladero.especies.map((especie) => {
-    const notas = notasDe(especie, caladero.notas);
+    const notas = notasDe(especie, caladero.notas, comunidad);
     if (especie.talla.tipo === "por_determinar") {
       const citada = especie.talla.segunNota;
       if (!notas.some((nota) => nota.marca === citada)) {

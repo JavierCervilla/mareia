@@ -90,11 +90,18 @@ Leídas las notas de las versiones en vigor:
 - **`(*)` del Anexo II**: la talla del pulpo **no se aplica en aguas interiores de Illes Balears**.
   Tenemos 17 puertos baleares.
 
-**Decisión de alcance, y es la que mantiene T-19 pequeña**: resolver la nota por puerto exige saber
-en qué división CIEM cae cada puerto, y eso es geometría — justo lo que esta trayectoria no hace.
-Así que **la nota viaja pegada a la cifra y se renderiza junto a ella, siempre**. Nunca se muestra un
-número al que le aplica una nota sin la nota. Resolverla por puerto queda anotado como trabajo
-futuro con nombre propio, no como deuda anónima.
+**Decisión de alcance, y es la que mantiene T-19 pequeña**: **la nota viaja pegada a la cifra y se
+renderiza junto a ella, siempre**. Nunca se muestra un número al que le aplica una nota sin la nota.
+
+**Corregido tras el pase adversario (H-5).** Este párrafo decía que además no se resuelve por puerto
+«porque exige saber en qué división CIEM cae cada puerto, y eso es geometría». Eso es verdad de las
+notas de la lubina y el boquerón, que hablan de divisiones del CIEM — y **falso de la del pulpo**,
+cuyo criterio es **administrativo**: la Comunidad Autónoma de las Illes Balears, dato que el portal
+ya tiene en `ports.json` y con el que construye la URL en la que está el lector. La única de las
+tres resoluble con lo que ya hay en el repo era justamente la que se dejaba sin resolver, dando por
+motivo el de las otras. Ahora **se resuelve** —por las dos ramas, y sin quitar la nota— y las del
+CIEM siguen adjuntas y sin resolver, que es lo que el texto de la sección dice ahora. Ver
+`packages/modules/regulations/src/excepciones.ts` y ADR-03.
 
 ---
 
@@ -119,7 +126,9 @@ futuro con nombre propio, no como deuda anónima.
 - **Nota adjunta frente a nota resuelta.** Adjuntar la nota deja al lector una excepción que
   resolver; resolverla exige geometría y trae un error nuevo (asignar mal una división CIEM da un
   número seguro y falso). **Se acepta**: una excepción visible es honrada; un número seguro y
-  equivocado no.
+  equivocado no. *(Matizado por H-5: vale para las dos notas del CIEM. La balear es administrativa,
+  no geométrica, y sí se resuelve — sumando la respuesta debajo de la nota entera, nunca en su
+  lugar.)*
 
 ---
 
@@ -216,7 +225,8 @@ instrumento deja de morder en cuanto el instrumento cambia — lección pagada e
 
 ## Lo que esta trayectoria NO hace
 
-1. **No resuelve las notas por puerto** (exige división CIEM = geometría). Van adjuntas y visibles.
+1. **No resuelve las notas del CIEM por puerto** (exige geometría). Van adjuntas y visibles. La
+   balear **sí** se resuelve: es administrativa y el dato ya está en el catálogo (H-5).
 2. **No corrige `1 1`.** Se publica ilegible antes que inventado.
 3. **No publica vedas ni cupos.** No hay fuente estructurada; el art. 5 del RD 347/2011 solo habilita
    al Ministerio a fijarlos por orden.

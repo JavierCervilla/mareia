@@ -115,6 +115,16 @@
   white-space: nowrap;
 }
 
+/* Lo que la nota significa para ESTE puerto, cuando se puede saber (excepciones
+   administrativas: ver `excepciones.ts`). Renglón propio debajo de la nota, en su
+   mismo cuerpo. Sin color ni peso: es la respuesta a la excepción, no una alarma,
+   y sobre una cifra legal el adorno consigue que se le crea más de lo que merece. */
+.tabla-tallas__resolucion {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--m-text-meta);
+}
+
 /* El literal del BOE es lo que permite comparar lo que pintamos con lo que dice
    la norma. Va al lado y en cuerpo pequeño: se consulta, no se lee.
 

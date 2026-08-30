@@ -25,6 +25,7 @@ import { readFile } from "node:fs/promises";
 
 import type {
   Caladero,
+  ComunidadDelPuerto,
   EspecieConTalla,
   FormatoDeTallas,
   FuenteNormativa,
@@ -262,22 +263,41 @@ const cargarNormativa = unaVez(async (): Promise<Normativa> => {
   return leerNormativa(FICHERO_NORMATIVA, crudo);
 });
 
+/** Lo que el catálogo dice de un puerto y esta sección necesita: qué tabla le toca y dónde está. */
+interface EncajeDelPuerto {
+  readonly caladero: string;
+  readonly comunidad: ComunidadDelPuerto;
+}
+
 /**
- * El caladero declarado por cada puerto del catálogo, leído de `ports.json`.
+ * El caladero y la comunidad autónoma de cada puerto del catálogo, leídos de `ports.json`.
  *
- * Solo se leen `slug` y `caladero`: lo demás del catálogo ya lo sirve el caso de uso `listPorts` y
+ * Solo se leen esos tres campos: lo demás del catálogo ya lo sirve el caso de uso `listPorts` y
  * duplicar su lectura aquí sería un segundo camino al mismo dato.
+ *
+ * La **comunidad** entró en T-19 con el hallazgo H-5 y no es un dato de adorno: la nota `(*)` del
+ * Anexo II excepciona a la Comunidad Autónoma de las Illes Balears, que es un criterio
+ * administrativo y no geográfico, así que con este campo la sección puede decirle a quien lee si
+ * esa excepción le afecta en vez de pasarle el trabajo. Es el mismo dato con el que se construye la
+ * URL de la página en la que está.
  */
-const cargarCaladerosDePuerto = unaVez(async (): Promise<ReadonlyMap<string, string>> => {
+const cargarEncajeDePuertos = unaVez(async (): Promise<ReadonlyMap<string, EncajeDelPuerto>> => {
   const documento = objeto(FICHERO_PUERTOS, JSON.parse(await readFile(FICHERO_PUERTOS, "utf8")), "$");
   const puertos = lista(FICHERO_PUERTOS, documento, "ports", "$");
   return new Map(
     puertos.map((valor, indice) => {
       const ruta = `$.ports[${indice}]`;
       const puerto = objeto(FICHERO_PUERTOS, valor, ruta);
+      const region = objeto(FICHERO_PUERTOS, puerto["region"], `${ruta}.region`);
       return [
         texto(FICHERO_PUERTOS, puerto, "slug", ruta),
-        texto(FICHERO_PUERTOS, puerto, "caladero", ruta),
+        {
+          caladero: texto(FICHERO_PUERTOS, puerto, "caladero", ruta),
+          comunidad: {
+            slug: texto(FICHERO_PUERTOS, region, "slug", `${ruta}.region`),
+            nombre: texto(FICHERO_PUERTOS, region, "name", `${ruta}.region`),
+          },
+        },
       ] as const;
     }),
   );
@@ -291,6 +311,8 @@ const cargarCaladerosDePuerto = unaVez(async (): Promise<ReadonlyMap<string, str
 export interface TablaDelPuerto {
   readonly fuente: FuenteNormativa;
   readonly caladero: Caladero;
+  /** Dónde está el puerto, para resolver las excepciones que dependen de la comunidad autónoma. */
+  readonly comunidad: ComunidadDelPuerto;
 }
 
 /**
@@ -301,9 +323,10 @@ export interface TablaDelPuerto {
  * equivocada o deja un hueco mudo en la página de un puerto real.
  */
 export async function cargarTablaDeTallas(contexto: ContextoDeSeccion): Promise<TablaDelPuerto> {
-  const [normativa, caladeros] = await Promise.all([cargarNormativa(), cargarCaladerosDePuerto()]);
-  const id = caladeros.get(contexto.slug);
-  if (id === undefined) {
+  const [normativa, puertos] = await Promise.all([cargarNormativa(), cargarEncajeDePuertos()]);
+  const encaje = puertos.get(contexto.slug);
+  const id = encaje?.caladero;
+  if (encaje === undefined || id === undefined) {
     throw new Error(
       `El puerto ${contexto.slug} no declara caladero en ${FICHERO_PUERTOS}: sin él no se sabe qué ` +
         `anexo del RD 560/1995 le aplica, y los tres publican cifras distintas para la misma especie.`,
@@ -316,7 +339,7 @@ export async function cargarTablaDeTallas(contexto: ContextoDeSeccion): Promise<
         `publica ${normativa.caladeros.map((c) => JSON.stringify(c.id)).join(", ")}.`,
     );
   }
-  return { fuente: normativa.fuente, caladero };
+  return { fuente: normativa.fuente, caladero, comunidad: encaje.comunidad };
 }
 
 /** El formato numérico del sitio, prestado al módulo (coma decimal, como el resto de la página). */

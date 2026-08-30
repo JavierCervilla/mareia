@@ -32,12 +32,21 @@ export {
   ROTULO_FUENTES,
   ROTULO_NOMBRE_LOCAL,
   ROTULO_NOTAS,
+  resolucionDeNota,
   ROTULO_PROCEDENCIA,
   rotuloDeVigencia,
   SIN_TALLA_FIJADA,
   TALLA_ILEGIBLE,
   tituloDeLaSeccion,
 } from "./textos.ts";
+
+// Qué excepciones se pueden resolver para el puerto de la página y cuáles no (ver `excepciones.ts`).
+export { EXCEPCIONES_POR_COMUNIDAD, resolverNota } from "./excepciones.ts";
+export type {
+  ComunidadDelPuerto,
+  ExcepcionPorComunidad,
+  ResolucionDeNota,
+} from "./excepciones.ts";
 
 // El sello de vigencia y su degradación: los umbrales son del módulo, no de la página (ver
 // `vigencia.ts`), igual que las ventanas de frescura de la meteo.

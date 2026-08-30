@@ -13,10 +13,19 @@ import test from "node:test";
 
 import type { Caladero, EspecieConTalla } from "../tipos.ts";
 import { claveDeFila, filasDeTallas, textoDeTalla } from "../vista.ts";
-import { SIN_TALLA_FIJADA, TALLA_ILEGIBLE } from "../textos.ts";
+import { resolucionDeNota, SIN_TALLA_FIJADA, TALLA_ILEGIBLE } from "../textos.ts";
 
 /** El formato del sitio: coma decimal, como `apps/web/src/formato.ts`. */
 const FORMATO = { numero: (valor: number, decimales: number) => valor.toFixed(decimales).replace(".", ",") };
+
+/**
+ * El puerto desde el que se lee, para las excepciones que dependen de la comunidad autónoma.
+ *
+ * Galicia y no Balears en los casos generales: la resolución de la excepción balear tiene sus
+ * propios recorridos abajo, y un fixture que la disparase de fondo escondería en cuál se está
+ * midiendo.
+ */
+const EN_GALICIA = { slug: "galicia", nombre: "Galicia" };
 
 const PROCEDENCIA = {
   bloque: "ani",
@@ -113,6 +122,7 @@ test("la boga llega a la fila con su literal «1 1» intacto: nadie lo arregla a
       }),
     ]),
     FORMATO,
+    EN_GALICIA,
   );
   assert.equal(fila?.literal, "1 1");
   assert.equal(fila?.talla.texto, TALLA_ILEGIBLE);
@@ -137,10 +147,14 @@ test("la nota llega a la fila con su TEXTO, no solo con la marca", () => {
       [{ marca: "(***)", texto: NOTA_LUBINA }],
     ),
     FORMATO,
+    EN_GALICIA,
   );
-  // Una marca sola obligaría a bajar al pie a buscarla. Son 8 cm de diferencia en los puertos
-  // cantábricos de este portal, y del lado que multa.
-  assert.deepEqual(fila?.notas, [{ marca: "(***)", texto: NOTA_LUBINA }]);
+  // Una marca sola obligaría a bajar al pie a buscarla. Son 8 cm de diferencia, y del lado que
+  // multa. Y esta nota **no se resuelve**: habla de divisiones del CIEM, que es geometría marina
+  // que este portal no calcula (ver `excepciones.ts`).
+  assert.deepEqual(fila?.notas, [
+    { marca: "(***)", texto: NOTA_LUBINA, resolucion: { tipo: "sin_resolver" } },
+  ]);
 });
 
 test("una marca sin nota en el anexo LEVANTA: no se publica una cifra con una estrella muda", () => {
@@ -156,6 +170,7 @@ test("una marca sin nota en el anexo LEVANTA: no se publica una cifra con una es
           }),
         ]),
         FORMATO,
+        EN_GALICIA,
       ),
     /Lubina: la marca \(\*\*\*\) no tiene nota/u,
   );
@@ -177,6 +192,7 @@ test("una talla «por determinar» que no arrastra su nota LEVANTA: diría que n
           [{ marca: "(*)", texto: "Talla por determinar." }],
         ),
         FORMATO,
+        EN_GALICIA,
       ),
     /Anguila: la talla está «por determinar» según \(\*\)/u,
   );
@@ -199,7 +215,7 @@ test("cuando la norma no da el binomio, viaja el motivo y no un hueco", () => {
     notas: [],
     procedencia: PROCEDENCIA,
   };
-  const [fila] = filasDeTallas(caladero([cigalaColas]), FORMATO);
+  const [fila] = filasDeTallas(caladero([cigalaColas]), FORMATO, EN_GALICIA);
   assert.deepEqual(fila?.cientifico, { tipo: "ausente", motivo });
 });
 
@@ -212,7 +228,7 @@ test("una fila sin binomio y sin motivo LEVANTA: la ausencia muda no se publica"
     procedencia: PROCEDENCIA,
   };
   assert.throws(
-    () => filasDeTallas(caladero([muda]), FORMATO),
+    () => filasDeTallas(caladero([muda]), FORMATO, EN_GALICIA),
     /Fantasma: no trae nombre científico ni el motivo/u,
   );
 });
@@ -224,6 +240,7 @@ test("el nombre local canario solo aparece donde la norma lo da; en los otros an
       especie({ nombreComun: "Abadejo" }),
     ]),
     FORMATO,
+    EN_GALICIA,
   );
   assert.deepEqual(conLocal?.local, { tipo: "nombre", valor: "Besuguito aligote" });
   assert.equal(sinLocal?.local, null);
@@ -252,6 +269,7 @@ test("la cigala partida en dos medidas da dos filas con clave distinta y su rót
       }),
     ]),
     FORMATO,
+    EN_GALICIA,
   );
   assert.deepEqual(
     filas.map((fila) => [fila.clave, fila.medida, fila.talla.texto]),
@@ -271,6 +289,7 @@ test("el orden es el del BOE: la tabla no se reordena por talla ni por «mejores
       ),
     ),
     FORMATO,
+    EN_GALICIA,
   );
   assert.deepEqual(
     filas.map((fila) => fila.nombreComun),
@@ -281,4 +300,87 @@ test("el orden es el del BOE: la tabla no se reordena por talla ni por «mejores
 test("la clave de una fila sin medida es su nombre, sin acentos ni paréntesis", () => {
   assert.equal(claveDeFila(especie({ nombreComun: "Atún rojo" })), "atun-rojo");
   assert.equal(claveDeFila(especie({ nombreComun: "Palometa negra o japuta" })), "palometa-negra-o-japuta");
+});
+
+
+// =================================================================================================
+// La excepción que SÍ se puede resolver: la comunidad autónoma
+// =================================================================================================
+
+/** La nota `(*)` del Anexo II, literal del BOE. */
+const NOTA_PULPO =
+  "La talla del pulpo (Octopus vulgaris) recogida en la presente tabla no es de aplicación en las " +
+  "aguas interiores y la plataforma continental de la Comunidad Autónoma de las Illes Balears.";
+
+const EN_BALEARS = { slug: "illes-balears", nombre: "Illes Balears" };
+
+/** El pulpo del Anexo II, con su nota, leído desde donde se le diga. */
+function pulpoDesde(comunidad: { slug: string; nombre: string }) {
+  const [fila] = filasDeTallas(
+    caladero(
+      [
+        especie({
+          nombreComun: "Pulpo",
+          nombreCientifico: "Octopus vulgaris",
+          talla: { tipo: "peso_kg", kg: 1 },
+          textoOriginal: "1 kg",
+          notas: ["(*)"],
+        }),
+      ],
+      [{ marca: "(*)", texto: NOTA_PULPO }],
+    ),
+    FORMATO,
+    comunidad,
+  );
+  return fila;
+}
+
+test("en un puerto balear la nota del pulpo se resuelve: ahí esa talla no rige", () => {
+  // El hallazgo H-5. El criterio de esta nota es ADMINISTRATIVO —la comunidad autónoma— y el portal
+  // ya sabe la de cada puerto: es con lo que construye la URL en la que está el lector.
+  assert.deepEqual(pulpoDesde(EN_BALEARS)?.notas, [
+    {
+      marca: "(*)",
+      texto: NOTA_PULPO,
+      resolucion: { tipo: "no_aplica_aqui", comunidad: "Illes Balears" },
+    },
+  ]);
+  // Y la nota entera sigue estando: resolver es AÑADIR. Si la regla se equivocase, lo que queda a
+  // la vista es el literal del BOE.
+  assert.match(pulpoDesde(EN_BALEARS)?.notas[0]?.texto ?? "", /no es de aplicación/u);
+});
+
+test("y en un puerto peninsular también se resuelve, diciendo que allí sí rige", () => {
+  // Las dos ramas, no solo la que excepciona: publicar «aquí no aplica» en Palma y NADA en Valencia
+  // le dejaría a quien lee en Valencia el mismo trabajo de antes.
+  assert.deepEqual(pulpoDesde({ slug: "comunitat-valenciana", nombre: "Comunitat Valenciana" })?.notas[0]?.resolucion, {
+    tipo: "aplica_aqui",
+    comunidad: "Illes Balears",
+  });
+});
+
+test("una nota que solo MENCIONA la comunidad no se resuelve: la regla describe a la nota, no al topónimo", () => {
+  // El fallo que esta forma de regla evita: una nota futura que fijara en Balears una talla
+  // distinta —en vez de excepcionarla— se publicaría con un «aquí no se aplica» que sería falso.
+  const [fila] = filasDeTallas(
+    caladero(
+      [especie({ nombreComun: "Pulpo", talla: { tipo: "peso_kg", kg: 1 }, textoOriginal: "1 kg", notas: ["(*)"] })],
+      [{ marca: "(*)", texto: "En la Comunidad Autónoma de las Illes Balears la talla es de 1,5 kg." }],
+    ),
+    FORMATO,
+    EN_BALEARS,
+  );
+  assert.deepEqual(fila?.notas[0]?.resolucion, { tipo: "sin_resolver" });
+});
+
+test("las tres resoluciones se escriben distinto, y la que no se puede resolver no escribe nada", () => {
+  assert.equal(resolucionDeNota({ tipo: "sin_resolver" }), null);
+  assert.match(
+    resolucionDeNota({ tipo: "no_aplica_aqui", comunidad: "Illes Balears" }) ?? "",
+    /^En este puerto no se aplica: está en Illes Balears\.$/u,
+  );
+  assert.match(
+    resolucionDeNota({ tipo: "aplica_aqui", comunidad: "Illes Balears" }) ?? "",
+    /^En este puerto sí se aplica: la excepción es solo para Illes Balears\.$/u,
+  );
 });

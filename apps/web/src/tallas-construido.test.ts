@@ -169,6 +169,42 @@ test("el pulpo del Mediterráneo publica su kilo y, en la fila, que no aplica en
   }
 });
 
+test("y la excepción balear se RESUELVE: un puerto balear no lee el pulpo igual que uno peninsular", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  // EL GATE DE H-5. Antes, el `<tr>` del pulpo de Palma y el de Ibiza eran idénticos byte a byte al
+  // de Valencia, aunque la propia nota dijera que en Balears esa talla no es de aplicación. El
+  // criterio de esa nota es administrativo —la comunidad autónoma— y el portal lo sabe: está en
+  // `ports.json` y con él construye la URL en la que el lector está. Las dos ramas se miden, no
+  // solo la que excepciona: sin la de «aquí sí aplica», a quien lee en Valencia se le seguiría
+  // dejando el trabajo.
+  const puertos = await cargarPuertos();
+  const comunidadDe = new Map(puertos.map((puerto) => [puerto.slug, puerto.region.slug]));
+  const mediterraneos = (await paginasConTabla()).filter(
+    (pagina) => pagina.caladero.id === "mediterraneo",
+  );
+  const baleares: string[] = [];
+  const resto: string[] = [];
+  for (const { slug, seccion } of mediterraneos) {
+    const fila = textoDe(filaDe(seccion, "pulpo") ?? "");
+    const esBalear = comunidadDe.get(slug) === "illes-balears";
+    (esBalear ? baleares : resto).push(slug);
+    assert.match(
+      fila,
+      esBalear
+        ? /En este puerto no se aplica: está en Illes Balears\./u
+        : /En este puerto sí se aplica: la excepción es solo para Illes Balears\./u,
+      `${slug}: la fila del pulpo no dice si la excepción balear le afecta · «${fila}»`,
+    );
+  }
+  // Los 17 puertos de Balears del catálogo, y los otros 63 del caladero. Si el reparto cambia, hay
+  // que mirar por qué antes de tocar este número.
+  assert.equal(baleares.length, 17, `puertos baleares medidos: ${baleares.join(", ")}`);
+  assert.equal(resto.length, 63);
+});
+
 // =================================================================================================
 // Las cinco clases, publicadas
 // =================================================================================================

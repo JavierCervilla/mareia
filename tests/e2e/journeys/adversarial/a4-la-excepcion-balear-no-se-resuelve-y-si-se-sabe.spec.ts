@@ -61,9 +61,13 @@ test("A4 · en un puerto balear la talla del pulpo no puede leerse igual que en 
   page,
   qa,
 }) => {
-  // TRINQUETE · Hallazgo ABIERTO (bundle 357b20089027). Quítalo el día en que un puerto balear deje
-  // de leer la talla del pulpo igual que uno peninsular.
-  test.fail();
+  // TRINQUETE · Hallazgo ARREGLADO (bundle 357b20089027). La cura vive en
+  // `packages/modules/regulations/src/excepciones.ts`: la excepción del pulpo es administrativa
+  // —la comunidad autónoma— y el portal ya sabe la de cada puerto, así que la resuelve por las dos
+  // ramas (aquí no se aplica / aquí sí, la excepción es solo para Illes Balears) SIN quitar la
+  // nota entera. Las del CIEM se siguen publicando enteras y sin resolver, y el texto de la
+  // sección ya dice esa diferencia en vez de dar un solo motivo. Este recorrido se queda como gate
+  // permanente: no se borra.
 
   qa.step("abrir Valencia, un puerto del Anexo II donde la talla del pulpo SÍ rige");
   const valencia = await celdaDelPulpo(page, VALENCIA);

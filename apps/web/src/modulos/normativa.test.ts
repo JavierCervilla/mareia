@@ -25,6 +25,14 @@ function contexto(slug: string): ContextoDeSeccion {
   return { slug, nombre: slug, fechaIso: "2026-08-30", timezone: "Europe/Madrid" };
 }
 
+/**
+ * La comunidad desde la que se lee en los recorridos que no van de eso.
+ *
+ * Galicia y no Balears a propósito: la excepción administrativa del pulpo tiene sus propios
+ * recorridos, y dispararla de fondo escondería en cuál se está midiendo.
+ */
+const EN_GALICIA = { slug: "galicia", nombre: "Galicia" };
+
 /** Un puerto de cada caladero, para no repetir slugs a lo largo del fichero. */
 const BILBAO = contexto("bilbao"); // Anexo I  · cantábrico-noroeste-y-golfo-de-cádiz
 const VALENCIA = contexto("valencia"); // Anexo II · mediterráneo
@@ -101,7 +109,7 @@ test("las 9 especies con nota del dataset llegan a la fila con el TEXTO de su no
   let conNota = 0;
   for (const puerto of [BILBAO, VALENCIA, TELDE]) {
     const { caladero } = await cargarTablaDeTallas(puerto);
-    const filas = filasDeTallas(caladero, FORMATO_DE_TALLAS);
+    const filas = filasDeTallas(caladero, FORMATO_DE_TALLAS, EN_GALICIA);
     for (const [indice, especie] of caladero.especies.entries()) {
       if (especie.notas.length === 0) continue;
       conNota += 1;
@@ -132,8 +140,8 @@ test("las 9 especies con nota del dataset llegan a la fila con el TEXTO de su no
 test("las tres notas que cambian la cifra para puertos de este portal dicen el número de la excepción", async () => {
   const { caladero: anexoI } = await cargarTablaDeTallas(BILBAO);
   const { caladero: anexoII } = await cargarTablaDeTallas(VALENCIA);
-  const filasI = filasDeTallas(anexoI, FORMATO_DE_TALLAS);
-  const filasII = filasDeTallas(anexoII, FORMATO_DE_TALLAS);
+  const filasI = filasDeTallas(anexoI, FORMATO_DE_TALLAS, EN_GALICIA);
+  const filasII = filasDeTallas(anexoII, FORMATO_DE_TALLAS, EN_GALICIA);
 
   // Lubina: 36 cm salvo en las divisiones 8a/8b del CIEM —el golfo de Vizcaya, o sea los puertos
   // cantábricos de este portal—, donde son 44. Ocho centímetros, del lado que multa.
@@ -156,7 +164,7 @@ test("las tres notas que cambian la cifra para puertos de este portal dicen el n
 
 test("la boga se publica ilegible y con su literal: nadie ha «arreglado» el 1 1 a 11", async () => {
   const { caladero } = await cargarTablaDeTallas(BILBAO);
-  const boga = filasDeTallas(caladero, FORMATO_DE_TALLAS).find((fila) => fila.clave === "boga");
+  const boga = filasDeTallas(caladero, FORMATO_DE_TALLAS, EN_GALICIA).find((fila) => fila.clave === "boga");
   assert.equal(boga?.literal, "1 1");
   assert.equal(boga?.talla.hayCifra, false, "un `1 1` pintado como cifra sería una talla inventada");
   assert.match(boga?.talla.explicacion ?? "", /no se lee como una talla/u);
@@ -164,7 +172,7 @@ test("la boga se publica ilegible y con su literal: nadie ha «arreglado» el 1 
 
 test("las seis «talla por determinar» dicen que la norma no la fija, y por qué", async () => {
   const { caladero } = await cargarTablaDeTallas(BILBAO);
-  const filas = filasDeTallas(caladero, FORMATO_DE_TALLAS);
+  const filas = filasDeTallas(caladero, FORMATO_DE_TALLAS, EN_GALICIA);
   const porDeterminar = filas.filter((fila) => fila.talla.texto === "La norma no fija talla");
   assert.equal(porDeterminar.length, 6);
   for (const fila of porDeterminar) {

@@ -50,6 +50,7 @@ import {
   ROTULO_FUENTES,
   ROTULO_NOMBRE_LOCAL,
   ROTULO_NOTAS,
+  resolucionDeNota,
   ROTULO_PROCEDENCIA,
   rotuloDeVigencia,
   estadoDeVigencia,
@@ -66,8 +67,8 @@ interface Props {
 
 const { contexto } = Astro.props;
 
-const { fuente, caladero } = await cargarTablaDeTallas(contexto);
-const filas = filasDeTallas(caladero, FORMATO_DE_TALLAS);
+const { fuente, caladero, comunidad } = await cargarTablaDeTallas(contexto);
+const filas = filasDeTallas(caladero, FORMATO_DE_TALLAS, comunidad);
 
 // El sello de G2 se compara con **el día que publica esta página** (`contexto.fechaIso`, el
 // `BUILD_DATE`), que es el único «hoy» que un HTML estático conoce. Cuando G2 se queda en su rama
@@ -188,6 +189,17 @@ const avisoVigencia = avisoDeVigencia(vigencia);
             {fila.notas.map((nota) => (
               <span class="tabla-tallas__nota">
                 <span class="tabla-tallas__marca">{nota.marca}</span> {nota.texto}
+                {/*
+                  Y si la excepción se puede resolver para este puerto, se resuelve: la del pulpo
+                  del Anexo II es de la Comunidad Autónoma de las Illes Balears —criterio
+                  administrativo— y el portal sabe en cuál está el lector. Va DESPUÉS de la nota
+                  entera y nunca en su lugar: si la regla se equivocara, lo que queda a la vista
+                  sigue siendo el literal del BOE. Las notas del CIEM no se resuelven y aquí no
+                  escriben nada.
+                */}
+                {resolucionDeNota(nota.resolucion) !== null && (
+                  <span class="tabla-tallas__resolucion">{resolucionDeNota(nota.resolucion)}</span>
+                )}
               </span>
             ))}
           </td>
