@@ -31,6 +31,14 @@ interface Medida {
 }
 
 /**
+ * **Los culpables se buscan en toda la página, no dentro de `#meteo`**, y por el borde derecho, no
+ * por `scrollWidth`. La aserción siempre midió el documento entero, así que limitar el diagnóstico a
+ * la sección de meteo lo hacía mentir en cuanto el desbordamiento venía de otro sitio: T-19 metió el
+ * ELI de la norma —una «palabra» de 44 caracteres— en otra fila `flex` y este recorrido falló
+ * señalando un `P.meteo__anuncio` inocente, que era lo único que se desplazaba **dentro** de su
+ * propia caja. Un gate que acierta el veredicto y falla el culpable manda a quien lo lea al sitio
+ * equivocado.
+ *
  * La medida va como **expresión en texto** y no como función: el `tsconfig` del repo deja `lib` en
  * `ES2022` a propósito —para que el dominio no pueda tocar el DOM sin darse cuenta—, así que un
  * `page.evaluate` con `document` dentro no compila. Evaluar la expresión en el navegador y tipar
@@ -39,8 +47,8 @@ interface Medida {
 const MEDIR_DESBORDAMIENTO = `(() => ({
   desplazable: document.documentElement.scrollWidth,
   visible: document.documentElement.clientWidth,
-  culpables: [...document.querySelectorAll("#meteo *")]
-    .filter((nodo) => nodo.scrollWidth > nodo.clientWidth + 1)
+  culpables: [...document.querySelectorAll("body *")]
+    .filter((nodo) => nodo.getBoundingClientRect().right > document.documentElement.clientWidth + 1)
     .map((nodo) => nodo.tagName + "." + nodo.className),
 }))()`;
 

@@ -120,3 +120,18 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+/* El ELI se imprime entero como texto del enlace —es la dirección canónica de la norma y el lector
+ * tiene que poder copiarla o teclearla—, y eso mete una «palabra» de 44 caracteres sin espacios en
+ * una fila `flex`, donde el mínimo de contenido de un hijo es su palabra más larga. Medido a 320 px:
+ * la página entera se desplazaba 33 px en horizontal.
+ *
+ * Es el MISMO defecto que el pase A5 encontró en el boletín de AEMET y que H-5 curó en dos
+ * selectores; ésta es la tercera superficie que lo trae, y por el mismo motivo: texto que no
+ * partimos nosotros. Se aplica la misma cura del repo (`overflow-wrap: anywhere`, no `break-word`:
+ * solo aquélla reduce el tamaño mínimo de contenido, que es lo que empuja al `flex`) y `min-width`
+ * a cero, porque un hijo de `flex` no baja de su `auto` por sí solo. */
+#tallas-minimas .datos__valor {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
