@@ -26,9 +26,11 @@ import { cargarCatalogo, cargarPuertos, puertosDeRegion } from "./datos/catalogo
 import { cargarDatosDePuerto } from "./datos/pagina-puerto.ts";
 import { diasDelMes } from "./datos/fecha-build.ts";
 import { hora, metros } from "./formato.ts";
+import { cargarCatalogoDeEspecies } from "./modulos/especies/catalogo.ts";
 import {
   RUTA_ESPECIES,
   RUTA_MAREAS,
+  rutaFichaDeEspecie,
   rutaProvincia,
   rutaPuerto,
   rutaRegion,
@@ -77,6 +79,12 @@ async function rutasEsperadas(): Promise<readonly string[]> {
     // estuviera aquí, el gate del sitemap dejaría de exigir que se publique y una página real del
     // sitio podría quedarse fuera del XML sin que nadie se enterase.
     RUTA_ESPECIES,
+    // Y sus 86 fichas (T-23), por lo mismo: el gate exige que el sitemap liste todas las páginas
+    // construidas «y ninguna más», así que una familia entera de páginas fuera de esta lista sería
+    // una familia entera que puede dejar de publicarse sin que nadie se entere.
+    ...(await cargarCatalogoDeEspecies()).especies.map((especie) =>
+      rutaFichaDeEspecie(especie.clave),
+    ),
     ...regiones.map((region) => rutaRegion(region.slug)),
     ...regiones.flatMap((region) =>
       region.provincias.map((provincia) => rutaProvincia(region.slug, provincia.slug)),
