@@ -48,17 +48,25 @@ del gate G3 y del primer requisito del parser: **seleccionar la versión en vigo
 
 ### 2. La columna «Talla (en cm)» no contiene solo tallas en cm
 
-Censo completo sobre las tres versiones **en vigor**: 26 celdas de 124 no son un entero.
+Censo sobre las tres versiones **en vigor**, contado sobre el dataset construido (53 del Anexo I +
+34 del II + 31 del III = **118 tallas publicadas**):
 
 | Clase | Ejemplos medidos | Cuántas |
 |---|---|---|
-| **Peso, no longitud** | `6,4 kg` (atún rojo), `3,2 kg` (patudo, rabil), `1 kg` (pulpo) | 8 |
+| Longitud en cm, entera | `36` (lubina), `20` (aligote) | 97 |
+| **Longitud en cm, decimal** | `3,7` (colas de cigala), `2,5` (almeja, chirla), `8,5` (cefalotórax de bogavante) | 4 |
+| **Peso, no longitud** | `6,4 kg` (atún rojo), `3,2 kg` (patudo, rabil), `1 kg` (pulpo) | 9 |
+| **«Talla por determinar»** | `(*)` en anguila, buey, calamar, faneca, jibias, rape | 6 |
 | **Disyunción longitud-o-peso** | `80 cm o 10 kg de peso` (atún rojo, Anexo II) | 1 |
-| **Remite a nota, sin cifra** | `(*)` en anguila, buey, calamar, faneca, jibias, rape | 6 |
-| **Cifra + nota que la excepciona** | `12 (**)`, `36 (***)`, `120 (*)` | 3 |
-| **Longitud decimal** | `3,7` (colas de cigala), `2,5` (almeja, chirla), `8,5` (cefalotórax de bogavante) | 4 |
-| **Especie multifila** (la cabecera no lleva cifra; la llevan sus filas hijas) | `Cigala (entera) …:` → `Cigalas (colas)`; `Bogavante …:` → `Longitud cefalotórax` | 2·2 |
 | **Ilegible en origen** | `1 1` en la boga del Anexo I | 1 |
+
+**17 de las 118 no son una longitud en cm** (9 + 6 + 1 + 1); con las cuatro decimales, **21 no son
+un entero de centímetros**. Y tres tallas más llevan una cifra que una nota excepciona (`12 (**)`,
+`36 (***)`, `120 (*)`) — ver §3.
+
+Aparte, dos especies del Anexo I y II vienen **partidas en varias filas**: la fila cabecera
+(`Cigala (entera) …:`, `Bogavante …:`) no lleva cifra y la llevan sus filas hijas. No se publican
+como especie sin talla: van como filas hijas rotuladas con su medida.
 
 `talla: number` es, por tanto, un tipo **falso**. Se modela como unión discriminada y **cada celda
 conserva su texto literal**.
@@ -105,7 +113,7 @@ futuro con nombre propio, no como deuda anónima.
 ### Dos tradeoffs
 
 - **Publicar el literal frente a normalizar.** Normalizar todo a un número da una tabla bonita y
-  miente en 26 celdas de 124. Se paga: la UI tiene que saber pintar seis formas distintas de talla, y
+  miente en 21 de las 118. Se paga: la UI tiene que saber pintar cinco formas distintas de talla, y
   el tipo es una unión, no un `number`. **Se acepta el coste**: es el mismo criterio con el que
   `rmse_m` se publica como cota superior en vez de como «precisión».
 - **Nota adjunta frente a nota resuelta.** Adjuntar la nota deja al lector una excepción que
