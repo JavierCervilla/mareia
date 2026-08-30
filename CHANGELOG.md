@@ -2,6 +2,196 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-30 — T-20 · Las 86 especies que el BOE regula, con los dos nombres que tienen
+
+El portal estrena página: **`/pesca/especies/`**, el catálogo de las **86 especies** a las que el RD
+560/1995 le fija una talla mínima, con el nombre que usa la norma, el que la ciencia acepta hoy, los
+caladeros que la regulan con su talla y los registros de presencia de OBIS. Es la primera vez que el
+proyecto publica un dato de **dos fuentes internacionales** (WoRMS y OBIS) y la primera vez que
+publica un número que **no significa lo que parece**.
+
+- **Los dos nombres, y el de la norma no se sustituye nunca.** La norma es de 1995 y la taxonomía se
+  ha movido: de los 86 nombres, **64 resuelven en WoRMS preguntándolos tal y como los escribe el
+  BOE**, **21 resuelven porque nosotros decidimos qué preguntar** —las 15 filas de género
+  (`Sepia spp`, `Mullus spp`…) más 6 erratas de la propia norma (`Cáncer pagurus`,
+  `Melanogrammús aeglefinus`, `Thunnus aibacares`…), todas con la **correspondencia declarada como
+  nuestra** y su motivo— y **1 no resuelve** y publica por qué: `Lophius piscatorius, L. Budegassa`
+  nombra **dos** especies en una sola celda, y repartir una fila legal en dos decide un alcance que
+  no es nuestro. De las que resuelven, **11 tienen hoy un nombre aceptado distinto**
+  (`Solea vulgaris` → **Solea solea**, `Psetta maxima` → **Scophthalmus maximus**, `Sparus auratus`
+  → **Sparus aurata**…). **No es un error del BOE que haya que arreglar**: el nombre de la norma es
+  el que tiene consecuencia legal y el aceptado es el que sirve para buscar la especie en cualquier
+  otra base, así que se publican los dos, cada uno con su fuente y su `AphiaID`, y la fila dice **por
+  qué** difieren. El gate **E1** exige el nombre del BOE **literal en las 86 filas** del `dist/`;
+  probado en rojo publicando sólo el aceptado, que nombra las **11** filas afectadas.
+- **Un género no se convierte en especie.** Las **15** filas `spp` publican su rango («género, no
+  especie») y ninguna nombra una especie concreta: que la talla aplique al género entero es un hecho
+  jurídico, y elegirle una especie sería estrecharle a la norma un alcance que la norma no estrecha.
+  Son 15 filas del BOE sobre **14 géneros distintos** —`Mugil` sale dos veces, como `Mugil spp` en el
+  Anexo I y como `Mugil spps`, con la errata de la propia norma, en el II, y las dos se publican tal
+  cual—, y las dos cifras se dicen siempre juntas porque no son la misma. Con el mismo criterio se
+  rotulan las otras **dos filas que tampoco son una especie**: `Palinuridae`, que es una **familia**
+  entera, y `Trisopterus minutus capelanus`, que es una **subespecie**. **17 rótulos sobre 86**, y
+  ninguno en las 68 que sí son una especie.
+- **Los registros de OBIS son esfuerzo de muestreo, no abundancia, y ninguna cifra sale sin decirlo.**
+  La dorada en toda la costa gallega son **12 registros**, de 3 conjuntos de datos; la misma especie
+  en el conjunto de OBIS pasa de 18.000. Así que en esta página **no existe el elemento «número»**:
+  la cifra sale siempre dentro de una frase que lleva el sesgo pegado, en el mismo elemento, y la
+  explicación larga va antes de la primera cifra. El gate **E4** lo mide en el **bloque más interno**
+  que contiene cada número —no «en la página»—, sobre **todos** los HTML construidos: **106 cifras**,
+  todas con su sesgo al lado. Probado en rojo quitándole la coletilla a la frase: **105 cifras
+  desnudas** con la explicación larga todavía en la página, o sea que un gate a nivel de página
+  habría seguido verde. Y el cero no se publica como cifra: el dataset publica los 114 recuentos tal
+  y como los devolvió OBIS —**9 de ellos son un cero**— y la interfaz los convierte en la ausencia
+  que son, porque un `0 registros` se lee como una ausencia medida y eso es lo que OBIS no puede
+  afirmar. **Los dos silencios se distinguen**: «se preguntó y no hay ningún registro» (9) no es lo
+  mismo que «no se preguntó», que le pasa a la única fila sin taxón y publica su propio motivo.
+- **La sección de la página de puerto es UN ENLACE, no una segunda tabla.** Las tallas ya las publica
+  `regulations` con sus notas pegadas a cada cifra; repetirlas serían **dos superficies del mismo
+  dato**, y dos superficies del mismo dato se desincronizan hasta publicar dos cifras legales
+  distintas para la misma especie en la misma página. La sección enlaza al catálogo **ya filtrado por
+  el caladero del puerto** —51 especies en el Cantábrico y golfo de Cádiz, 33 en el Mediterráneo, 31
+  en el Canario— y ocupa **1.453 B** (753 B comprimidos). El mismo argumento decide el código: la
+  talla no se vuelve a escribir aquí, se presta `textoDeTalla` de `regulations`.
+- **Y aun así el catálogo acabó siendo esa segunda superficie: el gate que faltaba (E5).** El
+  argumento de arriba era correcto y se aplicó a medias — la sección del puerto es un enlace, pero el
+  propio catálogo **copia** la talla de `tallas-minimas.json` y nada volvía a contrastar la copia.
+  Medido: poniendo `Merluccius merluccius` a **12 cm** en el catálogo, el mismo `dist/` decía «Merluza
+  … 12 cm, el BOE imprime "12"» en el índice y «Merluza … 27 cm» en la página de Vigo — una cifra con
+  **consecuencia legal**, atribuida al BOE, contradicha por el sitio, y `run.py check`, el build y los
+  tests los tres en verde. **E5** cierra el hueco con el patrón que ya usaba `normativa` (G4): las
+  **117** tallas del catálogo se **rehacen** desde `tallas-minimas.json` y se diffean **campo a
+  campo**, contra la misma función que las publica y no contra una segunda lectura de la norma. Entra
+  ahí `medida`, que tampoco tenía gate: sin ella la cigala publica **2 cm y 7 cm** en el mismo
+  caladero sin nada que diga que uno es cefalotórax y el otro longitud total, y eso se lee peor que
+  una cifra mal —invita a quedarse con la pequeña—. Probado en rojo con los tres sabotajes, y el
+  mensaje nombra especie, caladero, cifra publicada y cifra de la norma.
+- **Y la procedencia taxonómica tampoco se contrastaba: 85 filas y el gate que faltaba (E6).** El
+  gate E1 mira el nombre del BOE y el E2 **de quién es la decisión** de a qué nombre se pregunta;
+  ninguno miraba **qué contestó WoRMS**. Medido: en `Conger conger`, con la correspondencia
+  `literal`/`worms` intacta, cambiar el `AphiaID` al de la sardina y el aceptado a `Sardina
+  pilchardus` dejaba `run.py check`, `pytest` y `pnpm test` en verde. Ni el `aphiaId`, ni el `estado`,
+  ni el `aceptado`, ni el `rango`, ni la `cita` tenían quien los mirara. **E6** rehace el taxón desde
+  las **82 respuestas de WoRMS capturadas y commiteadas** —`data/pipeline/tests/fixtures/worms/`, 77
+  KB, al lado de las del BOE y por el mismo motivo: una sola copia de la fuente—, **recomputando** con
+  qué nombre se pregunta en vez de leerlo del artefacto, que es justo lo falseable. La captura **la
+  escribe la propia ingesta** junto al dataset, así que no hay forma de regenerar uno sin el otro y no
+  puede envejecer. **No es un mirror** de WoRMS, que su licencia prohíbe: son los 82 nombres que el RD
+  560/1995 obliga a resolver, con la cita que la fuente devuelve por registro — la misma extracción
+  curada que ya publica el catálogo. Y una comprobación que va con esto: los **85** taxones publicados
+  se rehacen desde la captura y coinciden **campo a campo**, o sea que el dato de hoy estaba bien; lo
+  que faltaba era el gate.
+- **El filtro por caladero es CSS puro, y usa `:target` en vez de los radios de la portada.** Un radio
+  no se puede preseleccionar desde una URL sin JavaScript, y la sección de los **153** puertos tiene
+  que enlazar al catálogo ya filtrado. Con `:target` el estado vive en el fragmento: los 153 enlaces
+  funcionan, el estado es compartible y la página conserva su **cero bytes de JavaScript**. Como un
+  selector de atributo no puede leer un identificador que sale del dataset, los tres caladeros están
+  escritos a mano en la hoja y **un gate exige que todo caladero del catálogo tenga sus reglas**, para
+  que un cuarto no rompa el filtro en silencio.
+- **`ModuleId` se amplía por tercera vez, a seis.** `species` no cuelga de `regulations` aunque hable
+  de lo mismo: lo que añade **no sale del BOE**, sale de WoRMS y de OBIS, y una de esas licencias trae
+  una condición —**no se puede redistribuir la base entera ni partes sustanciales de ella**— que hay
+  que poder leer sola y no diluida entre la reutilización de la legislación española. Lo que
+  publicamos es una **extracción curada**, y eso está escrito en el campo de licencia de la
+  atribución, no en un comentario. Va con `order: 35`, la última de las cinco secciones de módulo, y
+  es **el único módulo sin política offline**: el precacheo de esta PWA es **por favorito** y el
+  catálogo no está en lo que guarda un favorito, así que en vez de prometerlo la sección dice lo
+  contrario («este enlace necesita cobertura»).
+- **Dos hallazgos que salieron de medir y no de leer.** El gate E1 se puso rojo en su primera pasada
+  con una fila real: el BOE escribe **`Thunnus thynnus`** en los Anexos I y II y **`Thunnus Thynnus`**
+  en el III, dos nombres que cualquier slug en minúsculas colapsa en uno —y con la clave repetida, el
+  gate encuentra siempre la primera fila y la segunda puede publicarse a medias en verde—. No se
+  corrige la ortografía de la norma: son dos entradas, y ahora el dataset les da **dos claves**. La
+  `clave` es el slug del nombre **más el digest de su literal exacto**, y el sufijo va en las 86 y no
+  sólo en las dos que chocan: al salir únicamente del nombre, no depende de la posición de la fila ni
+  de qué otras filas existan, así que añadir o quitar una especie no repunta el `data-especie` de
+  ninguna otra. Distinguirlas sólo por la caja —`thunnus-thynnus` frente a `Thunnus-Thynnus`— habría
+  vuelto a colapsarlas en cuanto algo las comparase sin distinguir mayúsculas. Lo comprueban **dos**
+  gates y los dos están probados en rojo con el sabotaje que de verdad ocurre (implementar la clave
+  como un slug en minúsculas y regenerar las 86): `run.py check` sale en **exit 1** nombrando las dos
+  filas que colisionan, y `pnpm --filter web build` en **exit 1** porque el lector **rechaza el
+  dataset entero si dos especies comparten clave**. Y la cigala (`Nephrops norvegicus`) tiene **dos
+  tallas en el mismo anexo** —2 cm de cefalotórax y 7 cm de longitud total—: sin decir qué mide cada
+  una, las dos cifras se leen como una contradicción, y publicadas como dos entradas repetirían el
+  mismo recuento de OBIS dos veces en la misma fila, que es una invitación a sumarlos. Las tallas
+  cuelgan de su caladero (varias) y la presencia es una sola, en el dataset y en la interfaz.
+- **Los dos carriles se juntan, y manda el artefacto.** La interfaz se escribió en paralelo al
+  dataset y contra la forma que se esperaba de él; al fusionar, la forma real mandó y se adaptó el
+  lector, que es literalmente un adaptador entre lo que publica el pipeline y lo que consume el
+  módulo. Con **una regla**: se renombran campos, **no se reescriben valores** —el `origen: "mareia"`
+  con el que el dataset firma una correspondencia llega a la interfaz sin traducir, porque un
+  adaptador que reescribe firmas publica una que no ha estampado nadie—. Lo que se midió al juntarlos
+  y no se sabía antes: el dataset resuelve **cuatro** rangos y no dos, y los dos raros son justo los
+  que una unión de dos valores habría tenido que aplastar contra «especie».
+- **El pase adversario encontró cinco roturas y las cinco estaban en el mismo sitio: la frontera
+  entre el dataset y la página.** No eran cinco defectos, era uno con cinco caras. E5 y E6 cerraron
+  el dataset y lo cerraron bien —el propio pase lo comprobó con una lectura independiente—, pero la
+  comparación **terminaba en el JSON**: `especies/v1` traía las notas al pie de cada talla, la fila
+  del BOE sin binomio y el binomio que WoRMS devolvió, y el contrato del módulo **no tenía dónde
+  ponerlos**, así que el adaptador los tiraba. Lo que se cae después del último gate no lo mira
+  nadie. Se ha arreglado la frontera y no cada síntoma:
+  - **Ninguna cifra legal se publica sin la excepción que la cambia.** Es la regla de T-19 —«la nota
+    viaja pegada a la cifra y se pinta con ella, siempre»— reintroducida en una superficie nueva: el
+    índice publicaba «Lubina · **36 cm** · el BOE imprime «36 (***)»» y la llamada aparecía **1 vez
+    mientras el texto de la nota aparecía 0** —`8a y 8b`: 0 ocurrencias; `44 cent`: 0—, o sea una
+    marca apuntando a nada, mientras la página de puerto del **mismo `dist/`** publicaba la nota
+    entera. Igual el boquerón (12 → **10 cm** en la división IX a) y el pulpo (1 kg, que **no rige en
+    Baleares**), que era el peor de los tres porque su literal es «1 kg» sin marca y no dejaba
+    rastro. El texto de la nota **no se hornea en `especies/v1`**: se resuelve contra `normativa/v1`,
+    que es el único sitio donde vive, porque dos copias de un pie legal se corrigen en una y no en la
+    otra — que es exactamente el defecto. Hoy las **9** tallas con llamada publican su pie **entero y
+    en el mismo bloque** que la cifra.
+  - **A WoRMS ya no se le atribuye lo que no dijo.** La columna tenía **tres** estados y sólo dos
+    modelados: faltaba «a WoRMS no se le preguntó este nombre», que son **22 de 86** —los 15 géneros
+    con `spp`, las 6 erratas del BOE y la celda con dos especies—. **20 filas** decían «WoRMS acepta
+    el nombre de la norma» sobre nombres que WoRMS nunca vio, y `Cáncer pagurus` se contradecía dos
+    líneas más abajo **en la misma celda**. Ahora **54** filas dicen que WoRMS acepta el nombre de la
+    norma —las que se preguntaron tal cual— y **21** dicen el tercer estado, nombrando **el registro
+    al que apunta la fila**: en las 6 erratas el binomio corregido (`Cancer pagurus`,
+    `Glyptocephalus cynoglossus`, `Microstomus kitt`, `Melanogrammus aeglefinus`,
+    `Penaeus kerathurus`, `Thunnus albacares`) no aparecía en **ninguna parte** de su fila. Y el
+    enlace deja de rotularse «Ficha **del nombre de la norma** en WoRMS», que en esas 22 filas era la
+    atribución al revés: ahora **nombra su registro**.
+  - **Las dos filas de un mismo taxón se enteran la una de la otra.** Tres registros (127029, 127027,
+    126032) se publican en dos filas cada uno, con las dos grafías que imprime el BOE. **Las filas no
+    se fusionan** —son dos nombres de la norma y el de la norma tiene consecuencia legal—, pero quien
+    buscaba el atún rojo por `Thunnus thynnus` leía dos caladeros y concluía que en Canarias no hay
+    talla mínima: la hay, **6,4 kg**, en la fila de al lado, bajo la `T` mayúscula del BOE. Las **6**
+    filas cruzan ahora a su hermana por su nombre del BOE.
+  - **La fila 118 se publica, y el catálogo deja de decir que está completo.** El Anexo I le fija
+    **3,7 cm** a «Cigalas (colas)» y esa fila no entra en la tabla porque la norma no escribe ahí
+    ningún latín — decisión tomada, razonada y guardada en `sinNombreCientifico`, que no llegaba a la
+    página mientras la entradilla afirmaba «ni sobra ninguna ni **falta ninguna por decisión
+    nuestra**». Se han hecho **las dos cosas**: la fila se publica al final de la página con su
+    caladero, su talla, su literal y su motivo, y la entradilla dice dónde está lo que no cabe en la
+    tabla en vez de afirmar una completitud que no tiene. No es cosmético: son **tres** medidas del
+    mismo animal en el mismo anexo (cefalotórax 2 cm, longitud total 7 cm, colas 3,7 cm) y se
+    publicaban dos.
+  - **La tercera frase dura de la columna de presencia vive ya en el código.** `presenciaAusente` era
+    texto libre del JSON que la vista imprimía tal cual: plantando ahí «Sin registros: OBIS confirma
+    que la especie no está presente en este caladero», los **siete** gates del pipeline y el build
+    salían verdes y la página lo publicaba. Es el hallazgo H-1 de T-21 en otro campo y se cierra
+    igual — del dato cruza ahora **si se preguntó o no**, un booleano, y la frase es
+    `NO_SE_PREGUNTO_A_OBIS`, constante del módulo. El dataset sigue guardando su motivo, porque es un
+    derivado publicable por sí mismo; lo que ya no hay es camino de ese texto a la página.
+- **Dos gates nuevos sobre el `dist/`, probados en rojo, y nueve recorridos que dejan de ser
+  fail-open.** **E7** exige que toda talla con nota publique el **texto entero** —no la marca— **en
+  el mismo bloque** que la cifra, y que ninguna llamada impresa se quede sin pie; lee las notas de
+  `normativa/v1` **por su cuenta**, sin pasar por el adaptador que las resuelve, para que un fallo en
+  esa resolución no se confirme a sí mismo. **E8** exige que toda fila del BOE que la tabla no
+  publique se nombre en la página con su motivo y su talla. Los dos, más el E4 corregido —que se
+  comparaba contra el propio valor que vigilaba y por eso no vio nada—, **medidos en rojo contra el
+  `dist/` anterior**: 9 cifras mudas, 8 marcas huérfanas y «Cigalas (colas): no se nombra en la
+  página». Y los **9 cuerpos** del pase adversario pierden su `test.fail()`: Playwright avisó de
+  «pasó lo que se esperaba que fallara» en los nueve antes de retirarlo, y sus **asserts canario** se
+  quedan, que es lo único que distingue «pasa porque está arreglado» de «pasa porque ya no mide».
+- **Medido al cerrar, con el comando de CI**: `pnpm test` **667 en verde** (283 de ellos contra el
+  `dist/`) · `pnpm test:e2e` **70 passed**, ahora los 70 midiendo de verdad · `pytest` **1.919 en
+  verde** · `pnpm lint`, `pnpm typecheck`, `pnpm --filter web build`, `ruff` y `run.py check` en
+  **0** · el catálogo son **111.516 B** de HTML (11.514 B comprimidos) con **86 filas** y **cero
+  scripts** salvo el JSON-LD · **153** páginas de puerto con su enlace al catálogo filtrado,
+  comprobado contra el `dist/`.
+
 ## 2026-08-30 — T-21 · Áreas marinas protegidas: 348 avisos, 10 «ninguna» y ni un vértice
 
 La página de puerto publica los espacios marinos protegidos que tiene a menos de **30 km** —nombre

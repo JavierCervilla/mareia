@@ -1,0 +1,59 @@
+{
+  "snapshotId": "a7c519970543",
+  "runId": "run-2026-08-30T21-03-41-276Z",
+  "test": {
+    "title": "adversarial/a4-worms-no-acepta-el-nombre-que-la-fila-le-atribuye.spec.ts > A4 · la fila publica el nombre del registro de WoRMS al que manda a comprobarla",
+    "file": "/home/user/mareia/tests/e2e/journeys/adversarial/a4-worms-no-acepta-el-nombre-que-la-fila-le-atribuye.spec.ts",
+    "line": 100,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 12877,
+  "urlAtFailure": "http://127.0.0.1:4321/pesca/especies/",
+  "error": {
+    "message": "Error: filas resueltas que no publican en ninguna parte el nombre del registro de WoRMS al que apuntan su AphiaID y su enlace\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 8\n\n- Array []\n+ Array [\n+   \"«Cáncer pagurus» publica el AphiaID 107276 y no dice que es el de «Cancer pagurus»\",\n+   \"«Gliptocephalus cynoglossus» publica el AphiaID 127136 y no dice que es el de «Glyptocephalus cynoglossus»\",\n+   \"«Melanogrammús aeglefinus» publica el AphiaID 126437 y no dice que es el de «Melanogrammus aeglefinus»\",\n+   \"«Microstommus kitt» publica el AphiaID 127140 y no dice que es el de «Microstomus kitt»\",\n+   \"«Panaeux kerathurus» publica el AphiaID 246388 y no dice que es el de «Penaeus kerathurus»\",\n+   \"«Thunnus aibacares» publica el AphiaID 127027 y no dice que es el de «Thunnus albacares»\",\n+ ]",
+    "stack": "Error: filas resueltas que no publican en ninguna parte el nombre del registro de WoRMS al que apuntan su AphiaID y su enlace\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 8\n\n- Array []\n+ Array [\n+   \"«Cáncer pagurus» publica el AphiaID 107276 y no dice que es el de «Cancer pagurus»\",\n+   \"«Gliptocephalus cynoglossus» publica el AphiaID 127136 y no dice que es el de «Glyptocephalus cynoglossus»\",\n+   \"«Melanogrammús aeglefinus» publica el AphiaID 126437 y no dice que es el de «Melanogrammus aeglefinus»\",\n+   \"«Microstommus kitt» publica el AphiaID 127140 y no dice que es el de «Microstomus kitt»\",\n+   \"«Panaeux kerathurus» publica el AphiaID 246388 y no dice que es el de «Penaeus kerathurus»\",\n+   \"«Thunnus aibacares» publica el AphiaID 127027 y no dice que es el de «Thunnus albacares»\",\n+ ]\n    at /home/user/mareia/tests/e2e/journeys/adversarial/a4-worms-no-acepta-el-nombre-que-la-fila-le-atribuye.spec.ts:137:5"
+  },
+  "events": [
+    {
+      "at": 3,
+      "kind": "step",
+      "text": "abrir el catálogo tal y como se publica"
+    },
+    {
+      "at": 36,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/pesca/especies/"
+    },
+    {
+      "at": 12671,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12672,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12764,
+      "kind": "step",
+      "text": "las filas donde la norma escribe una errata y WoRMS devolvió otro binomio"
+    },
+    {
+      "at": 12771,
+      "kind": "step",
+      "text": "6 erratas de la norma: ¿publica la fila el taxón que WoRMS devolvió?"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

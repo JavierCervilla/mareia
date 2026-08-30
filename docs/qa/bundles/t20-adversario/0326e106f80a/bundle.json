@@ -1,0 +1,48 @@
+{
+  "snapshotId": "0326e106f80a",
+  "runId": "run-2026-08-30T21-11-06-251Z",
+  "test": {
+    "title": "adversarial/a6-la-unica-frase-de-presencia-que-viaja-en-el-dato.spec.ts > A6 · ninguna frase de la columna de presencia afirma qué hay en el mar",
+    "file": "/home/user/mareia/tests/e2e/journeys/adversarial/a6-la-unica-frase-de-presencia-que-viaja-en-el-dato.spec.ts",
+    "line": 70,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 16305,
+  "urlAtFailure": "about:blank",
+  "error": {
+    "message": "Error: «Sin registros: OBIS confirma que la especie no está presente en este caladero.» se publica en la columna de presencia del catálogo. Gates del pipeline que lo vieron: ninguno. Build: 0.\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true",
+    "stack": "Error: «Sin registros: OBIS confirma que la especie no está presente en este caladero.» se publica en la columna de presencia del catálogo. Gates del pipeline que lo vieron: ninguno. Build: 0.\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true\n    at /home/user/mareia/tests/e2e/journeys/adversarial/a6-la-unica-frase-de-presencia-que-viaja-en-el-dato.spec.ts:121:7"
+  },
+  "events": [
+    {
+      "at": 3,
+      "kind": "step",
+      "text": "comprobar que los gates del pipeline están verdes sobre el catálogo publicado"
+    },
+    {
+      "at": 122,
+      "kind": "step",
+      "text": "plantar una afirmación de ausencia en la única frase de presencia que sale del JSON"
+    },
+    {
+      "at": 131,
+      "kind": "step",
+      "text": "los gates del pipeline, sobre el catálogo con la frase plantada"
+    },
+    {
+      "at": 235,
+      "kind": "step",
+      "text": "construir el sitio con ese catálogo y leer la página del catálogo"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

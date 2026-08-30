@@ -28,8 +28,16 @@ export const DATASET = join(RAIZ, "data", "geo", "areas-protegidas.json");
 /** El catálogo de puertos: de aquí salen las rutas de las 153 páginas. */
 const PORTS = join(RAIZ, "data", "geo", "ports.json");
 
-/** Lo que se copia por enlace: es grande y ningún ataque de T-21 lo toca. */
-const ENLAZADO = ["brest", "normativa", "stations"] as const;
+/**
+ * Lo que se copia por enlace: es grande y ningún ataque de T-21 lo toca.
+ *
+ * Es **todo lo que el sitio necesita para construirse** menos lo que este pase ataca, así que un
+ * dataset nuevo se añade aquí o el `astro build` de estos recorridos se queda sin él. `especies`
+ * entró con T-20: la sección del catálogo la pintan las 153 páginas de puerto, así que sin ese
+ * directorio la construcción efímera aborta con un ENOENT y el rojo deja de ser del defecto que se
+ * está atacando.
+ */
+const ENLAZADO = ["brest", "normativa", "stations", "especies"] as const;
 
 /** Una relación puerto–área, en la forma en que la publica el derivado. */
 export interface AreaPublicada {

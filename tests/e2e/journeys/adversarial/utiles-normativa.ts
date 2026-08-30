@@ -26,8 +26,16 @@ import { RAIZ } from "./utiles";
 /** El dataset de normativa, tal y como está commiteado. */
 export const DATASET = join(RAIZ, "data", "normativa", "tallas-minimas.json");
 
-/** Lo que se copia por enlace: es grande y ningún ataque lo toca. */
-const ENLAZADO = ["geo", "stations", "brest"] as const;
+/**
+ * Lo que se copia por enlace: es grande y ningún ataque lo toca.
+ *
+ * Es **todo lo que el sitio necesita para construirse** menos lo que este pase ataca, así que un
+ * dataset nuevo se añade aquí o el `astro build` de estos recorridos se queda sin él. `especies`
+ * entró con T-20: la sección del catálogo la pintan las 153 páginas de puerto, así que sin ese
+ * directorio la construcción efímera aborta con un ENOENT y el rojo deja de ser del defecto que se
+ * está atacando.
+ */
+const ENLAZADO = ["geo", "stations", "brest", "especies"] as const;
 
 /** El dataset ya parseado, en la forma mínima que estos ataques necesitan tocar. */
 export interface Normativa {

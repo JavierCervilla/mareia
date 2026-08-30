@@ -1,0 +1,4 @@
+{"at":3,"kind":"step","text":"comprobar que los gates del pipeline están verdes sobre el catálogo publicado"}
+{"at":122,"kind":"step","text":"plantar una afirmación de ausencia en la única frase de presencia que sale del JSON"}
+{"at":131,"kind":"step","text":"los gates del pipeline, sobre el catálogo con la frase plantada"}
+{"at":235,"kind":"step","text":"construir el sitio con ese catálogo y leer la página del catálogo"}

@@ -7,6 +7,7 @@
     python run.py normativa  # ingesta del RD 560/1995 del BOE → data/normativa/tallas-minimas.json
     python run.py verificar-normativa   # gate G2: ¿sigue en vigor lo que publicamos?
     python run.py areas-protegidas      # ingesta de RAMPE 2025 → data/geo/areas-protegidas.json
+    python run.py especies              # WoRMS + OBIS → data/especies/catalogo.json
 
 Todas las fuentes son públicas y anónimas: el pipeline no lee ninguna credencial.
 """
@@ -22,11 +23,11 @@ import urllib.error
 from collections import Counter
 from pathlib import Path
 
-from mareia_pipeline import areas, catalog, normativa, report, schema, utm
+from mareia_pipeline import areas, catalog, especies, normativa, report, schema, utm
 from mareia_pipeline import grade as grading
 from mareia_pipeline.ports import PILOT_PORTS, Port
 from mareia_pipeline.reconcile import Selection, select, to_station_v1
-from mareia_pipeline.sources import boe, cache, geonames, ioc, rampe
+from mareia_pipeline.sources import boe, cache, geonames, ioc, obis, rampe, worms
 from mareia_pipeline.sources.tide_database import GaugeRecord, load_gauges
 from mareia_pipeline.tides.predict import Harmonic
 from mareia_pipeline.validate import Metrics, evaluate
@@ -356,6 +357,7 @@ def command_check(_: argparse.Namespace) -> int:
     failures += _check_catalogue()
     failures += _check_normativa()
     failures += _check_areas_protegidas()
+    failures += _check_especies()
     return 1 if failures else 0
 
 
@@ -693,6 +695,235 @@ def command_verificar_normativa(_: argparse.Namespace) -> int:
     return 0
 
 
+def _check_especies() -> int:
+    """Gates E2 y E3 del catálogo de especies, más su cobertura. Offline y determinista.
+
+    * **E2 · el mapeo tiene dueño.** Se mide **recomputando**: se compara con qué nombre se
+      preguntó a WoRMS contra el nombre del BOE normalizado. Si difieren, la correspondencia la
+      decidimos nosotros y tiene que ir firmada con su motivo; si coinciden, la fila no puede
+      apuntarse una decisión que no ha tomado. Un gate que sólo exigiera que exista el campo
+      `origen` se satisface escribiendo «worms» en todas partes.
+    * **E3 · el género no se convierte en especie.** Las filas `spp` publican rango género y su
+      ficha entera —todas sus cadenas, no una lista de campos elegida a mano— no nombra ninguna
+      especie concreta de ese género.
+    * **Los recortes de OBIS cubren su caladero y ninguno más.** Se comprueba contra `ports.json`,
+      no contra una declaración del dataset: es lo que hace que la presencia sea de ese caladero.
+    * **La clave no colapsa dos filas de la norma.** Se recomputa del literal de cada nombre y se
+      comprueba que no haya dos iguales: el BOE escribe «Thunnus thynnus» y «Thunnus Thynnus», que
+      cualquier slug en minúsculas convierte en una sola fila que nadie puede distinguir.
+    * **Cobertura**: las especies del BOE están todas y las 118 filas de la norma están contadas
+      (117 con nombre científico y la de «Cigalas (colas)», que no lo trae y se publica aparte).
+    * **E5 · la talla publicada es la de la norma.** Se **rehace** desde `tallas-minimas.json` y se
+      diffea campo a campo, `medida` incluida. La talla legal se publica en dos superficies —la
+      ficha y la página del puerto— y hasta aquí sólo una tenía quien la contrastara: el catálogo
+      copiaba la cifra en la ingesta y podía contradecir al puerto con todo en verde.
+    * **E6 · el taxón es el que contestó WoRMS.** Se **rehace** desde las respuestas capturadas,
+      recomputando con qué nombre se pregunta. E2 audita de quién es la decisión de preguntar; esto
+      audita la respuesta: `aphiaId`, `estado`, `aceptado`, `rango` y `cita`, que no los miraba nada.
+    """
+    problems = 0
+    catalogo = json.loads(PORTS_JSON.read_text(encoding="utf-8"))
+    recortes = obis.errores_de_recortes(catalogo)
+    for error in recortes:
+        print(f"✗ recorte de OBIS: {error}", file=sys.stderr)
+    problems += len(recortes)
+    if not recortes:
+        cajas = sum(len(recorte.cajas) for recorte in obis.RECORTES.values())
+        print(
+            f"✓ los {cajas} rectángulos de los {len(obis.RECORTES)} recortes de OBIS contienen los "
+            f"{len(catalogo['ports'])} puertos de su caladero y ninguno de otro"
+        )
+    if not especies.DATASET.exists():
+        print(
+            f"✗ falta {especies.DATASET.relative_to(REPO_ROOT)}: genéralo con "
+            "`python run.py especies`",
+            file=sys.stderr,
+        )
+        return problems + 1
+    dataset = especies.cargar()
+    tallas = normativa.cargar()
+    cobertura = especies.errores_de_cobertura(dataset, tallas)
+    for error in cobertura:
+        print(f"✗ cobertura: {error}", file=sys.stderr)
+    problems += len(cobertura)
+    if not cobertura:
+        resumen = dataset["resumen"]
+        print(
+            f"✓ el catálogo publica las {resumen['especies']} especies que nombra el RD 560/1995 y "
+            f"da cuenta de sus {resumen['filasDelBoe']} filas"
+        )
+    mapeos = especies.errores_de_mapeo(dataset)
+    for error in mapeos:
+        print(f"✗ E2 · mapeo: {error}", file=sys.stderr)
+    problems += len(mapeos)
+    if not mapeos:
+        resumen = dataset["resumen"]
+        print(
+            f"✓ E2 · las {resumen['correspondenciasDeMareia']} correspondencias que no salen de "
+            f"WoRMS van firmadas como nuestras y con motivo; las otras "
+            f"{resumen['especies'] - resumen['correspondenciasDeMareia']} se preguntaron con el "
+            "nombre que escribe la norma"
+        )
+    generos = especies.errores_de_genero(dataset)
+    for error in generos:
+        print(f"✗ E3 · género: {error}", file=sys.stderr)
+    problems += len(generos)
+    if not generos:
+        filas = especies.filas_de_genero(dataset)
+        distintos = {especies.es_genero(fila["nombreBoe"]) for fila in filas}
+        print(
+            f"✓ E3 · las {len(filas)} filas «spp» ({len(distintos)} géneros) publican rango género "
+            "y ninguna nombra una especie concreta"
+        )
+    claves = especies.errores_de_clave(dataset)
+    for error in claves:
+        print(f"✗ clave: {error}", file=sys.stderr)
+    problems += len(claves)
+    if not claves:
+        print(
+            f"✓ las {len(dataset['especies'])} claves salen del literal de la norma y ninguna se "
+            "repite: «Thunnus thynnus» y «Thunnus Thynnus» son dos filas y dos claves"
+        )
+    presencia = especies.errores_de_presencia(dataset)
+    for error in presencia:
+        print(f"✗ presencia: {error}", file=sys.stderr)
+    problems += len(presencia)
+    if not presencia:
+        conteo = sum(
+            1
+            for e in dataset["especies"]
+            for c in e["caladeros"]
+            if c.get("presencia") is not None
+        )
+        print(
+            f"✓ las {conteo} cifras de presencia publican su recorte y su frase de sesgo en el "
+            "mismo objeto que el número"
+        )
+    tallas_publicadas = especies.errores_de_tallas(dataset, tallas)
+    for error in tallas_publicadas:
+        print(f"✗ E5 · talla: {error}", file=sys.stderr)
+    problems += len(tallas_publicadas)
+    if not tallas_publicadas:
+        cifras = sum(len(c["tallas"]) for e in dataset["especies"] for c in e["caladeros"])
+        print(
+            f"✓ E5 · las {cifras} tallas que publica el catálogo son, campo a campo, las que dice "
+            f"{normativa.DATASET.relative_to(REPO_ROOT)}"
+        )
+    procedencia = especies.errores_de_procedencia(dataset)
+    for error in procedencia:
+        print(f"✗ E6 · procedencia: {error}", file=sys.stderr)
+    problems += len(procedencia)
+    if not procedencia:
+        resumen = dataset["resumen"]
+        print(
+            f"✓ E6 · los {resumen['resueltas']} taxones publicados se rehacen desde las respuestas "
+            "capturadas de WoRMS y coinciden campo a campo"
+        )
+    return problems
+
+
+def command_especies(args: argparse.Namespace) -> int:
+    """Ingesta de WoRMS + OBIS: `data/normativa/tallas-minimas.json` → `data/especies/catalogo.json`.
+
+    Necesita red y no corre en CI, igual que `build`, `normativa` y `areas-protegidas`: el dataset
+    se commitea. Las consultas van **en serie** —OBIS lo pide expresamente— y con caché en disco.
+    Los gates E2, E3 y E5 se pasan **antes** de escribir, así que un mapeo sin dueño, un género
+    convertido en especie o una talla que no es la de la norma no llegan ni al disco.
+
+    Escribe **dos** artefactos y en la misma tanda: el catálogo y la captura de las respuestas de
+    WoRMS (`especies.volcar_captura`). Son la pareja que compara E6, así que regenerar uno sin el
+    otro es lo único que no se puede hacer — y por eso no hay forma de hacerlo desde aquí. E6 corre
+    al final contra lo ya escrito: es la comprobación de que la captura que queda en disco
+    reconstruye, byte a byte y con el parser de hoy, el taxón que se acaba de publicar.
+    """
+    hoy = dt.datetime.now(dt.timezone.utc).date()
+    tallas = normativa.cargar()
+    nombres = especies.nombres_del_boe(tallas)
+    print(f"{len(nombres)} nombres científicos en {normativa.DATASET.relative_to(REPO_ROOT)}")
+
+    resoluciones: dict[str, worms.Resolucion] = {}
+    #: El cuerpo crudo de cada consulta, que es lo que se captura: el gate E6 rehace el taxón
+    #: pasando estos mismos bytes por el parser de hoy. Se guarda por consulta y no por nombre
+    #: porque dos grafías del BOE («Thunnus thynnus» y «Thunnus Thynnus») preguntan lo mismo.
+    cuerpos: dict[str, bytes] = {}
+    for nombre in nombres:
+        correspondencia = especies.correspondencia_de(nombre)
+        if correspondencia.consulta is None:
+            resoluciones[nombre] = especies.sin_consultar(correspondencia)
+            continue
+        consulta = correspondencia.consulta
+        if consulta not in cuerpos:
+            cuerpos[consulta] = worms.descargar(consulta, refresh=args.refresh)
+        resoluciones[nombre] = worms.leer_respuesta(cuerpos[consulta], consultado=consulta)
+    reparto = Counter(resolucion.desenlace for resolucion in resoluciones.values())
+    for desenlace, cuantos in sorted(reparto.items()):
+        print(f"  WoRMS {desenlace:15} {cuantos}")
+    for nombre, resolucion in resoluciones.items():
+        registro = resolucion.registro
+        if registro and not registro.aceptado:
+            print(
+                f"      {nombre:32} {registro.estado:20} → {registro.nombre_aceptado} "
+                f"({registro.aphia_id_aceptado})"
+            )
+
+    presencias: dict[tuple[str, str], obis.Presencia] = {}
+    for caladero in tallas["caladeros"]:
+        recorte = obis.RECORTES[caladero["id"]]
+        del_caladero = {
+            e["nombreCientifico"] for e in caladero["especies"] if "nombreCientifico" in e
+        }
+        for nombre in sorted(del_caladero):
+            registro = resoluciones[nombre].registro
+            if registro is None:
+                continue
+            clave = (especies.nombre_para_obis(registro), caladero["id"])
+            if clave not in presencias:
+                presencias[clave] = obis.consultar(clave[0], recorte, refresh=args.refresh)
+        del_recorte = [p for (_, cal), p in presencias.items() if cal == caladero["id"]]
+        con_registros = sum(1 for p in del_recorte if p.registros > 0)
+        print(
+            f"  OBIS  {caladero['id']:36} {len(del_recorte)} taxones consultados, "
+            f"{con_registros} con algún registro"
+        )
+
+    dataset = especies.construir_dataset(tallas, resoluciones, presencias, consultado_en=hoy)
+    errores = [
+        *(f"cobertura: {error}" for error in especies.errores_de_cobertura(dataset, tallas)),
+        *(f"E2 · mapeo: {error}" for error in especies.errores_de_mapeo(dataset)),
+        *(f"E3 · género: {error}" for error in especies.errores_de_genero(dataset)),
+        *(f"clave: {error}" for error in especies.errores_de_clave(dataset)),
+        *(f"presencia: {error}" for error in especies.errores_de_presencia(dataset)),
+        *(f"E5 · talla: {error}" for error in especies.errores_de_tallas(dataset, tallas)),
+    ]
+    if errores:
+        for error in errores:
+            print(f"✗ {error}", file=sys.stderr)
+        return 1
+    especies.volcar(dataset)
+    # La captura se escribe **con** el dataset y en la misma tanda: es contra ella contra la que
+    # E6 rehace el taxón, y una captura de otro día daría verde describiendo un WoRMS que no es el
+    # que se publicó. Va después de `volcar` para que un dataset que no llega al disco tampoco
+    # deje una captura suya rondando.
+    capturados = especies.volcar_captura(cuerpos)
+    print(
+        f"  captura de WoRMS → {len(capturados)} respuestas en "
+        f"{especies.FUENTE_WORMS_CAPTURADA.relative_to(REPO_ROOT)}"
+    )
+    procedencia = especies.errores_de_procedencia(dataset)
+    if procedencia:
+        for error in procedencia:
+            print(f"✗ E6 · procedencia: {error}", file=sys.stderr)
+        return 1
+    resumen = dataset["resumen"]
+    print(
+        f"  {resumen['resueltas']} resuelven en WoRMS ({resumen['aceptadas']} con el nombre "
+        f"aceptado y {resumen['conNombreAceptadoDistinto']} con uno distinto del que usa la norma) "
+        f"y {resumen['sinResolver']} no"
+    )
+    print(f"especies → {especies.DATASET.relative_to(REPO_ROOT)}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -716,6 +947,9 @@ def main(argv: list[str] | None = None) -> int:
     subparsers.add_parser(
         "areas-protegidas", help="ingesta de RAMPE 2025 (áreas marinas protegidas por puerto)"
     )
+    subparsers.add_parser(
+        "especies", help="ingesta de WoRMS + OBIS (catálogo de las especies que regula el BOE)"
+    )
 
     args = parser.parse_args(argv)
     if getattr(args, "commit", None) is None:
@@ -730,6 +964,7 @@ def main(argv: list[str] | None = None) -> int:
         "normativa": command_normativa,
         "verificar-normativa": command_verificar_normativa,
         "areas-protegidas": command_areas_protegidas,
+        "especies": command_especies,
     }
     return handlers[args.command](args)
 

@@ -1,0 +1,79 @@
+{
+  "snapshotId": "7a7b9b7e2da8",
+  "runId": "run-2026-08-30T21-06-02-542Z",
+  "test": {
+    "title": "adversarial/a12-la-misma-especie-partida-en-dos-filas.spec.ts > A12 · con el filtro de un caladero puesto, todo taxón visible publica el nombre aceptado",
+    "file": "/home/user/mareia/tests/e2e/journeys/adversarial/a12-la-misma-especie-partida-en-dos-filas.spec.ts",
+    "line": 113,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 13119,
+  "urlAtFailure": "http://127.0.0.1:4321/pesca/especies/#cal-canario",
+  "error": {
+    "message": "Error: taxones que el filtro deja a la vista sin publicar en ninguna fila visible el nombre que WoRMS acepta para ellos\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 9\n\n- Array []\n+ Array [\n+   \"cantabrico-noroeste-y-golfo-de-cadiz: «Cáncer pagurus» sin «Cancer pagurus» a la vista\",\n+   \"cantabrico-noroeste-y-golfo-de-cadiz: «Gliptocephalus cynoglossus» sin «Glyptocephalus cynoglossus» a la vista\",\n+   \"cantabrico-noroeste-y-golfo-de-cadiz: «Melanogrammús aeglefinus» sin «Melanogrammus aeglefinus» a la vista\",\n+   \"cantabrico-noroeste-y-golfo-de-cadiz: «Microstommus kitt» sin «Microstomus kitt» a la vista\",\n+   \"mediterraneo: «Panaeux kerathurus» sin «Penaeus kerathurus» a la vista\",\n+   \"canario: «Thunnus Thynnus» sin «Thunnus thynnus» a la vista\",\n+   \"canario: «Thunnus aibacares» sin «Thunnus albacares» a la vista\",\n+ ]",
+    "stack": "Error: taxones que el filtro deja a la vista sin publicar en ninguna fila visible el nombre que WoRMS acepta para ellos\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 9\n\n- Array []\n+ Array [\n+   \"cantabrico-noroeste-y-golfo-de-cadiz: «Cáncer pagurus» sin «Cancer pagurus» a la vista\",\n+   \"cantabrico-noroeste-y-golfo-de-cadiz: «Gliptocephalus cynoglossus» sin «Glyptocephalus cynoglossus» a la vista\",\n+   \"cantabrico-noroeste-y-golfo-de-cadiz: «Melanogrammús aeglefinus» sin «Melanogrammus aeglefinus» a la vista\",\n+   \"cantabrico-noroeste-y-golfo-de-cadiz: «Microstommus kitt» sin «Microstomus kitt» a la vista\",\n+   \"mediterraneo: «Panaeux kerathurus» sin «Penaeus kerathurus» a la vista\",\n+   \"canario: «Thunnus Thynnus» sin «Thunnus thynnus» a la vista\",\n+   \"canario: «Thunnus aibacares» sin «Thunnus albacares» a la vista\",\n+ ]\n    at /home/user/mareia/tests/e2e/journeys/adversarial/a12-la-misma-especie-partida-en-dos-filas.spec.ts:154:5"
+  },
+  "events": [
+    {
+      "at": 10,
+      "kind": "step",
+      "text": "abrir el catálogo entero"
+    },
+    {
+      "at": 33,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/pesca/especies/"
+    },
+    {
+      "at": 12688,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12691,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12723,
+      "kind": "step",
+      "text": "pulsar el filtro «Cantábrico y noroeste y golfo de Cádiz», que es a donde lleva el enlace de un puerto"
+    },
+    {
+      "at": 12816,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/pesca/especies/#cal-cantabrico-noroeste-y-golfo-de-cadiz"
+    },
+    {
+      "at": 12893,
+      "kind": "step",
+      "text": "pulsar el filtro «Mediterráneo», que es a donde lleva el enlace de un puerto"
+    },
+    {
+      "at": 12944,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/pesca/especies/#cal-mediterraneo"
+    },
+    {
+      "at": 12994,
+      "kind": "step",
+      "text": "pulsar el filtro «Canario», que es a donde lleva el enlace de un puerto"
+    },
+    {
+      "at": 13024,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/pesca/especies/#cal-canario"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

@@ -1,0 +1,59 @@
+{
+  "snapshotId": "33065439f669",
+  "runId": "run-2026-08-30T21-05-39-489Z",
+  "test": {
+    "title": "adversarial/a12-la-misma-especie-partida-en-dos-filas.spec.ts > A12 · dos filas que son el mismo taxón lo dicen, o dan cuenta de todos sus caladeros",
+    "file": "/home/user/mareia/tests/e2e/journeys/adversarial/a12-la-misma-especie-partida-en-dos-filas.spec.ts",
+    "line": 66,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 12863,
+  "urlAtFailure": "http://127.0.0.1:4321/pesca/especies/",
+  "error": {
+    "message": "Error: filas que publican un registro de WoRMS que otra fila también publica, sin decirlo y sin dar cuenta de los caladeros que la otra se lleva\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 8\n\n- Array []\n+ Array [\n+   \"AphiaID 126032: «Mugil spp» publica Cantábrico y noroeste y golfo de Cádiz y no nombra a «Mugil spps», que es el mismo taxón\",\n+   \"AphiaID 126032: «Mugil spps» publica Mediterráneo y no nombra a «Mugil spp», que es el mismo taxón\",\n+   \"AphiaID 127029: «Thunnus Thynnus» publica Canario y no nombra a «Thunnus thynnus», que es el mismo taxón\",\n+   \"AphiaID 127029: «Thunnus thynnus» publica Cantábrico y noroeste y golfo de Cádiz + Mediterráneo y no nombra a «Thunnus Thynnus», que es el mismo taxón\",\n+   \"AphiaID 127027: «Thunnus aibacares» publica Canario y no nombra a «Thunnus albacares», que es el mismo taxón\",\n+   \"AphiaID 127027: «Thunnus albacares» publica Cantábrico y noroeste y golfo de Cádiz y no nombra a «Thunnus aibacares», que es el mismo taxón\",\n+ ]",
+    "stack": "Error: filas que publican un registro de WoRMS que otra fila también publica, sin decirlo y sin dar cuenta de los caladeros que la otra se lleva\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 8\n\n- Array []\n+ Array [\n+   \"AphiaID 126032: «Mugil spp» publica Cantábrico y noroeste y golfo de Cádiz y no nombra a «Mugil spps», que es el mismo taxón\",\n+   \"AphiaID 126032: «Mugil spps» publica Mediterráneo y no nombra a «Mugil spp», que es el mismo taxón\",\n+   \"AphiaID 127029: «Thunnus Thynnus» publica Canario y no nombra a «Thunnus thynnus», que es el mismo taxón\",\n+   \"AphiaID 127029: «Thunnus thynnus» publica Cantábrico y noroeste y golfo de Cádiz + Mediterráneo y no nombra a «Thunnus Thynnus», que es el mismo taxón\",\n+   \"AphiaID 127027: «Thunnus aibacares» publica Canario y no nombra a «Thunnus albacares», que es el mismo taxón\",\n+   \"AphiaID 127027: «Thunnus albacares» publica Cantábrico y noroeste y golfo de Cádiz y no nombra a «Thunnus aibacares», que es el mismo taxón\",\n+ ]\n    at /home/user/mareia/tests/e2e/journeys/adversarial/a12-la-misma-especie-partida-en-dos-filas.spec.ts:110:5"
+  },
+  "events": [
+    {
+      "at": 5,
+      "kind": "step",
+      "text": "abrir el catálogo tal y como se publica"
+    },
+    {
+      "at": 31,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/pesca/especies/"
+    },
+    {
+      "at": 12725,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12726,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12783,
+      "kind": "step",
+      "text": "agrupar por AphiaID: qué registros de WoRMS se publican en más de una fila"
+    },
+    {
+      "at": 12790,
+      "kind": "step",
+      "text": "3 taxones en más de una fila: ¿lo sabe quien lee una sola?"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

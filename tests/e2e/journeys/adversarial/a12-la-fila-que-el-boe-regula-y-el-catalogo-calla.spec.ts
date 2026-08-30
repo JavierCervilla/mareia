@@ -1,0 +1,130 @@
+/**
+ * A12 · **El Anexo I le fija 3,7 cm a «Cigalas (colas)». El catálogo no la publica, dice de sí mismo
+ * que no falta ninguna «por decisión nuestra», y no publica en ninguna parte el motivo por el que
+ * falta ésta.**
+ *
+ * El catálogo se presenta con esta frase, que es la que fija su alcance:
+ *
+ * > «Las especies a las que el Real Decreto 560/1995 le fija una talla mínima de captura … **La
+ * > lista la fija el BOE: ni sobra ninguna ni falta ninguna por decisión nuestra.**»
+ *
+ * Y falta una por decisión nuestra. El RD tiene 118 filas con talla y el catálogo publica 86
+ * nombres; la 118ª es «Cigalas (colas)», Anexo I, 3,7 cm, y no entra porque la norma no escribe ahí
+ * ningún binomio. La decisión está tomada **y razonada**: el dataset la guarda aparte, en
+ * `sinNombreCientifico`, con su motivo escrito («la norma escribe «Cigalas (colas)» y ahí no hay
+ * ningún nombre latino entre paréntesis; no se infiere») y su cifra. El pipeline la cuenta
+ * (`filasSinNombreCientifico: 1`) y `run.py check` la nombra. Lo único que no pasa es que llegue a
+ * la página: ni el adaptador la lee ni la plantilla la pinta.
+ *
+ * Eso deja el catálogo incumpliendo la doctrina que el propio módulo repite en cada uno de sus
+ * campos —una ausencia dice por qué lo es, o no se distingue de un fallo nuestro—, y la incumple en
+ * el único sitio donde la ausencia tiene consecuencia legal: **3,7 cm es la talla mínima de las
+ * colas de cigala en el Cantábrico**, y no es la misma cifra que las dos que el catálogo sí publica
+ * para `Nephrops norvegicus` en ese caladero (2 cm de cefalotórax y 7 cm de longitud total). Son
+ * tres medidas del mismo animal y el catálogo publica dos, sin decir que hay una tercera.
+ *
+ * El segundo cuerpo lo mide entre las dos superficies, que es donde se ve: la página de un puerto
+ * cantábrico publica la fila «Cigalas (colas) · 3,7 cm» en su tabla de la norma y, unos párrafos más
+ * abajo, un enlace al catálogo «con el nombre que la ciencia acepta hoy … si la norma regula una
+ * especie o un género entero». Quien siga ese enlace buscando esa fila no la encuentra, y la página
+ * a la que llega le dice que no falta ninguna.
+ *
+ * **Qué se afirma aquí (el comportamiento correcto):** toda fila a la que el RD 560/1995 le fija una
+ * talla y que el catálogo no publica aparece en la página con su motivo, como aparece cualquier otra
+ * ausencia del portal. No se afirma que haya que inventarle un binomio: se afirma que el hueco tiene
+ * que decir por qué lo es.
+ *
+ * **Método.** Cero mutaciones. `dist/` servido por HTTP. La fila que falta y su motivo se leen del
+ * propio dataset (`sinNombreCientifico`), no se teclean: el día que la norma añada o quite una fila
+ * sin binomio, este recorrido sigue midiendo lo que dice medir.
+ */
+
+import { expect, test } from "../../fixtures/qa-bundle";
+
+import { catalogoPublicado, RUTA_CATALOGO, textoDe } from "./utiles-especies";
+
+/** Un puerto del caladero cantábrico, que es el anexo donde vive la fila que falta. */
+const PUERTO_CANTABRICO = "/mareas/galicia/pontevedra/vigo/";
+
+test("A12 · la fila del BOE que el catálogo no publica aparece con su motivo", async ({
+  page,
+  qa,
+}) => {
+  // TRINQUETE RETIRADO · hallazgo CERRADO. Playwright avisó de que «pasó lo que se esperaba
+  // que fallara» y aquí se quita el `test.fail()`: a partir de ahora este recorrido es un gate
+  // permanente y se pone ROJO si alguien lo vuelve a romper. El assert canario de más abajo —el
+  // que dice «el ataque no está midiendo nada»— se queda donde estaba: era lo único que
+  // distinguía «falla por el defecto» de «falla por otra cosa» mientras el hallazgo estaba
+  // abierto, y ahora es lo único que distingue «pasa porque está arreglado» de «pasa porque ya
+  // no mide».
+
+  qa.step("abrir el catálogo tal y como se publica");
+  await page.goto(RUTA_CATALOGO);
+  const leido = textoDe(await page.content());
+
+  qa.step("qué filas de la norma se quedaron fuera, según el propio dataset");
+  const catalogo = catalogoPublicado();
+  const fuera = catalogo.sinNombreCientifico;
+  expect(
+    fuera.length,
+    "el dataset no declara ninguna fila fuera del catálogo: el ataque no está midiendo nada",
+  ).toBeGreaterThan(0);
+
+  qa.step(`${fuera.length} filas fuera: ¿dice la página que existen y por qué no están?`);
+  const calladas = fuera
+    .filter((fila) => !leido.includes(fila.nombreComun) && !leido.includes(fila.motivo))
+    .map(
+      (fila) =>
+        `«${fila.nombreComun}» (${fila.caladero}, el BOE imprime «${fila.textoOriginal}») no se ` +
+        `nombra en la página, y su motivo tampoco: «${fila.motivo.slice(0, 80)}…»`,
+    );
+
+  // El comportamiento CORRECTO, y el que el resto del portal ya cumple: un hueco dice por qué lo
+  // es. La página afirma además que no falta ninguna fila por decisión nuestra, y ésta falta por
+  // una decisión nuestra que está tomada, razonada y guardada — en el JSON, no en la página.
+  expect(
+    calladas,
+    "filas con talla mínima en el RD 560/1995 que el catálogo no publica y de las que no dice nada",
+  ).toEqual([]);
+});
+
+test("A12 · lo que la página de un puerto publica y el catálogo al que enlaza no tiene", async ({
+  page,
+  qa,
+}) => {
+  // TRINQUETE RETIRADO · hallazgo CERRADO. Playwright avisó de que «pasó lo que se esperaba
+  // que fallara» y aquí se quita el `test.fail()`: a partir de ahora este recorrido es un gate
+  // permanente y se pone ROJO si alguien lo vuelve a romper. El assert canario de más abajo —el
+  // que dice «el ataque no está midiendo nada»— se queda donde estaba: era lo único que
+  // distinguía «falla por el defecto» de «falla por otra cosa» mientras el hallazgo estaba
+  // abierto, y ahora es lo único que distingue «pasa porque está arreglado» de «pasa porque ya
+  // no mide».
+
+  const catalogo = catalogoPublicado();
+  const fuera = catalogo.sinNombreCientifico[0];
+  expect(fuera, "el dataset no declara ninguna fila sin binomio").toBeDefined();
+  const nombre = fuera?.nombreComun ?? "";
+
+  qa.step("un puerto del caladero cantábrico: su tabla de la norma trae la fila");
+  await page.goto(PUERTO_CANTABRICO);
+  const enElPuerto = textoDe(await page.content());
+  expect(
+    enElPuerto.includes(nombre),
+    `la página de puerto no publica «${nombre}»: el ataque no está midiendo lo que dice`,
+  ).toBe(true);
+
+  qa.step("seguir el enlace de esa misma página al catálogo del caladero");
+  const enlace = page.locator(`a[href^="${RUTA_CATALOGO}#"]`).first();
+  await expect(enlace).toBeVisible();
+  await enlace.click();
+  await page.waitForURL(new RegExp(`${RUTA_CATALOGO}#`, "u"));
+  const enElCatalogo = textoDe(await page.content());
+
+  // El comportamiento CORRECTO: el sitio no publica una talla legal en una página y la hace
+  // desaparecer, sin decir nada, en la otra a la que él mismo manda.
+  expect(
+    enElCatalogo.includes(nombre) || enElCatalogo.includes(fuera?.motivo ?? "\u0000"),
+    `la página de puerto publica «${nombre}» con su talla y el catálogo al que enlaza no la ` +
+      `nombra ni dice por qué no está`,
+  ).toBe(true);
+});

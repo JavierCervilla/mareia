@@ -1,0 +1,12 @@
+{"at":13,"kind":"step","text":"un puerto del caladero cantábrico: su tabla de la norma trae la fila"}
+{"at":36,"kind":"navigation","text":"http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"}
+{"at":12664,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_CONNECTION_RESET"}
+{"at":12664,"kind":"console","text":"[error] Failed to load resource: net::ERR_CONNECTION_RESET"}
+{"at":12692,"kind":"httperror","text":"HTTP 404 GET http://127.0.0.1:4321/v1/modules/weather/weather?port=vigo"}
+{"at":12692,"kind":"console","text":"[error] Failed to load resource: the server responded with a status of 404 (Not Found)"}
+{"at":12692,"kind":"httperror","text":"HTTP 404 GET http://127.0.0.1:4321/v1/modules/weather/bulletin?port=vigo"}
+{"at":12692,"kind":"console","text":"[error] Failed to load resource: the server responded with a status of 404 (Not Found)"}
+{"at":12769,"kind":"step","text":"seguir el enlace de esa misma página al catálogo del caladero"}
+{"at":12905,"kind":"navigation","text":"http://127.0.0.1:4321/pesca/especies/#cal-cantabrico-noroeste-y-golfo-de-cadiz"}
+{"at":25489,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_CONNECTION_RESET"}
+{"at":25489,"kind":"console","text":"[error] Failed to load resource: net::ERR_CONNECTION_RESET"}
