@@ -1,0 +1,257 @@
+/* =============================================================================
+ * Catálogo de especies — la UI del módulo `species` (T-20): la sección de la
+ * página de puerto (un enlace) y la página `/pesca/especies/` (la tabla).
+ *
+ * La importa el layout, como las demás hojas del sitio (design-brief, «dónde
+ * vive el CSS»: `.css` de verdad y no un `<style>` en la plantilla, porque el
+ * gate anti-slop escanea `.css` y no `.astro`). Se sigue el mismo camino que
+ * `tallas-minimas.css` por lo medido en T-10: importada desde el componente,
+ * Astro no la incluye en el bundle cuando la sección llega por el mapa de
+ * renderizadores, y se publicaría sin estilos con el build en verde.
+ *
+ * **Aquí no hay ni un adorno sobre una cifra.** La página publica dos clases de
+ * número y las dos aguantan mal el énfasis: una talla legal (adornarla es
+ * pedirle crédito prestado a la ley) y un recuento de OBIS, que mide esfuerzo de
+ * muestreo y que destacado se leería como abundancia — exactamente lo que la
+ * trayectoria existe para impedir. Ni relleno, ni mancha de terracota sobre
+ * ninguna cifra, ni tamaño de titular.
+ *
+ * Ni un literal de color ni de fuente: todo sale de los tokens.
+ * ========================================================================== */
+
+/* --- La sección de la página de puerto ------------------------------------ */
+
+.especies__intro {
+  font-size: var(--m-text-body);
+}
+
+.especies__enlace {
+  font-size: var(--m-text-body);
+}
+
+/* Filete lateral en el acento cálido, como los avisos de la sección de tallas:
+   se ve sin gritar más que el «No apto para navegación» del pie. Es el único
+   sitio con color de las dos superficies, y no cae sobre ninguna cifra. */
+.especies__aviso {
+  border-inline-start: 2px solid var(--m-terra);
+  padding-inline-start: 12px;
+  font-size: var(--m-text-body);
+}
+
+/* =============================================================================
+ * El filtro por caladero: CSS puro, cero JavaScript.
+ *
+ * **Por qué `:target` y no los radios ocultos de la portada.** El portal ya
+ * filtra sin JavaScript en `/` (T-14B): tres radios hermanos y reglas de `~`.
+ * Aquí no sirve, y el motivo no es estético: la sección de cada página de puerto
+ * tiene que **enlazar al catálogo ya filtrado por su caladero**, y un radio no
+ * se puede preseleccionar desde una URL sin JavaScript. Con `:target` el estado
+ * vive en el fragmento, así que el enlace de los 153 puertos funciona, el estado
+ * es compartible y copiable, y el navegador además deja al lector justo encima
+ * de la lista filtrada.
+ *
+ * Lo que se paga, dicho para que nadie lo descubra tarde: el estado se ve en la
+ * barra de direcciones, cada opción necesita su ancla, y sólo puede haber un
+ * `:target` a la vez — que aquí es lo que se quiere (dos filtros a la vez darían
+ * la intersección de dos «esconde lo que no es») pero obliga a que «Todas» tenga
+ * su propia ancla en vez de ser la ausencia de estado.
+ *
+ * **Los tres identificadores de caladero están escritos a mano abajo**, porque
+ * un selector de atributo no puede leer un valor que sale del dataset. Son los
+ * tres anexos del RD 560/1995 y no cambian sin que cambie la norma; para que un
+ * cuarto no rompa el filtro **en silencio**, un gate de `especies-construido.test.ts`
+ * comprueba que todo caladero del catálogo tiene aquí sus dos reglas.
+ * ========================================================================== */
+
+/* Las anclas no ocupan sitio: sólo existen para recibir el `:target`. No se
+   ocultan con `display: none` porque entonces el navegador no puede desplazarse
+   hasta ellas y el enlace del puerto filtraría sin llevar a la lista. */
+.catalogo-especies__diana {
+  display: block;
+  height: 0;
+  scroll-margin-block-start: 12px;
+}
+
+.filtro-caladero {
+  border-top: 1px solid var(--m-rule-soft);
+  border-bottom: 1px solid var(--m-rule-soft);
+  margin-block: var(--m-gap-bloque);
+  padding-block-start: 12px;
+}
+
+.filtro-caladero__opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 28px;
+}
+
+/* Compuesto como los controles de la portada: tipografía del almanaque y un
+   filete debajo, sin relleno ni esquinas redondeadas. Los 44 px de alto los pide
+   el entorno de uso del brief (§1): un dedo con guantes en la playa. */
+.filtro-caladero__opcion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  border-bottom: 2px solid transparent;
+  color: var(--m-navy);
+  text-decoration: none;
+}
+
+.filtro-caladero__opcion:hover {
+  text-decoration: underline;
+}
+
+.filtro-caladero__cuenta {
+  font-size: var(--m-text-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--m-sub);
+}
+
+.filtro-caladero__nota {
+  max-width: 62ch;
+  padding-block-end: 12px;
+  font-size: var(--m-text-small);
+  color: var(--m-sub);
+}
+
+/* La opción activa se marca con su filete, y se sigue distinguiendo en papel y
+   sin color. Una regla por ancla porque el selector tiene que nombrar la suya. */
+#cal-todas:target ~ .filtro-caladero .filtro-caladero__opcion[href="#cal-todas"],
+#cal-cantabrico-noroeste-y-golfo-de-cadiz:target
+  ~ .filtro-caladero
+  .filtro-caladero__opcion[href="#cal-cantabrico-noroeste-y-golfo-de-cadiz"],
+#cal-mediterraneo:target ~ .filtro-caladero .filtro-caladero__opcion[href="#cal-mediterraneo"],
+#cal-canario:target ~ .filtro-caladero .filtro-caladero__opcion[href="#cal-canario"] {
+  border-bottom-color: var(--m-rule);
+  color: var(--m-ink);
+}
+
+/* Lo que hace el filtro: esconder las especies que ese caladero no regula. El
+   ancla «todas» no tiene regla, y por eso devuelve la lista entera. */
+#cal-cantabrico-noroeste-y-golfo-de-cadiz:target
+  ~ .tabla-especies
+  tbody
+  tr:not([data-caladeros~="cantabrico-noroeste-y-golfo-de-cadiz"]),
+#cal-mediterraneo:target ~ .tabla-especies tbody tr:not([data-caladeros~="mediterraneo"]),
+#cal-canario:target ~ .tabla-especies tbody tr:not([data-caladeros~="canario"]) {
+  display: none;
+}
+
+/* =============================================================================
+ * La tabla del catálogo
+ * ========================================================================== */
+
+.tabla-especies {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--m-text-body);
+  text-align: left;
+}
+
+.tabla-especies th,
+.tabla-especies td {
+  padding: var(--m-gap-fila) 10px var(--m-gap-fila) 0;
+  border-top: 1px solid var(--m-rule-soft);
+  vertical-align: baseline;
+}
+
+.tabla-especies thead th {
+  border-top: 0;
+  border-bottom: 1px solid var(--m-rule);
+  font-size: var(--m-text-eyebrow);
+  font-weight: 400;
+  letter-spacing: var(--m-track-label);
+  text-transform: uppercase;
+  color: var(--m-sub);
+}
+
+/* El nombre del BOE manda en la fila y por eso es lo único en tinta plena de su
+   celda; lo demás baja un peldaño. Sin negrita: la cabecera de fila ya lo
+   identifica, y el énfasis tipográfico sobre un nombre legal es innecesario
+   —está solo en su columna— y le restaría sitio a lo que sí hay que comparar. */
+.tabla-especies tbody th {
+  font-weight: 400;
+}
+
+.tabla-especies__boe {
+  display: block;
+  font-style: italic;
+}
+
+.tabla-especies__comun,
+.tabla-especies__rango,
+.tabla-especies__estado,
+.tabla-especies__ficha,
+.tabla-especies__nuestro,
+.tabla-especies__ausencia,
+.tabla-especies__literal,
+.tabla-especies__medida,
+.tabla-especies__presencia {
+  display: block;
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+}
+
+/* El nombre aceptado, en la misma cursiva que el del BOE porque es un binomio y
+   no una frase; en tinta plena porque es el otro nombre de la fila, no una nota
+   sobre él. Lo que NO hace es competir en tamaño: son dos nombres del mismo
+   rango, no uno bueno y uno viejo. */
+.tabla-especies__aceptado {
+  display: block;
+  font-style: italic;
+  color: var(--m-ink);
+}
+
+/* Que la norma regule un género entero es un hecho jurídico, así que se rotula
+   como se rotula una ausencia en el resto del portal —cursiva y cuerpo pequeño—
+   y no como una etiqueta de color: un chip aquí lo convertiría en una categoría
+   de producto (anti-objetivo del brief, §3). */
+.tabla-especies__rango,
+.tabla-especies__ausencia,
+.tabla-especies__nuestro {
+  font-style: italic;
+}
+
+.tabla-especies__caladeros {
+  display: flex;
+  flex-direction: column;
+  gap: var(--m-gap-fila);
+}
+
+.tabla-especies__caladero {
+  display: block;
+}
+
+/* `tabular-nums` SOLO donde hay una magnitud. Alinear como cifra una frase
+   —«La norma no fija talla»— la haría parecer un dato numérico, que es
+   exactamente lo que la norma no dice. Sin `nowrap`: la cifra y su unidad ya van
+   pegadas con un espacio duro desde `regulations`, y el `nowrap` de la celda es
+   lo que desbordaba la página en los 80 puertos mediterráneos (T-19). */
+.tabla-especies__talla {
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla-especies__sin-talla {
+  display: block;
+  font-style: italic;
+}
+
+/* El literal del BOE, para poder comparar lo pintado con lo publicado, y la
+   presencia de OBIS, que es una frase con una cifra dentro y NUNCA una cifra
+   sola. Las dos en cuerpo pequeño: se consultan, no se leen de corrido. */
+.tabla-especies__literal,
+.tabla-especies__presencia {
+  max-width: 62ch;
+}
+
+/* Los nombres científicos son palabras largas sin espacios y la celda de la
+   izquierda es estrecha en un móvil: es el mismo defecto que H-5 curó en el
+   boletín de AEMET y en el ELI de la sección de tallas, y se aplica la misma
+   cura (`anywhere`, no `break-word`: sólo aquélla reduce el tamaño mínimo de
+   contenido, que es lo que empuja al contenedor). */
+.tabla-especies th,
+.tabla-especies td {
+  overflow-wrap: anywhere;
+}

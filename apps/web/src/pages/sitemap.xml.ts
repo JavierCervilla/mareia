@@ -14,7 +14,14 @@ import type { APIRoute } from "astro";
 
 import { cargarCatalogo, puertosDeRegion } from "../datos/catalogo.ts";
 import { FECHA_DE_BUILD } from "../datos/fecha-build.ts";
-import { RUTA_MAREAS, rutaProvincia, rutaPuerto, rutaRegion, urlAbsoluta } from "../rutas.ts";
+import {
+  RUTA_ESPECIES,
+  RUTA_MAREAS,
+  rutaProvincia,
+  rutaPuerto,
+  rutaRegion,
+  urlAbsoluta,
+} from "../rutas.ts";
 
 interface Entrada {
   readonly ruta: string;
@@ -38,6 +45,10 @@ async function entradasDelSitio(): Promise<readonly Entrada[]> {
   const indices: Entrada[] = [
     { ruta: "/", frecuencia: "weekly", prioridad: "0.8" },
     { ruta: RUTA_MAREAS, frecuencia: "weekly", prioridad: "0.6" },
+    // El catálogo de especies (T-20). `weekly` como los índices y no `daily` como las páginas de
+    // puerto: su contenido sólo cambia cuando cambia la norma o cuando se vuelve a preguntar a
+    // WoRMS y a OBIS, no cada vez que se reconstruye el sitio.
+    { ruta: RUTA_ESPECIES, frecuencia: "weekly", prioridad: "0.6" },
   ];
   for (const region of regiones) {
     indices.push({ ruta: rutaRegion(region.slug), frecuencia: "weekly", prioridad: "0.5" });

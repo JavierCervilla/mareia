@@ -27,8 +27,24 @@
  * cualquiera de las dos metería en una sola lista de atribuciones una licencia real (la del BOE)
  * junto a un hueco de licencia declarado («condiciones de uso no declaradas en origen»), que es
  * justo lo que hay que poder leer por separado.
+ *
+ * `species` (T-20) es la **tercera**, y la razón vuelve a ser de dónde sale el dato y no de qué
+ * habla. El catálogo de especies habla justo de lo mismo que `regulations` —las especies a las que
+ * el RD 560/1995 le fija una talla—, así que la tentación de colgarlo de aquél es la más fuerte de
+ * las tres; y sería el peor sitio. Lo que el catálogo añade **no sale del BOE**: el taxón aceptado
+ * es de **WoRMS** y los registros de presencia son de **OBIS**, dos fuentes internacionales con sus
+ * propias licencias, una de ellas con una condición —no redistribuir la base entera— que hay que
+ * poder leer sola y no diluida entre la reutilización de la legislación española. Con una sola
+ * identidad, `/v1/modules` publicaría las tres licencias como si fueran del mismo dato, y dar de
+ * baja el catálogo sin dar de baja las tallas dejaría de ser borrar una línea.
  */
-export type ModuleId = "fishing" | "weather" | "navigation" | "regulations" | "protected-areas";
+export type ModuleId =
+  | "fishing"
+  | "weather"
+  | "navigation"
+  | "regulations"
+  | "protected-areas"
+  | "species";
 
 /**
  * Referencia mínima a un puerto: lo único que el contrato necesita saber para decidir si un módulo

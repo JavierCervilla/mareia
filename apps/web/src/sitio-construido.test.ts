@@ -26,7 +26,13 @@ import { cargarCatalogo, cargarPuertos, puertosDeRegion } from "./datos/catalogo
 import { cargarDatosDePuerto } from "./datos/pagina-puerto.ts";
 import { diasDelMes } from "./datos/fecha-build.ts";
 import { hora, metros } from "./formato.ts";
-import { RUTA_MAREAS, rutaProvincia, rutaPuerto, rutaRegion } from "./rutas.ts";
+import {
+  RUTA_ESPECIES,
+  RUTA_MAREAS,
+  rutaProvincia,
+  rutaPuerto,
+  rutaRegion,
+} from "./rutas.ts";
 
 const DIST = join(dirname(fileURLToPath(import.meta.url)), "..", "dist");
 const PORTADA = join(DIST, "index.html");
@@ -67,6 +73,10 @@ async function rutasEsperadas(): Promise<readonly string[]> {
   return [
     "/",
     RUTA_MAREAS,
+    // El catálogo de especies (T-20). Es una página del portal como los índices geográficos: si no
+    // estuviera aquí, el gate del sitemap dejaría de exigir que se publique y una página real del
+    // sitio podría quedarse fuera del XML sin que nadie se enterase.
+    RUTA_ESPECIES,
     ...regiones.map((region) => rutaRegion(region.slug)),
     ...regiones.flatMap((region) =>
       region.provincias.map((provincia) => rutaProvincia(region.slug, provincia.slug)),

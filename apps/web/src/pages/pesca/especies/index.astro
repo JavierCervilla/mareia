@@ -1,0 +1,305 @@
+---
+/**
+ * El catálogo de especies: `/pesca/especies/`. **Ruta decidida por el humano.**
+ *
+ * Las 86 especies a las que el RD 560/1995 le fija una talla mínima, con el nombre que usa la
+ * norma, el taxón que WoRMS acepta hoy, los caladeros que las regulan con su talla y los registros
+ * de presencia de OBIS. **Sin ficha individual**: eso es T-23.
+ *
+ * Las cuatro decisiones que dan forma a esta página, y ninguna es de composición:
+ *
+ * 1. **El nombre del BOE está en todas las filas y nunca lo sustituye el aceptado.** Es el que tiene
+ *    consecuencia legal; el aceptado es el que sirve para buscar la especie en cualquier otra base.
+ *    Se publican los dos porque elegir uno obliga a decidir entre mentir sobre la ley o mentir sobre
+ *    la taxonomía. Lo mide el gate E1 sobre el `dist/`.
+ * 2. **Ningún número de registros aparece sin decir lo que es.** OBIS mide esfuerzo de muestreo, no
+ *    abundancia —la dorada en toda Galicia son 12 registros—, así que la cifra no se imprime sola en
+ *    ninguna rama del código: sale de `presenciaEscrita`, que la escribe con su sesgo pegado. Lo
+ *    mide el gate E4.
+ * 3. **Un género no se convierte en especie.** 15 de los 86 nombres son un género (`Sepia spp`) y la
+ *    talla aplica a todo él; la fila lo rotula y no le elige ninguna especie.
+ * 4. **Las cifras que la página dice de sí misma se cuentan aquí, del catálogo que se está
+ *    pintando** (`censoDelCatalogo`), no se teclean. Si el BOE gana o pierde una especie, la
+ *    entradilla cambia sola.
+ *
+ * **Cero JavaScript**, como el resto del portal: el filtro por caladero es CSS puro sobre `:target`
+ * —ver `estilos/especies.css` para por qué `:target` y no los radios de la portada— y no hay ninguna
+ * isla.
+ */
+import {
+  ATRIBUCIONES_SPECIES,
+  cajaEscrita,
+  censoDelCatalogo,
+  COLUMNA_CALADEROS,
+  COLUMNA_NOMBRE_BOE,
+  COLUMNA_PRESENCIA,
+  COLUMNA_TAXON,
+  EL_FILTRO_NO_RECORTA_LA_FILA,
+  EL_GENERO_APLICA_A_TODO_EL_GENERO,
+  FILTRO_TODAS,
+  filasDeEspecies,
+  LA_CAJA_NO_ES_LA_COSTA,
+  LA_PRESENCIA_NO_ES_ABUNDANCIA,
+  POR_QUE_DOS_NOMBRES,
+  QUE_ES_ESTE_CATALOGO,
+  ROTULO_CAJAS,
+  ROTULO_FILTRO,
+  ROTULO_FUENTES,
+  anclaDeCaladero,
+  aphiaDelAceptado,
+  fichaEnWorms,
+  tituloDelCatalogo,
+} from "@mareia/module-species";
+
+import Migas from "../../../componentes/Migas.astro";
+import { fechaLarga, numero } from "../../../formato.ts";
+import AlmanaqueLayout from "../../../layouts/AlmanaqueLayout.astro";
+import { migasDeEspecies } from "../../../migas.ts";
+import {
+  cargarCatalogoDeEspecies,
+  FORMATO_DEL_CATALOGO,
+} from "../../../modulos/especies/catalogo.ts";
+import { RUTA_ESPECIES, urlAbsoluta } from "../../../rutas.ts";
+import { grafo, migasEstructuradas } from "../../../seo.ts";
+
+const catalogo = await cargarCatalogoDeEspecies();
+const censo = censoDelCatalogo(catalogo);
+const filas = filasDeEspecies(catalogo, FORMATO_DEL_CATALOGO);
+
+/**
+ * El ancla que devuelve la lista entera.
+ *
+ * Existe como elemento aunque no tenga ninguna regla de filtrado colgando: es lo que le da a la
+ * opción «Todas» un destino al que ir. Sin ella habría que enlazar a `#`, que en la práctica
+ * funciona pero es una URL que no nombra el estado al que lleva.
+ */
+const ANCLA_TODAS = "cal-todas";
+
+const titulo = `${tituloDelCatalogo(censo.especies)} · Mareia`;
+const descripcion =
+  `Las ${censo.especies} especies con talla mínima de captura en el Real Decreto 560/1995, con el ` +
+  "nombre que usa la norma, el nombre que la ciencia acepta hoy, los caladeros que las regulan y " +
+  "los registros de presencia en OBIS.";
+
+const migas = migasDeEspecies();
+---
+
+<AlmanaqueLayout
+  titulo={titulo}
+  descripcion={descripcion}
+  canonica={urlAbsoluta(RUTA_ESPECIES, Astro.site)}
+  jsonLd={grafo([migasEstructuradas(migas, Astro.site)])}
+>
+  <Migas slot="migas" migas={migas} />
+
+  <header class="portada">
+    <h1 class="portada__titulo">{tituloDelCatalogo(censo.especies)}</h1>
+    <p class="portada__entradilla">{QUE_ES_ESTE_CATALOGO}</p>
+  </header>
+
+  <section class="bloque" aria-labelledby="titulo-dos-nombres">
+    <h2 class="bloque__titulo" id="titulo-dos-nombres">Por qué cada especie tiene dos nombres</h2>
+    <p class="especies__intro">{POR_QUE_DOS_NOMBRES}</p>
+    {/*
+      El censo, contado del propio catálogo. Va aquí y no en la entradilla porque es lo que da la
+      medida de la distancia entre la norma y la taxonomía: 10 de 86 no es una anécdota y tampoco es
+      un desastre, y sin la cifra cada lector se imagina una de las dos cosas.
+    */}
+    <div class="datos">
+      <p class="datos__fila">
+        <span>Resuelven en WoRMS con el nombre de la norma</span>
+        <span class="datos__valor">{censo.resueltasTalCual} de {censo.especies}</span>
+      </p>
+      <p class="datos__fila">
+        <span>Resuelven al género porque la norma nombra un género</span>
+        <span class="datos__valor">{censo.porCorrespondenciaNuestra}, con la correspondencia declarada como nuestra</span>
+      </p>
+      <p class="datos__fila">
+        <span>No resuelven, y publican por qué</span>
+        <span class="datos__valor">{censo.sinResolver}</span>
+      </p>
+      <p class="datos__fila">
+        <span>Tienen hoy un nombre aceptado distinto del de la norma</span>
+        <span class="datos__valor">{censo.conAceptadoDistinto}</span>
+      </p>
+      <p class="datos__fila">
+        <span>Son un género entero y no una especie</span>
+        <span class="datos__valor">{censo.deGenero}</span>
+      </p>
+    </div>
+    <p class="datos__nota">{EL_GENERO_APLICA_A_TODO_EL_GENERO}</p>
+  </section>
+
+  <section class="bloque" aria-labelledby="titulo-presencia">
+    <h2 class="bloque__titulo" id="titulo-presencia">Qué miden los registros de OBIS</h2>
+    {/*
+      La regla dura de la trayectoria, dicha entera ANTES de la primera cifra y no en un pie. La
+      versión corta —«esfuerzo de muestreo, no abundancia»— va pegada a cada número dentro de la
+      tabla: las dos hacen falta, porque un párrafo arriba no viaja con la fila que alguien copia y
+      una coletilla sola no explica por qué 12 no significa doce doradas.
+    */}
+    <p class="especies__aviso">{LA_PRESENCIA_NO_ES_ABUNDANCIA}</p>
+    <p class="especies__intro">{LA_CAJA_NO_ES_LA_COSTA}</p>
+    <h3 class="etiqueta">{ROTULO_CAJAS}</h3>
+    <div class="datos">
+      {
+        catalogo.criterio.cajas.map((caja) => {
+          const caladero = censo.caladeros.find((candidato) => candidato.id === caja.caladero);
+          return (
+            <p class="datos__fila">
+              <span>{caladero?.nombre ?? caja.caladero}</span>
+              <span class="datos__valor">{cajaEscrita(caja, numero)}</span>
+            </p>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  {/*
+    El filtro por caladero, sin JavaScript. Las dianas van las primeras y son hermanas de la tabla
+    porque el combinador `~` solo mira hacia adelante; quien las mueve son los enlaces de abajo, que
+    es lo que se ve. La cuenta de cada opción es el resultado de aplicarla, horneada del catálogo.
+    Por qué `:target` y no los radios ocultos de la portada, en `estilos/especies.css`.
+  */}
+  <div class="catalogo-especies">
+    <span class="catalogo-especies__diana" id={ANCLA_TODAS}></span>
+    {
+      censo.caladeros.map((caladero) => (
+        <span class="catalogo-especies__diana" id={anclaDeCaladero(caladero.id)} />
+      ))
+    }
+
+    <nav class="filtro-caladero" aria-label={ROTULO_FILTRO}>
+      <h2 class="etiqueta" id="titulo-filtro">{ROTULO_FILTRO}</h2>
+      <ul class="filtro-caladero__opciones" role="list" aria-labelledby="titulo-filtro">
+        <li>
+          <a class="filtro-caladero__opcion" href={`#${ANCLA_TODAS}`}>
+            {FILTRO_TODAS} <span class="filtro-caladero__cuenta">{censo.especies}</span>
+          </a>
+        </li>
+        {
+          censo.caladeros.map((caladero) => (
+            <li>
+              <a class="filtro-caladero__opcion" href={`#${anclaDeCaladero(caladero.id)}`}>
+                {caladero.nombre} <span class="filtro-caladero__cuenta">{caladero.especies}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="filtro-caladero__nota">{EL_FILTRO_NO_RECORTA_LA_FILA}</p>
+    </nav>
+
+    <table class="tabla-especies">
+      <caption class="solo-lectores">
+        {tituloDelCatalogo(censo.especies)}, con el nombre de la norma, el taxón aceptado hoy y los
+        caladeros que fijan su talla
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{COLUMNA_NOMBRE_BOE}</th>
+          <th scope="col">{COLUMNA_TAXON}</th>
+          <th scope="col">{COLUMNA_CALADEROS} · {COLUMNA_PRESENCIA}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          filas.map((fila) => (
+            <tr data-especie={fila.clave} data-caladeros={fila.idsDeCaladero.join(" ")}>
+              <th scope="row">
+                {/*
+                  EL NOMBRE DEL BOE, literal y primero. No es una preferencia de composición: es el
+                  que tiene consecuencia legal, y el gate E1 exige encontrarlo en todas las filas.
+                */}
+                <span class="tabla-especies__boe">{fila.nombreBoe}</span>
+                <span class="tabla-especies__comun">{fila.nombresComunes.join(" · ")}</span>
+                {fila.rango !== null && <span class="tabla-especies__rango">{fila.rango}</span>}
+              </th>
+              <td>
+                {fila.taxon.tipo === "sin_resolver" ? (
+                  <span class="tabla-especies__ausencia">{fila.taxon.motivo}</span>
+                ) : (
+                  <>
+                    {fila.taxon.aceptado !== null && (
+                      <>
+                        <span class="tabla-especies__aceptado">{fila.taxon.aceptado.nombre}</span>
+                        <span class="tabla-especies__ficha">
+                          {aphiaDelAceptado(fila.taxon.aceptado.aphiaId)}
+                        </span>
+                      </>
+                    )}
+                    <span class="tabla-especies__estado">{fila.taxon.texto}</span>
+                    <span class="tabla-especies__ficha">
+                      <a href={fila.taxon.ficha.url}>{fichaEnWorms(fila.taxon.ficha.aphiaId)}</a>
+                    </span>
+                    {fila.taxon.correspondencia !== null && (
+                      <span class="tabla-especies__nuestro">{fila.taxon.correspondencia}</span>
+                    )}
+                  </>
+                )}
+              </td>
+              <td>
+                <ul class="tabla-especies__caladeros" role="list">
+                  {fila.caladeros.map((caladero) => (
+                    <li>
+                      <span class="tabla-especies__caladero">{caladero.nombre}</span>
+                      {caladero.tallas.map((talla) => (
+                        <>
+                          {/*
+                            Qué se mide, cuando el anexo mide la especie de más de una forma. Sin
+                            esto, la cigala publica 2 cm y 7 cm en el mismo caladero sin decir que
+                            una es la longitud del cefalotórax y la otra la longitud total.
+                          */}
+                          {talla.medida !== null && (
+                            <span class="tabla-especies__medida">{talla.medida}</span>
+                          )}
+                          <span
+                            class={
+                              talla.talla.hayCifra
+                                ? "tabla-especies__talla"
+                                : "tabla-especies__sin-talla"
+                            }
+                          >
+                            {talla.talla.texto}
+                          </span>
+                          <span class="tabla-especies__literal">
+                            el BOE imprime «{talla.literal}»
+                          </span>
+                        </>
+                      ))}
+                      {/*
+                        LA PRESENCIA, y nunca como número suelto: `presenciaEscrita` la devuelve con
+                        el sesgo dentro de la misma frase, y la rama de al lado no es un hueco sino
+                        el motivo de que no haya registros. El gate E4 mide justo esto en el `dist/`.
+                      */}
+                      <span class="tabla-especies__presencia">{caladero.presencia}</span>
+                    </li>
+                  ))}
+                </ul>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <p class="datos__nota">
+    {ROTULO_FUENTES} ·{" "}
+    {
+      ATRIBUCIONES_SPECIES.map((atribucion, indice) => (
+        <>
+          {indice > 0 && <> · </>}
+          <a href={atribucion.url}>{atribucion.name}</a> ({atribucion.license})
+        </>
+      ))
+    }
+  </p>
+  <p class="datos__nota">
+    WoRMS consultado el {fechaLarga(catalogo.fuentes.worms.consultadoEn)} · OBIS consultado el {
+      fechaLarga(catalogo.fuentes.obis.consultadoEn)
+    }. Las tallas y los nombres de la norma salen del Real Decreto 560/1995, que publica con su
+    fuente y su fecha la sección de tallas mínimas de cada puerto.
+  </p>
+</AlmanaqueLayout>
