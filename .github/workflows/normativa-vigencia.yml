@@ -107,11 +107,16 @@ jobs:
         env:
           DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
           AGENT_API_KEY: ${{ secrets.AGENT_API_KEY }}
-          PROJECT_ID: ${{ secrets.DASHBOARD_PROJECT_ID }}
+          # El ID del proyecto NO es un secreto: es un identificador opaco que ya viaja en claro por
+          # el plan de la trayectoria y por el vault. Va como `vars` para que el aviso crítico
+          # funcione sin que nadie tenga que dar de alta un secreto, con el literal de reserva —el
+          # proyecto Mareia— para que un repositorio recién clonado tampoco degrade. Los dos que sí
+          # son secretos, la URL y la clave del agente, siguen en `secrets`.
+          PROJECT_ID: ${{ vars.DASHBOARD_PROJECT_ID || 'cmtc83g5n000pvv7zga2az24g' }}
         run: |
           set -u
           if [ -z "${DASHBOARD_URL:-}" ] || [ -z "${AGENT_API_KEY:-}" ] || [ -z "${PROJECT_ID:-}" ]; then
-            echo "::warning::Sin DASHBOARD_URL/AGENT_API_KEY/DASHBOARD_PROJECT_ID no se puede dejar la acción crítica en el dashboard. El aviso se queda en este job, que ya está en rojo."
+            echo "::warning::Sin DASHBOARD_URL/AGENT_API_KEY no se puede dejar la acción crítica en el dashboard. El aviso se queda en este job, que ya está en rojo."
             exit 0
           fi
           detalle="$(head -c 1500 /tmp/vigencia.log)"
