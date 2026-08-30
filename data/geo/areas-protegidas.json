@@ -1,0 +1,3356 @@
+{
+  "schema": "areas-protegidas/v1",
+  "fuente": {
+    "nombre": "RAMPE 2025 · Red de Áreas Marinas Protegidas de España",
+    "organismo": "Ministerio para la Transición Ecológica y el Reto Demográfico (MITECO)",
+    "url": "https://www.miteco.gob.es/content/dam/miteco/es/biodiversidad/temas/biodiversidad-marina/rampe/Rampe2025_geojson.zip",
+    "paginaUrl": "https://www.miteco.gob.es/es/biodiversidad/temas/biodiversidad-marina/espacios-marinos-protegidos/rampe.html",
+    "licencia": "MITECO · RAMPE 2025 — condiciones de uso no declaradas en origen",
+    "aviso": "Solo la declaración oficial de cada espacio define sus límites y su régimen. Que no haya un área protegida cerca no autoriza a pescar: esto dice dónde NO se puede, nunca dónde sí.",
+    "descargadoEn": "2026-08-30",
+    "sha256": "0844dc8795ee70e006206651a71252c9478672fa2cacc5f40ca048a55b60b19d",
+    "censo": {
+      "areas": 86,
+      "verticesEnOrigen": 1076504,
+      "porFichero": {
+        "Rampe_c.geojson": 38,
+        "Rampe_p.geojson": 48
+      },
+      "porEpsg": {
+        "25830": 48,
+        "32628": 38
+      },
+      "porTipo": {
+        "AMP": 1,
+        "RESERVA MARINA": 10,
+        "ZEC": 32,
+        "ZEC/AMP": 1,
+        "ZEPA": 42
+      }
+    }
+  },
+  "criterio": {
+    "radioKm": 30.0,
+    "distancia": "distancia al vértice más cercano del área, redondeada a 1 decimal de kilómetro. Es una APROXIMACIÓN POR EXCESO: el vértice está igual de lejos o más lejos que el borde real del área, así que este número aleja y nunca acerca. No debe presentarse como una medida.",
+    "dentro": "true si el punto del puerto cae dentro del polígono del área, huecos excluidos. Es la comprobación que cubre el único caso en que la distancia al vértice engañaría hacia el lado peligroso: un puerto dentro de un área grande y lejos de todos sus vértices.",
+    "sinGeometria": "este dataset no publica geometría de ninguna clase. Ni vértices, ni polígonos, ni cajas envolventes, ni geometría simplificada."
+  },
+  "resumen": {
+    "puertos": 153,
+    "conArea": 143,
+    "sinArea": 10,
+    "relaciones": 342,
+    "reparto": {
+      "1": 54,
+      "2": 34,
+      "3": 19,
+      "4": 22,
+      "5": 9,
+      "6": 5
+    }
+  },
+  "puertos": [
+    {
+      "slug": "alicante",
+      "areas": [
+        {
+          "nombre": "Espacio marino de Tabarca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000214",
+          "distanciaAproxKm": 1.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Tabarca-Cabo de Palos",
+          "tipo": "ZEPA",
+          "codigo": "ES0000508",
+          "distanciaAproxKm": 8.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de la Isla de Tabarca",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552484",
+          "distanciaAproxKm": 19.1,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "altea",
+      "areas": [
+        {
+          "nombre": "ZEPA Espacio marino de Ifac",
+          "tipo": "ZEPA",
+          "codigo": "ES0000538",
+          "distanciaAproxKm": 8.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de la Marina Alta",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ16007",
+          "distanciaAproxKm": 19.8,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "benidorm",
+      "areas": [
+        {
+          "nombre": "ZEPA Espacio marino de Ifac",
+          "tipo": "ZEPA",
+          "codigo": "ES0000538",
+          "distanciaAproxKm": 17.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de la Marina Alta",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ16007",
+          "distanciaAproxKm": 28.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "calp",
+      "areas": [
+        {
+          "nombre": "ZEPA Espacio marino de Ifac",
+          "tipo": "ZEPA",
+          "codigo": "ES0000538",
+          "distanciaAproxKm": 0.0,
+          "dentro": true
+        },
+        {
+          "nombre": "Espacio marino de la Marina Alta",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ16007",
+          "distanciaAproxKm": 10.6,
+          "dentro": false
+        },
+        {
+          "nombre": "L'Almadrava",
+          "tipo": "ZEPA",
+          "codigo": "ES5212005",
+          "distanciaAproxKm": 25.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Plataforma-talud marinos del Cabo de la Nao",
+          "tipo": "ZEPA",
+          "codigo": "ES0000510",
+          "distanciaAproxKm": 26.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "denia",
+      "areas": [
+        {
+          "nombre": "L'Almadrava",
+          "tipo": "ZEPA",
+          "codigo": "ES5212005",
+          "distanciaAproxKm": 1.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de la Marina Alta",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ16007",
+          "distanciaAproxKm": 10.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Plataforma-talud marinos del Cabo de la Nao",
+          "tipo": "ZEPA",
+          "codigo": "ES0000510",
+          "distanciaAproxKm": 16.0,
+          "dentro": false
+        },
+        {
+          "nombre": "ZEPA Espacio marino de Ifac",
+          "tipo": "ZEPA",
+          "codigo": "ES0000538",
+          "distanciaAproxKm": 18.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Corredor de Migración de Cetáceos del Mediterráneo",
+          "tipo": "AMP",
+          "codigo": "ES90MED10",
+          "distanciaAproxKm": 19.5,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "guardamar-del-segura",
+      "areas": [
+        {
+          "nombre": "Espacio Marino de Cabo Roig",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ16009",
+          "distanciaAproxKm": 2.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Tabarca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000214",
+          "distanciaAproxKm": 3.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Tabarca-Cabo de Palos",
+          "tipo": "ZEPA",
+          "codigo": "ES0000508",
+          "distanciaAproxKm": 3.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de la Isla de Tabarca",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552484",
+          "distanciaAproxKm": 15.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "javea",
+      "areas": [
+        {
+          "nombre": "Espacio marino de la Marina Alta",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ16007",
+          "distanciaAproxKm": 2.5,
+          "dentro": false
+        },
+        {
+          "nombre": "L'Almadrava",
+          "tipo": "ZEPA",
+          "codigo": "ES5212005",
+          "distanciaAproxKm": 9.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Corredor de Migración de Cetáceos del Mediterráneo",
+          "tipo": "AMP",
+          "codigo": "ES90MED10",
+          "distanciaAproxKm": 13.7,
+          "dentro": false
+        },
+        {
+          "nombre": "ZEPA Espacio marino de Ifac",
+          "tipo": "ZEPA",
+          "codigo": "ES0000538",
+          "distanciaAproxKm": 14.9,
+          "dentro": false
+        },
+        {
+          "nombre": "Plataforma-talud marinos del Cabo de la Nao",
+          "tipo": "ZEPA",
+          "codigo": "ES0000510",
+          "distanciaAproxKm": 15.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "orihuela",
+      "areas": [
+        {
+          "nombre": "Espacio Marino de Cabo Roig",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ16009",
+          "distanciaAproxKm": 0.1,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Tabarca-Cabo de Palos",
+          "tipo": "ZEPA",
+          "codigo": "ES0000508",
+          "distanciaAproxKm": 1.9,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de Cabo de Palos e Islas Hormigas",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552487",
+          "distanciaAproxKm": 23.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Valles submarinos del Escarpe de Mazarrón",
+          "tipo": "ZEC",
+          "codigo": "ES6200048",
+          "distanciaAproxKm": 26.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "santa-pola",
+      "areas": [
+        {
+          "nombre": "Espacio marino de Tabarca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000214",
+          "distanciaAproxKm": 0.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Tabarca-Cabo de Palos",
+          "tipo": "ZEPA",
+          "codigo": "ES0000508",
+          "distanciaAproxKm": 4.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de la Isla de Tabarca",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552484",
+          "distanciaAproxKm": 8.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio Marino de Cabo Roig",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ16009",
+          "distanciaAproxKm": 13.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "teulada",
+      "areas": [
+        {
+          "nombre": "Espacio marino de la Marina Alta",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ16007",
+          "distanciaAproxKm": 1.3,
+          "dentro": false
+        },
+        {
+          "nombre": "ZEPA Espacio marino de Ifac",
+          "tipo": "ZEPA",
+          "codigo": "ES0000538",
+          "distanciaAproxKm": 2.1,
+          "dentro": false
+        },
+        {
+          "nombre": "L'Almadrava",
+          "tipo": "ZEPA",
+          "codigo": "ES5212005",
+          "distanciaAproxKm": 18.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Corredor de Migración de Cetáceos del Mediterráneo",
+          "tipo": "AMP",
+          "codigo": "ES90MED10",
+          "distanciaAproxKm": 23.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Plataforma-talud marinos del Cabo de la Nao",
+          "tipo": "ZEPA",
+          "codigo": "ES0000510",
+          "distanciaAproxKm": 25.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "torrevieja",
+      "areas": [
+        {
+          "nombre": "Espacio Marino de Cabo Roig",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ16009",
+          "distanciaAproxKm": 0.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Tabarca-Cabo de Palos",
+          "tipo": "ZEPA",
+          "codigo": "ES0000508",
+          "distanciaAproxKm": 1.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Tabarca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000214",
+          "distanciaAproxKm": 18.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de la Isla de Tabarca",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552484",
+          "distanciaAproxKm": 27.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "adra",
+      "areas": [
+        {
+          "nombre": "Bahía de Almería",
+          "tipo": "ZEPA",
+          "codigo": "ES0000506",
+          "distanciaAproxKm": 10.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Fondos marinos de Punta Entinas-Sabinar",
+          "tipo": "ZEC",
+          "codigo": "ES6110009",
+          "distanciaAproxKm": 22.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "carboneras",
+      "areas": [
+        {
+          "nombre": "Fondos marinos Levante Almeriense",
+          "tipo": "ZEC",
+          "codigo": "ES6110010",
+          "distanciaAproxKm": 1.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina del Cabo de Gata-Níjar",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552486",
+          "distanciaAproxKm": 3.0,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "cuevas-del-almanzora",
+      "areas": [
+        {
+          "nombre": "Fondos marinos Levante Almeriense",
+          "tipo": "ZEC",
+          "codigo": "ES6110010",
+          "distanciaAproxKm": 0.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de los Islotes Litorales de Murcia y Almería",
+          "tipo": "ZEPA",
+          "codigo": "ES0000507",
+          "distanciaAproxKm": 7.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Valles submarinos del Escarpe de Mazarrón",
+          "tipo": "ZEC",
+          "codigo": "ES6200048",
+          "distanciaAproxKm": 25.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "garrucha",
+      "areas": [
+        {
+          "nombre": "Fondos marinos Levante Almeriense",
+          "tipo": "ZEC",
+          "codigo": "ES6110010",
+          "distanciaAproxKm": 0.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de los Islotes Litorales de Murcia y Almería",
+          "tipo": "ZEPA",
+          "codigo": "ES0000507",
+          "distanciaAproxKm": 16.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina del Cabo de Gata-Níjar",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552486",
+          "distanciaAproxKm": 25.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "nijar",
+      "areas": [
+        {
+          "nombre": "Reserva marina del Cabo de Gata-Níjar",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552486",
+          "distanciaAproxKm": 0.0,
+          "dentro": true
+        },
+        {
+          "nombre": "Bahía de Almería",
+          "tipo": "ZEPA",
+          "codigo": "ES0000506",
+          "distanciaAproxKm": 7.1,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "pulpi",
+      "areas": [
+        {
+          "nombre": "Espacio marino de los Islotes Litorales de Murcia y Almería",
+          "tipo": "ZEPA",
+          "codigo": "ES0000507",
+          "distanciaAproxKm": 1.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Fondos marinos Levante Almeriense",
+          "tipo": "ZEC",
+          "codigo": "ES6110010",
+          "distanciaAproxKm": 1.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Valles submarinos del Escarpe de Mazarrón",
+          "tipo": "ZEC",
+          "codigo": "ES6200048",
+          "distanciaAproxKm": 11.1,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "roquetas-de-mar",
+      "areas": [
+        {
+          "nombre": "Bahía de Almería",
+          "tipo": "ZEPA",
+          "codigo": "ES0000506",
+          "distanciaAproxKm": 0.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Arrecifes de Roquetas de Mar",
+          "tipo": "ZEC",
+          "codigo": "ES6110019",
+          "distanciaAproxKm": 1.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Fondos marinos de Punta Entinas-Sabinar",
+          "tipo": "ZEC",
+          "codigo": "ES6110009",
+          "distanciaAproxKm": 5.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina del Cabo de Gata-Níjar",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552486",
+          "distanciaAproxKm": 25.8,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "arenys-de-mar",
+      "areas": [],
+      "motivo": "ninguna área marina protegida de RAMPE 2025 tiene un vértice a menos de 30 km de este puerto, y el puerto tampoco cae dentro de ninguna. No mirar más lejos es una decisión nuestra, no una ausencia de la fuente."
+    },
+    {
+      "slug": "badalona",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Baix Llobregat-Garraf",
+          "tipo": "ZEPA",
+          "codigo": "ES0000513",
+          "distanciaAproxKm": 17.5,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "barcelona",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Baix Llobregat-Garraf",
+          "tipo": "ZEPA",
+          "codigo": "ES0000513",
+          "distanciaAproxKm": 14.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "castelldefels",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Baix Llobregat-Garraf",
+          "tipo": "ZEPA",
+          "codigo": "ES0000513",
+          "distanciaAproxKm": 8.5,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "el-masnou",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Baix Llobregat-Garraf",
+          "tipo": "ZEPA",
+          "codigo": "ES0000513",
+          "distanciaAproxKm": 24.5,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "mataro",
+      "areas": [],
+      "motivo": "ninguna área marina protegida de RAMPE 2025 tiene un vértice a menos de 30 km de este puerto, y el puerto tampoco cae dentro de ninguna. No mirar más lejos es una decisión nuestra, no una ausencia de la fuente."
+    },
+    {
+      "slug": "premia-de-mar",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Baix Llobregat-Garraf",
+          "tipo": "ZEPA",
+          "codigo": "ES0000513",
+          "distanciaAproxKm": 28.5,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "sitges",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Baix Llobregat-Garraf",
+          "tipo": "ZEPA",
+          "codigo": "ES0000513",
+          "distanciaAproxKm": 11.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de Masía Blanca",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552489",
+          "distanciaAproxKm": 25.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "vilanova-i-la-geltru",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Baix Llobregat-Garraf",
+          "tipo": "ZEPA",
+          "codigo": "ES0000513",
+          "distanciaAproxKm": 11.1,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de Masía Blanca",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552489",
+          "distanciaAproxKm": 17.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del Delta de l'Ebre-Illes Columbretes",
+          "tipo": "ZEPA",
+          "codigo": "ES0000512",
+          "distanciaAproxKm": 29.8,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "bermeo",
+      "areas": [
+        {
+          "nombre": "Espacio marino de la Ría de Mundaka-Cabo de Ogoño",
+          "tipo": "ZEPA",
+          "codigo": "ES0000490",
+          "distanciaAproxKm": 1.0,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "bilbao",
+      "areas": [
+        {
+          "nombre": "Espacio marino de la Ría de Mundaka-Cabo de Ogoño",
+          "tipo": "ZEPA",
+          "codigo": "ES0000490",
+          "distanciaAproxKm": 7.0,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "elantxobe",
+      "areas": [
+        {
+          "nombre": "Espacio marino de la Ría de Mundaka-Cabo de Ogoño",
+          "tipo": "ZEPA",
+          "codigo": "ES0000490",
+          "distanciaAproxKm": 0.0,
+          "dentro": true
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "lekeitio",
+      "areas": [
+        {
+          "nombre": "Espacio marino de la Ría de Mundaka-Cabo de Ogoño",
+          "tipo": "ZEPA",
+          "codigo": "ES0000490",
+          "distanciaAproxKm": 7.1,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "mundaka",
+      "areas": [
+        {
+          "nombre": "Espacio marino de la Ría de Mundaka-Cabo de Ogoño",
+          "tipo": "ZEPA",
+          "codigo": "ES0000490",
+          "distanciaAproxKm": 1.5,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "a-coruna",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 1.0,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "boiro",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 0.1,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "ferrol",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 5.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "pobra-do-caraminal",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 0.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "rianxo",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 4.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "ribeira",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 0.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "sada",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 0.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "algeciras",
+      "areas": [
+        {
+          "nombre": "Estrecho Oriental",
+          "tipo": "ZEC",
+          "codigo": "ES6120032",
+          "distanciaAproxKm": 3.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Estrecho Occidental",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ12004",
+          "distanciaAproxKm": 7.1,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "barbate",
+      "areas": [
+        {
+          "nombre": "Estrecho Occidental",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ12004",
+          "distanciaAproxKm": 0.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "cadiz",
+      "areas": [
+        {
+          "nombre": "Estrecho Occidental",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ12004",
+          "distanciaAproxKm": 7.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Golfo de Cádiz",
+          "tipo": "ZEPA",
+          "codigo": "ES0000500",
+          "distanciaAproxKm": 20.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "chiclana-de-la-frontera",
+      "areas": [
+        {
+          "nombre": "Estrecho Occidental",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ12004",
+          "distanciaAproxKm": 0.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "chipiona",
+      "areas": [
+        {
+          "nombre": "Golfo de Cádiz",
+          "tipo": "ZEPA",
+          "codigo": "ES0000500",
+          "distanciaAproxKm": 19.1,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "conil-de-la-frontera",
+      "areas": [
+        {
+          "nombre": "Estrecho Occidental",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ12004",
+          "distanciaAproxKm": 0.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "la-linea-de-la-concepcion",
+      "areas": [
+        {
+          "nombre": "Estrecho Oriental",
+          "tipo": "ZEC",
+          "codigo": "ES6120032",
+          "distanciaAproxKm": 1.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Estrecho Occidental",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ12004",
+          "distanciaAproxKm": 10.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "rota",
+      "areas": [
+        {
+          "nombre": "Golfo de Cádiz",
+          "tipo": "ZEPA",
+          "codigo": "ES0000500",
+          "distanciaAproxKm": 13.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Estrecho Occidental",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ12004",
+          "distanciaAproxKm": 18.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "san-roque",
+      "areas": [
+        {
+          "nombre": "Estrecho Oriental",
+          "tipo": "ZEC",
+          "codigo": "ES6120032",
+          "distanciaAproxKm": 10.1,
+          "dentro": false
+        },
+        {
+          "nombre": "Fondos marinos de la Bahía de Estepona",
+          "tipo": "ZEC",
+          "codigo": "ES6170036",
+          "distanciaAproxKm": 16.9,
+          "dentro": false
+        },
+        {
+          "nombre": "El Saladillo-Punta de Baños",
+          "tipo": "ZEC",
+          "codigo": "ES6170037",
+          "distanciaAproxKm": 24.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Estrecho Occidental",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ12004",
+          "distanciaAproxKm": 26.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "sanlucar-de-barrameda",
+      "areas": [
+        {
+          "nombre": "Golfo de Cádiz",
+          "tipo": "ZEPA",
+          "codigo": "ES0000500",
+          "distanciaAproxKm": 28.5,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "tarifa",
+      "areas": [
+        {
+          "nombre": "Estrecho Occidental",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ12004",
+          "distanciaAproxKm": 0.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Estrecho Oriental",
+          "tipo": "ZEC",
+          "codigo": "ES6120032",
+          "distanciaAproxKm": 21.6,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "ceuta",
+      "areas": [
+        {
+          "nombre": "Estrecho Occidental",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ12004",
+          "distanciaAproxKm": 12.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Estrecho Oriental",
+          "tipo": "ZEC",
+          "codigo": "ES6120032",
+          "distanciaAproxKm": 15.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "borriana",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Delta de l'Ebre-Illes Columbretes",
+          "tipo": "ZEPA",
+          "codigo": "ES0000512",
+          "distanciaAproxKm": 7.1,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Orpesa i Benicàssim",
+          "tipo": "ZEPA",
+          "codigo": "ES0000447",
+          "distanciaAproxKm": 19.6,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "castellon-de-la-plana",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Delta de l'Ebre-Illes Columbretes",
+          "tipo": "ZEPA",
+          "codigo": "ES0000512",
+          "distanciaAproxKm": 3.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Orpesa i Benicàssim",
+          "tipo": "ZEPA",
+          "codigo": "ES0000447",
+          "distanciaAproxKm": 5.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "oropesa-del-mar",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Delta de l'Ebre-Illes Columbretes",
+          "tipo": "ZEPA",
+          "codigo": "ES0000512",
+          "distanciaAproxKm": 0.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Orpesa i Benicàssim",
+          "tipo": "ZEPA",
+          "codigo": "ES0000447",
+          "distanciaAproxKm": 0.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "agaete",
+      "areas": [
+        {
+          "nombre": "Costa de Sardina del Norte",
+          "tipo": "ZEC",
+          "codigo": "ES7010066",
+          "distanciaAproxKm": 2.1,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Mogán-La Aldea",
+          "tipo": "ZEPA",
+          "codigo": "ES0000530",
+          "distanciaAproxKm": 14.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Güigüí",
+          "tipo": "ZEC",
+          "codigo": "ES7011005",
+          "distanciaAproxKm": 16.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Bahía del Confital",
+          "tipo": "ZEC",
+          "codigo": "ES7010037",
+          "distanciaAproxKm": 23.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Área marina de la Isleta",
+          "tipo": "ZEC",
+          "codigo": "ES7010016",
+          "distanciaAproxKm": 24.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Franja marina de Mogán",
+          "tipo": "ZEC",
+          "codigo": "ES7010017",
+          "distanciaAproxKm": 24.0,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "antigua",
+      "areas": [
+        {
+          "nombre": "Playas de sotavento de Jandía",
+          "tipo": "ZEC",
+          "codigo": "ES7010035",
+          "distanciaAproxKm": 23.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de La Bocayna",
+          "tipo": "ZEPA",
+          "codigo": "ES0000531",
+          "distanciaAproxKm": 25.6,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "arrecife",
+      "areas": [
+        {
+          "nombre": "Sebadales de Guasimeta",
+          "tipo": "ZEC",
+          "codigo": "ES7010021",
+          "distanciaAproxKm": 4.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Cagafrecho",
+          "tipo": "ZEC",
+          "codigo": "ES7011002",
+          "distanciaAproxKm": 12.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de los Islotes de Lanzarote",
+          "tipo": "ZEPA",
+          "codigo": "ES0000532",
+          "distanciaAproxKm": 19.9,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de La Bocayna",
+          "tipo": "ZEPA",
+          "codigo": "ES0000531",
+          "distanciaAproxKm": 23.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de La Graciosa",
+          "tipo": "ZEC",
+          "codigo": "ES7010020",
+          "distanciaAproxKm": 25.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de la Isla Graciosa e Islotes del Norte de Lanzarote",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552480",
+          "distanciaAproxKm": 29.8,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "haria",
+      "areas": [
+        {
+          "nombre": "Espacio marino de los Islotes de Lanzarote",
+          "tipo": "ZEPA",
+          "codigo": "ES0000532",
+          "distanciaAproxKm": 0.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de La Graciosa",
+          "tipo": "ZEC",
+          "codigo": "ES7010020",
+          "distanciaAproxKm": 2.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de la Isla Graciosa e Islotes del Norte de Lanzarote",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552480",
+          "distanciaAproxKm": 8.1,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "la-aldea-de-san-nicolas",
+      "areas": [
+        {
+          "nombre": "Espacio marino de Mogán-La Aldea",
+          "tipo": "ZEPA",
+          "codigo": "ES0000530",
+          "distanciaAproxKm": 0.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Güigüí",
+          "tipo": "ZEC",
+          "codigo": "ES7011005",
+          "distanciaAproxKm": 1.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Franja marina de Mogán",
+          "tipo": "ZEC",
+          "codigo": "ES7010017",
+          "distanciaAproxKm": 10.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Costa de Sardina del Norte",
+          "tipo": "ZEC",
+          "codigo": "ES7010066",
+          "distanciaAproxKm": 15.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "la-oliva",
+      "areas": [
+        {
+          "nombre": "Espacio marino de La Bocayna",
+          "tipo": "ZEPA",
+          "codigo": "ES0000531",
+          "distanciaAproxKm": 0.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Corralejo",
+          "tipo": "ZEC",
+          "codigo": "ES7010022",
+          "distanciaAproxKm": 2.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Cagafrecho",
+          "tipo": "ZEC",
+          "codigo": "ES7011002",
+          "distanciaAproxKm": 25.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "las-palmas-de-gran-canaria",
+      "areas": [
+        {
+          "nombre": "Bahía del Confital",
+          "tipo": "ZEC",
+          "codigo": "ES7010037",
+          "distanciaAproxKm": 1.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Área marina de la Isleta",
+          "tipo": "ZEC",
+          "codigo": "ES7010016",
+          "distanciaAproxKm": 3.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Bahía de Gando",
+          "tipo": "ZEC",
+          "codigo": "ES7010048",
+          "distanciaAproxKm": 23.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Costa de Sardina del Norte",
+          "tipo": "ZEC",
+          "codigo": "ES7010066",
+          "distanciaAproxKm": 26.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Playa del Cabrón",
+          "tipo": "ZEC",
+          "codigo": "ES7010053",
+          "distanciaAproxKm": 29.6,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "mogan",
+      "areas": [
+        {
+          "nombre": "Franja marina de Mogán",
+          "tipo": "ZEC",
+          "codigo": "ES7010017",
+          "distanciaAproxKm": 0.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Mogán-La Aldea",
+          "tipo": "ZEPA",
+          "codigo": "ES0000530",
+          "distanciaAproxKm": 4.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Playa del Inglés",
+          "tipo": "ZEC",
+          "codigo": "ES7010056",
+          "distanciaAproxKm": 12.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Güigüí",
+          "tipo": "ZEC",
+          "codigo": "ES7011005",
+          "distanciaAproxKm": 18.8,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "puerto-del-rosario",
+      "areas": [
+        {
+          "nombre": "Espacio marino de La Bocayna",
+          "tipo": "ZEPA",
+          "codigo": "ES0000531",
+          "distanciaAproxKm": 17.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Corralejo",
+          "tipo": "ZEC",
+          "codigo": "ES7010022",
+          "distanciaAproxKm": 18.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "san-bartolome-de-tirajana",
+      "areas": [
+        {
+          "nombre": "Franja marina de Mogán",
+          "tipo": "ZEC",
+          "codigo": "ES7010017",
+          "distanciaAproxKm": 0.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Playa del Inglés",
+          "tipo": "ZEC",
+          "codigo": "ES7010056",
+          "distanciaAproxKm": 2.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Mogán-La Aldea",
+          "tipo": "ZEPA",
+          "codigo": "ES0000530",
+          "distanciaAproxKm": 13.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Playa del Cabrón",
+          "tipo": "ZEC",
+          "codigo": "ES7010053",
+          "distanciaAproxKm": 24.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Güigüí",
+          "tipo": "ZEC",
+          "codigo": "ES7011005",
+          "distanciaAproxKm": 28.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Bahía de Gando",
+          "tipo": "ZEC",
+          "codigo": "ES7010048",
+          "distanciaAproxKm": 29.8,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "telde",
+      "areas": [
+        {
+          "nombre": "Bahía de Gando",
+          "tipo": "ZEC",
+          "codigo": "ES7010048",
+          "distanciaAproxKm": 4.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Playa del Cabrón",
+          "tipo": "ZEC",
+          "codigo": "ES7010053",
+          "distanciaAproxKm": 11.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Área marina de la Isleta",
+          "tipo": "ZEC",
+          "codigo": "ES7010016",
+          "distanciaAproxKm": 11.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Bahía del Confital",
+          "tipo": "ZEC",
+          "codigo": "ES7010037",
+          "distanciaAproxKm": 18.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Playa del Inglés",
+          "tipo": "ZEC",
+          "codigo": "ES7010056",
+          "distanciaAproxKm": 25.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "tias",
+      "areas": [
+        {
+          "nombre": "Cagafrecho",
+          "tipo": "ZEC",
+          "codigo": "ES7011002",
+          "distanciaAproxKm": 0.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Guasimeta",
+          "tipo": "ZEC",
+          "codigo": "ES7010021",
+          "distanciaAproxKm": 6.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de La Bocayna",
+          "tipo": "ZEPA",
+          "codigo": "ES0000531",
+          "distanciaAproxKm": 8.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Corralejo",
+          "tipo": "ZEC",
+          "codigo": "ES7010022",
+          "distanciaAproxKm": 24.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de los Islotes de Lanzarote",
+          "tipo": "ZEPA",
+          "codigo": "ES0000532",
+          "distanciaAproxKm": 25.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "tuineje",
+      "areas": [
+        {
+          "nombre": "Playas de sotavento de Jandía",
+          "tipo": "ZEC",
+          "codigo": "ES7010035",
+          "distanciaAproxKm": 0.0,
+          "dentro": true
+        },
+        {
+          "nombre": "Espacio marino de La Bocayna",
+          "tipo": "ZEPA",
+          "codigo": "ES0000531",
+          "distanciaAproxKm": 28.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "yaiza",
+      "areas": [
+        {
+          "nombre": "Espacio marino de La Bocayna",
+          "tipo": "ZEPA",
+          "codigo": "ES0000531",
+          "distanciaAproxKm": 0.1,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Corralejo",
+          "tipo": "ZEC",
+          "codigo": "ES7010022",
+          "distanciaAproxKm": 12.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Cagafrecho",
+          "tipo": "ZEC",
+          "codigo": "ES7011002",
+          "distanciaAproxKm": 15.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Guasimeta",
+          "tipo": "ZEC",
+          "codigo": "ES7010021",
+          "distanciaAproxKm": 22.8,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "almunecar",
+      "areas": [
+        {
+          "nombre": "Bahía de Málaga-Cerro Gordo",
+          "tipo": "ZEPA",
+          "codigo": "ES0000504",
+          "distanciaAproxKm": 3.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "motril",
+      "areas": [
+        {
+          "nombre": "Bahía de Málaga-Cerro Gordo",
+          "tipo": "ZEPA",
+          "codigo": "ES0000504",
+          "distanciaAproxKm": 21.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "ayamonte",
+      "areas": [
+        {
+          "nombre": "Golfo de Cádiz",
+          "tipo": "ZEPA",
+          "codigo": "ES0000500",
+          "distanciaAproxKm": 11.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "cartaya",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Tinto y del Odiel",
+          "tipo": "ZEPA",
+          "codigo": "ES0000501",
+          "distanciaAproxKm": 14.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Golfo de Cádiz",
+          "tipo": "ZEPA",
+          "codigo": "ES0000500",
+          "distanciaAproxKm": 15.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "huelva",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Tinto y del Odiel",
+          "tipo": "ZEPA",
+          "codigo": "ES0000501",
+          "distanciaAproxKm": 1.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Golfo de Cádiz",
+          "tipo": "ZEPA",
+          "codigo": "ES0000500",
+          "distanciaAproxKm": 10.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "isla-cristina",
+      "areas": [
+        {
+          "nombre": "Golfo de Cádiz",
+          "tipo": "ZEPA",
+          "codigo": "ES0000500",
+          "distanciaAproxKm": 8.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "palos-de-la-frontera",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Tinto y del Odiel",
+          "tipo": "ZEPA",
+          "codigo": "ES0000501",
+          "distanciaAproxKm": 1.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Golfo de Cádiz",
+          "tipo": "ZEPA",
+          "codigo": "ES0000500",
+          "distanciaAproxKm": 9.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "punta-umbria",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Tinto y del Odiel",
+          "tipo": "ZEPA",
+          "codigo": "ES0000501",
+          "distanciaAproxKm": 0.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Golfo de Cádiz",
+          "tipo": "ZEPA",
+          "codigo": "ES0000500",
+          "distanciaAproxKm": 7.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "foz",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 1.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "viveiro",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 0.8,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "estepona",
+      "areas": [
+        {
+          "nombre": "Fondos marinos de la Bahía de Estepona",
+          "tipo": "ZEC",
+          "codigo": "ES6170036",
+          "distanciaAproxKm": 0.3,
+          "dentro": false
+        },
+        {
+          "nombre": "El Saladillo-Punta de Baños",
+          "tipo": "ZEC",
+          "codigo": "ES6170037",
+          "distanciaAproxKm": 9.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Estrecho Oriental",
+          "tipo": "ZEC",
+          "codigo": "ES6120032",
+          "distanciaAproxKm": 23.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "fuengirola",
+      "areas": [
+        {
+          "nombre": "Bahía de Málaga-Cerro Gordo",
+          "tipo": "ZEPA",
+          "codigo": "ES0000504",
+          "distanciaAproxKm": 18.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "malaga",
+      "areas": [
+        {
+          "nombre": "Bahía de Málaga-Cerro Gordo",
+          "tipo": "ZEPA",
+          "codigo": "ES0000504",
+          "distanciaAproxKm": 6.8,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "manilva",
+      "areas": [
+        {
+          "nombre": "Fondos marinos de la Bahía de Estepona",
+          "tipo": "ZEC",
+          "codigo": "ES6170036",
+          "distanciaAproxKm": 9.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Estrecho Oriental",
+          "tipo": "ZEC",
+          "codigo": "ES6120032",
+          "distanciaAproxKm": 16.5,
+          "dentro": false
+        },
+        {
+          "nombre": "El Saladillo-Punta de Baños",
+          "tipo": "ZEC",
+          "codigo": "ES6170037",
+          "distanciaAproxKm": 17.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "marbella",
+      "areas": [
+        {
+          "nombre": "El Saladillo-Punta de Baños",
+          "tipo": "ZEC",
+          "codigo": "ES6170037",
+          "distanciaAproxKm": 11.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Fondos marinos de la Bahía de Estepona",
+          "tipo": "ZEC",
+          "codigo": "ES6170036",
+          "distanciaAproxKm": 22.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "melilla",
+      "areas": [],
+      "motivo": "ninguna área marina protegida de RAMPE 2025 tiene un vértice a menos de 30 km de este puerto, y el puerto tampoco cae dentro de ninguna. No mirar más lejos es una decisión nuestra, no una ausencia de la fuente."
+    },
+    {
+      "slug": "aguilas",
+      "areas": [
+        {
+          "nombre": "Espacio marino de los Islotes Litorales de Murcia y Almería",
+          "tipo": "ZEPA",
+          "codigo": "ES0000507",
+          "distanciaAproxKm": 1.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Valles submarinos del Escarpe de Mazarrón",
+          "tipo": "ZEC",
+          "codigo": "ES6200048",
+          "distanciaAproxKm": 2.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Fondos marinos Levante Almeriense",
+          "tipo": "ZEC",
+          "codigo": "ES6110010",
+          "distanciaAproxKm": 5.8,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "cabo-de-palos",
+      "areas": [
+        {
+          "nombre": "Espacio marino de Tabarca-Cabo de Palos",
+          "tipo": "ZEPA",
+          "codigo": "ES0000508",
+          "distanciaAproxKm": 0.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de Cabo de Palos e Islas Hormigas",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552487",
+          "distanciaAproxKm": 1.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Valles submarinos del Escarpe de Mazarrón",
+          "tipo": "ZEC",
+          "codigo": "ES6200048",
+          "distanciaAproxKm": 1.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio Marino de Cabo Roig",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ16009",
+          "distanciaAproxKm": 24.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de los Islotes Litorales de Murcia y Almería",
+          "tipo": "ZEPA",
+          "codigo": "ES0000507",
+          "distanciaAproxKm": 27.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "cartagena",
+      "areas": [
+        {
+          "nombre": "Valles submarinos del Escarpe de Mazarrón",
+          "tipo": "ZEC",
+          "codigo": "ES6200048",
+          "distanciaAproxKm": 0.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de los Islotes Litorales de Murcia y Almería",
+          "tipo": "ZEPA",
+          "codigo": "ES0000507",
+          "distanciaAproxKm": 2.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Tabarca-Cabo de Palos",
+          "tipo": "ZEPA",
+          "codigo": "ES0000508",
+          "distanciaAproxKm": 25.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de Cabo de Palos e Islas Hormigas",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552487",
+          "distanciaAproxKm": 28.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "la-manga-del-mar-menor",
+      "areas": [
+        {
+          "nombre": "Espacio marino de Tabarca-Cabo de Palos",
+          "tipo": "ZEPA",
+          "codigo": "ES0000508",
+          "distanciaAproxKm": 0.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de Cabo de Palos e Islas Hormigas",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552487",
+          "distanciaAproxKm": 9.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Valles submarinos del Escarpe de Mazarrón",
+          "tipo": "ZEC",
+          "codigo": "ES6200048",
+          "distanciaAproxKm": 11.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio Marino de Cabo Roig",
+          "tipo": "ZEPA",
+          "codigo": "ESZZ16009",
+          "distanciaAproxKm": 12.8,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "mazarron",
+      "areas": [
+        {
+          "nombre": "Valles submarinos del Escarpe de Mazarrón",
+          "tipo": "ZEC",
+          "codigo": "ES6200048",
+          "distanciaAproxKm": 0.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de los Islotes Litorales de Murcia y Almería",
+          "tipo": "ZEPA",
+          "codigo": "ES0000507",
+          "distanciaAproxKm": 16.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "castropol",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 2.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "gijon",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 8.5,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "alcudia",
+      "areas": [
+        {
+          "nombre": "Espacio marino del norte de Mallorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000520",
+          "distanciaAproxKm": 0.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina del Levante de Mallorca - Cala Rajada",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552488",
+          "distanciaAproxKm": 16.1,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "calvia",
+      "areas": [
+        {
+          "nombre": "Espacio marino del poniente de Mallorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000519",
+          "distanciaAproxKm": 0.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del sur de Mallorca y Cabrera",
+          "tipo": "ZEPA",
+          "codigo": "ES0000518",
+          "distanciaAproxKm": 15.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del norte de Mallorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000520",
+          "distanciaAproxKm": 25.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "campos",
+      "areas": [
+        {
+          "nombre": "Espacio marino del sur de Mallorca y Cabrera",
+          "tipo": "ZEPA",
+          "codigo": "ES0000518",
+          "distanciaAproxKm": 5.5,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "ciutadella-de-menorca",
+      "areas": [
+        {
+          "nombre": "Espacio marino del norte y oeste de Menorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000521",
+          "distanciaAproxKm": 0.0,
+          "dentro": true
+        },
+        {
+          "nombre": "Espacio marino del norte de Mallorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000520",
+          "distanciaAproxKm": 27.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "es-castell",
+      "areas": [
+        {
+          "nombre": "Espacio marino del sureste de Menorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000522",
+          "distanciaAproxKm": 1.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del norte y oeste de Menorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000521",
+          "distanciaAproxKm": 21.6,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "es-mercadal",
+      "areas": [
+        {
+          "nombre": "Espacio marino del norte y oeste de Menorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000521",
+          "distanciaAproxKm": 0.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del sureste de Menorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000522",
+          "distanciaAproxKm": 19.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "felanitx",
+      "areas": [
+        {
+          "nombre": "Espacio marino del sur de Mallorca y Cabrera",
+          "tipo": "ZEPA",
+          "codigo": "ES0000518",
+          "distanciaAproxKm": 19.8,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "formentera",
+      "areas": [
+        {
+          "nombre": "Espacio marino de Formentera y del sur de Ibiza",
+          "tipo": "ZEPA",
+          "codigo": "ES0000515",
+          "distanciaAproxKm": 3.1,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del poniente y norte de Ibiza",
+          "tipo": "ZEPA",
+          "codigo": "ES0000516",
+          "distanciaAproxKm": 17.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Area marina del Cap Martinet",
+          "tipo": "ZEC",
+          "codigo": "ES5310108",
+          "distanciaAproxKm": 21.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del levante de Ibiza",
+          "tipo": "ZEPA",
+          "codigo": "ES0000517",
+          "distanciaAproxKm": 23.0,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "ibiza",
+      "areas": [
+        {
+          "nombre": "Espacio marino de Formentera y del sur de Ibiza",
+          "tipo": "ZEPA",
+          "codigo": "ES0000515",
+          "distanciaAproxKm": 2.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Area marina del Cap Martinet",
+          "tipo": "ZEC",
+          "codigo": "ES5310108",
+          "distanciaAproxKm": 3.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del levante de Ibiza",
+          "tipo": "ZEPA",
+          "codigo": "ES0000517",
+          "distanciaAproxKm": 5.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del poniente y norte de Ibiza",
+          "tipo": "ZEPA",
+          "codigo": "ES0000516",
+          "distanciaAproxKm": 15.1,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "llucmajor",
+      "areas": [
+        {
+          "nombre": "Espacio marino del sur de Mallorca y Cabrera",
+          "tipo": "ZEPA",
+          "codigo": "ES0000518",
+          "distanciaAproxKm": 5.1,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del poniente de Mallorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000519",
+          "distanciaAproxKm": 22.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del norte de Mallorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000520",
+          "distanciaAproxKm": 27.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "mahon",
+      "areas": [
+        {
+          "nombre": "Espacio marino del sureste de Menorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000522",
+          "distanciaAproxKm": 2.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del norte y oeste de Menorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000521",
+          "distanciaAproxKm": 19.0,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "manacor",
+      "areas": [
+        {
+          "nombre": "Espacio marino del norte de Mallorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000520",
+          "distanciaAproxKm": 17.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina del Levante de Mallorca - Cala Rajada",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552488",
+          "distanciaAproxKm": 21.0,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "palma-de-mallorca",
+      "areas": [
+        {
+          "nombre": "Espacio marino del sur de Mallorca y Cabrera",
+          "tipo": "ZEPA",
+          "codigo": "ES0000518",
+          "distanciaAproxKm": 9.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del poniente de Mallorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000519",
+          "distanciaAproxKm": 13.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del norte de Mallorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000520",
+          "distanciaAproxKm": 18.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "pollenca",
+      "areas": [
+        {
+          "nombre": "Espacio marino del norte de Mallorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000520",
+          "distanciaAproxKm": 0.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina del Levante de Mallorca - Cala Rajada",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552488",
+          "distanciaAproxKm": 20.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "sant-antoni-de-portmany",
+      "areas": [
+        {
+          "nombre": "Espacio marino del poniente y norte de Ibiza",
+          "tipo": "ZEPA",
+          "codigo": "ES0000516",
+          "distanciaAproxKm": 0.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Formentera y del sur de Ibiza",
+          "tipo": "ZEPA",
+          "codigo": "ES0000515",
+          "distanciaAproxKm": 13.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Area marina del Cap Martinet",
+          "tipo": "ZEC",
+          "codigo": "ES5310108",
+          "distanciaAproxKm": 17.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del levante de Ibiza",
+          "tipo": "ZEPA",
+          "codigo": "ES0000517",
+          "distanciaAproxKm": 18.1,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "santa-eularia-des-riu",
+      "areas": [
+        {
+          "nombre": "Espacio marino del levante de Ibiza",
+          "tipo": "ZEPA",
+          "codigo": "ES0000517",
+          "distanciaAproxKm": 0.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Area marina del Cap Martinet",
+          "tipo": "ZEC",
+          "codigo": "ES5310108",
+          "distanciaAproxKm": 4.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Formentera y del sur de Ibiza",
+          "tipo": "ZEPA",
+          "codigo": "ES0000515",
+          "distanciaAproxKm": 11.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del poniente y norte de Ibiza",
+          "tipo": "ZEPA",
+          "codigo": "ES0000516",
+          "distanciaAproxKm": 13.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "soller",
+      "areas": [
+        {
+          "nombre": "Espacio marino del norte de Mallorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000520",
+          "distanciaAproxKm": 0.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del poniente de Mallorca",
+          "tipo": "ZEPA",
+          "codigo": "ES0000519",
+          "distanciaAproxKm": 29.1,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "baiona",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 0.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "bueu",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 1.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "cambados",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 0.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "marin",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 10.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "o-grove",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 0.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "poio",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 11.1,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "redondela",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 15.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "sanxenxo",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 2.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "vigo",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 7.6,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "vilagarcia-de-arousa",
+      "areas": [
+        {
+          "nombre": "Corredor migratorio galaico-cantábrico occidental",
+          "tipo": "ZEPA",
+          "codigo": "ES0000554",
+          "distanciaAproxKm": 4.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "castro-urdiales",
+      "areas": [
+        {
+          "nombre": "Espacio marino de la Ría de Mundaka-Cabo de Ogoño",
+          "tipo": "ZEPA",
+          "codigo": "ES0000490",
+          "distanciaAproxKm": 18.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "el-astillero",
+      "areas": [
+        {
+          "nombre": "Espacio marino de los Islotes de Portios-Isla Conejera-Isla de Mouro",
+          "tipo": "ZEPA",
+          "codigo": "ES0000492",
+          "distanciaAproxKm": 8.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "santander",
+      "areas": [
+        {
+          "nombre": "Espacio marino de los Islotes de Portios-Isla Conejera-Isla de Mouro",
+          "tipo": "ZEPA",
+          "codigo": "ES0000492",
+          "distanciaAproxKm": 2.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "santona",
+      "areas": [
+        {
+          "nombre": "Espacio marino de los Islotes de Portios-Isla Conejera-Isla de Mouro",
+          "tipo": "ZEPA",
+          "codigo": "ES0000492",
+          "distanciaAproxKm": 26.0,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "seville",
+      "areas": [],
+      "motivo": "ninguna área marina protegida de RAMPE 2025 tiene un vértice a menos de 30 km de este puerto, y el puerto tampoco cae dentro de ninguna. No mirar más lejos es una decisión nuestra, no una ausencia de la fuente."
+    },
+    {
+      "slug": "donostia",
+      "areas": [],
+      "motivo": "ninguna área marina protegida de RAMPE 2025 tiene un vértice a menos de 30 km de este puerto, y el puerto tampoco cae dentro de ninguna. No mirar más lejos es una decisión nuestra, no una ausencia de la fuente."
+    },
+    {
+      "slug": "getaria",
+      "areas": [],
+      "motivo": "ninguna área marina protegida de RAMPE 2025 tiene un vértice a menos de 30 km de este puerto, y el puerto tampoco cae dentro de ninguna. No mirar más lejos es una decisión nuestra, no una ausencia de la fuente."
+    },
+    {
+      "slug": "calafell",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Baix Llobregat-Garraf",
+          "tipo": "ZEPA",
+          "codigo": "ES0000513",
+          "distanciaAproxKm": 4.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de Masía Blanca",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552489",
+          "distanciaAproxKm": 6.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del Delta de l'Ebre-Illes Columbretes",
+          "tipo": "ZEPA",
+          "codigo": "ES0000512",
+          "distanciaAproxKm": 19.0,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "el-vendrell",
+      "areas": [
+        {
+          "nombre": "Reserva marina de Masía Blanca",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552489",
+          "distanciaAproxKm": 0.1,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del Baix Llobregat-Garraf",
+          "tipo": "ZEPA",
+          "codigo": "ES0000513",
+          "distanciaAproxKm": 8.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del Delta de l'Ebre-Illes Columbretes",
+          "tipo": "ZEPA",
+          "codigo": "ES0000512",
+          "distanciaAproxKm": 12.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "l-ametlla-de-mar",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Delta de l'Ebre-Illes Columbretes",
+          "tipo": "ZEPA",
+          "codigo": "ES0000512",
+          "distanciaAproxKm": 0.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "l-ampolla",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Delta de l'Ebre-Illes Columbretes",
+          "tipo": "ZEPA",
+          "codigo": "ES0000512",
+          "distanciaAproxKm": 7.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "roda-de-bera",
+      "areas": [
+        {
+          "nombre": "Reserva marina de Masía Blanca",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552489",
+          "distanciaAproxKm": 0.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del Delta de l'Ebre-Illes Columbretes",
+          "tipo": "ZEPA",
+          "codigo": "ES0000512",
+          "distanciaAproxKm": 8.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del Baix Llobregat-Garraf",
+          "tipo": "ZEPA",
+          "codigo": "ES0000513",
+          "distanciaAproxKm": 11.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "tarragona",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Delta de l'Ebre-Illes Columbretes",
+          "tipo": "ZEPA",
+          "codigo": "ES0000512",
+          "distanciaAproxKm": 0.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de Masía Blanca",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552489",
+          "distanciaAproxKm": 21.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "torredembarra",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Delta de l'Ebre-Illes Columbretes",
+          "tipo": "ZEPA",
+          "codigo": "ES0000512",
+          "distanciaAproxKm": 0.9,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina de Masía Blanca",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552489",
+          "distanciaAproxKm": 8.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del Baix Llobregat-Garraf",
+          "tipo": "ZEPA",
+          "codigo": "ES0000513",
+          "distanciaAproxKm": 18.6,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "vandellos-i-l-hospitalet-de-l-infant",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Delta de l'Ebre-Illes Columbretes",
+          "tipo": "ZEPA",
+          "codigo": "ES0000512",
+          "distanciaAproxKm": 0.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "adeje",
+      "areas": [
+        {
+          "nombre": "Franja marina Teno - Rasca",
+          "tipo": "ZEC",
+          "codigo": "ES7020017",
+          "distanciaAproxKm": 0.0,
+          "dentro": true
+        },
+        {
+          "nombre": "Sebadales del Sur de Tenerife",
+          "tipo": "ZEC",
+          "codigo": "ES7020116",
+          "distanciaAproxKm": 10.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Cueva marina de San Juan",
+          "tipo": "ZEC",
+          "codigo": "ES7020117",
+          "distanciaAproxKm": 12.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de La Gomera-Teno",
+          "tipo": "ZEPA",
+          "codigo": "ES0000526",
+          "distanciaAproxKm": 16.7,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "alajero",
+      "areas": [
+        {
+          "nombre": "Franja marina Santiago - Valle Gran Rey",
+          "tipo": "ZEC",
+          "codigo": "ES7020123",
+          "distanciaAproxKm": 0.1,
+          "dentro": true
+        },
+        {
+          "nombre": "Espacio marino de La Gomera-Teno",
+          "tipo": "ZEPA",
+          "codigo": "ES0000526",
+          "distanciaAproxKm": 0.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Costa de Los Órganos",
+          "tipo": "ZEC",
+          "codigo": "ES7020125",
+          "distanciaAproxKm": 20.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "arona",
+      "areas": [
+        {
+          "nombre": "Franja marina Teno - Rasca",
+          "tipo": "ZEC",
+          "codigo": "ES7020017",
+          "distanciaAproxKm": 0.0,
+          "dentro": true
+        },
+        {
+          "nombre": "Sebadales del Sur de Tenerife",
+          "tipo": "ZEC",
+          "codigo": "ES7020116",
+          "distanciaAproxKm": 6.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de La Gomera-Teno",
+          "tipo": "ZEPA",
+          "codigo": "ES0000526",
+          "distanciaAproxKm": 15.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Cueva marina de San Juan",
+          "tipo": "ZEC",
+          "codigo": "ES7020117",
+          "distanciaAproxKm": 16.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "candelaria",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Roque de la Playa",
+          "tipo": "ZEPA",
+          "codigo": "ES0000528",
+          "distanciaAproxKm": 14.1,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadal de San Andrés",
+          "tipo": "ZEC",
+          "codigo": "ES7020120",
+          "distanciaAproxKm": 20.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Costa de San Juan de la Rambla",
+          "tipo": "ZEC",
+          "codigo": "ES7020126",
+          "distanciaAproxKm": 22.9,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de los Acantilados de Santo Domingo y Roque de Garachico",
+          "tipo": "ZEPA",
+          "codigo": "ES0000527",
+          "distanciaAproxKm": 26.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Antequera",
+          "tipo": "ZEC",
+          "codigo": "ES7020128",
+          "distanciaAproxKm": 27.8,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "el-pinar-de-el-hierro",
+      "areas": [
+        {
+          "nombre": "Reserva marina de la Restinga - Mar de las Calmas",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552481",
+          "distanciaAproxKm": 0.0,
+          "dentro": true
+        },
+        {
+          "nombre": "Mar de Las Calmas",
+          "tipo": "ZEC",
+          "codigo": "ES7020057",
+          "distanciaAproxKm": 0.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de la zona occidental de El Hierro",
+          "tipo": "ZEPA",
+          "codigo": "ES0000523",
+          "distanciaAproxKm": 7.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de los Roques de Salmor",
+          "tipo": "ZEPA",
+          "codigo": "ES0000524",
+          "distanciaAproxKm": 19.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "el-rosario",
+      "areas": [
+        {
+          "nombre": "Sebadal de San Andrés",
+          "tipo": "ZEC",
+          "codigo": "ES7020120",
+          "distanciaAproxKm": 13.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del Roque de la Playa",
+          "tipo": "ZEPA",
+          "codigo": "ES0000528",
+          "distanciaAproxKm": 15.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Antequera",
+          "tipo": "ZEC",
+          "codigo": "ES7020128",
+          "distanciaAproxKm": 21.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Anaga",
+          "tipo": "ZEPA",
+          "codigo": "ES0000529",
+          "distanciaAproxKm": 25.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Costa de San Juan de la Rambla",
+          "tipo": "ZEC",
+          "codigo": "ES7020126",
+          "distanciaAproxKm": 26.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "fasnia",
+      "areas": [
+        {
+          "nombre": "Sebadales del Sur de Tenerife",
+          "tipo": "ZEC",
+          "codigo": "ES7020116",
+          "distanciaAproxKm": 22.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del Roque de la Playa",
+          "tipo": "ZEPA",
+          "codigo": "ES0000528",
+          "distanciaAproxKm": 24.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Costa de San Juan de la Rambla",
+          "tipo": "ZEC",
+          "codigo": "ES7020126",
+          "distanciaAproxKm": 27.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "garachico",
+      "areas": [
+        {
+          "nombre": "Espacio marino de los Acantilados de Santo Domingo y Roque de Garachico",
+          "tipo": "ZEPA",
+          "codigo": "ES0000527",
+          "distanciaAproxKm": 0.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Costa de San Juan de la Rambla",
+          "tipo": "ZEC",
+          "codigo": "ES7020126",
+          "distanciaAproxKm": 8.5,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de La Gomera-Teno",
+          "tipo": "ZEPA",
+          "codigo": "ES0000526",
+          "distanciaAproxKm": 9.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Franja marina Teno - Rasca",
+          "tipo": "ZEC",
+          "codigo": "ES7020017",
+          "distanciaAproxKm": 12.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Cueva marina de San Juan",
+          "tipo": "ZEC",
+          "codigo": "ES7020117",
+          "distanciaAproxKm": 22.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del Roque de la Playa",
+          "tipo": "ZEPA",
+          "codigo": "ES0000528",
+          "distanciaAproxKm": 26.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "guia-de-isora",
+      "areas": [
+        {
+          "nombre": "Franja marina Teno - Rasca",
+          "tipo": "ZEC",
+          "codigo": "ES7020017",
+          "distanciaAproxKm": 0.0,
+          "dentro": true
+        },
+        {
+          "nombre": "Cueva marina de San Juan",
+          "tipo": "ZEC",
+          "codigo": "ES7020117",
+          "distanciaAproxKm": 1.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de La Gomera-Teno",
+          "tipo": "ZEPA",
+          "codigo": "ES0000526",
+          "distanciaAproxKm": 5.9,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de los Acantilados de Santo Domingo y Roque de Garachico",
+          "tipo": "ZEPA",
+          "codigo": "ES0000527",
+          "distanciaAproxKm": 21.8,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales del Sur de Tenerife",
+          "tipo": "ZEC",
+          "codigo": "ES7020116",
+          "distanciaAproxKm": 24.0,
+          "dentro": false
+        },
+        {
+          "nombre": "Costa de San Juan de la Rambla",
+          "tipo": "ZEC",
+          "codigo": "ES7020126",
+          "distanciaAproxKm": 28.2,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "san-sebastian-de-la-gomera",
+      "areas": [
+        {
+          "nombre": "Espacio marino de La Gomera-Teno",
+          "tipo": "ZEPA",
+          "codigo": "ES0000526",
+          "distanciaAproxKm": 1.2,
+          "dentro": false
+        },
+        {
+          "nombre": "Franja marina Santiago - Valle Gran Rey",
+          "tipo": "ZEC",
+          "codigo": "ES7020123",
+          "distanciaAproxKm": 10.1,
+          "dentro": false
+        },
+        {
+          "nombre": "Costa de Los Órganos",
+          "tipo": "ZEC",
+          "codigo": "ES7020125",
+          "distanciaAproxKm": 18.7,
+          "dentro": false
+        },
+        {
+          "nombre": "Franja marina Teno - Rasca",
+          "tipo": "ZEC",
+          "codigo": "ES7020017",
+          "distanciaAproxKm": 25.5,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "santa-cruz-de-tenerife",
+      "areas": [
+        {
+          "nombre": "Sebadal de San Andrés",
+          "tipo": "ZEC",
+          "codigo": "ES7020120",
+          "distanciaAproxKm": 2.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Sebadales de Antequera",
+          "tipo": "ZEC",
+          "codigo": "ES7020128",
+          "distanciaAproxKm": 9.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino de Anaga",
+          "tipo": "ZEPA",
+          "codigo": "ES0000529",
+          "distanciaAproxKm": 13.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del Roque de la Playa",
+          "tipo": "ZEPA",
+          "codigo": "ES0000528",
+          "distanciaAproxKm": 23.6,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "tazacorte",
+      "areas": [
+        {
+          "nombre": "Franja marina de Fuencaliente",
+          "tipo": "ZEC",
+          "codigo": "ES7020122",
+          "distanciaAproxKm": 0.1,
+          "dentro": false
+        },
+        {
+          "nombre": "Espacio marino del norte de La Palma",
+          "tipo": "ZEPA",
+          "codigo": "ES0000525",
+          "distanciaAproxKm": 7.3,
+          "dentro": false
+        },
+        {
+          "nombre": "Reserva marina Isla de La Palma",
+          "tipo": "RESERVA MARINA",
+          "codigo": "555552482",
+          "distanciaAproxKm": 8.4,
+          "dentro": false
+        },
+        {
+          "nombre": "Costa de Garafía",
+          "tipo": "ZEC",
+          "codigo": "ES7020124",
+          "distanciaAproxKm": 20.3,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "alboraya",
+      "areas": [],
+      "motivo": "ninguna área marina protegida de RAMPE 2025 tiene un vértice a menos de 30 km de este puerto, y el puerto tampoco cae dentro de ninguna. No mirar más lejos es una decisión nuestra, no una ausencia de la fuente."
+    },
+    {
+      "slug": "canet-d-en-berenguer",
+      "areas": [
+        {
+          "nombre": "Espacio marino del Delta de l'Ebre-Illes Columbretes",
+          "tipo": "ZEPA",
+          "codigo": "ES0000512",
+          "distanciaAproxKm": 28.6,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "gandia",
+      "areas": [
+        {
+          "nombre": "L'Almadrava",
+          "tipo": "ZEPA",
+          "codigo": "ES5212005",
+          "distanciaAproxKm": 17.6,
+          "dentro": false
+        },
+        {
+          "nombre": "Plataforma-talud marinos del Cabo de la Nao",
+          "tipo": "ZEPA",
+          "codigo": "ES0000510",
+          "distanciaAproxKm": 27.9,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "oliva",
+      "areas": [
+        {
+          "nombre": "L'Almadrava",
+          "tipo": "ZEPA",
+          "codigo": "ES5212005",
+          "distanciaAproxKm": 9.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "sagunto",
+      "areas": [],
+      "motivo": "ninguna área marina protegida de RAMPE 2025 tiene un vértice a menos de 30 km de este puerto, y el puerto tampoco cae dentro de ninguna. No mirar más lejos es una decisión nuestra, no una ausencia de la fuente."
+    },
+    {
+      "slug": "silla",
+      "areas": [],
+      "motivo": "ninguna área marina protegida de RAMPE 2025 tiene un vértice a menos de 30 km de este puerto, y el puerto tampoco cae dentro de ninguna. No mirar más lejos es una decisión nuestra, no una ausencia de la fuente."
+    },
+    {
+      "slug": "sueca",
+      "areas": [
+        {
+          "nombre": "Plataforma-talud marinos del Cabo de la Nao",
+          "tipo": "ZEPA",
+          "codigo": "ES0000510",
+          "distanciaAproxKm": 22.4,
+          "dentro": false
+        }
+      ],
+      "motivo": null
+    },
+    {
+      "slug": "valencia",
+      "areas": [],
+      "motivo": "ninguna área marina protegida de RAMPE 2025 tiene un vértice a menos de 30 km de este puerto, y el puerto tampoco cae dentro de ninguna. No mirar más lejos es una decisión nuestra, no una ausencia de la fuente."
+    }
+  ]
+}
