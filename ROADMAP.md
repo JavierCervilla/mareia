@@ -113,6 +113,23 @@
       entradas mudas y el último clic antes de la ficha se daba a ciegas—, y el contrato del API
       explica los dos `null` de `hw_time_err_p95_min` con su motivo y su cifra (118 sin observación,
       13 micromareales medidos), con gates que atan el **significado** y no la presencia
+- [x] T-19 · **Tallas mínimas por caladero, dichas como las dice la norma.** La página de puerto
+      publica las **118** tallas del RD 560/1995 (texto consolidado `BOE-A-1995-8639`): **53** del
+      Anexo I, **34** del II y **31** del III, con la fecha de la redacción en vigor, el día en que
+      una máquina comprobó la vigencia y el enlace ELI. Los **153** puertos declaran su caladero
+      (**47** cantábrico-noroeste-y-golfo-de-Cádiz · **80** mediterráneo · **26** canario), y doce se
+      curan a mano con su motivo publicado porque Cádiz es la única provincia que cruza el límite
+      entre dos caladeros. El parser selecciona la **versión en vigor** por `fecha_vigencia` y aborta
+      si el bloque no trae ninguna: leer el bloque entero mezclaría las tres redacciones apiladas y
+      publicaría en el caladero canario seis cifras derogadas, **cinco del lado que multa**. `talla`
+      es una **unión cerrada de cinco clases** —17 de las 118 no son un entero de centímetros— y se
+      publican las cinco como lo que son, incluido el `1 1` de la boga, que **no se corrige**. Las
+      **9** especies con excepción llevan la nota **entera y pegada a la cifra**, no en un pie: la
+      lubina son 36 cm salvo en las divisiones 8a/8b del CIEM —los puertos cantábricos de aquí—,
+      donde son 44. Entra por el contrato `AppModule` como módulo propio (`ModuleId` se amplía a
+      cuatro), en `static` y con **cero JavaScript**; ver `docs/adr/ADR-03`, hermano de ADR-01 para
+      el dato que no caduca pero se deroga. G2 vigila la vigencia a diario con **tres desenlaces**
+      (verde escribe el sello, rojo rompe CI, ámbar no toca la fecha y la página degrada sola)
 - [ ] T-14 · Metodología pública + QC navegable + dataset con su licencia por puerto declarada
       (el reparto real ya publicado en T-14A) + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario
