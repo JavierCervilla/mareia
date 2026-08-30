@@ -1,0 +1,126 @@
+name: Vigencia de la normativa (G2)
+
+# El dato que este workflow vigila no caduca en horas como la meteo: **se deroga**. El RD 560/1995
+# lleva vivo treinta años y en 2025 le movieron seis tallas canarias de golpe; cinco hacia arriba,
+# o sea que quien se hubiera fiado de la cifra vieja se habría quedado un ejemplar por el que le
+# pueden sancionar. Un dataset commiteado no se entera solo de eso, así que alguien tiene que
+# preguntárselo al BOE todos los días, y ese alguien es este job.
+#
+# **Va ANTES del rebuild diario** (04:20 UTC): primero se comprueba que lo que publicamos sigue
+# siendo lo que dice la norma, y sólo después se reconstruye el sitio con ello.
+#
+# Tres desenlaces y tres colores, que es el diseño entero del gate:
+#
+#   * verde  — sigue en vigor y nada ha cambiado. Se escribe `verificadoEn` en el dataset y se
+#              commitea. **Es el único sitio desde el que se escribe esa fecha**: tecleada a mano
+#              no diría nada, porque lo que afirma es que alguien lo comprobó ese día.
+#   * ROJO   — la norma está derogada o el texto consolidado ha cambiado. El portal está publicando
+#              cifras que ya no son las de la norma: hace falta regenerar el dataset y mirar qué se
+#              movió. Además se deja una acción crítica en el dashboard del enjambre.
+#   * ámbar  — no se ha podido preguntar (red, BOE caído). `verificadoEn` **no se toca**, el sello
+#              envejece y la página degrada sola. Confundir esto con el caso anterior significa
+#              romper el despliegue cada vez que el BOE tenga un mal día, que es como se consigue
+#              que un gate acabe desactivado.
+
+on:
+  schedule:
+    # 03:50 UTC, media hora antes del rebuild diario: si la fuente ha cambiado, se sabe antes de
+    # reconstruir el sitio con el dataset viejo.
+    - cron: "50 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: normativa-vigencia
+  cancel-in-progress: false
+
+jobs:
+  vigencia:
+    name: ¿El RD 560/1995 sigue diciendo lo que publicamos?
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: ${{ github.workspace }}/data/pipeline
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: data/pipeline/requirements.txt
+
+      - run: pip install --requirement data/pipeline/requirements.txt
+
+      - name: Preguntar al BOE
+        id: vigencia
+        working-directory: data/pipeline
+        run: |
+          set +e
+          python run.py verificar-normativa 2>&1 | tee /tmp/vigencia.log
+          codigo=${PIPESTATUS[0]}
+          set -e
+          echo "codigo=$codigo" >> "$GITHUB_OUTPUT"
+          # El log entero viaja al resumen del job: quien lo abra tiene que ver QUÉ cambió sin
+          # tener que volver a correr nada.
+          {
+            echo '### Verificación de vigencia'
+            echo '```'
+            cat /tmp/vigencia.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$codigo" = "2" ]; then
+            echo "::warning::No se ha podido consultar el BOE. verificadoEn NO se ha tocado: el sello envejece y la sección de normativa degradará sola. Esto NO rompe el despliegue a propósito."
+          fi
+          # Ámbar (2) no es un fallo del job; rojo (1) sí. Cualquier otro código también: un
+          # comportamiento que no habíamos previsto se mira, no se ignora.
+          [ "$codigo" = "0" ] || [ "$codigo" = "2" ]
+
+      - name: Commitear el sello de verificación
+        if: steps.vigencia.outputs.codigo == '0'
+        run: |
+          set -eu
+          if git diff --quiet -- data/normativa/tallas-minimas.json; then
+            echo "El sello ya era el de hoy; nada que commitear."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/normativa/tallas-minimas.json
+          # `[skip ci]`: este commit sólo mueve una fecha que el propio gate acaba de comprobar;
+          # relanzar la suite entera por él no comprueba nada nuevo.
+          git commit -m "datos(normativa): verificada la vigencia del RD 560/1995 [skip ci]"
+          git push
+
+      - name: Avisar al enjambre de que la fuente ha cambiado
+        # Sólo en el camino ROJO. El job ya está en rojo por sí mismo: esto es el aviso al humano
+        # que tiene que decidir, y por eso es `severity critical` y no un comentario en un log.
+        if: failure() && steps.vigencia.outputs.codigo == '1'
+        env:
+          DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
+          AGENT_API_KEY: ${{ secrets.AGENT_API_KEY }}
+          PROJECT_ID: ${{ secrets.DASHBOARD_PROJECT_ID }}
+        run: |
+          set -u
+          if [ -z "${DASHBOARD_URL:-}" ] || [ -z "${AGENT_API_KEY:-}" ] || [ -z "${PROJECT_ID:-}" ]; then
+            echo "::warning::Sin DASHBOARD_URL/AGENT_API_KEY/DASHBOARD_PROJECT_ID no se puede dejar la acción crítica en el dashboard. El aviso se queda en este job, que ya está en rojo."
+            exit 0
+          fi
+          detalle="$(head -c 1500 /tmp/vigencia.log)"
+          # Contrato real de la plataforma (skill agentic-dashboard, `action-add`): POST
+          # /api/actions con Bearer y los campos title/detail/kind/severity/actor. Comprobado
+          # contra el script del enjambre, no supuesto: con `x-api-key` la escritura se rechaza.
+          jq -n --arg p "$PROJECT_ID" --arg d "$detalle" '{
+            projectId: $p,
+            actor: "verificador",
+            kind: "decision",
+            severity: "critical",
+            title: "El RD 560/1995 ha cambiado: las tallas mínimas publicadas ya no son las de la norma",
+            detail: ("El gate diario de vigencia (G2) ha encontrado una diferencia entre el dataset publicado y el texto consolidado del BOE. Hay que regenerar data/normativa/tallas-minimas.json con `python run.py normativa` y revisar qué cifras se movieron ANTES de volver a desplegar.\n\n" + $d)
+          }' > /tmp/accion.json
+          curl -sSf -X POST -H "Authorization: Bearer $AGENT_API_KEY" \
+            -H 'Content-Type: application/json' \
+            --data @/tmp/accion.json "$DASHBOARD_URL/api/actions" > /dev/null \
+            || echo "::warning::No se pudo registrar la acción en el dashboard."
