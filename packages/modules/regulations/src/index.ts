@@ -22,6 +22,7 @@ export {
 } from "./module.ts";
 
 export {
+  avisoDeVigencia,
   AVISO_SIN_RED,
   COLUMNA_ESPECIE,
   COLUMNA_LITERAL,
@@ -32,10 +33,21 @@ export {
   ROTULO_NOMBRE_LOCAL,
   ROTULO_NOTAS,
   ROTULO_PROCEDENCIA,
+  rotuloDeVigencia,
   SIN_TALLA_FIJADA,
   TALLA_ILEGIBLE,
   tituloDeLaSeccion,
 } from "./textos.ts";
+
+// El sello de vigencia y su degradación: los umbrales son del módulo, no de la página (ver
+// `vigencia.ts`), igual que las ventanas de frescura de la meteo.
+export {
+  DIAS_SELLO_CORRIENTE,
+  DIAS_SELLO_RANCIO,
+  diasDesdeLaComprobacion,
+  estadoDeVigencia,
+} from "./vigencia.ts";
+export type { EstadoDeVigencia } from "./vigencia.ts";
 
 export type {
   Caladero,

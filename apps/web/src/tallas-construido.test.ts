@@ -18,10 +18,18 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { ID_SECCION_TALLAS } from "@mareia/module-regulations";
+import {
+  avisoDeVigencia,
+  DIAS_SELLO_CORRIENTE,
+  DIAS_SELLO_RANCIO,
+  estadoDeVigencia,
+  ID_SECCION_TALLAS,
+  rotuloDeVigencia,
+} from "@mareia/module-regulations";
 import type { Caladero } from "@mareia/module-regulations";
 
 import { cargarPuertos } from "./datos/catalogo.ts";
+import { FECHA_DE_BUILD } from "./datos/fecha-build.ts";
 import { cargarTablaDeTallas } from "./modulos/normativa.ts";
 import { claveDeFila } from "@mareia/module-regulations";
 import { rutaPuerto } from "./rutas.ts";
@@ -221,7 +229,12 @@ test("cada página publica la fecha del texto, la de verificación y el enlace E
     // Las tres son la mitad del valor de la sección: sin ellas, una tabla de cifras legales no se
     // puede fechar ni contrastar.
     assert.match(leido, /2 de noviembre de 2025/u, `${slug}: falta la fecha de la redacción`);
-    assert.match(leido, /Vigencia comprobada contra el BOE el/u, `${slug}: falta el sello de G2`);
+    // El rótulo del sello es el que le toca a su estado, no una cadena fija: si G2 llevara días
+    // sin escribir, la página no puede seguir diciendo «comprobada» (ver el gate de abajo).
+    assert.ok(
+      leido.includes(rotuloDeVigencia(estadoDeVigencia(fuente.verificadoEn, FECHA_DE_BUILD))),
+      `${slug}: falta el sello de G2`,
+    );
     assert.ok(seccion.includes(`href="${fuente.eli}"`), `${slug}: falta el enlace ELI`);
     assert.ok(leido.includes(caladero.normaModificadora), `${slug}: falta la norma modificadora`);
     assert.ok(leido.includes(fuente.aviso), `${slug}: falta el aviso de autenticidad`);
@@ -242,6 +255,48 @@ test("la sección se lee sin cobertura y lo dice: el aviso duro va horneado, no 
     assert.ok(!/<script/iu.test(seccion), `${slug}: la sección trae JavaScript y es SSG`);
     assert.ok(!/\son[a-z]+=/iu.test(seccion), `${slug}: la sección trae un manejador en línea`);
   }
+});
+
+test("el sello de vigencia degrada EN LO PUBLICADO, y no solo en una función", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  // EL GATE DE H-1. El workflow de G2 promete dos veces que en su rama ámbar «la sección degradará
+  // sola»; hasta T-19 no degradaba nada y el único gate que miraba `verificadoEn` comprobaba su
+  // FORMATO (`/^\d{4}-\d{2}-\d{2}$/`), que es lo que un sello de 2019 pasa sin despeinarse. Este
+  // mide el artefacto: qué estado publican las 153 páginas y si dicen lo que ese estado obliga a
+  // decir. Que los tres estados se lean distinto lo prueban los tests del módulo; que un sello
+  // atrasado cambie la página construida, el recorrido adversario A2.
+  const { fuente } = await cargarTablaDeTallas({
+    slug: "vigo",
+    nombre: "Vigo",
+    fechaIso: FECHA_DE_BUILD,
+    timezone: "Europe/Madrid",
+  });
+  const esperado = estadoDeVigencia(fuente.verificadoEn, FECHA_DE_BUILD);
+  const aviso = avisoDeVigencia(esperado);
+  for (const { slug, seccion } of await paginasConTabla()) {
+    const publicado = /data-vigencia="([a-z_]+)"/u.exec(seccion)?.[1];
+    assert.equal(
+      publicado,
+      esperado,
+      `${slug}: publica el estado de vigencia ${publicado} y al sello ${fuente.verificadoEn} le ` +
+        `toca ${esperado} el día que se construyó (${FECHA_DE_BUILD})`,
+    );
+    const leido = textoDe(seccion);
+    if (aviso === null) {
+      // Y al revés: con el sello recién escrito no puede haber un aviso de sello viejo. Un aviso
+      // permanente se aprende a ignorar el primer día.
+      assert.ok(!/que no se comprueba que esta norma siga en vigor/u.test(leido), `${slug}: avisa de más`);
+    } else {
+      assert.ok(leido.includes(textoDe(aviso)), `${slug}: el sello está ${esperado} y no lo dice`);
+    }
+  }
+  t.diagnostic(
+    `sello ${fuente.verificadoEn} · build ${FECHA_DE_BUILD} · estado ${esperado} ` +
+      `(umbrales ${DIAS_SELLO_CORRIENTE}/${DIAS_SELLO_RANCIO} días)`,
+  );
 });
 
 test("cero juice sobre una cifra legal: la hoja de la sección no anima ni destaca nada", (t) => {

@@ -76,9 +76,10 @@ function sinFechas(seccion: string): string {
 test("A2 · una vigencia comprobada por última vez en 2019 tiene que leerse distinta", async ({
   qa,
 }) => {
-  // TRINQUETE · Hallazgo ABIERTO (bundle 98297c6c420d). Quítalo el día en que un sello sin
-  // comprobar cambie lo que se publica; el recorrido se queda como gate permanente.
-  test.fail();
+  // TRINQUETE · Hallazgo ARREGLADO (bundle 98297c6c420d). La cura vive en
+  // `packages/modules/regulations/src/vigencia.ts`: dos umbrales con nombre —7 días y 60— y tres
+  // estados, que la sección publica en `data-vigencia` y acompaña de un aviso que sólo existe
+  // cuando hay algo que decir. Este recorrido se queda como gate permanente: no se borra.
 
   qa.step("la sección tal y como se publica hoy, con el sello recién escrito por G2");
   const publicada = seccionPublicada();

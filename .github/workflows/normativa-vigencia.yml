@@ -21,6 +21,12 @@ name: Vigencia de la normativa (G2)
 #              envejece y la página degrada sola. Confundir esto con el caso anterior significa
 #              romper el despliegue cada vez que el BOE tenga un mal día, que es como se consigue
 #              que un gate acabe desactivado.
+#
+# «La página degrada sola» tiene dirección, y hasta T-19 no la tenía: los umbrales y los tres
+# estados están en `packages/modules/regulations/src/vigencia.ts` (7 días y 60), la sección los
+# publica en `data-vigencia` y el gate que lo mide sobre el `dist/` está en
+# `apps/web/src/tallas-construido.test.ts`. El pase adversario cazó esta frase siendo falsa (H-1):
+# con el sello puesto a 2019 la sección publicada era idéntica salvo la cadena de la fecha.
 
 on:
   schedule:

@@ -12,6 +12,9 @@
  * segunda versión de algo que ya viene firmado con el dato, y las dos se desincronizarían.
  */
 
+import { DIAS_SELLO_CORRIENTE, DIAS_SELLO_RANCIO } from "./vigencia.ts";
+import type { EstadoDeVigencia } from "./vigencia.ts";
+
 /** Rótulo de la sección. El caladero se nombra porque la tabla que aplica depende de él. */
 export function tituloDeLaSeccion(nombreDelCaladero: string): string {
   return `Tallas mínimas del caladero ${nombreDelCaladero}`;
@@ -31,6 +34,58 @@ export const QUE_ES_ESTO =
 
 /** Rótulo del bloque que dice de qué redacción concreta salen las cifras. */
 export const ROTULO_PROCEDENCIA = "De dónde salen estas cifras";
+
+/**
+ * Cómo se rotula la fila del sello de vigencia, **según el estado en que esté**.
+ *
+ * No es un adorno: mientras el gate diario escribe, la página puede decir «comprobada»; cuando
+ * lleva días sin escribir, esa palabra es una afirmación que no se sostiene y lo único que la fila
+ * puede decir es **cuándo fue la última vez**. Cambiar el rótulo es la mitad barata de la
+ * degradación; la otra mitad es `avisoDeVigencia`, que dice lo que eso significa para quien lee.
+ */
+export function rotuloDeVigencia(estado: EstadoDeVigencia): string {
+  return estado === "comprobada"
+    ? "Vigencia comprobada contra el BOE el"
+    : "Última vez que se comprobó la vigencia contra el BOE";
+}
+
+/**
+ * Lo que la sección dice de más cuando el sello ha envejecido, y `null` cuando no hay nada que
+ * decir.
+ *
+ * Los dos avisos se escriben con una **cota inferior** («hace más de N días») a propósito: este
+ * HTML es estático y se queda en el teléfono de quien lo abra, así que una cuenta exacta se
+ * volvería mentira al día siguiente y una cota inferior sigue siendo verdad. Los umbrales se
+ * interpolan desde `vigencia.ts` en vez de escribirse a mano para que el texto no pueda quedarse
+ * diciendo «una semana» el día que alguien mueva el número.
+ *
+ * El `switch` no tiene `default` y cierra con `never`, igual que el de las cinco clases de talla:
+ * un cuarto estado de vigencia no compilará hasta que alguien decida qué le dice a quien lee.
+ */
+export function avisoDeVigencia(estado: EstadoDeVigencia): string | null {
+  switch (estado) {
+    case "comprobada":
+      return null;
+    case "envejecida":
+      return (
+        `Hace más de ${DIAS_SELLO_CORRIENTE} días que no se comprueba que esta norma siga en ` +
+        "vigor. La comprobación contra el BOE es diaria, así que esto significa que no está " +
+        "corriendo: las cifras de abajo son las de la última ingesta y pueden haber cambiado sin " +
+        "que esta página se entere."
+      );
+    case "sin_comprobar":
+      return (
+        `Hace más de ${DIAS_SELLO_RANCIO} días que no se comprueba que esta norma siga en vigor, ` +
+        "así que esta página no puede decir que estas cifras sean las que están en vigor hoy. " +
+        "Antes de quedarte una pieza, contrasta la talla con el texto consolidado del BOE: es el " +
+        "único texto auténtico y aquí abajo está el enlace."
+      );
+    default: {
+      const imposible: never = estado;
+      throw new Error(`estado de vigencia no contemplado: ${JSON.stringify(imposible)}`);
+    }
+  }
+}
 
 /**
  * El aviso de lectura sin red, y es **duro a propósito**.
