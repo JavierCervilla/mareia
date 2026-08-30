@@ -72,6 +72,12 @@ jobs:
           # Se leen los build args que ya hay y se sustituye SOLO la línea de BUILD_DATE: mandar el
           # campo entero a ciegas borraría `SITE_URL` o cualquier otro que alguien haya puesto en el
           # panel, y el estropicio no se notaría hasta el siguiente despliegue.
+          # `application.one`, NO `application.byId`: la tabla de la skill documenta `byId` y ese
+          # endpoint **no existe** — devuelve 404. Medido contra el panel real el 2026-08-29 al
+          # desplegar el API. Es la TERCERA vez que esa tabla engaña en un día (antes fue PATCH por
+          # POST), y esta vez engañó también al verificador, que me corrigió desde `one` hacia `byId`
+          # razonando desde el documento. Con `byId` este workflow habría muerto en el primer curl.
+          #
           # ANTES de tocar nada se guarda la ficha entera. `application.update` se asume
           # **parcial** —mandamos solo `{applicationId, buildArgs}`— y esa asunción NO está probada
           # contra el panel real. Si fuera un **reemplazo**, esta llamada dejaría la aplicación viva
@@ -81,7 +87,7 @@ jobs:
           # lo que se envió, que es el peor sitio donde mirar. Así que se guarda la ficha y se
           # compara después campo a campo.
           antes="$(curl -sSf -H "x-api-key: $DOKPLOY_API_KEY" \
-            "$DOKPLOY_API_URL/api/application.byId?applicationId=$DOKPLOY_WEB_APP_ID")"
+            "$DOKPLOY_API_URL/api/application.one?applicationId=$DOKPLOY_WEB_APP_ID")"
           actuales="$(printf '%s' "$antes" | jq -r '.buildArgs // ""')"
           nuevos="$(printf '%s\n' "$actuales" | grep -v '^BUILD_DATE=' || true)"
           nuevos="$(printf '%s\nBUILD_DATE=%s\n' "$nuevos" "$HOY" | sed '/^$/d')"
@@ -100,7 +106,7 @@ jobs:
           # en vez de desplegar la fecha de ayer
           # con toda la pinta de haber funcionado.
           despues="$(curl -sSf -H "x-api-key: $DOKPLOY_API_KEY" \
-            "$DOKPLOY_API_URL/api/application.byId?applicationId=$DOKPLOY_WEB_APP_ID")"
+            "$DOKPLOY_API_URL/api/application.one?applicationId=$DOKPLOY_WEB_APP_ID")"
 
           # (a) Lo que queríamos escribir, se escribió.
           #
