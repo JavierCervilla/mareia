@@ -1,0 +1,10 @@
+{"at":10,"kind":"step","text":"abrir el catálogo entero"}
+{"at":33,"kind":"navigation","text":"http://127.0.0.1:4321/pesca/especies/"}
+{"at":12688,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_CONNECTION_RESET"}
+{"at":12691,"kind":"console","text":"[error] Failed to load resource: net::ERR_CONNECTION_RESET"}
+{"at":12723,"kind":"step","text":"pulsar el filtro «Cantábrico y noroeste y golfo de Cádiz», que es a donde lleva el enlace de un puerto"}
+{"at":12816,"kind":"navigation","text":"http://127.0.0.1:4321/pesca/especies/#cal-cantabrico-noroeste-y-golfo-de-cadiz"}
+{"at":12893,"kind":"step","text":"pulsar el filtro «Mediterráneo», que es a donde lleva el enlace de un puerto"}
+{"at":12944,"kind":"navigation","text":"http://127.0.0.1:4321/pesca/especies/#cal-mediterraneo"}
+{"at":12994,"kind":"step","text":"pulsar el filtro «Canario», que es a donde lleva el enlace de un puerto"}
+{"at":13024,"kind":"navigation","text":"http://127.0.0.1:4321/pesca/especies/#cal-canario"}

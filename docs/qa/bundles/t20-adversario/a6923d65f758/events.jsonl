@@ -1,0 +1,6 @@
+{"at":4,"kind":"step","text":"abrir el catálogo tal y como se publica"}
+{"at":23,"kind":"navigation","text":"http://127.0.0.1:4321/pesca/especies/"}
+{"at":12577,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_CONNECTION_RESET"}
+{"at":12577,"kind":"console","text":"[error] Failed to load resource: net::ERR_CONNECTION_RESET"}
+{"at":12647,"kind":"step","text":"separar las filas a las que WoRMS nunca vio el nombre que escribe la norma"}
+{"at":12655,"kind":"step","text":"21 filas con una consulta distinta: ¿qué dicen de WoRMS?"}

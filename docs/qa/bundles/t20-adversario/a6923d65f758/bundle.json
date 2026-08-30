@@ -1,0 +1,59 @@
+{
+  "snapshotId": "a6923d65f758",
+  "runId": "run-2026-08-30T21-03-16-426Z",
+  "test": {
+    "title": "adversarial/a4-worms-no-acepta-el-nombre-que-la-fila-le-atribuye.spec.ts > A4 · sólo dice «WoRMS acepta el nombre de la norma» la fila cuyo nombre se preguntó",
+    "file": "/home/user/mareia/tests/e2e/journeys/adversarial/a4-worms-no-acepta-el-nombre-que-la-fila-le-atribuye.spec.ts",
+    "line": 59,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 12732,
+  "urlAtFailure": "http://127.0.0.1:4321/pesca/especies/",
+  "error": {
+    "message": "Error: filas que publican «WoRMS acepta el nombre de la norma» sobre un nombre que WoRMS nunca vio porque fuimos nosotros quienes decidimos preguntarle otro\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  -  1\n+ Received  + 22\n\n- Array []\n+ Array [\n+   \"«Alosa spp» (a WoRMS se le preguntó «alosa»)\",\n+   \"«Cáncer pagurus» (a WoRMS se le preguntó «cancer pagurus»)\",\n+   \"«Diplodus spp» (a WoRMS se le preguntó «diplodus»)\",\n+   \"«Epinephelus spp» (a WoRMS se le preguntó «epinephelus»)\",\n+   \"«Gliptocephalus cynoglossus» (a WoRMS se le preguntó «glyptocephalus cynoglossus»)\",\n+   \"«Lepidorhombus spp» (a WoRMS se le preguntó «lepidorhombus»)\",\n+   \"«Lophius spp» (a WoRMS se le preguntó «lophius»)\",\n+   \"«Melanogrammús aeglefinus» (a WoRMS se le preguntó «melanogrammus aeglefinus»)\",\n+   \"«Microstommus kitt» (a WoRMS se le preguntó «microstomus kitt»)\",\n+   \"«Mugil spp» (a WoRMS se le preguntó «mugil»)\",\n+   \"«Mugil spps» (a WoRMS se le preguntó «mugil»)\",\n+   \"«Mullus spp» (a WoRMS se le preguntó «mullus»)\",\n+   \"«Pagellus spp» (a WoRMS se le preguntó «pagellus»)\",\n+   \"«Pecten spp» (a WoRMS se le preguntó «pecten»)\",\n+   \"«Scomber spp» (a WoRMS se le preguntó «scomber»)\",\n+   \"«Sepia spp» (a WoRMS se le preguntó «sepia»)\",\n+   \"«Thunnus aibacares» (a WoRMS se le preguntó «thunnus albacares»)\",\n+   \"«Trachurus spp» (a WoRMS se le preguntó «trachurus»)\",\n+   \"«Venerupis spp» (a WoRMS se le preguntó «venerupis»)\",\n+   \"«Venus spp» (a WoRMS se le preguntó «venus»)\",\n+ ]",
+    "stack": "Error: filas que publican «WoRMS acepta el nombre de la norma» sobre un nombre que WoRMS nunca vio porque fuimos nosotros quienes decidimos preguntarle otro\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  -  1\n+ Received  + 22\n\n- Array []\n+ Array [\n+   \"«Alosa spp» (a WoRMS se le preguntó «alosa»)\",\n+   \"«Cáncer pagurus» (a WoRMS se le preguntó «cancer pagurus»)\",\n+   \"«Diplodus spp» (a WoRMS se le preguntó «diplodus»)\",\n+   \"«Epinephelus spp» (a WoRMS se le preguntó «epinephelus»)\",\n+   \"«Gliptocephalus cynoglossus» (a WoRMS se le preguntó «glyptocephalus cynoglossus»)\",\n+   \"«Lepidorhombus spp» (a WoRMS se le preguntó «lepidorhombus»)\",\n+   \"«Lophius spp» (a WoRMS se le preguntó «lophius»)\",\n+   \"«Melanogrammús aeglefinus» (a WoRMS se le preguntó «melanogrammus aeglefinus»)\",\n+   \"«Microstommus kitt» (a WoRMS se le preguntó «microstomus kitt»)\",\n+   \"«Mugil spp» (a WoRMS se le preguntó «mugil»)\",\n+   \"«Mugil spps» (a WoRMS se le preguntó «mugil»)\",\n+   \"«Mullus spp» (a WoRMS se le preguntó «mullus»)\",\n+   \"«Pagellus spp» (a WoRMS se le preguntó «pagellus»)\",\n+   \"«Pecten spp» (a WoRMS se le preguntó «pecten»)\",\n+   \"«Scomber spp» (a WoRMS se le preguntó «scomber»)\",\n+   \"«Sepia spp» (a WoRMS se le preguntó «sepia»)\",\n+   \"«Thunnus aibacares» (a WoRMS se le preguntó «thunnus albacares»)\",\n+   \"«Trachurus spp» (a WoRMS se le preguntó «trachurus»)\",\n+   \"«Venerupis spp» (a WoRMS se le preguntó «venerupis»)\",\n+   \"«Venus spp» (a WoRMS se le preguntó «venus»)\",\n+ ]\n    at /home/user/mareia/tests/e2e/journeys/adversarial/a4-worms-no-acepta-el-nombre-que-la-fila-le-atribuye.spec.ts:97:5"
+  },
+  "events": [
+    {
+      "at": 4,
+      "kind": "step",
+      "text": "abrir el catálogo tal y como se publica"
+    },
+    {
+      "at": 23,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/pesca/especies/"
+    },
+    {
+      "at": 12577,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12577,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12647,
+      "kind": "step",
+      "text": "separar las filas a las que WoRMS nunca vio el nombre que escribe la norma"
+    },
+    {
+      "at": 12655,
+      "kind": "step",
+      "text": "21 filas con una consulta distinta: ¿qué dicen de WoRMS?"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

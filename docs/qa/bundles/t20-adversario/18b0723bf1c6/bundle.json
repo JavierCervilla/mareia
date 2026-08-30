@@ -1,0 +1,90 @@
+{
+  "snapshotId": "18b0723bf1c6",
+  "runId": "run-2026-08-30T21-07-33-572Z",
+  "test": {
+    "title": "adversarial/a12-la-fila-que-el-boe-regula-y-el-catalogo-calla.spec.ts > A12 · lo que la página de un puerto publica y el catálogo al que enlaza no tiene",
+    "file": "/home/user/mareia/tests/e2e/journeys/adversarial/a12-la-fila-que-el-boe-regula-y-el-catalogo-calla.spec.ts",
+    "line": 87,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 25583,
+  "urlAtFailure": "http://127.0.0.1:4321/pesca/especies/#cal-cantabrico-noroeste-y-golfo-de-cadiz",
+  "error": {
+    "message": "Error: la página de puerto publica «Cigalas (colas)» con su talla y el catálogo al que enlaza no la nombra ni dice por qué no está\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false",
+    "stack": "Error: la página de puerto publica «Cigalas (colas)» con su talla y el catálogo al que enlaza no la nombra ni dice por qué no está\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false\n    at /home/user/mareia/tests/e2e/journeys/adversarial/a12-la-fila-que-el-boe-regula-y-el-catalogo-calla.spec.ts:117:5"
+  },
+  "events": [
+    {
+      "at": 13,
+      "kind": "step",
+      "text": "un puerto del caladero cantábrico: su tabla de la norma trae la fila"
+    },
+    {
+      "at": 36,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/mareas/galicia/pontevedra/vigo/"
+    },
+    {
+      "at": 12664,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12664,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12692,
+      "kind": "httperror",
+      "text": "HTTP 404 GET http://127.0.0.1:4321/v1/modules/weather/weather?port=vigo"
+    },
+    {
+      "at": 12692,
+      "kind": "console",
+      "text": "[error] Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "at": 12692,
+      "kind": "httperror",
+      "text": "HTTP 404 GET http://127.0.0.1:4321/v1/modules/weather/bulletin?port=vigo"
+    },
+    {
+      "at": 12692,
+      "kind": "console",
+      "text": "[error] Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "at": 12769,
+      "kind": "step",
+      "text": "seguir el enlace de esa misma página al catálogo del caladero"
+    },
+    {
+      "at": 12905,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/pesca/especies/#cal-cantabrico-noroeste-y-golfo-de-cadiz"
+    },
+    {
+      "at": 25489,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 25489,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_CONNECTION_RESET"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

@@ -1,0 +1,59 @@
+{
+  "snapshotId": "17f423ce6f10",
+  "runId": "run-2026-08-30T21-07-12-051Z",
+  "test": {
+    "title": "adversarial/a12-la-fila-que-el-boe-regula-y-el-catalogo-calla.spec.ts > A12 · la fila del BOE que el catálogo no publica aparece con su motivo",
+    "file": "/home/user/mareia/tests/e2e/journeys/adversarial/a12-la-fila-que-el-boe-regula-y-el-catalogo-calla.spec.ts",
+    "line": 53,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 12853,
+  "urlAtFailure": "http://127.0.0.1:4321/pesca/especies/",
+  "error": {
+    "message": "Error: filas con talla mínima en el RD 560/1995 que el catálogo no publica y de las que no dice nada\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 3\n\n- Array []\n+ Array [\n+   \"«Cigalas (colas)» (cantabrico-noroeste-y-golfo-de-cadiz, el BOE imprime «3,7») no se nombra en la página, y su motivo tampoco: «la norma escribe «Cigalas (colas)» y ahí no hay ningún nombre latino entre parén…»\",\n+ ]",
+    "stack": "Error: filas con talla mínima en el RD 560/1995 que el catálogo no publica y de las que no dice nada\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 3\n\n- Array []\n+ Array [\n+   \"«Cigalas (colas)» (cantabrico-noroeste-y-golfo-de-cadiz, el BOE imprime «3,7») no se nombra en la página, y su motivo tampoco: «la norma escribe «Cigalas (colas)» y ahí no hay ningún nombre latino entre parén…»\",\n+ ]\n    at /home/user/mareia/tests/e2e/journeys/adversarial/a12-la-fila-que-el-boe-regula-y-el-catalogo-calla.spec.ts:84:5"
+  },
+  "events": [
+    {
+      "at": 3,
+      "kind": "step",
+      "text": "abrir el catálogo tal y como se publica"
+    },
+    {
+      "at": 29,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/pesca/especies/"
+    },
+    {
+      "at": 12729,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12729,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12796,
+      "kind": "step",
+      "text": "qué filas de la norma se quedaron fuera, según el propio dataset"
+    },
+    {
+      "at": 12802,
+      "kind": "step",
+      "text": "1 filas fuera: ¿dice la página que existen y por qué no están?"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

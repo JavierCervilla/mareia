@@ -1,0 +1,59 @@
+{
+  "snapshotId": "707c73d79bad",
+  "runId": "run-2026-08-30T21-03-16-326Z",
+  "test": {
+    "title": "adversarial/a12-la-talla-legal-sin-la-excepcion-que-la-cambia.spec.ts > A12 · toda cifra legal del catálogo publica la excepción que la norma le cuelga",
+    "file": "/home/user/mareia/tests/e2e/journeys/adversarial/a12-la-talla-legal-sin-la-excepcion-que-la-cambia.spec.ts",
+    "line": 54,
+    "retry": 0,
+    "project": "movil"
+  },
+  "status": "failed",
+  "expectedStatus": "passed",
+  "durationMs": 12893,
+  "urlAtFailure": "http://127.0.0.1:4321/pesca/especies/",
+  "error": {
+    "message": "Error: cifras legales publicadas en el catálogo sin la excepción que la norma les pone, mientras la página de puerto de esos mismos caladeros sí la publica\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 5\n\n- Array []\n+ Array [\n+   \"Dicentrarchus labrax · Cantábrico y noroeste y golfo de Cádiz · «36 (***)» → falta «Excepto en las divisiones 8a y 8b del Consejo Internacional para la Exploración del Mar, t…»\",\n+   \"Engraulis encrasicholus · Cantábrico y noroeste y golfo de Cádiz · «12 (**)» → falta «Excepto en la división IX, a), en la que la talla mínima es de 10 centímetros.…»\",\n+   \"Octopus vulgaris · Mediterráneo · «1 kg» → falta «La talla del pulpo (Octopus vulgaris) recogida en la presente tabla no es de aplicación en…»\",\n+ ]",
+    "stack": "Error: cifras legales publicadas en el catálogo sin la excepción que la norma les pone, mientras la página de puerto de esos mismos caladeros sí la publica\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 5\n\n- Array []\n+ Array [\n+   \"Dicentrarchus labrax · Cantábrico y noroeste y golfo de Cádiz · «36 (***)» → falta «Excepto en las divisiones 8a y 8b del Consejo Internacional para la Exploración del Mar, t…»\",\n+   \"Engraulis encrasicholus · Cantábrico y noroeste y golfo de Cádiz · «12 (**)» → falta «Excepto en la división IX, a), en la que la talla mínima es de 10 centímetros.…»\",\n+   \"Octopus vulgaris · Mediterráneo · «1 kg» → falta «La talla del pulpo (Octopus vulgaris) recogida en la presente tabla no es de aplicación en…»\",\n+ ]\n    at /home/user/mareia/tests/e2e/journeys/adversarial/a12-la-talla-legal-sin-la-excepcion-que-la-cambia.spec.ts:105:5"
+  },
+  "events": [
+    {
+      "at": 5,
+      "kind": "step",
+      "text": "abrir el catálogo tal y como se publica"
+    },
+    {
+      "at": 93,
+      "kind": "navigation",
+      "text": "http://127.0.0.1:4321/pesca/especies/"
+    },
+    {
+      "at": 12725,
+      "kind": "requestfailed",
+      "text": "GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap",
+      "detail": "net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12725,
+      "kind": "console",
+      "text": "[error] Failed to load resource: net::ERR_CONNECTION_RESET"
+    },
+    {
+      "at": 12807,
+      "kind": "step",
+      "text": "buscar en la norma qué cifras del catálogo llevan una excepción al pie"
+    },
+    {
+      "at": 12814,
+      "kind": "step",
+      "text": "3 cifras con excepción: ¿la publica el catálogo?"
+    }
+  ],
+  "eventsTruncated": false,
+  "artifacts": {
+    "screenshot": "screenshot.png",
+    "dom": "dom.html",
+    "events": "events.jsonl"
+  },
+  "captureErrors": []
+}

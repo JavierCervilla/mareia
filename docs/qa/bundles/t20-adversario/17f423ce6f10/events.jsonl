@@ -1,0 +1,6 @@
+{"at":3,"kind":"step","text":"abrir el catálogo tal y como se publica"}
+{"at":29,"kind":"navigation","text":"http://127.0.0.1:4321/pesca/especies/"}
+{"at":12729,"kind":"requestfailed","text":"GET https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap","detail":"net::ERR_CONNECTION_RESET"}
+{"at":12729,"kind":"console","text":"[error] Failed to load resource: net::ERR_CONNECTION_RESET"}
+{"at":12796,"kind":"step","text":"qué filas de la norma se quedaron fuera, según el propio dataset"}
+{"at":12802,"kind":"step","text":"1 filas fuera: ¿dice la página que existen y por qué no están?"}
