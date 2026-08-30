@@ -75,4 +75,4 @@ export type {
   NotaVisible,
   TallaEscrita,
 } from "./vista.ts";
-export { claveDeFila, filasDeTallas, textoDeTalla } from "./vista.ts";
+export { claveDeFila, filasDeTallas, nombreSecundario, textoDeTalla } from "./vista.ts";

@@ -30,6 +30,10 @@ import "../estilos/areas-protegidas.css";
 // usa una PÁGINA del portal (`/pesca/especies/`) y no sólo una sección de módulo: son las dos
 // superficies del mismo catálogo y comparten la composición de la tabla, así que comparten hoja.
 import "../estilos/especies.css";
+// La hoja de la ficha de especie (T-23). No es de una sección de módulo sino de una PÁGINA del
+// portal —las 86 de `/pesca/especies/<clave>/`—, y va aquí por lo mismo que la de arriba: una sola
+// hoja compartida y cacheada por todas en vez de un `<style>` repetido en cada HTML.
+import "../estilos/ficha-especie.css";
 // La hoja de la PWA (T-12): la sección «sin cobertura» y la calculadora de otro día. Se importa
 // aquí por el mismo motivo que la de arriba —una sola hoja compartida y cacheada por todas las
 // páginas— aunque sus dos secciones solo salgan en la página de puerto.

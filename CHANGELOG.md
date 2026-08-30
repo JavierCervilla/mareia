@@ -2,6 +2,76 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-30 — T-23 (carril de la ficha) · Una página por especie, con los mismos nueve campos siempre
+
+El catálogo de T-20 deja de ser el final del camino: cada una de las **86** especies estrena su
+**ficha** en `/pesca/especies/<clave>/`, enlazada desde el nombre de su fila. El problema de diseño de
+esta trayectoria no es cómo se enseña un dato: es **cómo se enseña que falta**.
+
+- **La retícula es fija, y por eso el hueco se ve.** Nueve campos, siempre los mismos y siempre en el
+  mismo orden —nombre del BOE · nombre común · nombre local canario · taxón aceptado y su estado · a
+  qué alcanza la talla · talla por caladero con su nota entera · registros de OBIS con su sesgo ·
+  espacios protegidos de sus caladeros · foto con su licencia y su autor—, **también cuando no hay
+  nada que poner en uno**. Un campo vacío es entonces **visible** y dice «esto no lo sabemos»; un
+  párrafo libre lo escondería, porque no se ve lo que no se escribió. **Ningún hueco se deja en blanco
+  ni se omite la fila**: todos publican su motivo, y los motivos distinguen cosas que no son la misma.
+  El nombre local canario lo enseña: **28 de las 31** especies del Anexo III lo tienen, **3** dicen que
+  la norma deja vacía esa celda y las **55** que no están en ese anexo dicen que la norma no lo escribe
+  fuera de Canarias. Tres frases distintas donde un guion habría dicho lo mismo tres veces, que es
+  nada. Gate **F3**, **774 campos** comprobados en las 86 fichas; probado en rojo con un hueco en
+  blanco (**58 campos** vacíos: las fichas que no publican nombre local) y con una fila omitida
+  (tres pruebas en rojo a la vez).
+- **La nota legal viaja con la cifra por tercera vez, y esta vez el gate nace con la página.** T-19
+  pegó la nota a la talla en las **153** páginas de puerto; T-20 la reintrodujo como defecto en el
+  catálogo y hubo que arreglarla **después** de un pase adversario. La ficha es la **tercera**
+  superficie de la misma cifra legal y no espera a que un adversario lo encuentre: el gate **F1**
+  entra con el primer commit de la página y exige el **texto entero** de la nota —no la marca— dentro
+  del bloque de **su** cifra. **Probado en rojo** con el sabotaje que importa: la nota movida fuera del
+  bloque **pero todavía en la página**, que es el defecto real —**9 cifras** en rojo, y un gate que
+  mirase «en la página» habría seguido en verde—.
+- **A qué alcanza la talla se rotula en las 86, también en las 68 que son una especie.** Es la única
+  divergencia deliberada con la tabla de T-20, y sale de la diferencia entre una tabla y una retícula:
+  allí un «especie» repetido 68 veces sería ruido que le restaría fuerza a los **17** rótulos que
+  cambian el alcance —**15 filas de género sobre 14 géneros distintos** (`Mugil` sale dos veces), una
+  familia y una subespecie—; aquí, callar sería dejar la fila en blanco. Las 15 de género arrastran
+  además la glosa de que la norma regula el género entero, y las otras 71 no la arrastran.
+- **Nada de puntuar, y el gate mira el artefacto y no la intención.** Cero barras de 0-100, cero
+  estrellas, cero rareza, cero dificultad, cero puntos, cero «mejor cebo», cero «temporada ideal»,
+  cero descripción narrativa de cosecha propia y ninguna ordenación que sugiera «mejores especies» —la
+  única lista ordenada de una ficha son las migas—. **Una talla mínima no parpadea, no cuenta hacia
+  arriba y no tiene halo**: el *juice* sobre un dato con consecuencia jurídica es el mecanismo por el
+  que una interfaz consigue que le crean más de lo que merece. El gate **F4** mide marcado
+  (`<progress>`, `<meter>`, `aria-valuenow`, `<canvas>`), vocabulario, listas ordenadas y la hoja
+  (nada de `@keyframes`/`animation`/`transition`/`box-shadow`/`border-radius`/degradados, terracota
+  sólo en el aviso y `tabular-nums` sólo en la cifra). **Probado en rojo** con una barra de dificultad:
+  cae por cuatro vías en las 86 páginas, incluida la palabra «dificultad» —que el propio aviso de la
+  página nombra, así que el gate retira los dos avisos literales antes de buscar y los comprueba
+  aparte—.
+- **La foto lleva su autor y su licencia dentro de su misma figura, nunca en un pie global.** En la
+  **muestra de 12 ficheros** que midió el plan —**una muestra, no un censo de las 86**— hay **seis
+  licencias distintas**, así que un «fotos de Wikimedia Commons» al pie sería falso para cinco de
+  ellas. Junto a la imagen van autor, licencia con enlace a su texto, enlace al fichero en Commons,
+  **quién identificó el taxón** (Wikidata `P18`, que no somos nosotros) y el aviso de que una foto no
+  sirve para identificar una captura. El dataset lo publica el otro carril de esta trayectoria: hasta
+  que llegue, las 86 fichas dicen que **aún no se ha preguntado** —que no es lo mismo que «esta
+  especie no tiene foto»— y **ninguna publica imagen**, que es lo que mide hoy el gate **F2**;
+  **probado en rojo** colando un `<img>` sin crédito.
+- **Los espacios protegidos se cuentan por caladero, porque RAMPE no habla de especies.** La fuente
+  publica espacios y no dice qué especie está protegida en cada uno, así que la ficha no puede
+  decirlo, y lo dice con esas palabras **antes** del recuento. Lo que sí sostiene el cruce con T-21 es
+  el caladero donde se aplica la talla: **44 de 47** puertos del cantábrico-noroeste-golfo de Cádiz
+  tienen algún espacio a menos de 30 km, sobre **7** espacios distintos; **73 de 80** en el
+  mediterráneo, sobre **36**; **26 de 26** en el canario, sobre **37**. Detrás va literal el aviso de
+  T-21, de su propio módulo: esto dice dónde **no** se puede, nunca dónde sí.
+- **`Thunnus thynnus` y `Thunnus Thynnus` son dos fichas**, porque son dos nombres de la norma. El
+  slug es la `clave` de T-20 con su digest —fea y difícil de recortar, y se acepta: un slug legible
+  las colapsaría en una y los **6,4 kg** del Anexo III desaparecerían de la URL sin que nada se
+  pusiera rojo—. Cada una enlaza a la otra, que es lo que el aviso de T-20 no podía hacer.
+- **Cero JavaScript**, como el resto del portal. Las 86 fichas ocupan **828.580 B** de HTML (media
+  **9.634 B**; la de la lubina, **3.454 B** comprimidos), la hoja **6.873 B**, y el `dist/` pasa de
+  193 a **279** páginas. Medido con el comando de CI: `pnpm lint`, `pnpm typecheck`, `pnpm test` y
+  `pnpm --filter web build` en verde.
+
 ## 2026-08-30 — T-20 · Las 86 especies que el BOE regula, con los dos nombres que tienen
 
 El portal estrena página: **`/pesca/especies/`**, el catálogo de las **86 especies** a las que el RD

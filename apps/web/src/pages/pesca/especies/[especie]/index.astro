@@ -1,0 +1,365 @@
+---
+/**
+ * La ficha de una especie: `/pesca/especies/<clave>/`. **86 páginas, una por especie del BOE.**
+ *
+ * **La regla que gobierna esta página entera.** Un pokédex ayuda a la honradez porque tiene siempre
+ * los mismos campos: un campo vacío es **visible** y dice «esto no lo sabemos». Un párrafo libre
+ * esconde el hueco, porque no se ve lo que no se escribió. Por eso la retícula es fija —las nueve
+ * filas se pintan siempre, en el orden de `CAMPOS_DE_LA_FICHA`— y **ningún hueco se deja en blanco
+ * ni se omite la fila**: cada uno publica su motivo.
+ *
+ * Y estorba si se le deja hacer lo que hacen los juegos —rellenar y puntuar—, así que aquí no hay
+ * ni barras, ni estrellas, ni rareza, ni dificultad, ni puntos, ni «mejor cebo», ni «temporada
+ * ideal», ni descripción narrativa de cosecha propia, ni ninguna ordenación que sugiera «mejores
+ * especies». Lo mide el gate **F4** sobre el artefacto, no sobre la intención.
+ *
+ * Las cinco decisiones que dan forma a la página:
+ *
+ * 1. **Las nueve secciones se generan recorriendo `CAMPOS_DE_LA_FICHA`**, que es el único sitio del
+ *    proyecto donde está escrito el orden de la retícula. Ni la plantilla ni el gate F3 lo teclean
+ *    por su cuenta: un orden escrito dos veces es un orden que se desincroniza, y si mañana entra un
+ *    campo décimo la sección aparece sola —vacía, que es lo que F3 pone rojo— en vez de no aparecer.
+ * 2. **La cifra legal y su nota van en el mismo bloque**, como en la página de puerto (T-19) y en el
+ *    catálogo (T-20). Ésta es la **tercera** superficie de la misma cifra y la segunda la perdió; el
+ *    gate **F1** nace con la página, exigiendo el **texto entero** de la nota —no la marca— dentro
+ *    del bloque de su talla.
+ * 3. **El orden de la retícula no es el orden de importancia, y la jerarquía la marca la
+ *    tipografía.** El nombre de la norma abre la página en cuerpo de display porque es el que tiene
+ *    consecuencia legal; la talla mínima va en su cuerpo de cifra. Reordenar la retícula por
+ *    importancia la volvería variable, y una retícula variable ya no delata un hueco.
+ * 4. **Los espacios protegidos se cuentan por caladero y se dice que RAMPE no habla de especies.**
+ *    La fuente publica espacios, no especies: una lista de espacios debajo del nombre de un animal
+ *    se leería como «esta especie está protegida aquí», que no tenemos con qué sostener.
+ * 5. **La foto lleva su autor y su licencia pegados a ella**, nunca en un pie global: en la muestra
+ *    de 12 ficheros del plan hay seis licencias distintas, así que un pie único sería falso para
+ *    cinco de ellas. Lo mide el gate **F2**.
+ *
+ * **Cero JavaScript**, como el resto del portal: la ficha es HTML estático y no tiene ningún estado
+ * que animar.
+ */
+import { NO_AUTORIZA_A_PESCAR } from "@mareia/module-protected-areas";
+import {
+  AQUI_NO_SE_PUNTUA_NADA,
+  aphiaDelAceptado,
+  ATRIBUCIONES_SPECIES,
+  CAMPOS_DE_LA_FICHA,
+  censoDelCatalogo,
+  fichaEnWorms,
+  fotosConsultadasEn,
+  LA_FOTO_NO_IDENTIFICA,
+  LA_PRESENCIA_NO_ES_ABUNDANCIA,
+  QUE_ES_ESTA_FICHA,
+  RAMPE_NO_HABLA_DE_ESPECIES,
+  ROTULO_FUENTES,
+  tituloDelCampo,
+  tituloDeLaFicha,
+  volverAlCatalogo,
+} from "@mareia/module-species";
+import type { FichaDeEspecie } from "@mareia/module-species";
+
+import Migas from "../../../../componentes/Migas.astro";
+import { fechaLarga } from "../../../../formato.ts";
+import AlmanaqueLayout from "../../../../layouts/AlmanaqueLayout.astro";
+import { migasDeFichaDeEspecie } from "../../../../migas.ts";
+import { cargarCatalogoDeEspecies } from "../../../../modulos/especies/catalogo.ts";
+import { cargarFichasDeEspecies } from "../../../../modulos/especies/ficha.ts";
+import { cargarFotos } from "../../../../modulos/especies/fotos.ts";
+import { RUTA_ESPECIES, rutaFichaDeEspecie, urlAbsoluta } from "../../../../rutas.ts";
+import { grafo, migasEstructuradas } from "../../../../seo.ts";
+
+/**
+ * Una página por especie del catálogo, con la `clave` de T-20 como slug.
+ *
+ * Las 86 fichas se componen **de una sola lectura de los cuatro derivados** y viajan como `props`:
+ * componerlas dentro de cada página releería el catálogo, la norma, las áreas y las fotos 86 veces.
+ */
+export async function getStaticPaths() {
+  const fichas = await cargarFichasDeEspecies();
+  return fichas.map((ficha) => ({ params: { especie: ficha.clave }, props: { ficha } }));
+}
+
+interface Props {
+  ficha: FichaDeEspecie;
+}
+
+const { ficha } = Astro.props;
+const catalogo = await cargarCatalogoDeEspecies();
+const censo = censoDelCatalogo(catalogo);
+const fotos = await cargarFotos();
+/** El nombre del BOE de cada hermana, por clave, para rotular su enlace con el nombre que la nombra. */
+const nombrePorClave = new Map(
+  catalogo.especies.map((especie) => [especie.clave, especie.nombreBoe] as const),
+);
+
+const ruta = rutaFichaDeEspecie(ficha.clave);
+const titulo = `${tituloDeLaFicha(ficha.nombreBoe)} · Especies que regula el BOE · Mareia`;
+const descripcion =
+  `Lo que este portal sabe de ${ficha.nombreBoe}, una de las ${censo.especies} especies con talla ` +
+  "mínima de captura en el Real Decreto 560/1995: la talla de cada caladero con la nota que la " +
+  "excepciona, el taxón que WoRMS acepta hoy y los registros de presencia en OBIS.";
+const migas = migasDeFichaDeEspecie(ficha.nombreBoe);
+---
+
+<AlmanaqueLayout
+  titulo={titulo}
+  descripcion={descripcion}
+  canonica={urlAbsoluta(ruta, Astro.site)}
+  jsonLd={grafo([migasEstructuradas(migas, Astro.site)])}
+>
+  <Migas slot="migas" migas={migas} />
+
+  <header class="portada">
+    {/*
+      EL NOMBRE DEL BOE, literal y primero. No es una preferencia de composición: es el que tiene
+      consecuencia legal —el que aparece en una inspección— y por eso encabeza la página. El taxón
+      que la ciencia acepta hoy está más abajo, en su fila, y no lo sustituye nunca.
+    */}
+    <h1 class="portada__titulo ficha__nombre-boe">{tituloDeLaFicha(ficha.nombreBoe)}</h1>
+    <p class="portada__entradilla">{QUE_ES_ESTA_FICHA}</p>
+    {/*
+      Lo que esta ficha NO hace, dicho donde se lee. Quien llega a una ficha de especie viene
+      acostumbrado a que le puntúen el animal; que aquí no pase es una decisión, no una carencia.
+    */}
+    <p class="ficha__aviso">{AQUI_NO_SE_PUNTUA_NADA}</p>
+  </header>
+
+  {/*
+    LA RETÍCULA. Se recorre `CAMPOS_DE_LA_FICHA` en vez de escribir las nueve secciones a mano: ese
+    array es el único sitio donde vive el orden, y lo comparten esta plantilla y el gate F3. Cada
+    sección se rotula con su título (`aria-labelledby`), así que un lector de pantalla puede saltar
+    de campo en campo y oír el nombre de cada uno.
+  */}
+  <div class="ficha">
+    {
+      CAMPOS_DE_LA_FICHA.map((campo) => (
+        <section
+          class="ficha__campo"
+          data-campo={campo.id}
+          aria-labelledby={tituloDelCampo(campo.id)}
+        >
+          <h2 class="etiqueta ficha__rotulo" id={tituloDelCampo(campo.id)}>
+            {campo.rotulo}
+          </h2>
+          <div class="ficha__valor">
+            {campo.id === "nombre-boe" && (
+              <>
+                <p class="ficha__dato ficha__binomio">{ficha.nombreBoe}</p>
+                {/*
+                  EL CRUCE CON LA FICHA HERMANA, y aquí además enlazado. El BOE escribe tres taxones
+                  con dos grafías (`Thunnus thynnus` y `Thunnus Thynnus`) y son dos fichas, porque
+                  son dos nombres de la norma; sin este aviso cada una se lee como si diera cuenta de
+                  todos los caladeros del taxón, y quien busca el atún rojo por el binomio bien
+                  escrito concluye que en Canarias no hay talla mínima. La hay, en la otra ficha.
+                */}
+                {ficha.tambienEn !== null && (
+                  <p class="ficha__nota-de-campo">{ficha.tambienEn}</p>
+                )}
+                {ficha.clavesHermanas.map((clave) => (
+                  <p class="ficha__enlace">
+                    <a href={rutaFichaDeEspecie(clave)}>
+                      Ver la ficha de {nombrePorClave.get(clave) ?? clave}
+                    </a>
+                  </p>
+                ))}
+              </>
+            )}
+
+            {campo.id === "nombre-comun" &&
+              (ficha.nombresComunes.tipo === "hueco" ? (
+                <p class="ficha__hueco">{ficha.nombresComunes.motivo}</p>
+              ) : (
+                <p class="ficha__dato">{ficha.nombresComunes.valor.join(" · ")}</p>
+              ))}
+
+            {campo.id === "nombre-local-canario" &&
+              (ficha.nombreLocalCanario.tipo === "hueco" ? (
+                <p class="ficha__hueco">{ficha.nombreLocalCanario.motivo}</p>
+              ) : (
+                <p class="ficha__dato">{ficha.nombreLocalCanario.valor}</p>
+              ))}
+
+            {campo.id === "taxon" &&
+              (ficha.taxon.tipo === "sin_resolver" ? (
+                <p class="ficha__hueco">{ficha.taxon.motivo}</p>
+              ) : (
+                <>
+                  {ficha.taxon.aceptado !== null && (
+                    <>
+                      <p class="ficha__dato ficha__binomio">{ficha.taxon.aceptado.nombre}</p>
+                      <p class="ficha__nota-de-campo">
+                        {aphiaDelAceptado(ficha.taxon.aceptado.aphiaId)}
+                      </p>
+                    </>
+                  )}
+                  {/* El estado, en las palabras de WoRMS y entrecomillado: es una cita. */}
+                  <p class="ficha__dato">{ficha.taxon.texto}</p>
+                  <p class="ficha__enlace">
+                    <a href={ficha.taxon.ficha.url}>
+                      {fichaEnWorms(ficha.taxon.ficha.nombre, ficha.taxon.ficha.aphiaId)}
+                    </a>
+                  </p>
+                  {ficha.taxon.correspondencia !== null && (
+                    <p class="ficha__nota-de-campo">{ficha.taxon.correspondencia}</p>
+                  )}
+                </>
+              ))}
+
+            {campo.id === "rango" &&
+              (ficha.rango.tipo === "hueco" ? (
+                <p class="ficha__hueco">{ficha.rango.motivo}</p>
+              ) : (
+                <>
+                  <p class="ficha__dato">{ficha.rango.valor}</p>
+                  {/*
+                    Qué significa que la norma regule un género entero, y SÓLO en las 17 fichas cuyo
+                    alcance no es una especie. Es un hecho jurídico: elegirle una especie sería
+                    estrecharle a la norma un alcance que la norma no estrecha, y del lado que multa.
+                    En las otras 68 la glosa hablaría de géneros debajo de una fila que no habla de
+                    ninguno.
+                  */}
+                  {ficha.notaDelRango !== null && (
+                    <p class="ficha__nota-de-campo">{ficha.notaDelRango}</p>
+                  )}
+                </>
+              ))}
+
+            {campo.id === "tallas" && (
+              <ul class="ficha__lista" role="list">
+                {ficha.caladeros.map((caladero) => (
+                  <li class="ficha__caladero">
+                    <span class="ficha__nombre-caladero">{caladero.nombre}</span>
+                    {caladero.tallas.map((talla) => (
+                      // El bloque de UNA talla: su cifra, qué mide, el literal del BOE y **sus
+                      // notas enteras**. Todo dentro del mismo `<div>` a propósito: es el bloque
+                      // que mide el gate F1, y es lo que se lleva quien copia una fila o quien la
+                      // recorre con un lector de pantalla. Un pie al final de la página no viaja.
+                      <div class="ficha__talla">
+                        {talla.medida !== null && (
+                          <span class="ficha__medida">{talla.medida}</span>
+                        )}
+                        <span
+                          class={talla.talla.hayCifra ? "ficha__cifra" : "ficha__sin-cifra"}
+                        >
+                          {talla.talla.texto}
+                        </span>
+                        <span class="ficha__literal">el BOE imprime «{talla.literal}»</span>
+                        {/*
+                          LA NOTA, ENTERA Y JUNTO A SU CIFRA. La lubina son 36 cm salvo en las
+                          divisiones 8a y 8b del CIEM, donde son 44: un número sin su excepción es
+                          una cifra legal falsa para quien pesca en la zona excepcionada. Va aquí y
+                          no en un pie de la página, por tercera vez en el portal y por tercera vez
+                          por el mismo motivo.
+                        */}
+                        {talla.notas.map((nota) => (
+                          <span class="ficha__nota-legal">{nota}</span>
+                        ))}
+                      </div>
+                    ))}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {campo.id === "presencia" && (
+              <>
+                {/*
+                  La explicación larga ANTES de la primera cifra, como en el catálogo: una coletilla
+                  sola no explica por qué 12 no significa doce doradas.
+                */}
+                <p class="ficha__nota-de-campo">{LA_PRESENCIA_NO_ES_ABUNDANCIA}</p>
+                <ul class="ficha__lista" role="list">
+                  {ficha.caladeros.map((caladero) => (
+                    <li class="ficha__caladero">
+                      <span class="ficha__nombre-caladero">{caladero.nombre}</span>
+                      {/*
+                        LA PRESENCIA, y nunca como número suelto: la frase lleva el sesgo dentro de
+                        su mismo bloque, que es donde lo mide el gate E4 de T-20 —que barre TODAS
+                        las páginas construidas, también estas 86—.
+                      */}
+                      <span class="ficha__presencia">{caladero.presencia}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            {campo.id === "areas-protegidas" && (
+              <>
+                {/*
+                  LO PRIMERO DE LA FILA, y por eso es una constante del código: RAMPE publica
+                  espacios, no especies. Sin esta frase delante, un recuento debajo del nombre de un
+                  animal se lee como «esta especie está protegida aquí».
+                */}
+                <p class="ficha__nota-de-campo">{RAMPE_NO_HABLA_DE_ESPECIES}</p>
+                <ul class="ficha__lista" role="list">
+                  {ficha.espacios.map((espacio) => (
+                    <li class="ficha__espacio">{espacio}</li>
+                  ))}
+                </ul>
+                {/* Y el aviso de T-21, literal y de su propio módulo: esto dice dónde NO se puede. */}
+                <p class="ficha__aviso">{NO_AUTORIZA_A_PESCAR}</p>
+              </>
+            )}
+
+            {campo.id === "foto" &&
+              (ficha.foto.tipo === "hueco" ? (
+                <p class="ficha__hueco">{ficha.foto.motivo}</p>
+              ) : (
+                // AUTOR Y LICENCIA DENTRO DE LA MISMA FIGURA que la imagen. No hay pie global de la
+                // página y no puede haberlo: en la muestra de 12 ficheros del plan hay seis
+                // licencias distintas, así que un «fotos de Wikimedia Commons» sería falso para
+                // cinco de ellas. El gate F2 lo mide en el bloque de la imagen.
+                <figure class="ficha__figura">
+                  <img
+                    class="ficha__foto"
+                    src={ficha.foto.valor.url}
+                    alt={ficha.foto.valor.alternativo}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <figcaption class="ficha__credito">
+                    <span class="ficha__dato">{ficha.foto.valor.credito}</span>
+                    <span class="ficha__enlace">
+                      <a href={ficha.foto.valor.licenciaUrl}>
+                        {ficha.foto.valor.rotuloDeLaLicencia}
+                      </a>
+                    </span>
+                    <span class="ficha__enlace">
+                      <a href={ficha.foto.valor.descripcionUrl}>
+                        {ficha.foto.valor.rotuloDelFichero}
+                      </a>
+                    </span>
+                    <span class="ficha__nota-de-campo">{ficha.foto.valor.identificacion}</span>
+                    <span class="ficha__nota-de-campo">{LA_FOTO_NO_IDENTIFICA}</span>
+                  </figcaption>
+                </figure>
+              ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+
+  <p class="ficha__enlace">
+    <a href={RUTA_ESPECIES}>{volverAlCatalogo(censo.especies)}</a>
+  </p>
+
+  <p class="datos__nota">
+    {ROTULO_FUENTES} ·{" "}
+    {
+      ATRIBUCIONES_SPECIES.map((atribucion, indice) => (
+        <>
+          {indice > 0 && <> · </>}
+          <a href={atribucion.url}>{atribucion.name}</a> ({atribucion.license})
+        </>
+      ))
+    }
+  </p>
+  <p class="datos__nota">
+    WoRMS consultado el {fechaLarga(catalogo.fuentes.worms.consultadoEn)} · OBIS consultado el {
+      fechaLarga(catalogo.fuentes.obis.consultadoEn)
+    }. Las tallas y los nombres de la norma salen del Real Decreto 560/1995, que publica con su
+    fuente y su fecha la sección de tallas mínimas de cada puerto.
+    {fotos.tipo === "ingerido" && <> {fotosConsultadasEn(fechaLarga(fotos.consultadoEn))}</>}
+  </p>
+</AlmanaqueLayout>

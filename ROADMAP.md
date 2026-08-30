@@ -249,6 +249,42 @@
       se esperaba que fallara» en los nueve— y conservan su assert canario. Medido con el comando de
       CI: `pnpm test` **667 en verde**, `pnpm test:e2e` **70** midiendo de verdad,
       `pytest` **1.919**, catálogo de **111.516 B** (11.514 comprimidos) con cero scripts
+- [ ] T-23 · **La ficha de cada especie: retícula fija, huecos rotulados y una foto que sabe de quién
+      es.** *(Carril de la ficha entregado; la ingesta de fotos va en el otro carril de la misma
+      trayectoria y cierra con él.)* **86 páginas nuevas** —`/pesca/especies/<clave>/`, una por
+      especie del BOE, enlazadas desde el catálogo de T-20— con **nueve campos fijos y en el mismo
+      orden**: nombre de la norma · nombre común · **nombre local canario** · taxón aceptado y su
+      estado · a qué alcanza la talla · **talla por caladero con su nota entera** · registros de OBIS
+      con su sesgo · espacios protegidos de sus caladeros · foto con **su** licencia y **su** autor.
+      **La retícula no varía y ningún hueco se deja en blanco ni se omite la fila**: un campo vacío es
+      *visible* y dice qué no sabemos, mientras que un párrafo libre esconde el hueco. Y los motivos
+      distinguen: **28 de las 31** especies del Anexo III publican su nombre local canario, **3** dicen
+      que la norma deja la celda vacía y las **55** que no están en ese anexo dicen que la norma no lo
+      escribe fuera de Canarias — tres frases y no un guion. Se rotula **a qué alcanza la talla** en
+      las 86, también en las **68** que son una especie (donde la tabla de T-20 calla a propósito,
+      porque allí 68 rótulos iguales serían ruido y aquí callar sería una fila en blanco), y las **15
+      filas de género sobre 14 géneros distintos** —`Mugil` sale dos veces— arrastran además la glosa
+      de que la norma regula el género entero. **Nada de puntuar**: cero barras de 0-100, cero
+      estrellas, cero rareza, cero dificultad, cero puntos, cero «mejor cebo», cero «temporada ideal»
+      y ninguna ordenación que sugiera «mejores especies» — el *juice* sobre una cifra con
+      consecuencia jurídica es el mecanismo por el que una interfaz consigue que le crean más de lo
+      que merece. Gates **F1** (la nota **entera**, no la marca, en el bloque de **su** cifra: es la
+      **tercera** superficie de la misma cifra legal y **nace con el gate puesto**, sin esperar al
+      pase adversario como en T-20), **F2** (ninguna foto sin autor y licencia **en su misma figura**,
+      nunca en un pie global: hay **seis licencias distintas** en una **muestra de 12** ficheros —una
+      muestra, no un censo—), **F3** (ningún hueco mudo: **774** campos comprobados en 86 fichas) y
+      **F4** (nada de puntuar, medido sobre el **artefacto**: marcado, vocabulario, listas ordenadas y
+      la hoja). **F1, F2, F3 y F4 probados en rojo** con sabotajes que llegan adonde el gate mira: la
+      nota movida fuera del bloque de su cifra **pero todavía en la página** deja **9 cifras** en rojo
+      —un gate a nivel de página habría seguido verde—, el hueco en blanco las **58** fichas que no publican nombre local, la fila omitida
+      pone en rojo tres pruebas a la vez, y una barra de dificultad con `<progress>` y estrellas cae
+      por cuatro vías en las 86. Los espacios protegidos se cuentan **por caladero y no por especie**,
+      porque RAMPE publica espacios y no dice qué especie está protegida en cada uno, y la fila lo
+      dice antes del recuento (**44 de 47** puertos del cantábrico sobre 7 espacios, **73 de 80** del
+      mediterráneo sobre 36, **26 de 26** del canario sobre 37) con el aviso de T-21 literal detrás.
+      El slug es la `clave` de T-20 con su digest, para que **`Thunnus thynnus` y `Thunnus Thynnus`
+      sigan siendo dos fichas** —y cada una enlaza a la otra—. **Cero JavaScript**; **828.580 B** de
+      HTML en las 86 (media 9.634 B) y el `dist/` pasa de 193 a **279** páginas.
 - [ ] T-14 · Metodología pública + QC navegable + dataset con su licencia por puerto declarada
       (el reparto real ya publicado en T-14A) + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario
