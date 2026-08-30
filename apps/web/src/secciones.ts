@@ -17,16 +17,19 @@
  */
 
 import { SECCION_ACTIVIDAD_SOLUNAR } from "@mareia/module-fishing";
+import { SECCION_AREAS_PROTEGIDAS } from "@mareia/module-protected-areas";
 import { SECCION_TALLAS_MINIMAS } from "@mareia/module-regulations";
 import { METEO_SECTION_COMPONENT } from "@mareia/module-weather/ui";
 import type { AstroComponentFactory } from "astro/runtime/server/index.js";
 
 import Meteo from "./componentes/Meteo.astro";
 import ActividadSolunar from "./componentes/modulos/ActividadSolunar.astro";
+import AreasProtegidas from "./componentes/modulos/AreasProtegidas.astro";
 import TallasMinimas from "./componentes/modulos/TallasMinimas.astro";
 
 export const RENDERIZADORES_DE_SECCION: Readonly<Record<string, AstroComponentFactory>> = {
   [SECCION_ACTIVIDAD_SOLUNAR]: ActividadSolunar,
   [METEO_SECTION_COMPONENT]: Meteo,
   [SECCION_TALLAS_MINIMAS]: TallasMinimas,
+  [SECCION_AREAS_PROTEGIDAS]: AreasProtegidas,
 };

@@ -2,6 +2,83 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-30 — T-21 · Áreas marinas protegidas: 342 avisos, 10 «ninguna» y ni un vértice
+
+La página de puerto publica los espacios marinos protegidos que tiene a menos de **30 km** —nombre
+oficial, figura y distancia aproximada— a partir de **RAMPE 2025** (MITECO). Es la primera sección
+del portal que **no es información sino advertencia**, y eso mueve dónde se coloca y cómo se
+escribe.
+
+- **Se hace la mitad defendible del encargo.** Lo pedido era «zonas de pesca y zonas prohibidas».
+  Las de pesca **no se publican**: no hay fuente, y decir dónde *sí* se puede pescar es inventar. Las
+  protegidas sí, porque hay fuente oficial y el error cae del lado conservador. La consecuencia va
+  escrita en la página y no insinuada: el aviso de la fuente —«que no haya un área protegida cerca no
+  autoriza a pescar: esto dice dónde NO se puede, nunca dónde sí»— va **antes** de la lista, en las
+  **153** páginas, y un gate del `dist/` busca ocho maneras de sugerir lo contrario («pesca
+  permitida», «zona libre», «apto para la pesca»…).
+- **143 de 153 puertos tienen alguna, y son 342 relaciones de las 86 áreas de la fuente.** El
+  reparto por figura de lo publicado: **206 ZEPA · 107 ZEC · 26 reservas marinas · 3 AMP**. La quinta
+  figura de RAMPE, `ZEC/AMP`, tiene una sola área —El Cachucho, en el Cantábrico abierto— y no cae a
+  menos de 30 km de ningún puerto del catálogo: está glosada y probada en el módulo, y el gate lo
+  dice en vez de fingir que la mide.
+- **Los 10 puertos sin ninguna área lo DICEN**, y es la decisión de producto de la trayectoria.
+  Alboraya, Arenys de Mar, Donostia, Getaria, Mataró, Melilla, Sagunto, Sevilla, Silla y Valencia no
+  pierden la sección: publican «Ninguna a menos de 30 km de este puerto» y, debajo, hasta dónde se ha
+  mirado y que el radio es **una decisión nuestra, no una ausencia de la fuente**. Una sección que
+  desaparece se lee como «no hay nada que saber» y no se distingue de «esto no lo hemos hecho».
+- **La distancia se publica como cota entera, nunca como medida.** El derivado mide al **vértice más
+  cercano** del área, que está igual de lejos o más lejos que el borde real, así que se escribe «a
+  menos de 9 km» y no «8,7 km»: es verdad —la real es menor—, es del lado que conviene en una
+  advertencia —nunca aleja un área más de lo que está— y no finge una precisión que el método no da.
+  Las **60** relaciones por debajo del kilómetro dicen todas «a menos de 1 km», que es lo único
+  afirmable de ellas, y las **10** en las que el puerto cae **dentro** de un área lo dicen con esas
+  palabras en vez de disolverlo en una distancia corta.
+- **Las siglas se glosan; el régimen, no.** ZEPA → «Zona de Especial Protección para las Aves», ZEC →
+  «Zona Especial de Conservación», AMP → «Área Marina Protegida», pegadas a la sigla y no en un pie.
+  Lo que **no** se escribe es qué permite o prohíbe cada figura: eso lo fija la declaración oficial de
+  cada espacio y no está en esta fuente. Desarrollar una sigla es leer; contar su régimen sería
+  redactar derecho por nuestra cuenta. El `switch` que las escribe cierra con `never`: una sexta
+  figura **no compila** hasta que alguien decida qué significa.
+- **Módulo propio, y `order: 12`: la primera de las secciones de módulo.** `ModuleId` pasa a
+  cinco (`fishing | weather | navigation | regulations | protected-areas`); es la **segunda** vez que
+  se ejerce esa puerta y el motivo está en el diff del contrato: no es pesca —aquélla calcula una
+  convención sin respaldo experimental— ni normativa —el BOE dice qué mide una pieza; RAMPE, qué
+  espacios están protegidos—, y colgarla de cualquiera de las dos habría metido en una sola lista de
+  atribuciones la licencia real del BOE junto al hueco de licencia de RAMPE. El `order: 12` la pone
+  delante de solunar y meteo (20) y de las tallas (30) porque **es una advertencia y no una
+  consulta**: en la jerarquía del design brief las advertencias están fuera de los tres niveles. El
+  hueco por debajo de 20 lo dejó reservado T-19 con esas palabras. Lo que ese 12 **no** hace, dicho
+  para que nadie lo suponga: `order` ordena las secciones de módulo entre sí, no por encima de los
+  bloques del core, así que la sección se lee justo **después** del dato de marea y no es un banner.
+- **Ni un vértice cruza a `dist/`.** La página de descarga de RAMPE **no declara licencia ni
+  condiciones de uso**, así que se publican **hechos derivados** —nombre, figura, código, distancia—
+  y ninguna geometría, ni simplificada ni en una caja envolvente. La atribución dice el hueco tal
+  cual: «MITECO · RAMPE 2025 — condiciones de uso no declaradas en origen». No se le pone una CC
+  porque otras fuentes del ministerio la lleven. Un gate mide el HTML publicado —nada con pinta de
+  coordenadas, y tope de bytes por sección— porque el último sitio por el que la geometría podría
+  escaparse es un `data-` puesto para «un mapita».
+- **Cero *juice* sobre una advertencia.** Ni parpadeo, ni halo, ni recuadro de estado, ni contador,
+  ni orden por «más interesante»: el orden es el del dato, que es la proximidad, y la plantilla **no
+  reordena** —si el derivado llegara desordenado, levanta, porque ordenarlo aquí taparía el fallo—.
+  La mancha de terracota cae solo en los dos avisos, nunca sobre un nombre ni sobre una distancia, y
+  hay un gate que lo mide sobre la hoja (sin `@keyframes`, `animation`, `transition`, `box-shadow`
+  ni `border-radius`).
+- **Sin cobertura la lista se lee, y el aviso empieza por su condición.** `offline: cache-first` y
+  **cero JavaScript**: el aviso no se enciende, va horneado siempre, y empieza por «si guardas este
+  puerto» porque quien guarda una página es la caja de favoritos y solo la del puerto que el lector
+  marque. Es la corrección de H-4 de T-19 aplicada **antes** de publicar, no después.
+- **El gate de la trayectoria, probado en rojo dos veces.** «Los 10 puertos sin área lo dicen» se
+  mide sobre el `dist/`: la frase, el motivo del dato y la marca del caso vacío, en las 10 páginas
+  construidas. Se probó (a) quitándole la frase a la rama vacía —salieron los 10 listados por su
+  slug— y (b) escondiendo la sección en esos 10 puertos con un `isEnabledForPort`, que es la
+  tentación real: se cayeron **9 de los 11** recorridos del fichero —los nueve que leen el `dist/`—,
+  nombrando el primer puerto sin sección.
+- **Lo que pesa, medido sobre el `dist/`.** La sección añade **1.958 B** en Valencia (sin ninguna
+  área, +4,7 %), **3.068 B** en Vigo (una área, +6,6 %) y **4.808 B** en Agaete (seis, el máximo del
+  catálogo, +11,3 %); comprimida, entre **612 y 1.183 B**. La hoja de estilos suma **1.004 B** al
+  bundle común (18.782 → 19.786, +5,3 %) y el `dist/` entero pasa de 7,73 a 8,26 MB (+6,9 %). **Ni
+  un byte de JavaScript.**
+
 ## 2026-08-30 — T-19 · Tallas mínimas por caladero: 118 cifras del BOE, y ninguna sin su excepción
 
 La página de puerto publica la talla mínima legal de captura del caladero al que pertenece, con la

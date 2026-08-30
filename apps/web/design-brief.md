@@ -293,6 +293,73 @@ eso mueve una regla que hasta ahora era estética.
   tabla, y llevarse impresa la talla mínima del caladero es exactamente el uso que un almanaque tiene
   en un barco.
 
+## 7 sexies. Ampliación T-21 — una advertencia por encima del dato, y por qué el hueco se dice
+
+Esta sección **amplía el brief** (no abre otro), como la de T-19: llega la primera sección que no es
+información sino **advertencia** —las áreas marinas protegidas que el puerto tiene a menos de **30
+km**, de RAMPE 2025 (MITECO)— y eso mueve dos reglas, una de colocación y otra de redacción.
+
+- **Es la primera de las secciones de módulo, y es la primera advertencia que entra por ahí.** El
+  contrato la coloca con `order: 12`: delante de la actividad solunar y de la meteo (20) y de las
+  tallas mínimas (30). La jerarquía de §1 tiene tres niveles —crítico, contextual, consultable— y
+  **las advertencias están fuera de los tres**: el banner «No apto para navegación» y el aviso
+  micromareal no compiten con el dato, avisan. Ésta es de esa clase. Quien mira una talla la mira
+  porque ya tiene la pieza en la mano; quien tiene delante una reserva marina necesita saberlo
+  **antes** de decidir nada, y una advertencia colocada detrás de lo que califica llega tarde. El
+  hueco por debajo de 20 estaba reservado desde T-19 con esas palabras; éste es el módulo que lo
+  ocupa. Se queda en 12 y no en 5 porque debajo tiene que seguir habiendo sitio para un aviso más
+  urgente —uno que dependa del día y no del sitio— sin renumerar a nadie.
+  **Y el límite de ese 12, dicho y no supuesto**: `order` ordena las secciones de módulo entre sí y
+  nada más. Los bloques del core —tabla, gráfico, coeficiente, sol y luna— los coloca la página y
+  van antes, así que esta sección **no es un banner**: es lo primero que se lee **después** del dato
+  de marea. Subirla por encima de la tabla exigiría tocar la plantilla, que es lo que el contrato de
+  módulos existe para no tener que hacer.
+- **La regla que manda sobre todas las demás: en ningún sitio, ni por omisión, puede leerse que se
+  pueda pescar.** El encargo era «zonas de pesca y zonas prohibidas» y se publica **solo la mitad
+  defendible**: dónde **no** se puede, que tiene fuente oficial y cuyo error cae del lado
+  conservador. Por eso el aviso de la fuente —«que no haya un área protegida cerca no autoriza a
+  pescar: esto dice dónde NO se puede, nunca dónde sí»— va **antes** de la lista y en las **153**
+  páginas, y por eso hay un gate que busca en el `dist/` ocho maneras de sugerir lo contrario
+  («pesca permitida», «zona libre», «apto para la pesca»…). Una lista de zonas prohibidas sin ese
+  encabezado se lee por descarte como un mapa de zonas libres.
+- **Los 10 puertos sin ninguna área lo DICEN**, y es la decisión de producto de la trayectoria. De
+  los **153** puertos, **143 de 153** tienen al menos un área a menos de 30 km —**342** relaciones
+  publicadas de las **86** áreas de la fuente— y **10** no tienen ninguna. Esos 10 no pierden la
+  sección: publican «Ninguna a menos de 30 km de este puerto» y, debajo, hasta dónde se ha mirado y
+  que el radio es una decisión nuestra y no una ausencia de la fuente. Una sección que desaparece se
+  lee como «no hay nada que saber» y no se distingue de «esto todavía no lo hemos hecho». Es la
+  misma regla que §3 («NO dato inventado»: ningún hueco se rellena, pero **tampoco se calla**).
+- **La distancia se publica como cota, no como medida.** El derivado mide al **vértice más cercano**
+  del área, que está igual de lejos o más lejos que su borde real, así que un `8,7 km` en la página
+  fingiría una precisión que el método no da —y de la que además se conoce el signo del error—. Se
+  escribe «a menos de 9 km»: verdadero, entero, y del lado que conviene en una advertencia, porque
+  nunca aleja un área más de lo que está. Cuando el puerto cae **dentro** de un área (10 relaciones
+  del dataset) eso se dice con sus palabras, no disuelto en un «a menos de 1 km». Y `tabular-nums`
+  sobre la distancia sin peso ni color: es una cota, no un titular.
+- **Las siglas se glosan; el régimen, no.** ZEPA, ZEC, AMP y ZEC/AMP salen con la sigla desarrollada
+  pegada al lado, porque «ZEPA» sola no informa a quien no la conozca ya y en un móvil al sol nadie
+  baja a buscar un pie. Lo que **no** se escribe es qué permite o prohíbe cada figura: eso lo fija la
+  declaración oficial de cada espacio y no está en esta fuente. Desarrollar una sigla es leer; contar
+  su régimen sería redactar derecho por nuestra cuenta. (`RESERVA MARINA` no lleva glosa porque la
+  fuente ya la escribe en palabras.)
+- **Cero *juice*, y aquí es la regla más dura de la casa.** Ni parpadeo, ni halo, ni recuadro de
+  estado, ni contador de áreas, ni orden por «más interesante» —el orden es el del dato, que es la
+  proximidad, y la plantilla **no reordena**—. La mancha de terracota cae solo en los dos avisos,
+  nunca sobre el nombre de un área ni sobre una distancia. Sobre una advertencia el adorno consigue
+  que se le crea por el adorno, y lo que esta sección puede sostener está escrito con sus
+  condiciones al lado. Hay un gate que lo mide sobre la hoja.
+- **Sin cobertura la lista se sigue leyendo, y lo dice con su condición delante.** `offline:
+  cache-first` y **cero JavaScript**: el aviso no se enciende, está siempre escrito, y empieza por
+  «si guardas este puerto» porque quien guarda una página es la caja de favoritos y solo la del
+  puerto que el lector marque. Es la corrección de H-4 de T-19 aplicada antes de publicar, no
+  después.
+- **El hueco de licencia se publica tal cual.** La página de descarga de RAMPE no declara licencia ni
+  condiciones de uso, así que la atribución al pie de la sección dice «MITECO · RAMPE 2025 —
+  condiciones de uso no declaradas en origen». No se le pone una CC porque otras fuentes del
+  ministerio la lleven. La consecuencia da forma a la sección entera: se publican **hechos
+  derivados** —nombre oficial, figura, código, distancia— y **ninguna geometría**, ni siquiera
+  simplificada, que es justo lo que una licencia no declarada no deja redistribuir.
+
 ## 8. Cómo se audita
 
 ```bash

@@ -136,6 +136,24 @@
       regenera las 118 cifras desde la fuente capturada y las diffea (G3 miraba 6), **G5** impide
       publicar un cero, el aviso de sin-red dice ahora **su condición** y la excepción balear **se
       resuelve** en los 17 puertos que excepciona y en los 63 que no
+- [x] T-21 · **Las áreas marinas protegidas que tienes al lado, y ninguna geometría en el móvil.**
+      La página de puerto publica los espacios marinos protegidos a menos de **30 km** con su nombre
+      oficial, su figura y su distancia: **143 de 153** puertos tienen alguno —**342** relaciones
+      salidas de las **86** áreas de RAMPE 2025 (MITECO)— y los **10** que no tienen ninguna **lo
+      dicen**, con el radio a la vista, en vez de perder la sección. Se hace **la mitad defendible**
+      del encargo «zonas de pesca y zonas prohibidas»: dónde **no** se puede, que tiene fuente
+      oficial; dónde sí no se publica porque no hay fuente, y el aviso de que **la ausencia de área
+      protegida no es un permiso** va antes de la lista en las 153 páginas, con un gate que busca en
+      el `dist/` ocho maneras de sugerir lo contrario. La distancia es al vértice más cercano y por
+      eso se publica como **cota entera** («a menos de 9 km»), nunca como una medida. Entra por el
+      contrato `AppModule` como módulo propio (`ModuleId` se amplía por segunda vez, a cinco), en
+      `static`, **cero JavaScript** y con **`order: 12`: la primera de las secciones de módulo**,
+      porque es una advertencia y no una consulta (ese orden manda entre módulos, no sobre los
+      bloques del core: se lee justo después del dato de marea, no como un banner). **Ni un vértice cruza a `dist/`** —la
+      licencia de la fuente no está declarada en origen y se publican hechos derivados, no
+      geometrías—, y el hueco de licencia se publica con esas palabras. Gate P3 comprobado en rojo
+      con dos mutaciones (quitarle la frase a la rama vacía y esconder la sección en los 10 puertos)
+      · el pase de `qa-adversario` y sus trinquetes se anotan aquí al cerrarlo, como en T-11/T-19
 - [ ] T-14 · Metodología pública + QC navegable + dataset con su licencia por puerto declarada
       (el reparto real ya publicado en T-14A) + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario

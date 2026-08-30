@@ -1,0 +1,173 @@
+---
+/**
+ * La sección que aporta el módulo `protected-areas`: las áreas marinas protegidas que este puerto
+ * tiene a menos del radio del criterio (RAMPE 2025, MITECO).
+ *
+ * Entra por donde tienen que entrar las secciones de módulo: el módulo declara su `PageSection`
+ * (una cadena), `src/secciones.ts` la traduce a este componente y `SeccionesDeModulos` lo coloca.
+ * La página de puerto no la nombra en ninguna línea, y **las áreas se piden por slug** —no llegan
+ * inyectadas desde la plantilla—, que es la regla de `ContextoDeSeccion`.
+ *
+ * Lo que se pinta, en este orden y por este motivo:
+ *
+ * 1. **Qué es esto**: que son espacios protegidos, que aquí no se dice qué se puede hacer dentro de
+ *    cada uno, y que esto **no dice dónde se puede pescar**. Una lista de nombres sin ese
+ *    encabezado se lee como un mapa, y un mapa de zonas protegidas se lee por descarte como un mapa
+ *    de zonas libres.
+ * 2. **El aviso de la fuente**, que es la regla dura de esta trayectoria y viaja firmado dentro del
+ *    dataset (`fuente.aviso`): *que no haya un área protegida cerca no autoriza a pescar*. Va
+ *    **antes** de la lista, porque califica todo lo que hay debajo, y se imprime en las 153
+ *    páginas: también —sobre todo— en las 10 que no listan ninguna área.
+ * 3. **Las áreas**, de la más cercana a la más lejana, con nombre oficial, figura glosada y
+ *    distancia como cota. O, si no hay ninguna, **la frase que lo dice** y el motivo del dato, que
+ *    es hasta dónde se ha mirado.
+ * 4. **Cómo se mide** esa distancia y **qué son las siglas**: las dos cosas que hacen que lo de
+ *    arriba se pueda leer sin creerle de más.
+ * 5. **El aviso de lectura sin red** y **la fuente con su licencia**, que aquí es un hueco
+ *    declarado y se publica como tal.
+ *
+ * **Cero *juice*, y sobre una advertencia el argumento es el más fuerte de todos**: no parpadea, no
+ * tiene halo, no hay contador de áreas ni orden por «más interesante» —el orden es el del dato, que
+ * es la proximidad—, y la mancha de terracota solo cae sobre los avisos, nunca sobre un nombre ni
+ * sobre una distancia. Adornar una advertencia es pedirle al lector que le crea por el adorno; lo
+ * que esta sección puede sostener está escrito con sus condiciones al lado.
+ *
+ * **Cero JavaScript**: esto es SSG y la sección no tiene nada que hidratar. Un espacio protegido no
+ * cambia en horas; cuando cambia, cambia por norma, y eso llega con una ingesta nueva y un rebuild.
+ *
+ * Su hoja de estilos (`estilos/areas-protegidas.css`) la importa el LAYOUT y no este componente,
+ * por lo medido en T-10: importada desde aquí, Astro no la mete en el bundle cuando el componente
+ * llega por el mapa de renderizadores y la sección se publicaría **sin estilos**, en verde.
+ */
+import {
+  ATRIBUCIONES_PROTECTED_AREAS,
+  AVISO_SIN_RED,
+  COLUMNA_AREA,
+  COLUMNA_DISTANCIA,
+  COLUMNA_FIGURA,
+  COMO_SE_MIDE_LA_DISTANCIA,
+  filasDeAreas,
+  ID_SECCION_AREAS,
+  kmDelRadio,
+  ningunaCerca,
+  QUE_ES_ESTO,
+  QUE_SON_LAS_SIGLAS,
+  ROTULO_CODIGO,
+  ROTULO_FUENTES,
+  tituloDeLaSeccion,
+} from "@mareia/module-protected-areas";
+
+import { fechaLarga } from "../../formato.ts";
+import { cargarAreasDelPuerto } from "../../modulos/areas-protegidas.ts";
+import type { ContextoDeSeccion } from "../../modulos/contexto.ts";
+
+interface Props {
+  contexto: ContextoDeSeccion;
+}
+
+const { contexto } = Astro.props;
+
+const { fuente, criterio, areas, motivo } = await cargarAreasDelPuerto(contexto);
+// `filasDeAreas` no ordena: comprueba que el dato venga por proximidad y levanta si no. Ordenar
+// aquí taparía un fallo del derivado que nadie volvería a ver.
+const filas = filasDeAreas(areas);
+---
+
+{/*
+  El `id` del título es `titulo-<id de la sección>` porque el `aria-labelledby` lo compone
+  `SeccionesDeModulos.astro`: sin esta convención la sección no se expone como región y el `id`
+  queda colgando. Lo caza `todaSeccionDeBloqueTieneNombreAccesible` (hallazgo A-13 de T-10).
+*/}
+<h2 class="bloque__titulo" id={`titulo-${ID_SECCION_AREAS}`}>
+  {tituloDeLaSeccion(criterio.radioKm)}
+</h2>
+<p class="areas__intro">{QUE_ES_ESTO}</p>
+
+{/*
+  LA REGLA DURA DE T-21, y por eso va aquí arriba y en las 153 páginas: en ningún sitio, ni por
+  omisión, puede leerse que se pueda pescar. El texto no se copia en el módulo —viaja firmado con
+  el dato, en `fuente.aviso`— porque dos ejemplares del mismo aviso acaban diciendo cosas distintas.
+*/}
+<p class="areas__aviso"><strong>{fuente.aviso}</strong></p>
+
+{
+  filas.length > 0 ? (
+    <>
+      <table class="tabla-areas">
+        <caption class="solo-lectores">
+          Áreas marinas protegidas a menos de {kmDelRadio(criterio.radioKm)} km de {
+            contexto.nombre
+          }, de la más cercana a la más lejana
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">{COLUMNA_AREA}</th>
+            <th scope="col">{COLUMNA_FIGURA}</th>
+            <th scope="col">{COLUMNA_DISTANCIA}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filas.map((fila) => (
+            <tr data-area={fila.clave} data-dentro={String(fila.proximidad.dentro)}>
+              <th scope="row">
+                {fila.nombre}
+                <span class="tabla-areas__codigo">
+                  {ROTULO_CODIGO}: {fila.codigo}
+                </span>
+              </th>
+              <td>
+                <span class="tabla-areas__sigla">{fila.tipo}</span>
+                {/*
+                  La glosa va pegada a la sigla y no en un pie: «ZEPA» sola no informa a nadie que
+                  no la conozca ya, y en un móvil al sol nadie baja a buscarla. `RESERVA MARINA` no
+                  la lleva porque la fuente ya la escribe en palabras.
+                */}
+                {fila.glosa !== null && <span class="tabla-areas__glosa">{fila.glosa}</span>}
+              </td>
+              <td>
+                <span class="tabla-areas__distancia">{fila.proximidad.texto}</span>
+                {/*
+                  «Dentro» es un hecho distinto y más fuerte que una distancia corta, así que se
+                  dice aparte y con sus palabras en vez de disolverse en un «a menos de 1 km».
+                */}
+                {fila.proximidad.explicacion !== null && (
+                  <span class="tabla-areas__dentro">{fila.proximidad.explicacion}</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p class="datos__nota">{COMO_SE_MIDE_LA_DISTANCIA}</p>
+      <p class="datos__nota">{QUE_SON_LAS_SIGLAS}</p>
+    </>
+  ) : (
+    <>
+      {/*
+        LOS 10 PUERTOS SIN NINGUNA ÁREA. La sección no desaparece: una sección que desaparece se lee
+        como «no hay nada que saber», y ésta dice lo que sabemos —ninguna— y, con el motivo que
+        viaja en el propio dato, hasta dónde hemos mirado y que el límite es una decisión nuestra.
+        Lo mide el gate P3 sobre el `dist/`.
+      */}
+      <p class="areas__ninguna" data-sin-areas="true">
+        {ningunaCerca(criterio.radioKm)}
+      </p>
+      <p class="datos__nota">{motivo}</p>
+    </>
+  )
+}
+
+<p class="areas__aviso">{AVISO_SIN_RED}</p>
+
+<p class="datos__nota">
+  {ROTULO_FUENTES} ·{" "}
+  {
+    ATRIBUCIONES_PROTECTED_AREAS.map((atribucion, indice) => (
+      <>
+        {indice > 0 && <> · </>}
+        <a href={atribucion.url}>{atribucion.name}</a> ({atribucion.license})
+      </>
+    ))
+  }{" "}
+  · Ingesta de la fuente del {fechaLarga(fuente.descargadoEn)}.
+</p>
