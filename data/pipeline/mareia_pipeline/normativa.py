@@ -484,6 +484,174 @@ def errores_de_trinquete(dataset: dict[str, Any]) -> list[str]:
 
 
 # --------------------------------------------------------------------------------------------
+# G4 · reconstrucción: las 118 cifras publicadas son las que dice la fuente
+# --------------------------------------------------------------------------------------------
+
+#: Las respuestas del BOE **capturadas** el día de la ingesta: ``metadatos``, ``texto/indice`` y los
+#: tres bloques de anexo, byte a byte tal y como los sirve la API.
+#:
+#: Viven bajo ``tests/fixtures`` porque es donde se capturaron para los recorridos del parser, y
+#: **no se duplican aquí a propósito**: dos copias de la misma fuente se desincronizan, y la que se
+#: quedase vieja daría verde comparando el dataset contra una fuente que ya nadie mira. Que un gate
+#: de producción lea de ``tests/`` es el precio de tener **una sola** copia de la fuente.
+FUENTE_CAPTURADA = REPO_ROOT / "data" / "pipeline" / "tests" / "fixtures" / "boe"
+
+
+def reconstruir_desde_fuente(
+    origen: Path = FUENTE_CAPTURADA, *, hoy: dt.date | None = None
+) -> dict[str, Any]:
+    """Rehace el dataset entero desde la fuente capturada, **sin tocar la red**.
+
+    Es el mismo camino que ``run.py normativa`` —los mismos parser, las mismas reglas de selección
+    de versión y el mismo constructor— con la descarga sustituida por los ficheros capturados. El
+    sello ``verificadoEn`` sale de ``hoy`` y lo pisa quien compare: esa fecha la escribe G2 y no la
+    fuente.
+
+    ``hoy`` manda sobre la **selección de versión** (la de mayor ``fecha_vigencia`` que no sea
+    futura), así que por defecto es el día real: si la fuente capturada trajera una redacción con
+    entrada en vigor futura, el día que entre en vigor este gate se pondrá rojo pidiendo regenerar,
+    que es exactamente lo que hay que hacer ese día.
+    """
+    fecha = hoy or dt.datetime.now(dt.timezone.utc).date()
+    metadatos = boe.leer_metadatos((origen / "metadatos.json").read_bytes())
+    indice = boe.leer_indice((origen / "indice.json").read_bytes())
+    anexos = tuple(
+        boe.parsear_anexo(
+            (origen / f"{bloque}.xml").read_bytes(),
+            bloque=bloque,
+            fecha_actualizacion=indice[bloque],
+            hoy=fecha,
+        )
+        for bloque in boe.BLOQUES_DE_ANEXO
+    )
+    return construir_dataset(metadatos, anexos, verificado_en=fecha)
+
+
+#: Cuántas diferencias se listan antes de callar. Un dataset regenerado de una fuente que cambió
+#: difiere en cientos de campos y volcarlos todos esconde el primero, que es el que se lee.
+TOPE_DE_DIFERENCIAS = 20
+
+
+def _etiqueta(entrada: Any, indice: int) -> str:
+    """Cómo se nombra una entrada de lista en el camino del error: por su nombre, no por su índice."""
+    if isinstance(entrada, dict):
+        nombre = entrada.get("id") or entrada.get("nombreComun") or entrada.get("marca")
+        if nombre:
+            return str(nombre)
+    return str(indice)
+
+
+def _diferencias(publicado: Any, esperado: Any, camino: str, fallos: list[str]) -> None:
+    """Compara campo a campo y **nombra el camino** de cada diferencia."""
+    if len(fallos) >= TOPE_DE_DIFERENCIAS:
+        return
+    if isinstance(esperado, dict) and isinstance(publicado, dict):
+        for clave in sorted(set(esperado) | set(publicado)):
+            if clave not in publicado:
+                fallos.append(f"{camino}.{clave}: la fuente lo trae y el dataset publicado no")
+            elif clave not in esperado:
+                fallos.append(f"{camino}.{clave}: el dataset lo publica y la fuente no lo dice")
+            else:
+                _diferencias(publicado[clave], esperado[clave], f"{camino}.{clave}", fallos)
+        return
+    if isinstance(esperado, list) and isinstance(publicado, list):
+        if len(esperado) != len(publicado):
+            fallos.append(
+                f"{camino}: el dataset publica {len(publicado)} entradas y la fuente da "
+                f"{len(esperado)}"
+            )
+            return
+        for indice, (uno, otro) in enumerate(zip(publicado, esperado, strict=True)):
+            _diferencias(uno, otro, f"{camino}[{_etiqueta(otro, indice)}]", fallos)
+        return
+    if publicado != esperado:
+        fallos.append(f"{camino}: el dataset publica {publicado!r} y la fuente dice {esperado!r}")
+
+
+def errores_de_reconstruccion(
+    dataset: dict[str, Any], origen: Path = FUENTE_CAPTURADA, *, hoy: dt.date | None = None
+) -> list[str]:
+    """Regenera el dataset desde la fuente capturada y lo compara con el que se publica.
+
+    **Cubre las 118 cifras, las tres tablas y todo lo que las acompaña** —nombres, literales,
+    notas, marcas, procedencias—, que es lo que G3 no puede hacer: el trinquete canario fija seis
+    especies elegidas a mano y sigue siendo el gate específico de la selección de versión, pero la
+    fila de al lado no la miraba nadie. Aquí no hay selección de qué vigilar: o el dataset es el
+    que sale de la fuente, o no se publica.
+
+    Lo que **no** hace, y por eso G2 sigue existiendo: preguntarle al BOE si la fuente capturada
+    sigue siendo la de hoy. Este gate es offline y determinista —corre en CI sin red y dice lo
+    mismo hoy que dentro de un año—; el de «¿ha cambiado la norma?» es diario y va contra la API.
+    Juntar los dos haría que un mal día del BOE rompiera el build, que es justo el fallo que la
+    rama ámbar de G2 existe para evitar.
+
+    ``verificadoEn`` se excluye de la comparación **por definición**: lo escribe G2 el día que
+    pregunta, no la fuente, y compararlo aquí pondría el gate en rojo cada mañana.
+    """
+    if not origen.is_dir():
+        return [
+            f"no está la fuente capturada ({origen}): sin ella no se puede comprobar que las "
+            "cifras publicadas son las de la norma"
+        ]
+    try:
+        esperado = reconstruir_desde_fuente(origen, hoy=hoy)
+    except (boe.ErrorBoe, OSError, KeyError) as error:
+        return [f"la fuente capturada ya no se puede leer con el parser de hoy: {error}"]
+    esperado["fuente"]["verificadoEn"] = dataset.get("fuente", {}).get("verificadoEn")
+    fallos: list[str] = []
+    _diferencias(dataset, esperado, "$", fallos)
+    if len(fallos) >= TOPE_DE_DIFERENCIAS:
+        fallos.append(
+            "… y más: la lista se corta en "
+            f"{TOPE_DE_DIFERENCIAS}. Regenera el dataset con `python run.py normativa` y mira el "
+            "diff entero"
+        )
+    return fallos
+
+
+# --------------------------------------------------------------------------------------------
+# G5 · rango sano
+# --------------------------------------------------------------------------------------------
+
+#: Los campos de ``talla`` que son una magnitud medible. Los otros dos —``segunNota`` y
+#: ``motivo``— son texto y dicen por qué no hay número.
+MAGNITUDES_DE_TALLA = ("cm", "kg")
+
+
+def errores_de_rango(dataset: dict[str, Any]) -> list[str]:
+    """Ninguna magnitud publicada puede ser cero ni negativa.
+
+    No es una validación de tipos —de eso ya se ocupa G1 con las claves de cada clase— sino de
+    **lectura**: un cero no se lee como una cifra rara, se lee como que **no hay mínimo**, y por ahí
+    se cuela lo contrario de lo que la sección existe para decir. Un negativo ni siquiera es una
+    magnitud. Las dos formas llegan hasta la página sin que nada se queje, porque la lectura
+    defensiva de la web sólo exige que sea un número finito.
+
+    Es un gate barato y de rango, no de valor: quién dice cuál es la cifra correcta es G4.
+    """
+    fallos: list[str] = []
+    for caladero in dataset.get("caladeros", []):
+        for especie in caladero.get("especies", []):
+            talla = especie.get("talla")
+            if not isinstance(talla, dict):
+                continue
+            etiqueta = f"{caladero.get('id', '?')} · {especie.get('nombreComun', '?')}"
+            for campo in MAGNITUDES_DE_TALLA:
+                if campo not in talla:
+                    continue
+                valor = talla[campo]
+                if not isinstance(valor, (int, float)) or isinstance(valor, bool):
+                    fallos.append(f"{etiqueta}: la talla publica {campo}={valor!r}, que no es un número")
+                elif valor <= 0:
+                    fallos.append(
+                        f"{etiqueta}: la talla publica {campo}={valor}. Una talla mínima de cero o "
+                        "negativa no se lee como un error: se lee como que esa especie no tiene "
+                        "mínimo, que es lo contrario de lo que dice la norma"
+                    )
+    return fallos
+
+
+# --------------------------------------------------------------------------------------------
 # G2 · vigencia
 # --------------------------------------------------------------------------------------------
 

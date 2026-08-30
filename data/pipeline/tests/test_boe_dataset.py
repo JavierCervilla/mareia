@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -240,6 +241,119 @@ def test_g3_en_rojo_si_una_de_las_seis_desaparece_del_dataset(copia: dict[str, A
 
 
 # --------------------------------------------------------------------------------------------
+# G4 · reconstrucción desde la fuente capturada
+# --------------------------------------------------------------------------------------------
+
+
+def test_g4_en_verde_las_118_tallas_publicadas_son_las_que_dice_la_fuente(
+    dataset: dict[str, Any],
+) -> None:
+    """El dataset commiteado se rehace campo a campo desde las respuestas capturadas del BOE.
+
+    Es lo que G3 no puede hacer: el trinquete canario fija seis especies elegidas a mano y la fila
+    de al lado no la mira nadie. Aquí no hay selección —118 tallas, 3 anexos, notas, literales,
+    procedencias— y no hace falta red.
+    """
+    assert normativa.errores_de_reconstruccion(dataset) == []
+    assert sum(len(c["especies"]) for c in dataset["caladeros"]) == 118
+
+
+@pytest.mark.parametrize(
+    ("caladero", "especie", "plantada", "real"),
+    [
+        ("cantabrico-noroeste-y-golfo-de-cadiz", "Merluza", 7, 27),
+        ("mediterraneo", "Salmonete", 3, 11),
+        ("canario", "Vieja colorada", 5, 22),
+    ],
+    ids=["Anexo I", "Anexo II", "Anexo III"],
+)
+def test_g4_en_rojo_una_cifra_plantada_en_cualquiera_de_los_tres_anexos(
+    copia: dict[str, Any], caladero: str, especie: str, plantada: int, real: int
+) -> None:
+    """Las tres del pase adversario, una por caladero.
+
+    La «Vieja colorada» es la que describe la forma del agujero que este gate tapa: está en la
+    misma tabla que G3 vigila, a dos filas de una de las seis que sí mira, y G3 la dejaba pasar.
+    """
+    tabla = next(c for c in copia["caladeros"] if c["id"] == caladero)
+    fila = next(e for e in tabla["especies"] if e["nombreComun"] == especie)
+    fila["talla"] = {"tipo": "longitud_cm", "cm": plantada}
+    fila["textoOriginal"] = str(plantada)
+    errores = normativa.errores_de_reconstruccion(copia)
+    assert any(f"publica {plantada} y la fuente dice {real}" in error for error in errores), errores
+
+
+def test_g4_en_rojo_una_nota_reescrita_tampoco_pasa(copia: dict[str, Any]) -> None:
+    """No es un gate de cifras: la nota que excepciona la cifra vale tanto como ella."""
+    mediterraneo = next(c for c in copia["caladeros"] if c["id"] == "mediterraneo")
+    mediterraneo["notas"][0]["texto"] = "La talla del pulpo no se aplica en ninguna parte."
+    assert normativa.errores_de_reconstruccion(copia) != []
+
+
+def test_g4_en_rojo_si_desaparece_una_fila_entera(copia: dict[str, Any]) -> None:
+    canario = next(c for c in copia["caladeros"] if c["id"] == "canario")
+    canario["especies"] = canario["especies"][:-1]
+    assert any("entradas y la fuente da" in error for error in normativa.errores_de_reconstruccion(copia))
+
+
+def test_g4_no_mira_el_sello_de_g2_que_cambia_cada_dia(copia: dict[str, Any]) -> None:
+    """``verificadoEn`` lo escribe G2 el día que pregunta al BOE, no la fuente.
+
+    Compararlo aquí pondría este gate en rojo cada mañana, que es como se consigue que alguien lo
+    desactive. Lo que envejece con ese sello lo mide la sección publicada, no este gate.
+    """
+    copia["fuente"]["verificadoEn"] = "2019-04-07"
+    assert normativa.errores_de_reconstruccion(copia) == []
+
+
+def test_g4_en_rojo_si_falta_la_fuente_capturada(
+    copia: dict[str, Any], tmp_path: Path
+) -> None:
+    """Sin fuente no se da un verde: un gate que no puede comparar no ha comparado nada."""
+    errores = normativa.errores_de_reconstruccion(copia, tmp_path / "no-existe")
+    assert errores and "no está la fuente capturada" in errores[0]
+
+
+# --------------------------------------------------------------------------------------------
+# G5 · rango sano
+# --------------------------------------------------------------------------------------------
+
+
+def test_g5_en_verde_ninguna_talla_publicada_es_cero_ni_negativa(dataset: dict[str, Any]) -> None:
+    assert normativa.errores_de_rango(dataset) == []
+
+
+@pytest.mark.parametrize("plantada", [0, -11], ids=["cero", "negativa"])
+def test_g5_en_rojo_un_cero_no_se_lee_como_error_sino_como_que_no_hay_minimo(
+    copia: dict[str, Any], plantada: int
+) -> None:
+    """El caso que peor se lee de todo el pase adversario.
+
+    ``magnitud()`` en la web sólo exige que sea un número finito, así que un ``0`` llega a la
+    página pintado como cifra, con ``tabular-nums`` y todo, y quien lo lea entiende que esa especie
+    no tiene talla mínima.
+    """
+    mediterraneo = next(c for c in copia["caladeros"] if c["id"] == "mediterraneo")
+    next(e for e in mediterraneo["especies"] if e["nombreComun"] == "Sardina")["talla"] = {
+        "tipo": "longitud_cm",
+        "cm": plantada,
+    }
+    errores = normativa.errores_de_rango(copia)
+    assert len(errores) == 1
+    assert f"cm={plantada}" in errores[0]
+
+
+def test_g5_tambien_mira_los_kilos_y_no_solo_los_centimetros(copia: dict[str, Any]) -> None:
+    """Nueve de las 118 tallas son un peso; un gate que sólo mirase ``cm`` dejaría fuera al pulpo."""
+    mediterraneo = next(c for c in copia["caladeros"] if c["id"] == "mediterraneo")
+    next(e for e in mediterraneo["especies"] if e["nombreComun"] == "Pulpo")["talla"] = {
+        "tipo": "peso_kg",
+        "kg": 0,
+    }
+    assert any("kg=0" in error for error in normativa.errores_de_rango(copia))
+
+
+# --------------------------------------------------------------------------------------------
 # Los gates están ENCHUFADOS al comando que corre CI, no sólo escritos
 # --------------------------------------------------------------------------------------------
 
@@ -260,4 +374,36 @@ def test_check_se_pone_rojo_con_una_cifra_derogada_y_con_una_procedencia_ausente
     }
     del copia["caladeros"][0]["especies"][0]["procedencia"]
     monkeypatch.setattr(normativa, "cargar", lambda: json.loads(json.dumps(copia)))
+    assert run.command_check(argparse.Namespace()) == 1
+
+
+def test_check_se_pone_rojo_con_una_cifra_que_no_es_la_de_la_norma(
+    monkeypatch: pytest.MonkeyPatch, copia: dict[str, Any]
+) -> None:
+    """G4 enchufado al comando. La merluza a 7 cm pasaba G1, G3, el build y todos los tests."""
+    cantabrico = next(
+        c for c in copia["caladeros"] if c["id"] == "cantabrico-noroeste-y-golfo-de-cadiz"
+    )
+    merluza = next(e for e in cantabrico["especies"] if e["nombreComun"] == "Merluza")
+    merluza["talla"] = {"tipo": "longitud_cm", "cm": 7}
+    merluza["textoOriginal"] = "7"
+    monkeypatch.setattr(normativa, "cargar", lambda: json.loads(json.dumps(copia)))
+    assert run.command_check(argparse.Namespace()) == 1
+
+
+def test_check_se_pone_rojo_con_una_talla_de_cero_aunque_g4_calle(
+    monkeypatch: pytest.MonkeyPatch, copia: dict[str, Any]
+) -> None:
+    """G5 enchufado al comando, y **medido solo**.
+
+    Se silencia G4 a propósito: con los dos vivos, un cero da rojo igualmente y un G5 desconectado
+    pasaría desapercibido. Un gate al que nunca se le ve morder por su cuenta no es cobertura.
+    """
+    mediterraneo = next(c for c in copia["caladeros"] if c["id"] == "mediterraneo")
+    next(e for e in mediterraneo["especies"] if e["nombreComun"] == "Sardina")["talla"] = {
+        "tipo": "longitud_cm",
+        "cm": 0,
+    }
+    monkeypatch.setattr(normativa, "cargar", lambda: json.loads(json.dumps(copia)))
+    monkeypatch.setattr(normativa, "errores_de_reconstruccion", lambda *_, **__: [])
     assert run.command_check(argparse.Namespace()) == 1

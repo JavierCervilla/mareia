@@ -416,6 +416,25 @@ def _check_normativa() -> int:
                 f"✓ G3 · las {len(normativa.TRINQUETE_CANARIO)} especies canarias que movió el RD "
                 "936/2025 publican su talla vigente y no la de 1995"
             )
+        # G4 · las cifras publicadas son las que dice la fuente. G3 fija seis especies elegidas
+        # a mano; esto regenera el dataset entero desde las respuestas capturadas del BOE y lo
+        # diffea, así que cubre las 118 tallas de los tres anexos sin salir a la red.
+        regeneradas = normativa.errores_de_reconstruccion(dataset)
+        for error in regeneradas:
+            print(f"✗ reconstrucción: {error}", file=sys.stderr)
+        problems += len(regeneradas)
+        if not regeneradas:
+            especies = sum(len(c["especies"]) for c in dataset["caladeros"])
+            print(
+                f"✓ G4 · las {especies} tallas publicadas son, campo a campo, las que salen de la "
+                "fuente capturada del BOE"
+            )
+        fuera_de_rango = normativa.errores_de_rango(dataset)
+        for error in fuera_de_rango:
+            print(f"✗ rango: {error}", file=sys.stderr)
+        problems += len(fuera_de_rango)
+        if not fuera_de_rango:
+            print("✓ G5 · ninguna talla publicada es cero ni negativa")
     catalogo = json.loads(PORTS_JSON.read_text(encoding="utf-8"))
     errores = normativa.errores_de_caladeros_de_puertos(catalogo)
     for error in errores:

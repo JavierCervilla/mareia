@@ -60,8 +60,14 @@ function python(): string {
 }
 
 /**
- * G1 + G3 sobre un dataset dado, que es exactamente lo que llama `run.py check` en
- * `_check_normativa`. Devuelve los errores que el gate ve.
+ * Los gates del pipeline sobre un dataset dado: **los mismos cuatro que llama `run.py check` en
+ * `_check_normativa`**, y en el mismo orden. Devuelve los errores que ven.
+ *
+ * La lista creció al arreglar este hallazgo. G1 (procedencia) y G3 (el trinquete canario de seis
+ * especies) son los que había cuando el ataque se reprodujo; G4 (reconstrucción: el dataset entero
+ * regenerado desde la fuente capturada del BOE y diffeado campo a campo) y G5 (rango sano: ninguna
+ * magnitud publicada es cero ni negativa) son la cura. Si mañana alguien añade un gate a
+ * `_check_normativa` y no lo añade aquí, este recorrido dejará de medir lo que dice medir.
  */
 function gatesDelPipeline(dataset: string): string[] {
   const programa = [
@@ -69,7 +75,12 @@ function gatesDelPipeline(dataset: string): string[] {
     "from pathlib import Path",
     "from mareia_pipeline import normativa",
     "d = normativa.cargar(Path(sys.argv[1]))",
-    "print(json.dumps(normativa.errores_de_procedencia(d) + normativa.errores_de_trinquete(d)))",
+    "print(json.dumps(",
+    "    normativa.errores_de_procedencia(d)",
+    "    + normativa.errores_de_trinquete(d)",
+    "    + normativa.errores_de_reconstruccion(d)",
+    "    + normativa.errores_de_rango(d)",
+    "))",
   ].join("\n");
   const salida = execFileSync(python(), ["-c", programa, dataset], {
     cwd: join(RAIZ, "data", "pipeline"),
@@ -108,9 +119,11 @@ for (const plantada of PLANTADAS) {
   test(`A12 · cambiar la talla de ${plantada.especie} (${plantada.puertos} puertos) tiene que poner algún gate en rojo`, async ({
     qa,
   }) => {
-    // TRINQUETE · Hallazgo ABIERTO (bundles fd2f39c2240e · b99b1319c77b · 8c682eb6ac5d ·
-    // 96f82e9917f8, uno por especie). Quítalo el día en que cambiar una cifra publicada ponga algo en rojo.
-    test.fail();
+    // TRINQUETE · Hallazgo ARREGLADO (bundles fd2f39c2240e · b99b1319c77b · 8c682eb6ac5d ·
+    // 96f82e9917f8, uno por especie). La cura son G4 y G5, en `data/pipeline/mareia_pipeline/
+    // normativa.py`: el dataset entero se regenera desde la fuente capturada del BOE y se diffea
+    // campo a campo (118 cifras, 3 anexos), y ninguna magnitud publicada puede ser cero ni
+    // negativa. Este recorrido se queda como gate permanente: no se borra.
 
     qa.step("los gates tienen que estar vivos: verdes sobre el dataset publicado");
     // Si esto no sale verde, un rojo posterior no probaría nada y un verde tampoco.
