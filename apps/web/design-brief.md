@@ -242,6 +242,55 @@ puertos planos. **306 entradas mudas**, y el último clic antes de la ficha dado
   repite, que es lo que gzip hace mejor. Ni un byte de JavaScript: estas páginas conservan su
   cero-JS.
 
+## 7 quinquies. Ampliación T-19 — una cifra legal en la página, y por qué no se adorna
+
+Esta sección **amplía el brief** (no abre otro), como anuncia la cabecera: llega la primera sección
+que publica un dato con **consecuencia jurídica** —las tallas mínimas de captura del RD 560/1995— y
+eso mueve una regla que hasta ahora era estética.
+
+- **Es información *consultable*, y va donde le toca** (§1). La sección entra por el contrato de
+  módulos con `order: 30`, detrás de la actividad solunar y de la meteo, que empatan a 20. A esta
+  página se viene a por la marea; quien mira la talla la mira porque **ya tiene la pieza en la
+  mano**, y ese momento no compite con la pleamar. Ponerla más arriba no la haría más útil: una
+  cifra legal no gana por estar antes, gana por estar **completa**.
+- **Cero *juice*, y aquí el argumento no es de gusto.** Ni barra, ni estrella, ni rareza, ni
+  dificultad, ni contador, ni orden por «mejores especies», ni la mancha de terracota sobre ningún
+  número. El anti-objetivo §3 ya prohíbe la gamificación del dato; sobre una cifra con consecuencia
+  jurídica se convierte en una regla dura: **el adorno consigue que se le crea al número más de lo
+  que merece**, y lo que merece está escrito encima con su fecha de comprobación. Lo único con color
+  de la sección son los dos avisos, con el mismo filete de terracota que ya usan los avisos del
+  puerto — y ninguno cae sobre una cifra. Hay un gate que lo mide sobre la hoja
+  (`tallas-construido.test.ts`).
+- **La nota va pegada a la cifra, no en el pie.** Es la decisión de composición que sostiene la
+  trayectoria entera: la lubina son 36 cm salvo en las divisiones 8a y 8b del CIEM —el golfo de
+  Vizcaya, o sea los 47 puertos del Anexo I de este portal—, donde son 44; el pulpo del Anexo II no
+  aplica en aguas interiores de Balears, y ahí hay 17 puertos. Una marca sola (`36 (***)`) es una
+  **promesa de nota** que hay que ir a buscar, y en un móvil al sol nadie la busca. Se paga en
+  repetición —la nota `(*)` sale seis veces en el Anexo I— y en bytes; se acepta, porque la
+  alternativa es publicar una cifra legal falsa para esos puertos. El pie con las notas enteras se
+  mantiene igualmente, para quien lea la tabla como tabla.
+- **La ausencia se escribe, no se rellena** (§3, «NO dato inventado»), y aquí toma cinco formas
+  porque la columna «Talla (en cm)» del BOE no contiene solo tallas en cm: 6 especies con la talla
+  *por determinar* (se dice que **la norma no la fija**), 9 en kilos (se dice **de peso**), una en
+  «80 cm o 10 kg», y la boga, cuya celda el BOE imprime como `1 1`: se publica el literal, se dice
+  que la norma lo escribe así y **no se corrige por inferencia**. La cifra alineada con
+  `tabular-nums` solo cuando de verdad **es** una cifra: una frase alineada como número se lee como
+  si lo fuera.
+- **El literal del BOE viaja al lado, siempre**, en una tercera columna de cuerpo pequeño. Es lo que
+  permite comparar lo que pintamos con lo que dice la norma sin salir de la página, y es la misma
+  costumbre del §7 (referencia 2): publicar el método junto al número.
+- **Sin cobertura la tabla se sigue leyendo, y lo dice.** El módulo declara `offline: cache-first`
+  —decisión del humano frente a la recomendación de ocultarla— y la sección **no tiene JavaScript**
+  con el que enterarse de si hay red, así que el aviso no se enciende: **está siempre escrito**,
+  redactado para ser verdad en los dos casos. Es la única forma honrada de sostener «se muestra sin
+  red»: si la copia guardada no puede decir que es una copia guardada, el sello de verificación se
+  lee como si fuese de hoy. Es el reverso exacto de ADR-01 —allí el dato caducaba en horas y por eso
+  hacía falta una isla; aquí no caduca, **se deroga**— y por eso esta sección conserva el cero JS del
+  core.
+- **En papel se imprime entera**, al contrario que los controles de §7 bis: no es un mando, es la
+  tabla, y llevarse impresa la talla mínima del caladero es exactamente el uso que un almanaque tiene
+  en un barco.
+
 ## 8. Cómo se audita
 
 ```bash

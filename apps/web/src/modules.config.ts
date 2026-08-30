@@ -5,6 +5,7 @@ import {
   selectPageSections,
 } from "@mareia/module-contract";
 import { fishingModule } from "@mareia/module-fishing";
+import { regulationsModule } from "@mareia/module-regulations";
 import { WEATHER_UI_MODULE } from "@mareia/module-weather/ui";
 
 /**
@@ -14,13 +15,19 @@ import { WEATHER_UI_MODULE } from "@mareia/module-weather/ui";
  * `fishing` (T-10) aporta la sección de actividad solunar y las bandas del gráfico, y no necesita
  * red: se calcula en build. `WEATHER_UI_MODULE` (T-11) es el módulo meteo **visto desde la UI**
  * —identidad, atribuciones y secciones—, sin su parte servidor, que necesita `fetch`, caché KV y la
- * clave de AEMET, y el build de la web no tiene ninguna de las tres.
+ * clave de AEMET, y el build de la web no tiene ninguna de las tres. `regulationsModule` (T-19)
+ * aporta las tallas mínimas del caladero del puerto: dato de build leído del BOE, sin parte
+ * servidor y sin JavaScript.
  *
- * **Dar de baja cualquiera de los dos es borrar su línea**: la página sigue construyendo, sin esa
+ * **Dar de baja cualquiera de los tres es borrar su línea**: la página sigue construyendo, sin esa
  * sección, y quitando meteo se queda además **sin JavaScript de cliente**. Lo comprueba
  * `modules.config.test.ts`.
  */
-export const activeModules: readonly AppModule[] = [fishingModule, WEATHER_UI_MODULE];
+export const activeModules: readonly AppModule[] = [
+  fishingModule,
+  WEATHER_UI_MODULE,
+  regulationsModule,
+];
 
 /**
  * Secciones que la página de un puerto debe renderizar, ordenadas por `order`. Quien las coloca es

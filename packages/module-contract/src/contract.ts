@@ -8,8 +8,17 @@
  * Astro, sin dominio. Solo tipos.
  */
 
-/** Identificador estable de un módulo. Alta/baja de módulos = editar los `modules.config.ts`. */
-export type ModuleId = "fishing" | "weather" | "navigation";
+/**
+ * Identificador estable de un módulo. Alta/baja de módulos = editar los `modules.config.ts`.
+ *
+ * La unión está **cerrada** para que dar de alta un módulo se vea en el diff de este archivo, y
+ * `regulations` (T-19) es la primera vez que se ejerce esa puerta. La normativa de tallas mínimas
+ * **no** entra colgada de `fishing` «para no tocar el contrato»: serían dos módulos con una sola
+ * identidad, una sola versión y las atribuciones mezcladas —la teoría solunar y el BOE en la misma
+ * lista—, y darlos de baja por separado dejaría de ser borrar una línea. Ampliar la unión es
+ * exactamente para lo que está cerrada.
+ */
+export type ModuleId = "fishing" | "weather" | "navigation" | "regulations";
 
 /**
  * Referencia mínima a un puerto: lo único que el contrato necesita saber para decidir si un módulo

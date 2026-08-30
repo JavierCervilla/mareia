@@ -5,6 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { AppModule } from "@mareia/module-contract";
+import { SECCION_TALLAS_MINIMAS } from "@mareia/module-regulations";
 import { METEO_SECTION_COMPONENT, WEATHER_UI_MODULE } from "@mareia/module-weather/ui";
 
 import { activeModules, sectionsForPort } from "./modules.config.ts";
@@ -34,19 +35,27 @@ const DUMMY: AppModule = {
   ],
 };
 
-test("el registry de producción publica los dos módulos y sus secciones, en orden", () => {
-  // Los dos, y en el orden que fija `order`: la unión es lo que rompía el merge de T-10 con T-11,
+test("el registry de producción publica los tres módulos y sus secciones, en orden", () => {
+  // Los tres, y en el orden que fija `order`: la unión es lo que rompía el merge de T-10 con T-11,
   // así que se afirma aquí en vez de dejar que cada trayectoria compruebe solo la suya.
   assert.deepEqual(
     activeModules.map((modulo) => modulo.id),
-    ["fishing", "weather"],
+    ["fishing", "weather", "regulations"],
   );
+  // Solunar y meteo empatan a `order: 20` (contextual) y las tallas van a 30 porque son
+  // **consultables**: se viene a esta página a por la marea, y una cifra legal no gana nada por
+  // estar antes. Ver el TSDoc de `SECCION_TALLAS`.
   assert.deepEqual(
     sectionsForPort(CORUNA).map((seccion) => [seccion.id, seccion.renderMode]),
     [
       ["actividad-solunar", "static"],
       ["meteo", "island"],
+      ["tallas-minimas", "static"],
     ],
+  );
+  assert.equal(
+    sectionsForPort(CORUNA).find((seccion) => seccion.id === "tallas-minimas")?.component,
+    SECCION_TALLAS_MINIMAS,
   );
   assert.deepEqual(
     sectionsForPort(CORUNA).filter((seccion) => seccion.id === "meteo"),
