@@ -2,7 +2,7 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
-## 2026-08-30 — T-21 · Áreas marinas protegidas: 342 avisos, 10 «ninguna» y ni un vértice
+## 2026-08-30 — T-21 · Áreas marinas protegidas: 348 avisos, 10 «ninguna» y ni un vértice
 
 La página de puerto publica los espacios marinos protegidos que tiene a menos de **30 km** —nombre
 oficial, figura y distancia aproximada— a partir de **RAMPE 2025** (MITECO). Es la primera sección
@@ -16,8 +16,8 @@ escribe.
   autoriza a pescar: esto dice dónde NO se puede, nunca dónde sí»— va **antes** de la lista, en las
   **153** páginas, y un gate del `dist/` busca ocho maneras de sugerir lo contrario («pesca
   permitida», «zona libre», «apto para la pesca»…).
-- **143 de 153 puertos tienen alguna, y son 342 relaciones de las 86 áreas de la fuente.** El
-  reparto por figura de lo publicado: **206 ZEPA · 107 ZEC · 26 reservas marinas · 3 AMP**. La quinta
+- **143 de 153 puertos tienen alguna, y son 348 relaciones de las 86 áreas de la fuente.** El
+  reparto por figura de lo publicado: **208 ZEPA · 108 ZEC · 26 reservas marinas · 6 AMP**. La quinta
   figura de RAMPE, `ZEC/AMP`, tiene una sola área —El Cachucho, en el Cantábrico abierto— y no cae a
   menos de 30 km de ningún puerto del catálogo: está glosada y probada en el módulo, y el gate lo
   dice en vez de fingir que la mide.
@@ -26,13 +26,35 @@ escribe.
   pierden la sección: publican «Ninguna a menos de 30 km de este puerto» y, debajo, hasta dónde se ha
   mirado y que el radio es **una decisión nuestra, no una ausencia de la fuente**. Una sección que
   desaparece se lee como «no hay nada que saber» y no se distingue de «esto no lo hemos hecho».
-- **La distancia se publica como cota entera, nunca como medida.** El derivado mide al **vértice más
-  cercano** del área, que está igual de lejos o más lejos que el borde real, así que se escribe «a
-  menos de 9 km» y no «8,7 km»: es verdad —la real es menor—, es del lado que conviene en una
-  advertencia —nunca aleja un área más de lo que está— y no finge una precisión que el método no da.
-  Las **60** relaciones por debajo del kilómetro dicen todas «a menos de 1 km», que es lo único
-  afirmable de ellas, y las **10** en las que el puerto cae **dentro** de un área lo dicen con esas
-  palabras en vez de disolverlo en una distancia corta.
+- **La distancia es al BORDE del área, y la primera versión de esta trayectoria la medía al vértice
+  más cercano.** El verificador rechazó ese primer intento y midió el coste: la cota por vértice
+  **perdía 6 relaciones reales** de las 348, tres de ellas del **Corredor de Migración de Cetáceos
+  del Mediterráneo**, que es la **única AMP** del catálogo y que así se publicaba en tres puertos y
+  se perdía en otros tres. Que el error cayera siempre del lado de «alejar» no lo hacía inofensivo:
+  en una sección cuya única razón de ser es avisar, alejar es **avisar de menos**. La causa está en
+  la fuente —RAMPE tiene una mediana de arista de 2,01 m pero **728 aristas de más de 1 km y una de
+  159,6 km**, y el error de la cota es del orden de media arista—, y el arreglo es distancia punto a
+  segmento sobre cada arista, en `geo.distancia_a_segmento_km`, con `math` y sin `pyproj` ni
+  `shapely`. Pollença tenía el Corredor a **27,6 km** de su borde y a **69,8 km** de su vértice.
+  Se sigue publicando como **cota entera** —«a menos de 9 km» y no «8,7 km»—, ahora con los dos
+  redondeos hacia arriba (la décima en el dato, el kilómetro en la página). Las **59** relaciones por
+  debajo del kilómetro dicen todas «a menos de 1 km», y las **10** en las que el puerto cae
+  **dentro** de un área lo dicen con esas palabras en vez de disolverlo en una distancia corta.
+- **Gate P5: las dos métricas, comparadas en cada ingesta.** El derivado publica cuánto se separan
+  —**6 relaciones de diferencia, 342 → 348**, la mayor de **42,2 km**— y `run.py check` lo comprueba
+  sin red contra un umbral declarado, porque CI no se baja los 54,8 MB de RAMPE. Dos rojos distintos:
+  por **umbral**, si la fuente pierde densidad de vértices y la divergencia crece; y sin umbral
+  ninguno, si alguna relación *desaparece* al medir el borde, que es aritméticamente imposible —el
+  vértice **es** un punto del borde— y por tanto sólo puede ser un error en la distancia
+  punto-segmento. Probado en rojo por las dos vías.
+- **Y `k0` quedó atado a algo que no somos nosotros.** El gate P1 anunciaba una capa de «escala» que
+  validaba `k0 = 0,9996`, y no la validaba: `k0` entraba por los dos lados de la comparación y se
+  cancelaba. Medido con `K0 = 1` —olvidarse entero del factor de escala de UTM, 1,8 km sobre el
+  terreno—: las **cuatro** capas seguían en verde. La quinta capa es un punto que publica un tercero
+  con sus **dos** coordenadas a la vez, la UTM y la geográfica —el ejemplo numérico de la transversa
+  de Mercator de Snyder, USGS Professional Paper 1395 (1987), págs. 269-270—; nuestra inversa lo
+  devuelve a **4,7 cm** de donde su autor lo puso, con tolerancia de 1 m, y se pone roja en cuanto
+  `k0` se equivoca en la **séptima cifra** (verde en +2,0 × 10⁻⁷, roja en +2,2 × 10⁻⁷).
 - **Las siglas se glosan; el régimen, no.** ZEPA → «Zona de Especial Protección para las Aves», ZEC →
   «Zona Especial de Conservación», AMP → «Área Marina Protegida», pegadas a la sigla y no en un pie.
   Lo que **no** se escribe es qué permite o prohíbe cada figura: eso lo fija la declaración oficial de
@@ -73,11 +95,14 @@ escribe.
   slug— y (b) escondiendo la sección en esos 10 puertos con un `isEnabledForPort`, que es la
   tentación real: se cayeron **9 de los 11** recorridos del fichero —los nueve que leen el `dist/`—,
   nombrando el primer puerto sin sección.
-- **Lo que pesa, medido sobre el `dist/`.** La sección añade **1.958 B** en Valencia (sin ninguna
-  área, +4,7 %), **3.068 B** en Vigo (una área, +6,6 %) y **4.808 B** en Agaete (seis, el máximo del
-  catálogo, +11,3 %); comprimida, entre **612 y 1.183 B**. La hoja de estilos suma **1.004 B** al
-  bundle común (18.782 → 19.786, +5,3 %) y el `dist/` entero pasa de 7,73 a 8,26 MB (+6,9 %). **Ni
-  un byte de JavaScript.**
+- **Lo que pesa, medido sobre el `dist/`** —la página con la sección menos la página sin ella, sobre
+  las 153—. La sección añade **1.955 B** en Valencia (sin ninguna área, +4,7 %), **2.944 B** en Vigo
+  (una área, +6,3 %) y **4.925 B** en Guía de Isora (seis, el máximo del catálogo, +11,5 %);
+  comprimida, entre **599 y 1.186 B**. La hoja de estilos suma **1.004 B** al bundle común
+  (18.782 → 19.786, +5,3 %) y el `dist/` entero pasa de 7,733 a 8,249 MB (+6,7 %). **Ni un byte de
+  JavaScript.** El máximo ya no se teclea: un recorrido lo recalcula sobre las 153 páginas
+  construidas. Hasta la revisión de esta trayectoria aquí figuraba **Agaete** como el más gordo con
+  4.808 B, y Agaete es el **quinto** —4.684 B—: la cifra reproducía, la palabra «máximo» no.
 
 ## 2026-08-30 — T-19 · Tallas mínimas por caladero: 118 cifras del BOE, y ninguna sin su excepción
 

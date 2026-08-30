@@ -216,7 +216,7 @@ test("ninguna página escribe una frase que suene a permiso", async (t) => {
 // Lo que se publica de cada área: nombre oficial, figura glosada y la distancia como COTA
 // =================================================================================================
 
-test("las 342 relaciones se publican con su nombre, su figura y su cota, en orden de proximidad", async (t) => {
+test("las 348 relaciones se publican con su nombre, su figura y su cota, en orden de proximidad", async (t) => {
   if (!HAY_BUILD) {
     t.skip(SIN_BUILD);
     return;
@@ -252,8 +252,8 @@ test("las 342 relaciones se publican con su nombre, su figura y su cota, en orde
     }
   }
   assert.deepEqual(rotas, []);
-  assert.equal(comprobadas, resumen.relaciones, "no se han comprobado las 342 relaciones");
-  assert.equal(comprobadas, 342);
+  assert.equal(comprobadas, resumen.relaciones, "no se han comprobado las 348 relaciones");
+  assert.equal(comprobadas, 348);
 });
 
 test("la distancia se publica SIEMPRE como cota entera, nunca como la décima del derivado", async (t) => {
@@ -261,7 +261,7 @@ test("la distancia se publica SIEMPRE como cota entera, nunca como la décima de
     t.skip(SIN_BUILD);
     return;
   }
-  // El derivado mide al vértice más cercano: `8,7` en la página se leería como una medida y no lo
+  // El derivado mide al borde: `8,7` en la página se leería como una medida y no lo
   // es. Se mide en el artefacto porque el error que importa —que alguien pinte
   // `{area.distanciaAproxKm} km` para «dar más detalle»— vive en la plantilla, no en la función.
   const decimales: string[] = [];
@@ -387,4 +387,34 @@ test("las cifras que el design brief cuenta de esta sección salen del dataset, 
   ]) {
     assert.ok(seccion.includes(cifra), `la ampliación del brief no dice «${cifra}»`);
   }
+});
+
+test("el peso de la sección en el dist/ es el que dice `module.ts`, y el máximo no se teclea", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  // El recorrido existe por un fallo real: `module.ts` y el CHANGELOG daban Agaete como el puerto
+  // donde más pesa la sección, y Agaete es el quinto. Nadie lo había medido sobre las 153 páginas.
+  // Lo que se mide es el coste MARGINAL —la página con la sección menos la página sin ella—, que es
+  // lo que la sección «añade»; medir el fragmento suelto daría otro número y otra frase.
+  const puertos = await cargarPuertos();
+  const pesos = puertos.map((puerto) => {
+    const html = readFileSync(join(DIST, rutaPuerto(puerto), "index.html"), "utf8");
+    const abre = html.indexOf(`<section id="${ID_SECCION_AREAS}"`);
+    const cierra = html.indexOf("</section>", abre) + "</section>".length;
+    const sinSeccion = html.slice(0, abre) + html.slice(cierra);
+    return {
+      slug: puerto.slug,
+      bytes: Buffer.byteLength(html) - Buffer.byteLength(sinSeccion),
+    };
+  });
+  pesos.sort((a, b) => b.bytes - a.bytes);
+  const mayor = pesos.at(0);
+  const menor = pesos.at(-1);
+  assert.ok(mayor !== undefined && menor !== undefined, "no se ha medido ninguna página");
+  assert.equal(mayor.slug, "guia-de-isora");
+  assert.equal(mayor.bytes, 4925);
+  assert.equal(menor.bytes, 1955);
+  t.diagnostic(`sección: de ${menor.bytes} B (${menor.slug}) a ${mayor.bytes} B (${mayor.slug})`);
 });

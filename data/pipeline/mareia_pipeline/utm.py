@@ -11,9 +11,12 @@ propósito: menos superficie que fijar y menos que pueda romperse dentro de un a
 tiene ``pyproj``, ``shapely`` ni ``geopandas``. Traer una dependencia nativa con los datos de PROJ
 por dos inversiones de UTM sería caro, así que se escribe aquí la inversa de la transversa de
 Mercator (series de Krüger, orden 3) y se paga el coste de mantenerla con el gate P1, que es lo que
-la ata a la realidad: ``errores_de_reproyeccion`` la mide contra cuatro cosas distintas, y una de
-ellas —el arco de meridiano por cuadratura numérica— **no comparte una línea de código con la
-serie**, que es lo que hace que sea una comprobación y no un eco.
+la ata a la realidad: ``errores_de_reproyeccion`` la mide contra cinco cosas distintas, y dos de
+ellas no comparten código con la serie —el arco de meridiano por cuadratura numérica— ni siquiera
+constantes con ella —un punto que publicó un tercero con su UTM y su geográfica a la vez—, que es lo
+que hace que sean comprobaciones y no un eco. La segunda se añadió tarde, al medir que las cuatro
+primeras siguen en verde con ``K0 = 1``: todas ellas arrancan de nuestro ``K0``, así que un ``K0``
+equivocado entra por los dos lados de cada comparación y se cancela.
 
 El modo de fallo que todo este módulo existe para impedir no es que la reproyección **falle**: es
 que **acierte a producir basura**. Una zona equivocada no levanta ninguna excepción; devuelve una
@@ -249,6 +252,15 @@ TOLERANCIA_INVARIANTE_GRADOS = 1e-12
 #: tolerancia de 10⁻⁷ acota el truncamiento, no la serie.
 TOLERANCIA_ESCALA_RELATIVA = 1e-7
 
+#: Tolerancia del punto publicado, en metros. Medido: la inversa devuelve el punto de Snyder a
+#: **4,7 cm** de sus coordenadas geográficas publicadas, que es lo que cabe esperar de unos valores
+#: redondeados a la décima de metro en origen. Un metro deja un factor de 21 sobre lo medido y queda
+#: 1.800 veces por debajo del error que produce ``K0 = 1`` (1.797 m), que es lo que esta capa
+#: existe para cazar. En términos de ``K0``, medido barriendo el valor: la comprobación se pone
+#: roja a partir de un desvío de 2,2 × 10⁻⁷ —verde en +2,0 × 10⁻⁷, roja en +2,2 × 10⁻⁷—, o sea en
+#: cuanto ``K0`` se equivoca en la séptima cifra.
+TOLERANCIA_PUNTO_PUBLICADO_M = 1.0
+
 #: Los dos puntos que la trayectoria midió contra la fuente real, cada uno en su zona. Son las
 #: primeras coordenadas de la primera *feature* de cada fichero de RAMPE 2025, y su referencia es el
 #: puerto del catálogo público que da nombre al sitio.
@@ -273,6 +285,69 @@ ANCLAS: tuple[Ancla, ...] = (
         lon_referencia=-17.9804,
         distancia_medida_km=17.93,
     ),
+)
+
+
+#: Elipsoide del punto publicado, y **sólo** de él: no está en ningún dato nuestro y por eso no
+#: entra en el mapa cerrado de ``PROYECCIONES``. Los parámetros son los que usa la fuente citada
+#: (a = 6.378.206,4 m, 1/f = 294,9786982, que da e² = 0,00676866, el valor que imprime el propio
+#: ejemplo). Que el elipsoide sea otro no debilita lo que esta capa ata —``K0``, el falso este y los
+#: coeficientes de la serie son los mismos para cualquier elipsoide—; el elipsoide concreto de
+#: nuestros datos lo atan el arco de meridiano y las invariantes, que sí corren sobre GRS80 y WGS84.
+CLARKE1866 = Elipsoide("Clarke 1866", 6_378_206.4, 1 / 294.9786982)
+
+
+@dataclass(frozen=True)
+class PuntoPublicado:
+    """Un punto del que un tercero publica **las dos** coordenadas: la UTM y la geográfica.
+
+    Es la única pieza de este gate que no sale de nosotros. Las otras cuatro capas comparan el
+    código contra otro cálculo propio —una cuadratura, tres igualdades, una diferencia finita—, y
+    todas ellas comparten con la serie los mismos parámetros de partida: si ``K0`` estuviera mal,
+    las cuatro seguirían verdes, porque el ``K0`` equivocado entra igual en los dos lados de la
+    comparación y se cancela. **Medido**: con ``K0 = 1`` en vez de 0,9996, las cuatro capas
+    anteriores no producen ni un fallo.
+
+    Un punto con las dos coordenadas publicadas rompe esa simetría porque el ``k0`` con el que se
+    calculó está congelado en los números, no en nuestro código.
+    """
+
+    #: De dónde salen los números, con el detalle suficiente para volver a buscarlos.
+    fuente: str
+    #: Se construye aquí y **no** se registra en ``PROYECCIONES``: es la zona del ejemplo citado, no
+    #: una zona que este pipeline sepa reproyectar porque algún dato suyo la necesite.
+    proyeccion: Proyeccion
+    este: float
+    norte: float
+    lat_publicada: float
+    lon_publicada: float
+    #: Separación medida el 2026-08-30 entre lo que devuelve la inversa y lo publicado.
+    desvio_medido_m: float
+
+
+#: El punto publicado que ata ``K0``.
+#:
+#: Sale del ejemplo numérico de la proyección transversa de Mercator de John P. Snyder, *Map
+#: Projections — A Working Manual*, USGS Professional Paper 1395 (1987), págs. 269-270: elipsoide
+#: Clarke 1866, ``k0 = 0,9996``, meridiano central 75° O —que es el de la zona UTM 18N—, y para
+#: 40°30′ N · 73°30′ O da ``x = 127.106,5 m`` e ``y = 4.484.124,4 m``. El ``x`` de Snyder se cuenta
+#: desde el meridiano central, así que aquí se le suma el falso este de UTM.
+#:
+#: **Por qué éste y no una coordenada nuestra**: el par (UTM, geográfica) lo calculó otra persona,
+#: con otro código y otras fórmulas, y publicó los dos lados. Nosotros no podemos moverlo. Si
+#: alguien cambia ``K0`` en la línea 32 de este fichero, este punto deja de cuadrar; ninguna otra
+#: capa se entera.
+PUNTO_PUBLICADO = PuntoPublicado(
+    fuente=(
+        "Snyder, J. P. (1987), «Map Projections — A Working Manual», USGS Professional Paper 1395, "
+        "ejemplo numérico de la transversa de Mercator, págs. 269-270"
+    ),
+    proyeccion=Proyeccion(26718, "NAD27 / UTM zona 18N", 18, CLARKE1866),
+    este=FALSO_ESTE + 127_106.5,
+    norte=4_484_124.4,
+    lat_publicada=40.5,
+    lon_publicada=-73.5,
+    desvio_medido_m=0.047,
 )
 
 
@@ -358,11 +433,18 @@ def _errores_de_invariantes() -> list[str]:
 
 
 def _errores_de_escala() -> list[str]:
-    """Sobre el meridiano central la escala es ``k0``, y eso fija cuánto vale un metro en longitud.
+    """Cuántos grados de longitud vale un metro de este, **relativo a ``k0``**.
 
-    Es la comprobación que ata la **longitud**, que es la mitad que el arco de meridiano no toca. El
-    valor esperado sale de la geometría del elipsoide (el radio del primer vertical por el coseno de
-    la latitud), no de la serie.
+    Ata la **longitud**, que es la mitad que el arco de meridiano no toca: el valor esperado sale de
+    la geometría del elipsoide —el radio del primer vertical por el coseno de la latitud—, no de la
+    serie, así que caza que la serie estire o encoja el eje este.
+
+    **Lo que NO ata, y conviene que esté escrito donde se lee la función: el valor de ``K0``.**
+    ``K0`` aparece en los dos lados de la comparación —en el norte que se construye para situarse a
+    la latitud pedida y en el denominador de ``esperado``— y **se cancela**. Medido: con ``K0 = 1``
+    en vez de 0,9996 esta capa sigue devolviendo la lista vacía. El nombre engaña y la vieja
+    redacción, que hablaba de comprobar «la escala k0», engañaba más. ``K0`` lo ata
+    ``_errores_de_punto_publicado``, y no lo ataba nadie hasta que se midió.
     """
     fallos: list[str] = []
     cuerda = 1_000.0
@@ -379,9 +461,9 @@ def _errores_de_escala() -> list[str]:
             desvio = abs(obtenido / esperado - 1)
             if desvio > TOLERANCIA_ESCALA_RELATIVA:
                 fallos.append(
-                    f"EPSG:{proyeccion.epsg}: a {grados}° la escala sobre el meridiano central se "
-                    f"desvía {desvio:.2e} de k0={K0} (tolerancia "
-                    f"{TOLERANCIA_ESCALA_RELATIVA:.0e})"
+                    f"EPSG:{proyeccion.epsg}: a {grados}° un metro de este vale {desvio:.2e} más "
+                    "de lo que dice el radio del primer vertical del elipsoide (tolerancia "
+                    f"{TOLERANCIA_ESCALA_RELATIVA:.0e}). Esto no mide k0: mide la serie"
                 )
     return fallos
 
@@ -403,26 +485,57 @@ def _errores_de_anclas() -> list[str]:
     return fallos
 
 
+def _errores_de_punto_publicado() -> list[str]:
+    """El punto que un tercero publica con sus dos coordenadas cae donde el tercero dice.
+
+    Es la capa que ata ``K0``, y la única que puede: las otras cuatro comparan este código contra
+    otro cálculo propio que arranca de las mismas constantes, así que un ``K0`` equivocado entra por
+    los dos lados y se cancela. Aquí no puede: el ``k0`` con el que se calcularon ``este`` y
+    ``norte`` está congelado en unos números que publicó otra persona en 1987.
+    """
+    punto = PUNTO_PUBLICADO
+    latitud, longitud = a_geograficas(punto.este, punto.norte, punto.proyeccion)
+    desvio_m = (
+        haversine_km(latitud, longitud, punto.lat_publicada, punto.lon_publicada) * 1_000.0
+    )
+    if desvio_m <= TOLERANCIA_PUNTO_PUBLICADO_M:
+        return []
+    return [
+        f"el punto publicado ({punto.este:.1f} E, {punto.norte:.1f} N, zona "
+        f"{punto.proyeccion.zona}, {punto.proyeccion.elipsoide.nombre}) sale en "
+        f"{latitud:.7f}, {longitud:.7f} y su fuente lo publica en "
+        f"{punto.lat_publicada}, {punto.lon_publicada}: {desvio_m:.3f} m de desvío, tolerancia "
+        f"{TOLERANCIA_PUNTO_PUBLICADO_M:.0f} m (medido {punto.desvio_medido_m} m). Lo primero que "
+        f"hay que mirar es K0, que ahora vale {K0}: con K0 = 1 este punto se va a 1.797 m y "
+        "ninguna otra capa de este gate se entera. Fuente: " + punto.fuente
+    ]
+
+
 def errores_de_reproyeccion() -> list[str]:
     """Gate P1: la inversa de Krüger sigue cayendo donde debe. Offline y determinista.
 
-    Cuatro capas, y son cuatro porque cada una ata algo que las otras no pueden:
+    Cinco capas, y son cinco porque cada una ata algo que las otras no pueden:
 
     * **Arco de meridiano** — la latitud, contra una cuadratura numérica que no comparte código con
       la serie. Es la única capa que puede desmentir a la serie en vez de repetirla.
     * **Invariantes** — las tres igualdades exactas de UTM (meridiano central, ecuador, simetría).
       Cazan un coeficiente con el signo cambiado, que el arco de meridiano no ve porque vive justo
       encima del meridiano central.
-    * **Escala** — la longitud, contra el radio del primer vertical. Es la mitad que el arco de
-      meridiano deja fuera.
+    * **Escala** — cuánto vale un metro de este en grados de longitud, contra el radio del primer
+      vertical. Es la mitad que el arco de meridiano deja fuera. **No mide ``K0``**: se cancela.
+    * **Punto publicado** — un punto del que una fuente ajena publica a la vez su UTM y su
+      geográfica. Es la única capa que no arranca de nuestras constantes, y por eso la única que
+      ata **``K0``**. Las otras cuatro siguen verdes con ``K0 = 1``; ésta se va a 1.797 m.
     * **Anclas geográficas** — dos puntos reales de RAMPE contra la coordenada de su puerto en el
       catálogo público, que viene de GeoNames. Miden en kilómetros, y es lo que se quiere: son las
       que cazan la **zona equivocada**, que es el fallo que no da ningún error y publica basura con
-      aspecto de coordenada.
+      aspecto de coordenada. Con 25 km de tolerancia **no** ven un ``K0`` equivocado, que mueve
+      estos mismos puntos menos de 2 km.
     """
     return [
         *_errores_de_meridiano(),
         *_errores_de_invariantes(),
         *_errores_de_escala(),
+        *_errores_de_punto_publicado(),
         *_errores_de_anclas(),
     ]

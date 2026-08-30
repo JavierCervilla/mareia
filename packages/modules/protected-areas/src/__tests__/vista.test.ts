@@ -25,12 +25,12 @@ function area(parcial: Partial<AreaProtegida> = {}): AreaProtegida {
 }
 
 test("la distancia se publica como cota entera hacia ARRIBA, no como la décima del dato", () => {
-  // 8,7 medidos al vértice: la real es menor, así que «a menos de 9» es verdad. «Unos 9 km» sería
-  // una medida que no tenemos y «8,7 km» una precisión que el método no da.
+  // 8,7 al borde, ya redondeados hacia arriba en el dato: «a menos de 9» es verdad. «Unos 9 km»
+  // sería una medida que no tenemos y «8,7 km» una precisión que el método no da.
   assert.equal(distanciaEscrita(8.7), "a menos de 9 km");
   assert.equal(distanciaEscrita(19.1), "a menos de 20 km");
   assert.equal(distanciaEscrita(29.8), "a menos de 30 km");
-  // Un entero exacto no se infla: 12,0 km al vértice siguen siendo menos de 12 hasta el borde.
+  // Un entero exacto no se infla: 12,0 km al borde son «a menos de 12», no «a menos de 13».
   assert.equal(distanciaEscrita(12), "a menos de 12 km");
 });
 

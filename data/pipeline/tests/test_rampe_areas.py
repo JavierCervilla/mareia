@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -78,18 +79,58 @@ def test_el_punto_en_poligono_mira_todos_los_poligonos() -> None:
     assert areas.dentro_del_area(10.5, 10.5, area) is True
 
 
-def test_la_distancia_es_al_vertice_y_no_al_borde() -> None:
-    """Y por eso **aleja**: el punto está a 0,5° del borde y la distancia publicada es la del vértice.
+def test_la_distancia_al_borde_es_la_del_segmento_y_no_la_del_vertice() -> None:
+    """El caso que se puede resolver a mano y contra el que se comprueba la fórmula.
 
-    Es la aproximación declarada del módulo, medida aquí en un caso donde las dos cifras se pueden
-    comparar: desde (0,5 · −1,0), el borde del cuadrado está a 1° de longitud y el vértice más
-    cercano, a 1° de longitud **y** 0,5° de latitud. Sale mayor, que es el lado bueno.
+    Desde (0,5 · −1,0) el lado oeste del cuadrado es el meridiano λ=0 entre las latitudes 0 y 1, así
+    que la distancia al borde tiene forma cerrada: ``R · asin(cos φ · sin Δλ)`` = 111,1908 km, y el
+    pie de la perpendicular cae dentro del lado. El vértice más cercano está a 124,31 km, porque
+    para llegar a él hay que subir además medio grado de latitud.
+
+    Los 13,1 km de diferencia son lo que la métrica vieja alejaba en un cuadrado de 1° de lado. En
+    RAMPE, con aristas de 160 km, la diferencia llegaba a 42,2 km.
     """
     area = area_sintetica((CUADRADO[0],))
-    al_vertice = areas.distancia_al_vertice_mas_cercano(0.5, -1.0, area)
-    al_borde = 111.195  # 1° de longitud en el ecuador, con el radio medio que usa `geo`
-    assert al_vertice > al_borde
-    assert al_vertice == pytest.approx(124.3, abs=0.1)
+    al_borde, al_vertice = areas.distancias_a(0.5, -1.0, area)
+    cerrada = 6371.0088 * math.asin(math.cos(math.radians(0.5)) * math.sin(math.radians(1.0)))
+    assert al_borde == pytest.approx(cerrada, abs=1e-9)
+    assert al_borde == pytest.approx(111.1908, abs=1e-4)
+    assert al_vertice == pytest.approx(124.31, abs=0.01)
+    assert areas.distancia_al_borde_km(0.5, -1.0, area) == al_borde
+
+
+def test_una_arista_larga_es_donde_la_cota_por_vertice_perdia_el_area() -> None:
+    """El hallazgo de T-21, reducido a un polígono que se puede leer.
+
+    Un rectángulo cuyo lado sur va de (40 · 0) a (40 · 2) —**170,4 km de una sola arista**, que es
+    del orden de la mayor de RAMPE— y un puerto a 0,2° al sur de su punto medio. El borde le pasa a
+    22,7 km; el vértice más cercano está a 88,2 km. Con el radio de 30 km, medir al borde publica el
+    área y medir al vértice la pierde entera, sin que nada se ponga rojo y sin que la página tenga
+    forma de saberlo.
+    """
+    area = area_sintetica(
+        (((40.0, 0.0), (40.0, 2.0), (40.5, 2.0), (40.5, 0.0), (40.0, 0.0)),)
+    )
+    al_borde, al_vertice = areas.distancias_a(39.8, 1.0, area)
+    assert al_borde == pytest.approx(22.7, abs=0.05)
+    assert al_vertice == pytest.approx(88.2, abs=0.05)
+    indexadas = areas.indexar((area,))
+    assert [v.area.codigo for v in areas.vecindad_de(39.8, 1.0, indexadas)] == ["ES-TEST"]
+    assert al_vertice > areas.RADIO_KM, "la métrica vieja no habría publicado esta relación"
+
+
+def test_el_borde_nunca_queda_mas_lejos_que_el_vertice() -> None:
+    """La desigualdad que hace del gate de divergencia algo más que un umbral.
+
+    El vértice **es** un punto del borde, así que la distancia al borde es menor o igual, siempre y
+    para cualquier punto. Se barre el recorte entero de RAMPE con una rejilla que cubre la España
+    marítima: si esta desigualdad se rompe en un solo punto, la distancia punto-segmento está mal.
+    """
+    for area in del_fixture():
+        for latitud in [x / 2 for x in range(54, 90)]:
+            for longitud in [x / 2 for x in range(-38, 12)]:
+                al_borde, al_vertice = areas.distancias_a(latitud, longitud, area)
+                assert al_borde <= al_vertice + 1e-9, (area.codigo, latitud, longitud)
 
 
 def test_el_descarte_por_caja_no_pierde_ninguna_area() -> None:
@@ -149,7 +190,14 @@ def test_el_puerto_con_areas_las_trae_ordenadas_y_sin_motivo() -> None:
     area = puerto["areas"][0]
     assert area["tipo"] == "RESERVA MARINA"
     assert area["codigo"] == "555552487"
-    assert area["distanciaAproxKm"] == pytest.approx(1.0, abs=0.05)
+    # Medido: 1,0328 km al borde, que aquí coincide con el vértice más cercano porque el punto más
+    # próximo de la reserva **es** un vértice. Se publica 1,1 y no 1,0 porque la décima se redondea
+    # hacia arriba: la página escribe «a menos de N km» y el redondeo tiene que empujar hacia el
+    # lado en el que esa frase es verdad.
+    assert areas.distancias_a(37.6338, -0.696, next(
+        a for a in del_fixture() if a.codigo == "555552487"
+    )) == pytest.approx((1.0328, 1.0328), abs=1e-4)
+    assert area["distanciaAproxKm"] == 1.1
     assert area["dentro"] is False
 
 
@@ -245,6 +293,118 @@ def test_p2_caza_un_dataset_que_engorda_entero() -> None:
     assert any("la primera sospecha es geometría" in fallo for fallo in fallos)
 
 
+# --------------------------------------------------------------------------------------------
+# P5 · las dos métricas, comparadas, y el gate que se entera si la fuente cambia de densidad
+# --------------------------------------------------------------------------------------------
+
+
+def dataset_de_la_arista_larga() -> dict[str, Any]:
+    """Un derivado de un solo puerto y una sola área, con una arista de 170 km entre los dos.
+
+    Es el caso de Pollença en miniatura: el borde a 22,7 km, el vértice más cercano a 88,2 km, el
+    radio en 30 km. Vale para ver la comparativa contar una relación que **sólo** entra por el borde
+    sin depender de que el fichero de 86 áreas siga diciendo lo que dice hoy.
+    """
+    area = area_sintetica(
+        (((40.0, 0.0), (40.0, 2.0), (40.5, 2.0), (40.5, 0.0), (40.0, 0.0)),)
+    )
+    return areas.construir_dataset(
+        catalogo_de(("puerto-de-la-arista", 39.8, 1.0)),
+        (area,),
+        descargado_en=dt.date(2026, 8, 30),
+        sha256="0" * 64,
+    )
+
+
+def test_la_comparativa_cuenta_lo_que_cada_metrica_publicaria() -> None:
+    dataset = dataset_de_la_arista_larga()
+    comparativa = dataset["comparativa"]
+    assert comparativa["relacionesPorBorde"] == 1
+    assert comparativa["relacionesPorVertice"] == 0
+    assert comparativa["entranSoloPorElBorde"] == 1
+    assert comparativa["salenAlMedirElBorde"] == 0
+    assert comparativa["bordeMasLejosQueVertice"] == 0
+    assert comparativa["mayorDiferenciaKm"] == pytest.approx(65.4, abs=0.1)
+    assert comparativa["aristaMaxM"] == pytest.approx(170_357.2, abs=1.0)
+    assert comparativa["aristasDeMasDeUnKm"] == 4
+
+
+def test_el_gate_de_divergencia_se_pone_rojo_por_los_dos_lados() -> None:
+    """El rojo que importa, y su simétrico, sobre el caso de la arista larga.
+
+    **Hacia arriba**: la fuente pierde densidad y la métrica vieja habría perdido más áreas todavía.
+    **Hacia abajo**: alguien vuelve a medir al vértice y la divergencia se desploma a cero. Con un
+    techo solo, esa vuelta atrás —que es el fallo que esta trayectoria acaba de arreglar— daría
+    **verde**, y por eso el trinquete tiene dos lados. Los dos mensajes mandan a **medir**, no a
+    mover el número, porque un umbral que se ajusta solo no es un gate.
+    """
+    dataset = dataset_de_la_arista_larga()
+    assert areas.errores_de_divergencia(dataset, divergencia=1) == []
+    arriba = areas.errores_de_divergencia(dataset, divergencia=0)
+    assert len(arriba) == 1
+    assert "1 relaciones entran sólo al medir el borde y lo medido son 0" in arriba[0]
+    assert "Vuelve a medir y explica el cambio" in arriba[0]
+    abajo = areas.errores_de_divergencia(dataset, divergencia=2)
+    assert len(abajo) == 1
+    assert "sólo 1 relaciones entran por el borde y lo medido son 2" in abajo[0]
+    assert "vuelto a medirse al vértice" in abajo[0]
+
+
+def test_el_gate_de_divergencia_caza_lo_que_la_aritmetica_prohibe() -> None:
+    """Que una relación *salga* al medir el borde es imposible, así que no lleva umbral.
+
+    El vértice es un punto del borde: la distancia al borde es menor o igual, siempre. Si la
+    comparativa dice otra cosa, lo que está roto es la distancia punto-segmento, y el gate tiene que
+    decir eso y no ofrecer un número que ajustar.
+    """
+    dataset = dataset_de_la_arista_larga()
+    dataset["comparativa"]["salenAlMedirElBorde"] = 1
+    dataset["comparativa"]["bordeMasLejosQueVertice"] = 3
+    fallos = areas.errores_de_divergencia(dataset)
+    assert any("No ajustes el umbral" in fallo for fallo in fallos)
+    assert any("la distancia punto-segmento está mal" in fallo for fallo in fallos)
+
+
+def test_el_gate_de_divergencia_caza_una_comparativa_de_otra_ejecucion() -> None:
+    """Una comparativa que no cuadra con el resumen no dice nada de este fichero."""
+    dataset = dataset_de_la_arista_larga()
+    dataset["comparativa"]["relacionesPorBorde"] = 99
+    assert any(
+        "la comparativa no es de este fichero" in fallo
+        for fallo in areas.errores_de_divergencia(dataset)
+    )
+    sin_bloque = {clave: valor for clave, valor in dataset.items() if clave != "comparativa"}
+    assert any(
+        "no publica el bloque `comparativa`" in fallo
+        for fallo in areas.errores_de_divergencia(sin_bloque)
+    )
+
+
+def test_p5_en_verde_sobre_el_artefacto_publicado() -> None:
+    assert areas.errores_de_divergencia(publicado()) == []
+
+
+def test_el_artefacto_publicado_reproduce_la_divergencia_medida() -> None:
+    """Las seis relaciones que la cota por vértice perdía, y la arista que las explica.
+
+    No es un snapshot de comodidad: es la cifra que justifica el cambio de métrica de T-21 y la que
+    tiene que moverse si RAMPE cambia de densidad de vértices.
+    """
+    comparativa = publicado()["comparativa"]
+    assert comparativa["relacionesPorBorde"] == 348
+    assert comparativa["relacionesPorVertice"] == 342
+    assert comparativa["entranSoloPorElBorde"] == 6
+    assert comparativa["salenAlMedirElBorde"] == 0
+    assert comparativa["bordeMasLejosQueVertice"] == 0
+    assert comparativa["mayorDiferenciaKm"] == 42.2
+    assert comparativa["mayorDiferenciaEn"] == (
+        "pollenca · Corredor de Migración de Cetáceos del Mediterráneo"
+    )
+    assert comparativa["aristaMaxM"] == 159_552.5
+    assert comparativa["aristasDeMasDeUnKm"] == 728
+    assert comparativa["entranSoloPorElBorde"] == areas.DIVERGENCIA_MEDIDA_RELACIONES
+
+
 def test_el_artefacto_publicado_reproduce_las_cifras_medidas() -> None:
     """Trinquete del derivado: las cifras que la trayectoria midió contra la fuente real.
 
@@ -256,8 +416,8 @@ def test_el_artefacto_publicado_reproduce_las_cifras_medidas() -> None:
         "puertos": 153,
         "conArea": 143,
         "sinArea": 10,
-        "relaciones": 342,
-        "reparto": {"1": 54, "2": 34, "3": 19, "4": 22, "5": 9, "6": 5},
+        "relaciones": 348,
+        "reparto": {"1": 53, "2": 32, "3": 21, "4": 22, "5": 10, "6": 5},
     }
     assert dataset["fuente"]["censo"] == {
         "areas": 86,
@@ -325,6 +485,11 @@ def miles(numero: int) -> str:
     return f"{numero:,}".replace(",", ".")
 
 
+def con_decimal(numero: float) -> str:
+    """159552.5 → ``159.552,5``: punto de millar y coma decimal, como se escribe en castellano."""
+    return f"{numero:,.1f}".replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+
+
 def test_el_readme_publica_las_cifras_que_publica_el_dato() -> None:
     """Recomputa, no lee una declaración: si el dato cambia y el README no, esto se pone rojo.
 
@@ -333,6 +498,7 @@ def test_el_readme_publica_las_cifras_que_publica_el_dato() -> None:
     """
     dataset = publicado()
     resumen, censo = dataset["resumen"], dataset["fuente"]["censo"]
+    comparativa = dataset["comparativa"]
     bloque = bloque_del_readme()
     esperados = [
         f"**{censo['areas']}**",
@@ -343,6 +509,13 @@ def test_el_readme_publica_las_cifras_que_publica_el_dato() -> None:
         f"**{resumen['relaciones']}**",
         f"**{resumen['sinArea']}**",
         f"≤ {dataset['criterio']['radioKm']:.0f} km",
+        # Y la comparativa de métricas, que es la cifra que justifica el cambio de T-21: si el
+        # README la deja vieja dirá que la métrica anterior perdía menos de lo que perdía.
+        f"**{comparativa['entranSoloPorElBorde']}** ({comparativa['relacionesPorVertice']} → "
+        f"{comparativa['relacionesPorBorde']}), la mayor separación "
+        f"{con_decimal(comparativa['mayorDiferenciaKm'])} km",
+        f"**{con_decimal(comparativa['aristaMaxM'])} m**, y "
+        f"{comparativa['aristasDeMasDeUnKm']} aristas de más de 1 km",
     ]
     for esperado in esperados:
         assert esperado in bloque, f"el README no dice {esperado!r}"

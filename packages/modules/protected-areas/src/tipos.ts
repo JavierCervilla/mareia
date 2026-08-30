@@ -37,19 +37,20 @@ export interface AreaProtegida {
   /** `SITE_CODE` de RAMPE. Es lo que permite buscar el espacio en la fuente sin fiarse del nombre. */
   readonly codigo: string;
   /**
-   * Distancia al **vértice más cercano** del área, en kilómetros y con una décima.
+   * Distancia al **borde** del área, en kilómetros y con una décima redondeada hacia arriba.
    *
-   * **Es una aproximación por exceso**: el vértice está igual de lejos o más lejos que el borde
-   * real, así que este número aleja y nunca acerca. No se publica tal cual (ver `distanciaEscrita`
-   * en `vista.ts`): un `8,7` en la página se lee como una medida, y esto no lo es.
+   * **Es aproximada**: el pipeline la mide punto a segmento sobre una esfera y no sobre el
+   * elipsoide (hasta 0,37 %, o sea 110 m a 30 km) y toma cada arista como arco de círculo máximo. No se publica tal cual (ver
+   * `distanciaEscrita` en `vista.ts`): un `8,7` en la página se lee como una medida, y esto no lo
+   * es. Hasta la primera versión de T-21 esto era la distancia al vértice más cercano, que aleja y
+   * que **perdía seis áreas reales** de las 348 porque RAMPE tiene aristas de hasta 159,6 km.
    */
   readonly distanciaAproxKm: number;
   /**
    * `true` si el punto del puerto cae **dentro** del polígono del área, huecos excluidos.
    *
-   * Cubre el único caso en que la distancia al vértice engañaría hacia el lado peligroso: un puerto
-   * dentro de un área grande y lejos de todos sus vértices. Es un hecho distinto y más fuerte que
-   * una distancia, y la sección lo dice con esas palabras.
+   * Responde lo que ninguna distancia responde: de qué lado del borde está el puerto. Es un hecho
+   * distinto y más fuerte que una distancia, y la sección lo dice con esas palabras.
    */
   readonly dentro: boolean;
 }

@@ -3,11 +3,11 @@
 Un reproyector roto no falla: **acierta** a producir una coordenada perfectamente formada a
 cientos de kilómetros de su sitio, y por ahí no salta ninguna excepción. Así que probarlo en verde
 no dice gran cosa; lo que dice algo es probar que cada capa del gate **caza un fallo que las otras
-tres no ven**, y eso es lo que hacen los cuatro recorridos en rojo de abajo.
+cuatro no ven**, y eso es lo que hacen los cinco recorridos en rojo de abajo.
 
 Las mutaciones no son arbitrarias: cada una imita un modo de avería real —un coeficiente de la
-serie mal transcrito, un cero de longitud mal puesto, una escala que se va, la zona equivocada— y
-se elige del tamaño justo para que las demás capas la dejen pasar.
+serie mal transcrito, un cero de longitud mal puesto, una escala que se va, un ``K0`` que no es el
+de UTM, la zona equivocada— y se elige del tamaño justo para que las demás capas la dejen pasar.
 """
 
 from __future__ import annotations
@@ -94,7 +94,7 @@ def test_p1_caza_un_signo_cambiado_en_la_serie(monkeypatch: pytest.MonkeyPatch) 
 def test_p1_caza_un_cero_de_longitud_mal_puesto(monkeypatch: pytest.MonkeyPatch) -> None:
     """Noventa metros constantes de longitud de más: sólo lo ven las invariantes exactas.
 
-    Es el recorrido que justifica que el gate tenga cuatro capas y no una. Un desplazamiento
+    Es el recorrido que justifica que el gate tenga cinco capas y no una. Un desplazamiento
     uniforme de 0,001° —88 m en el ancla de Cabo de Palos, 98 m en la de El Hierro— no llega a la
     décima de kilómetro con la que se publican las distancias, no lo ve la cuadratura (que sólo
     mira la latitud), no lo ve la escala (porque se cancela en la diferencia) y no lo ven las
@@ -121,12 +121,59 @@ def test_p1_caza_una_escala_que_se_va(monkeypatch: pytest.MonkeyPatch) -> None:
     assert utm._errores_de_anclas() == []
 
 
+def test_el_punto_publicado_cae_donde_lo_publica_su_fuente() -> None:
+    """La única cifra de este gate que no ha calculado este repositorio.
+
+    Snyder publica las dos coordenadas del mismo punto —la UTM y la geográfica— y nosotros sólo
+    ponemos la inversa. Que reproduzca a 4,7 cm sobre unos valores redondeados a la décima de metro
+    en origen es la comprobación entera: no hay nada nuestro en el otro lado de la comparación.
+    """
+    punto = utm.PUNTO_PUBLICADO
+    lat, lon = utm.a_geograficas(punto.este, punto.norte, punto.proyeccion)
+    desvio_m = haversine_km(lat, lon, punto.lat_publicada, punto.lon_publicada) * 1_000.0
+    assert desvio_m == pytest.approx(punto.desvio_medido_m, abs=0.01)
+    assert desvio_m < utm.TOLERANCIA_PUNTO_PUBLICADO_M
+
+
+def test_p1_caza_un_k0_que_no_es_el_de_utm(monkeypatch: pytest.MonkeyPatch) -> None:
+    """``K0`` mal, y **sólo** el punto publicado se entera. Es el hallazgo que trajo esta capa.
+
+    Se prueba con el error más gordo imaginable —``K0 = 1``, o sea olvidarse entero del factor de
+    escala de UTM, que sobre el terreno son 1,8 km— y las otras cuatro capas siguen devolviendo la
+    lista vacía. No es que sean flojas: es que las cuatro comparan este código contra otro cálculo
+    que arranca del mismo ``K0``, y un ``K0`` equivocado entra por los dos lados y **se cancela**.
+    Las anclas geográficas lo verían si midieran en metros, pero miden contra un puerto y toleran
+    25 km, así que 1,8 km no las mueve.
+    """
+    monkeypatch.setattr(utm, "K0", 1.0)
+    assert utm._errores_de_meridiano() == []
+    assert utm._errores_de_invariantes() == []
+    assert utm._errores_de_escala() == []
+    assert utm._errores_de_anclas() == []
+    fallos = utm._errores_de_punto_publicado()
+    assert len(fallos) == 1
+    assert "1797.221 m de desvío" in fallos[0]
+    assert "Lo primero que hay que mirar es K0" in fallos[0]
+
+
+def test_el_gate_de_k0_muerde_en_la_septima_cifra(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Y no sólo con la avería grosera: el hueco de la tolerancia, medido por los dos lados.
+
+    Un gate cuyo rojo sólo se ha visto con el desastre no dice dónde está su línea. Ésta está en
+    2,2 × 10⁻⁷ relativo sobre ``K0``, que es un metro de desvío sobre el punto publicado.
+    """
+    monkeypatch.setattr(utm, "K0", 0.9996 + 2.0e-7)
+    assert utm._errores_de_punto_publicado() == []
+    monkeypatch.setattr(utm, "K0", 0.9996 + 2.2e-7)
+    assert utm._errores_de_punto_publicado() != []
+
+
 def test_p1_caza_la_zona_equivocada(monkeypatch: pytest.MonkeyPatch) -> None:
     """El fallo que este gate existe para impedir: reproyectar Canarias con la zona peninsular.
 
-    No da error, no rompe nada y coloca el área a más de mil kilómetros. Ninguna de las otras tres
-    capas puede verlo —la serie está perfecta, es el sitio el que está mal— y por eso las anclas
-    geográficas son irrenunciables.
+    No da error, no rompe nada y coloca el área a más de mil kilómetros. Ninguna de las otras
+    cuatro capas puede verlo —la serie está perfecta, es el sitio el que está mal— y por eso las
+    anclas geográficas son irrenunciables.
     """
     canaria = next(a for a in utm.ANCLAS if a.epsg == 32628)
     peninsular = next(a for a in utm.ANCLAS if a.epsg == 25830)

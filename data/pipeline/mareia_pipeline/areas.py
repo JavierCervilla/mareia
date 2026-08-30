@@ -10,25 +10,36 @@ que no hace daño**—:
    aproximada, si el puerto cae dentro— y **ninguna geometría**. Es primero una cuestión de
    licencia: la página de descarga de MITECO no declara condiciones de uso, y lo que una licencia no
    declarada desde luego no permite es redistribuir la capa. Y es después una cuestión de peso: las
-   86 áreas son 1.076.504 vértices, y lo que se publica cabe en 86 kB para los 153 puertos. El
+   86 áreas son 1.076.504 vértices, y lo que se publica cabe en 88 kB para los 153 puertos. El
    gate P2 lo mide sobre el artefacto, no sobre la intención de este módulo.
 
-2. **La distancia es al vértice más cercano, y se publica como aproximación.** No es la distancia al
-   borde real del polígono, que exigiría distancia punto-segmento. La diferencia siempre cae del
-   mismo lado: el vértice está **igual de lejos o más lejos** que el borde, así que este número
-   **aleja, nunca acerca**. Un área que aparezca «a 12 km» puede estar de verdad a 11; una que no
-   aparezca no está a menos de 30. El error va hacia avisar de menos, no hacia dar por lejos algo
-   que tienes encima. Por eso el campo se llama ``distanciaAproxKm`` y no ``distanciaKm``: el nombre
-   tiene que decirlo aunque nadie lea la cabecera.
+2. **La distancia es al borde del polígono, medida arista a arista.** No al vértice más cercano,
+   que es lo que hacía la primera versión de este módulo por ser una línea de código en vez de
+   veinte. La cota por vértice parecía inofensiva porque el error cae siempre del mismo lado —el
+   vértice está igual de lejos o más lejos que el borde—, y **ese lado es el peligroso**: aleja, y
+   una sección cuya única razón de ser es avisar, alejando, avisa de menos. Medido sobre RAMPE 2025
+   contra los 153 puertos: la cota por vértice **perdía 6 relaciones reales** de 348, entre ellas 3
+   de las 6 del Corredor de Migración de Cetáceos del Mediterráneo, que es la **única AMP** del
+   catálogo. La causa está en la fuente y no en el método: RAMPE no tiene vértices densos —mediana
+   de arista 2,01 m, pero 728 aristas pasan de 1 km, 286 de 5 km y la mayor mide **159,6 km**—, y el
+   error de la cota es del orden de media arista. Pollença tenía el Corredor a 27,6 km de su borde
+   y a 69,8 km de su vértice más cercano.
 
-3. **Y por eso mismo hace falta mirar si el puerto cae dentro.** El único caso en que el vértice
-   más cercano miente en la dirección peligrosa es un puerto **dentro** de un área muy grande y
-   lejos de todos sus vértices. El punto-en-polígono es barato y lo cubre. Medido sobre RAMPE 2025:
-   hay 10 puertos dentro de un área, y los diez están además a 0,1 km o menos de un vértice, así que
-   hoy esta comprobación **no rescata ninguna relación** que la distancia no encontrara. Se queda
-   igual, y por dos motivos: publica un hecho distinto y más fuerte —«estás dentro», no «lo tienes a
-   0,0 km»— y el modo de fallo que tapa seguiría siendo invisible el día que RAMPE publique un área
-   mayor.
+   La distancia sigue publicándose como aproximación y el campo sigue llamándose
+   ``distanciaAproxKm``, porque sigue siéndolo: se mide sobre una esfera y no sobre el elipsoide
+   (hasta 0,37 % en las latitudes de la costa española, o sea 110 m a 30 km), la arista se toma como
+   arco de círculo máximo cuando en origen es una recta en un plano UTM (medido densificando en
+   metros UTM antes de reproyectar: ≤ 15,3 m entre lo que se publica), y se **redondea hacia
+   arriba** a la décima. Lo que ya no es es una cota de otra cosa.
+
+3. **Y sigue haciendo falta mirar si el puerto cae dentro**, pero por otro motivo que el que decía
+   esta cabecera. No es que el borde engañe: es que la distancia al borde **no distingue los dos
+   lados**, y estar a 3 km del borde por dentro no es lo mismo que estar a 3 km por fuera. El
+   punto-en-polígono es barato y responde una pregunta que ninguna distancia responde. Además cubre
+   el caso del puerto muy metido en un área muy grande, cuyo borde caería más allá del radio.
+   Medido sobre RAMPE 2025: hay 10 puertos dentro de un área y los diez están además a 0,1 km o
+   menos del borde, así que hoy no rescata ninguna relación; publica un hecho distinto y más fuerte
+   —«estás dentro»— y el modo de fallo que tapa seguiría siendo invisible.
 """
 
 from __future__ import annotations
@@ -41,7 +52,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from mareia_pipeline.geo import haversine_km
+from mareia_pipeline import geo
 from mareia_pipeline.sources import rampe
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -89,7 +100,10 @@ class Vecindad:
     """Un área que le toca a un puerto, con lo que se sabe de la relación entre las dos."""
 
     area: rampe.Area
+    #: Al **borde**: es la que se publica y la que decide si el área entra en el aviso.
     distancia_km: float
+    #: Al vértice más cercano. No se publica: es el otro lado de ``comparativa_de``.
+    distancia_al_vertice_km: float
     dentro: bool
 
 
@@ -114,14 +128,43 @@ def _puede_estar_cerca(lat: float, lon: float, caja: tuple[float, float, float, 
     )
 
 
+def distancias_a(lat: float, lon: float, area: rampe.Area) -> tuple[float, float]:
+    """Kilómetros del punto ``(al borde, al vértice más cercano)`` del área.
+
+    Las dos en la misma pasada porque recorren lo mismo —el millón de vértices de RAMPE— y porque
+    hay un gate que las compara: calcularlas en dos sitios distintos sería invitar a que se separen.
+
+    El borde se mide arista a arista con ``geo.distancia_a_segmento_km``. El anillo se recorre
+    **como ciclo**, con la arista que cierra incluida, igual que hace ``_dentro_del_anillo``: los
+    3.187 anillos de RAMPE 2025 vienen cerrados —medido—, así que esa arista es degenerada y no
+    aporta nada, pero el día que la fuente publique un anillo abierto las dos funciones seguirán
+    hablando del mismo polígono.
+    """
+    punto = geo.unitario(lat, lon)
+    al_borde = math.inf
+    al_vertice = math.inf
+    for poligono in area.poligonos:
+        for anillo in poligono:
+            vectores = [geo.unitario(vertice[0], vertice[1]) for vertice in anillo]
+            for indice, vector in enumerate(vectores):
+                al_vertice = min(al_vertice, geo.distancia_entre_unitarios_km(punto, vector))
+                siguiente = vectores[(indice + 1) % len(vectores)]
+                al_borde = min(al_borde, geo.distancia_a_segmento_km(punto, vector, siguiente))
+    return al_borde, al_vertice
+
+
+def distancia_al_borde_km(lat: float, lon: float, area: rampe.Area) -> float:
+    """Kilómetros del punto al borde del área: la distancia que se publica."""
+    return distancias_a(lat, lon, area)[0]
+
+
 def distancia_al_vertice_mas_cercano(lat: float, lon: float, area: rampe.Area) -> float:
-    """Kilómetros del punto al vértice más cercano del área. Ver el punto 2 de la cabecera."""
-    return min(
-        haversine_km(lat, lon, vertice[0], vertice[1])
-        for poligono in area.poligonos
-        for anillo in poligono
-        for vertice in anillo
-    )
+    """Kilómetros del punto al vértice más cercano: la métrica **vieja**, que ya no se publica.
+
+    Sigue aquí porque es el otro lado de ``comparativa_de``, el gate que mide cuánto se separan las
+    dos y se pone rojo si la fuente cambia de densidad.
+    """
+    return distancias_a(lat, lon, area)[1]
 
 
 def _dentro_del_anillo(lat: float, lon: float, anillo: rampe.Anillo) -> bool:
@@ -161,24 +204,198 @@ def dentro_del_area(lat: float, lon: float, area: rampe.Area) -> bool:
     return False
 
 
+def candidatas_de(
+    lat: float, lon: float, indexadas: tuple[AreaIndexada, ...]
+) -> list[Vecindad]:
+    """Todo lo que sobrevive al descarte por caja, con **las dos** distancias medidas.
+
+    Es la pasada cara y es una sola: ``vecindad_de`` filtra de aquí lo que se publica y
+    ``comparativa_de`` mira de aquí lo que las dos métricas dicen distinto. Publicar y comparar
+    tienen que ver exactamente el mismo conjunto de candidatas o la comparación no significa nada.
+    """
+    candidatas: list[Vecindad] = []
+    for indexada in indexadas:
+        if not _puede_estar_cerca(lat, lon, indexada.caja):
+            continue
+        al_borde, al_vertice = distancias_a(lat, lon, indexada.area)
+        candidatas.append(
+            Vecindad(
+                area=indexada.area,
+                distancia_km=al_borde,
+                distancia_al_vertice_km=al_vertice,
+                dentro=dentro_del_area(lat, lon, indexada.area),
+            )
+        )
+    return candidatas
+
+
 def vecindad_de(
     lat: float, lon: float, indexadas: tuple[AreaIndexada, ...], *, radio_km: float = RADIO_KM
 ) -> list[Vecindad]:
     """Las áreas que le tocan a un punto, ordenadas de más cerca a más lejos.
 
-    Entra un área si tiene un vértice a ``radio_km`` **o** si el punto cae dentro de ella. La
+    Entra un área si su **borde** está a ``radio_km`` **o** si el punto cae dentro de ella. La
     disyunción es el punto 3 de la cabecera: son dos preguntas distintas y ninguna implica la otra.
     """
-    vecinas: list[Vecindad] = []
-    for indexada in indexadas:
-        if not _puede_estar_cerca(lat, lon, indexada.caja):
-            continue
-        distancia = distancia_al_vertice_mas_cercano(lat, lon, indexada.area)
-        dentro = dentro_del_area(lat, lon, indexada.area)
-        if distancia <= radio_km or dentro:
-            vecinas.append(Vecindad(area=indexada.area, distancia_km=distancia, dentro=dentro))
+    vecinas = [
+        candidata
+        for candidata in candidatas_de(lat, lon, indexadas)
+        if candidata.distancia_km <= radio_km or candidata.dentro
+    ]
     vecinas.sort(key=lambda vecina: (vecina.distancia_km, vecina.area.nombre))
     return vecinas
+
+
+#: Cuántas relaciones de diferencia hay hoy entre medir al borde y medir al vértice: **6**, las
+#: seis que la cota por vértice perdía. Es un **trinquete de dos lados** y no un techo, y por eso el
+#: gate se pone rojo tanto si sube como si baja.
+#:
+#: Lo que este número mide de verdad es **la densidad de vértices de la fuente**: las dos distancias
+#: se separan como media arista, así que mientras RAMPE publique aristas de 160 km habrá relaciones
+#: que sólo el borde encuentra. Que **suba** significa que la fuente ha perdido densidad y que la
+#: métrica vieja habría perdido todavía más. Que **baje** significa que la ha ganado —buena
+#: noticia— o que alguien ha vuelto a medir al vértice sin que se note, que es el modo de fallo por
+#: el que el gate mira también hacia abajo: con un techo solo, revertir la métrica lo dejaría verde.
+#: Moverlo es una decisión con su PR y su medición, no un ajuste.
+DIVERGENCIA_MEDIDA_RELACIONES = 6
+
+#: Margen para comparar dos distancias que la aritmética exacta obliga a ordenar. El borde nunca
+#: puede quedar más lejos que el vértice —el vértice **es** un punto del borde—, así que cualquier
+#: diferencia por encima del ruido del flotante es un error de programación en la distancia
+#: punto-segmento, no un dato. Un micrómetro.
+_RUIDO_DEL_FLOTANTE_KM = 1e-9
+
+
+def _estadisticas_de_arista(areas: tuple[rampe.Area, ...]) -> dict[str, Any]:
+    """Cuánto miden las aristas de la fuente: la causa raíz, publicada para poder citarla.
+
+    Sin esto, «la cota por vértice pierde relaciones» es una afirmación sobre nuestro código. Con
+    esto es una afirmación sobre RAMPE, que es donde está el motivo: una arista de 160 km entre dos
+    vértices consecutivos hace que el vértice más cercano no diga nada sobre dónde está el borde.
+    """
+    mayor = 0.0
+    de_mas_de_un_km = 0
+    for area in areas:
+        for poligono in area.poligonos:
+            for anillo in poligono:
+                vectores = [geo.unitario(v[0], v[1]) for v in anillo]
+                for indice, vector in enumerate(vectores):
+                    siguiente = vectores[(indice + 1) % len(vectores)]
+                    metros = geo.distancia_entre_unitarios_km(vector, siguiente) * 1_000.0
+                    mayor = max(mayor, metros)
+                    de_mas_de_un_km += metros > 1_000.0
+    return {"aristaMaxM": round(mayor, 1), "aristasDeMasDeUnKm": de_mas_de_un_km}
+
+
+def comparativa_de(
+    catalogo: dict[str, Any],
+    indexadas: tuple[AreaIndexada, ...],
+    areas: tuple[rampe.Area, ...],
+    *,
+    radio_km: float = RADIO_KM,
+) -> dict[str, Any]:
+    """Qué publicaría cada una de las dos métricas, medido sobre el catálogo entero.
+
+    Es el gate del cambio de T-21 y **no** una nota histórica. La distancia al borde y la distancia
+    al vértice se separan como media arista, así que esta comparación es un termómetro de la
+    densidad de la fuente: el día que RAMPE cambie de densidad —a mejor o a peor— este bloque se
+    mueve, y por eso se recalcula en cada ingesta y se publica en el artefacto.
+
+    Se publica en el artefacto porque `run.py check` corre **sin red**: sin estas cifras dentro del
+    fichero, la única forma de comprobar la divergencia sería volver a descargar los 54,8 MB de
+    RAMPE, que es justo lo que CI no hace.
+    """
+    entran = 0
+    salen = 0
+    borde_mas_lejos = 0
+    por_borde = 0
+    por_vertice = 0
+    mayor_diferencia = 0.0
+    donde = ""
+    for puerto in catalogo["ports"]:
+        for candidata in candidatas_de(puerto["lat"], puerto["lon"], indexadas):
+            publica_borde = candidata.distancia_km <= radio_km or candidata.dentro
+            publica_vertice = candidata.distancia_al_vertice_km <= radio_km or candidata.dentro
+            por_borde += publica_borde
+            por_vertice += publica_vertice
+            entran += publica_borde and not publica_vertice
+            salen += publica_vertice and not publica_borde
+            diferencia = candidata.distancia_al_vertice_km - candidata.distancia_km
+            borde_mas_lejos += diferencia < -_RUIDO_DEL_FLOTANTE_KM
+            if publica_borde and diferencia > mayor_diferencia:
+                mayor_diferencia = diferencia
+                donde = f"{puerto['slug']} · {candidata.area.nombre}"
+    return {
+        "relacionesPorBorde": por_borde,
+        "relacionesPorVertice": por_vertice,
+        "entranSoloPorElBorde": entran,
+        "salenAlMedirElBorde": salen,
+        "bordeMasLejosQueVertice": borde_mas_lejos,
+        "mayorDiferenciaKm": round(mayor_diferencia, DECIMALES_KM),
+        "mayorDiferenciaEn": donde,
+        **_estadisticas_de_arista(areas),
+    }
+
+
+def errores_de_divergencia(
+    dataset: dict[str, Any], *, divergencia: int = DIVERGENCIA_MEDIDA_RELACIONES
+) -> list[str]:
+    """Gate P5: las dos métricas siguen diciendo lo que dijeron el día que se cambió de una a otra.
+
+    Tres cosas, y las tres pueden ponerse rojas por motivos distintos:
+
+    * **Ninguna relación puede salir al medir el borde**, ni el borde quedar más lejos que el
+      vértice. No es un umbral: es aritmética. El vértice **es** un punto del borde, así que la
+      distancia al borde es menor o igual siempre. Un rojo aquí es un error en la distancia
+      punto-segmento, y por eso el mensaje no invita a ajustar nada.
+    * **Cuántas relaciones entran sólo por el borde** tiene trinquete por los dos lados, y es la
+      medida de la densidad de la fuente. Ver ``DIVERGENCIA_MEDIDA_RELACIONES``.
+    * **La comparativa describe lo que se publica**: si `relacionesPorBorde` y el resumen no
+      coinciden, la comparativa es de otra ejecución y no dice nada de este fichero.
+    """
+    comparativa = dataset.get("comparativa")
+    if not isinstance(comparativa, dict):
+        return [
+            "el dataset no publica el bloque `comparativa`, así que no hay forma de saber sin red "
+            "cuánto se separan la distancia al borde y la distancia al vértice"
+        ]
+    fallos: list[str] = []
+    salen = comparativa.get("salenAlMedirElBorde")
+    if salen:
+        fallos.append(
+            f"{salen} relación(es) desaparecen al medir al borde en vez de al vértice, y eso no "
+            "puede pasar: el vértice es un punto del borde, así que el borde nunca está más lejos. "
+            "No ajustes el umbral, mira `geo.distancia_a_segmento_km`"
+        )
+    mas_lejos = comparativa.get("bordeMasLejosQueVertice")
+    if mas_lejos:
+        fallos.append(
+            f"en {mas_lejos} par(es) puerto–área el borde sale más lejos que el vértice más "
+            "cercano, que es imposible: la distancia punto-segmento está mal"
+        )
+    entran = comparativa.get("entranSoloPorElBorde")
+    if isinstance(entran, int) and entran > divergencia:
+        fallos.append(
+            f"{entran} relaciones entran sólo al medir el borde y lo medido son {divergencia}: la "
+            "fuente ha bajado de densidad de vértices (arista máxima publicada "
+            f"{comparativa.get('aristaMaxM')} m), así que la cota por vértice habría perdido "
+            "todavía más. Vuelve a medir y explica el cambio antes de tocar "
+            "DIVERGENCIA_MEDIDA_RELACIONES"
+        )
+    if isinstance(entran, int) and entran < divergencia:
+        fallos.append(
+            f"sólo {entran} relaciones entran por el borde y lo medido son {divergencia}: o la "
+            "fuente ha densificado sus polígonos —que sería una buena noticia— o la distancia ha "
+            "vuelto a medirse al vértice sin que se note. El gate mira también hacia abajo porque "
+            "con un techo solo esa vuelta atrás daría verde"
+        )
+    relaciones = dataset.get("resumen", {}).get("relaciones")
+    if comparativa.get("relacionesPorBorde") != relaciones:
+        fallos.append(
+            f"la comparativa dice {comparativa.get('relacionesPorBorde')} relaciones por borde y el "
+            f"resumen publica {relaciones}: la comparativa no es de este fichero"
+        )
+    return fallos
 
 
 def _sin_areas(radio_km: float) -> str:
@@ -190,10 +407,22 @@ def _sin_areas(radio_km: float) -> str:
     que publica la página no puede escribir la segunda si el puerto no está en el JSON.
     """
     return (
-        f"ninguna área marina protegida de RAMPE 2025 tiene un vértice a menos de {radio_km:.0f} "
-        "km de este puerto, y el puerto tampoco cae dentro de ninguna. No mirar más lejos es una "
+        f"ninguna área marina protegida de RAMPE 2025 tiene su borde a menos de {radio_km:.0f} km "
+        "de este puerto, y el puerto tampoco cae dentro de ninguna. No mirar más lejos es una "
         "decisión nuestra, no una ausencia de la fuente."
     )
+
+
+def _decima_hacia_arriba(kilometros: float) -> float:
+    """La distancia publicada, redondeada **hacia arriba** a la décima y no a la más cercana.
+
+    La página escribe «a menos de N km» a partir de esta cifra, así que el redondeo tiene que
+    empujar hacia el lado en el que esa frase sigue siendo verdad. Cuesta como mucho 99 m de
+    exageración, y es lo único que queda —ahora sí gratis— de la vieja regla de «aleja, nunca
+    acerca» que la cota por vértice pagaba perdiendo relaciones enteras.
+    """
+    factor = 10**DECIMALES_KM
+    return math.ceil(kilometros * factor) / factor
 
 
 def _area_a_json(vecina: Vecindad) -> dict[str, Any]:
@@ -201,7 +430,7 @@ def _area_a_json(vecina: Vecindad) -> dict[str, Any]:
         "nombre": vecina.area.nombre,
         "tipo": vecina.area.tipo,
         "codigo": vecina.area.codigo,
-        "distanciaAproxKm": round(vecina.distancia_km, DECIMALES_KM),
+        "distanciaAproxKm": _decima_hacia_arriba(vecina.distancia_km),
         "dentro": vecina.dentro,
     }
 
@@ -242,22 +471,24 @@ def construir_dataset(
         "criterio": {
             "radioKm": radio_km,
             "distancia": (
-                "distancia al vértice más cercano del área, redondeada a "
-                f"{DECIMALES_KM} decimal de kilómetro. Es una APROXIMACIÓN POR EXCESO: el vértice "
-                "está igual de lejos o más lejos que el borde real del área, así que este número "
-                "aleja y nunca acerca. No debe presentarse como una medida."
+                "distancia al BORDE del área —punto a segmento sobre cada arista del polígono—, "
+                f"redondeada hacia arriba a {DECIMALES_KM} decimal de kilómetro. Es aproximada: se "
+                "mide sobre una esfera y no sobre el elipsoide, y la arista se toma como arco de "
+                "círculo máximo cuando en origen es una recta en un plano UTM. No debe presentarse "
+                "como una medida."
             ),
             "dentro": (
                 "true si el punto del puerto cae dentro del polígono del área, huecos excluidos. "
-                "Es la comprobación que cubre el único caso en que la distancia al vértice "
-                "engañaría hacia el lado peligroso: un puerto dentro de un área grande y lejos de "
-                "todos sus vértices."
+                "Responde lo que ninguna distancia responde —de qué lado del borde está el "
+                "puerto— y cubre el caso del puerto muy metido en un área muy grande, cuyo borde "
+                "quedaría más allá del radio."
             ),
             "sinGeometria": (
                 "este dataset no publica geometría de ninguna clase. Ni vértices, ni polígonos, ni "
                 "cajas envolventes, ni geometría simplificada."
             ),
         },
+        "comparativa": comparativa_de(catalogo, indexadas, areas, radio_km=radio_km),
         "resumen": resumen_de(puertos),
         "puertos": puertos,
     }
@@ -349,8 +580,8 @@ CLAVES_PROHIBIDAS: frozenset[str] = frozenset(
 #: Tope de bytes del documento entero y de la parte de un puerto. Se mide sobre la serialización
 #: **compacta**, no sobre el fichero en disco, para que reformatear el JSON no mueva el límite.
 #:
-#: Medido sobre el dataset publicado: los 153 puertos y las 342 relaciones ocupan 57.227 bytes
-#: compactos (86.186 en disco, con sangrado) y el puerto más gordo —Garachico, con seis áreas—
+#: Medido sobre el dataset publicado: los 153 puertos y las 348 relaciones ocupan 58.445 bytes
+#: compactos (87.854 en disco, con sangrado) y el puerto más gordo —Garachico, con seis áreas—
 #: ocupa 849. Los topes dejan un factor de 2,1 y de 2,4: holgura para que la fuente crezca, y
 #: ningún sitio donde quepa un anillo.
 #:

@@ -5,11 +5,11 @@
  * Las dos reglas que este archivo existe para hacer cumplir:
  *
  * 1. **La distancia se publica como cota entera, nunca como la décima del dataset.** El derivado
- *    mide al vértice más cercano, que está igual de lejos o más lejos que el borde real; un `8,7`
- *    en la página se lee como una medida y no lo es. `distanciaEscrita` lo convierte en «a menos de
- *    9 km»: una afirmación verdadera —la real es menor— y del lado que conviene en una advertencia,
- *    porque nunca aleja un área más de lo que está. Y el caso `dentro` no se disfraza de distancia
- *    corta: es un hecho distinto y se dice con sus palabras.
+ *    mide al borde del área y redondea la décima hacia arriba; un `8,7` en la página se lee como
+ *    una medida y no lo es —el método tiene un error acotado pero no nulo—. `distanciaEscrita` lo
+ *    convierte en «a menos de 9 km»: una afirmación que los dos redondeos empujan hacia el lado que
+ *    conviene en una advertencia. Y el caso `dentro` no se disfraza de distancia corta: es un hecho
+ *    distinto y se dice con sus palabras.
  * 2. **El orden es el del dato, que es el de proximidad, y aquí no se reordena.** Ni por figura, ni
  *    por «rareza», ni por nada que se parezca a destacar lo interesante: esto es una advertencia y
  *    la única jerarquía defendible es lo que tienes más cerca. Si el dato llegara desordenado,
@@ -49,10 +49,12 @@ export interface FilaDeArea {
  * La distancia, escrita como lo que es: una cota superior en kilómetros enteros.
  *
  * `Math.ceil` y no `Math.round` porque el redondeo al par más cercano rompería la afirmación: con
- * 8,7 km medidos al vértice, «a menos de 9» es verdad y «unos 9» es una medida que no tenemos.
- * El mínimo es 1 km porque hay 12 relaciones que el derivado publica a 0,0 km —puertos pegados a su
- * área, o dentro— y «a menos de 0 km» no es una frase. Las 60 que están por debajo del kilómetro se
- * publican todas igual, «a menos de 1 km», que es lo único que se puede afirmar de ellas.
+ * 8,7 km al borde, «a menos de 9» es verdad y «unos 9» es una medida que no tenemos.
+ * El mínimo es 1 km porque «a menos de 0 km» no es una frase. Hoy el derivado no publica ninguna
+ * relación a 0,0 —desde T-21 la décima se redondea hacia arriba, así que lo más cerca que se
+ * publica es 0,1—, pero la guarda se queda: la función es total, y un puerto exactamente sobre el
+ * límite de un área daría 0,0. Las 59 relaciones por debajo del kilómetro se publican todas igual,
+ * «a menos de 1 km», que es lo único que se puede afirmar de ellas.
  *
  * Levanta si el número no se puede leer o es negativo: un `NaN` que llegase aquí publicaría «a
  * menos de NaN km» en la página de un puerto real, y una distancia negativa significaría que el

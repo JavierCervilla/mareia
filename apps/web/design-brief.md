@@ -323,19 +323,25 @@ km**, de RAMPE 2025 (MITECO)— y eso mueve dos reglas, una de colocación y otr
   («pesca permitida», «zona libre», «apto para la pesca»…). Una lista de zonas prohibidas sin ese
   encabezado se lee por descarte como un mapa de zonas libres.
 - **Los 10 puertos sin ninguna área lo DICEN**, y es la decisión de producto de la trayectoria. De
-  los **153** puertos, **143 de 153** tienen al menos un área a menos de 30 km —**342** relaciones
+  los **153** puertos, **143 de 153** tienen al menos un área a menos de 30 km —**348** relaciones
   publicadas de las **86** áreas de la fuente— y **10** no tienen ninguna. Esos 10 no pierden la
   sección: publican «Ninguna a menos de 30 km de este puerto» y, debajo, hasta dónde se ha mirado y
   que el radio es una decisión nuestra y no una ausencia de la fuente. Una sección que desaparece se
   lee como «no hay nada que saber» y no se distingue de «esto todavía no lo hemos hecho». Es la
   misma regla que §3 («NO dato inventado»: ningún hueco se rellena, pero **tampoco se calla**).
-- **La distancia se publica como cota, no como medida.** El derivado mide al **vértice más cercano**
-  del área, que está igual de lejos o más lejos que su borde real, así que un `8,7 km` en la página
-  fingiría una precisión que el método no da —y de la que además se conoce el signo del error—. Se
-  escribe «a menos de 9 km»: verdadero, entero, y del lado que conviene en una advertencia, porque
-  nunca aleja un área más de lo que está. Cuando el puerto cae **dentro** de un área (10 relaciones
-  del dataset) eso se dice con sus palabras, no disuelto en un «a menos de 1 km». Y `tabular-nums`
-  sobre la distancia sin peso ni color: es una cota, no un titular.
+- **La distancia se publica como cota, no como medida.** El derivado mide al **borde** del área,
+  arista a arista, así que un `8,7 km` en la página fingiría una precisión que el método no da. Se
+  escribe «a menos de 9 km»: verdadero, entero, y del lado que conviene en una advertencia. Cuando
+  el puerto cae **dentro** de un área (10 relaciones del dataset) eso se dice con sus palabras, no
+  disuelto en un «a menos de 1 km». Y `tabular-nums` sobre la distancia sin peso ni color: es una
+  cota, no un titular.
+  **La primera versión medía al vértice más cercano y eso costó seis avisos.** El vértice aleja, así
+  que la cota parecía del lado seguro; en una sección cuya única razón de ser es avisar, alejar es
+  avisar de menos. Medido: la cota por vértice perdía **6 relaciones de 348**, tres de ellas del
+  Corredor de Migración de Cetáceos —la única AMP del catálogo, que se publicaba en tres puertos y
+  desaparecía en otros tres—, porque RAMPE tiene aristas de hasta 159,6 km entre dos vértices
+  consecutivos. Es la clase de error que este brief llama de §3 («NO dato inventado») por el otro
+  lado: no inventa nada, calla lo que sabe.
 - **Las siglas se glosan; el régimen, no.** ZEPA, ZEC, AMP y ZEC/AMP salen con la sigla desarrollada
   pegada al lado, porque «ZEPA» sola no informa a quien no la conozca ya y en un móvil al sol nadie
   baja a buscar un pie. Lo que **no** se escribe es qué permite o prohíbe cada figura: eso lo fija la

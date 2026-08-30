@@ -98,9 +98,11 @@ export const SECCION_AREAS: PageSection = {
 /**
  * Política offline: **`cache-first`**, o sea que la copia guardada se sirve sin preguntar a la red.
  *
- * Es barato y es útil justo donde el portal se usa. **Medido sobre el `dist/`**: la sección le añade
- * a la página de un puerto entre 1.958 B (Valencia, sin ninguna área) y 4.808 B (Agaete, el máximo
- * del catálogo con seis), o sea **entre 0,6 y 1,2 kB comprimidos**. Y el entorno que manda en el
+ * Es barato y es útil justo donde el portal se usa. **Medido sobre el `dist/`** —lo que ocupa la
+ * página con la sección menos lo que ocupa sin ella—: entre 1.955 B (Valencia, sin ninguna área) y
+ * 4.925 B (Guía de Isora, seis áreas y el máximo del catálogo), o sea **entre 599 y 1.186 B
+ * comprimidos**. Agaete, que hasta la revisión de T-21 figuraba aquí como el máximo, es la quinta
+ * página más gorda con 4.684 B: el máximo se comprueba ahora sobre las 153 y no se teclea. Y el entorno que manda en el
  * design brief es un teléfono en la orilla y a menudo sin cobertura, que es exactamente cuando
  * alguien necesita saber si tiene una reserva marina delante.
  *

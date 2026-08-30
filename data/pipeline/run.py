@@ -496,6 +496,10 @@ def _check_areas_protegidas() -> int:
       cerrado. Un gate cuyo rojo se ha muerto da verde igual que uno que funciona.
     * **P2 · la geometría no cruza.** Se mide sobre el **artefacto**: ni una clave de geometría, ni
       una lista de números, ni un puerto que pase del tope de bytes.
+    * **P5 · las dos métricas siguen diciendo lo mismo.** Compara lo que publicaría la distancia al
+      borde con lo que publicaría la distancia al vértice. La comparación se **calcula con la
+      fuente** en la ingesta y viaja publicada en el artefacto, porque aquí no hay red: sin ese
+      bloque, comprobar la divergencia costaría volver a bajarse los 54,8 MB de RAMPE.
     """
     problems = 0
     desvios = utm.errores_de_reproyeccion()
@@ -505,8 +509,10 @@ def _check_areas_protegidas() -> int:
     if not desvios:
         print(
             f"✓ P1 · la inversa de Krüger cae donde debe: arco de meridiano, invariantes de UTM, "
-            f"escala y {len(utm.ANCLAS)} anclas geográficas a menos de "
-            f"{utm.TOLERANCIA_ANCLA_KM:.0f} km de su puerto"
+            f"escala de la serie, el punto UTM que publica un tercero a "
+            f"{utm.PUNTO_PUBLICADO.desvio_medido_m} m de donde lo publica —única capa que ata "
+            f"k0={utm.K0}; la cita, en `utm.PUNTO_PUBLICADO.fuente`— y {len(utm.ANCLAS)} anclas "
+            f"geográficas a menos de {utm.TOLERANCIA_ANCLA_KM:.0f} km de su puerto"
         )
     muertos = rampe.errores_de_gate_de_crs()
     for muerto in muertos:
@@ -544,6 +550,20 @@ def _check_areas_protegidas() -> int:
             f"✓ P2 · las {censo['areas']} áreas publican nombre, tipo y distancia y ni uno de sus "
             f"{censo['verticesEnOrigen']} vértices"
         )
+    divergencia = areas.errores_de_divergencia(dataset)
+    for error in divergencia:
+        print(f"✗ P5 · métrica: {error}", file=sys.stderr)
+    problems += len(divergencia)
+    if not divergencia:
+        comparativa = dataset["comparativa"]
+        print(
+            f"✓ P5 · la distancia se mide al borde y no al vértice: son "
+            f"{comparativa['entranSoloPorElBorde']} relaciones de diferencia sobre "
+            f"{comparativa['relacionesPorBorde']} —exactamente las "
+            f"{areas.DIVERGENCIA_MEDIDA_RELACIONES} medidas, ni una más ni una menos—, la mayor de "
+            f"{comparativa['mayorDiferenciaKm']} km en {comparativa['mayorDiferenciaEn']}; la "
+            f"arista más larga de la fuente mide {comparativa['aristaMaxM']} m"
+        )
     catalogo = json.loads(PORTS_JSON.read_text(encoding="utf-8"))
     cobertura = areas.errores_de_cobertura(dataset, catalogo)
     for error in cobertura:
@@ -564,8 +584,9 @@ def command_areas_protegidas(args: argparse.Namespace) -> int:
     """Ingesta de RAMPE 2025: MITECO → `data/geo/areas-protegidas.json`.
 
     Necesita red y no corre en CI, igual que `build` y `normativa`: el dataset se commitea. Los
-    gates P2 y de cobertura se pasan **antes** de escribir, así que un documento con geometría
-    dentro o con un puerto de menos no llega ni al disco.
+    gates P2, P5 y de cobertura se pasan **antes** de escribir, así que un documento con geometría
+    dentro, con un puerto de menos o con las dos métricas separándose más de lo declarado no llega
+    ni al disco.
     """
     cuerpo = rampe.descargar(refresh=args.refresh)
     huella = cache.sha256(cuerpo)
@@ -590,6 +611,7 @@ def command_areas_protegidas(args: argparse.Namespace) -> int:
     errores = [
         *(f"geometría: {error}" for error in areas.errores_de_geometria(dataset)),
         *(f"cobertura: {error}" for error in areas.errores_de_cobertura(dataset, catalogo)),
+        *(f"métrica: {error}" for error in areas.errores_de_divergencia(dataset)),
     ]
     if errores:
         for error in errores:
@@ -601,6 +623,14 @@ def command_areas_protegidas(args: argparse.Namespace) -> int:
         f"  {resumen['conArea']} de {resumen['puertos']} puertos tienen alguna área a "
         f"{dataset['criterio']['radioKm']:.0f} km ({resumen['relaciones']} relaciones); "
         f"{resumen['sinArea']} publican que no hay ninguna"
+    )
+    comparativa = dataset["comparativa"]
+    print(
+        f"  medir al borde y no al vértice añade {comparativa['entranSoloPorElBorde']} relaciones "
+        f"({comparativa['relacionesPorVertice']} → {comparativa['relacionesPorBorde']}); la mayor "
+        f"diferencia son {comparativa['mayorDiferenciaKm']} km en "
+        f"{comparativa['mayorDiferenciaEn']}, y la arista más larga de la fuente mide "
+        f"{comparativa['aristaMaxM']} m"
     )
     print(f"áreas protegidas → {areas.DATASET.relative_to(REPO_ROOT)}")
     return 0

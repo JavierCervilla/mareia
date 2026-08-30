@@ -62,14 +62,15 @@ sesenta líneas de `math`, y validada contra las dos zonas cae donde debe:
 
 ### 4. El tamaño real del entregable, medido
 
-Cruzando las 86 áreas reproyectadas contra los 153 puertos, con distancia al vértice más cercano:
+Cruzando las 86 áreas reproyectadas contra los 153 puertos, con **distancia al borde** del área
+(punto a segmento sobre cada arista; ver la corrección de más abajo):
 
 | | |
 |---|---|
 | Puertos con al menos un área a ≤ 30 km | **143 de 153** |
-| Relaciones puerto–área publicables | **342** |
+| Relaciones puerto–área publicables | **348** |
 | Puertos **sin ninguna** | **10** |
-| Reparto | 54 puertos con 1 área · 34 con 2 · 19 con 3 · 22 con 4 · 9 con 5 · 5 con 6 |
+| Reparto | 53 puertos con 1 área · 32 con 2 · 21 con 3 · 22 con 4 · 10 con 5 · 5 con 6 |
 
 Los **10 sin ninguna** no son un hueco: son un dato, y se publican diciéndolo. Una sección que
 desaparece se lee como «no hay nada que saber»; una que dice «ninguna a menos de 30 km» dice lo que
@@ -84,18 +85,17 @@ sabemos y hasta dónde miramos.
 1. **RAMPE seguirá declarando su CRS en el fichero.** Hoy lo hace, en `crs.properties.name`. El
    parser **lo lee y no lo supone**: si falta, o si trae una zona que no conocemos, **aborta**. Una
    reproyección con la zona equivocada no falla, acierta a producir basura, que es peor.
-2. **La distancia al vértice más cercano basta para «tienes esto al lado».** No es la distancia al
-   borde real del polígono (que exigiría distancia punto-segmento), y por eso se publica **redondeada
-   y como aproximación declarada**, nunca como un número de precisión.
+2. ~~**La distancia al vértice más cercano basta para «tienes esto al lado».**~~ **Falsa, medida y
+   retirada** — ver «La asunción 2 era falsa» al final. Se mide al borde, punto a segmento.
 3. **El nombre oficial y el tipo son estables.** Se crean por norma; RAMPE los versiona por año.
 
 ### Dos tradeoffs
 
-- **Vértice más cercano frente a borde del polígono.** El vértice es más barato y siempre da una
-  distancia **mayor o igual** a la real, o sea que **puede alejar un área, nunca acercarla de más**:
-  el error cae del lado de avisar de menos, no de dar por lejos algo que tienes encima… salvo en un
-  caso, y hay que decirlo: **un puerto dentro de un área muy grande** puede estar lejos de todos sus
-  vértices. Se cubre comprobando además si el punto cae **dentro** del polígono, que es barato.
+- ~~**Vértice más cercano frente a borde del polígono.**~~ **El tradeoff estaba mal planteado y el
+  plan se equivocó dos veces**: dijo que el error de la cota «cae del lado de avisar de menos, no de
+  dar por lejos algo que tienes encima», que es la misma cosa dicha dos veces —avisar de menos **es**
+  dar por lejos algo que tienes cerca—, y dijo que el puerto dentro de un área grande era el único
+  caso peligroso, que es falso. Se mide al **borde**. Ver el apartado final.
 - **Reproyectar nosotros frente a traer `pyproj`.** Nuestra inversa es código que hay que mantener y
   probar; `pyproj` es una dependencia nativa pesada con datos de PROJ. **Se elige la nuestra**,
   contra la política de menos código propio pero a favor de la política declarada de menos
@@ -119,6 +119,9 @@ sabemos y hasta dónde miramos.
      `dist/`. Medido sobre el artefacto, con tope de bytes de la sección.
    - **P3 · los 10 sin área lo dicen**: las 10 páginas publican la frase, no una sección vacía.
    - **P4 · CRS leído, no supuesto**: un fichero con CRS desconocido aborta la ingesta en rojo.
+   - **P5 · la métrica** (añadido tras el rechazo del verificador): la distancia al borde y la vieja
+     cota por vértice se comparan en cada ingesta, y la ingesta aborta si la divergencia pasa del
+     umbral declarado o si alguna relación **desaparece** al medir el borde, que es imposible.
 6. **Licencia**: `data/geo/README.md` + `attributions` del módulo con **«MITECO · RAMPE 2025 —
    condiciones de uso no declaradas en origen»**. Verificado hoy por mí: la página de descarga **no
    declara licencia ni condiciones de uso**. Consecuencia práctica, y es la que manda: publicamos
@@ -134,9 +137,49 @@ sabemos y hasta dónde miramos.
 4. **No dice «puedes pescar aquí»** en ningún caso, ni por omisión: la ausencia de área protegida
    cerca **no** es permiso.
 
+## La asunción 2 era falsa: la cota por vértice perdía seis avisos
+
+Escrito **después** del rechazo del verificador, y aquí y no en un hilo porque el plan afirmaba lo
+contrario en tres sitios.
+
+El plan dijo que la distancia al vértice más cercano bastaba, que su error «cae del lado de avisar
+de menos» —presentado como el lado bueno— y que el único caso peligroso era un puerto **dentro** de
+un área muy grande. Lo primero es cierto y no es una defensa: en una sección cuya única razón de ser
+es avisar, **avisar de menos es el fallo**, no la salvaguarda. Lo tercero es directamente falso.
+
+Medido sobre RAMPE 2025 contra los 153 puertos, con el puerto **fuera** del polígono:
+
+| Puerto | Área | Al borde | Al vértice |
+|---|---|---|---|
+| `pollenca` | Corredor de Migración de Cetáceos del Mediterráneo (AMP) | 27,6 km | **69,8 km** |
+| `altea` | Plataforma-talud marinos del Cabo de la Nao (ZEPA) | 28,5 km | 31,0 km |
+| `alajero` | Franja marina Teno - Rasca (ZEC) | 27,7 km | 34,1 km |
+| `sant-antoni-de-portmany` | Corredor de Cetáceos (AMP) | 25,6 km | 30,2 km |
+| `oliva` | Cabo de la Nao (ZEPA) | 24,4 km | 31,8 km |
+| `soller` | Corredor de Cetáceos (AMP) | 22,7 km | 36,8 km |
+
+Seis relaciones reales que no se publicaban, y **tres de las seis son la única AMP del catálogo**:
+el Corredor de Cetáceos salía en tres puertos y desaparecía en otros tres. La causa no es el método
+sino la fuente: RAMPE no tiene vértices densos —mediana de arista **2,01 m**, pero **728 aristas de
+más de 1 km**, 286 de más de 5 y una de **159,6 km**, justo en el Corredor—, y el error de la cota
+es del orden de media arista.
+
+**El arreglo**: distancia punto a segmento sobre cada arista, en `geo.distancia_a_segmento_km`, con
+`math` y sin `pyproj` ni `shapely` —la arista se toma como arco de círculo máximo, que es el mismo
+modelo esférico que `haversine_km` ya usaba en todo el pipeline, y el error de esa elección frente a
+tomarla como recta en el plano UTM de origen está medido: **≤ 2 m** entre las relaciones que se
+publican—. Y **el gate P5**, para que el día que la fuente cambie de densidad se vea en vez de
+quedar en una relación menos.
+
+**Y una segunda de la misma familia, en el gate P1**: la capa de «escala» se anunciaba como la que
+validaba `k0 = 0,9996` y **no podía fallar**, porque `k0` entraba por los dos lados de la
+comparación y se cancelaba. Medido con `K0 = 1`: las cuatro capas del gate, en verde. La quinta capa
+es un punto UTM que publica un tercero con sus dos coordenadas a la vez (Snyder, USGS PP 1395,
+1987), y ésa sí se pone roja.
+
 ## Definition of Done
 
-Suite entera verde, los gates P1–P4 **probados en rojo** además de en verde, `ROADMAP.md` y
+Suite entera verde, los gates P1–P5 **probados en rojo** además de en verde, `ROADMAP.md` y
 `CHANGELOG.md` en el mismo PR, pase de `verificador`, de `qa` y de **`qa-adversario`** con sus
 trinquetes, y CI en verde. Y la condición que T-19 dejó escrita con sangre: **el ledger sin hallazgos
 abiertos, no el color de CI.**

@@ -74,18 +74,18 @@ export function ningunaCerca(radioKm: number): string {
 /**
  * Cómo se ha medido la distancia, dicho donde se lee la distancia.
  *
- * El dataset mide al **vértice más cercano** del polígono, que está igual de lejos o más lejos que
- * el borde real: el número aleja y nunca acerca. Publicarlo como `8,7 km` sería fingir una
- * precisión que no existe —y de la que además se sabe el signo del error—, así que se publica como
- * **cota** («a menos de 9 km»), que es una afirmación verdadera y del lado que conviene en una
- * advertencia: nunca dice que un área esté más lejos de lo que está.
+ * El dataset mide al **borde** del área, arista a arista. Es una aproximación con error acotado
+ * —esfera en vez de elipsoide, y la arista como arco— pero ya no una cota de otra cosa: hasta la
+ * primera versión de T-21 se medía al vértice más cercano, que aleja, y esa cota **perdía seis
+ * áreas reales** de las 348. Publicarlo como `8,7 km` seguiría fingiendo una precisión que no
+ * existe, así que se escribe como **cota** («a menos de 9 km»), que es lo que los dos redondeos
+ * —la décima hacia arriba en el dato, el kilómetro hacia arriba aquí— hacen verdad.
  */
 export const COMO_SE_MIDE_LA_DISTANCIA =
-  "Las distancias son aproximadas y se publican como cota: se miden al vértice más cercano del " +
-  "área, que está igual de lejos o más lejos que su borde real, y luego se redondean al " +
-  "kilómetro hacia arriba. Un área que aquí figura a menos de 9 km puede estar de verdad más " +
-  "cerca; ninguna está más lejos de lo que se dice. No son una medida y no sirven para decidir " +
-  "dónde empieza un espacio protegido: eso solo lo dice su declaración oficial.";
+  "Las distancias son aproximadas y se publican como cota: se miden al borde del área y se " +
+  "redondean al kilómetro hacia arriba. Un área que aquí figura a menos de 9 km puede estar de " +
+  "verdad más cerca. No son una medida y no sirven para decidir dónde empieza un espacio " +
+  "protegido: eso solo lo dice su declaración oficial.";
 
 /**
  * Qué son las siglas, sin inventarles un régimen.
