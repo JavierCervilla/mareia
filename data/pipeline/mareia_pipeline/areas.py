@@ -707,3 +707,173 @@ def errores_de_cobertura(dataset: dict[str, Any], catalogo: dict[str, Any]) -> l
             f"el resumen publicado dice {dataset.get('resumen')} y el contenido dice {recalculado}"
         )
     return fallos
+
+
+# --------------------------------------------------------------------------------------------
+# P6 · reconstrucción: lo que se publica de las áreas del fixture sale de la geometría de la fuente
+# --------------------------------------------------------------------------------------------
+
+#: El recorte de RAMPE 2025 **capturado**: dos GeoJSON con siete áreas, tal y como los sirve MITECO
+#: dentro de su ZIP.
+#:
+#: Viven bajo ``tests/fixtures`` porque es donde se capturaron para los recorridos del parser, y
+#: **no se duplican aquí a propósito**: dos copias de la misma fuente se desincronizan y la que se
+#: quedase vieja daría verde comparando el derivado contra una fuente que ya nadie mira. Que un gate
+#: de producción lea de ``tests/`` es el precio de tener **una sola** copia de la fuente, y es el
+#: mismo precio que paga G4 en ``normativa`` con las respuestas capturadas del BOE.
+FUENTE_CAPTURADA = REPO_ROOT / "data" / "pipeline" / "tests" / "fixtures" / "rampe"
+
+
+def areas_de_la_fuente_capturada(origen: Path = FUENTE_CAPTURADA) -> tuple[rampe.Area, ...]:
+    """Las áreas del recorte, leídas con **el mismo parser** que la ingesta de verdad.
+
+    Con el mismo lector y la misma reproyección: si el camino de lectura se rompe, este gate se
+    rompe con él en vez de comparar contra una segunda implementación que nadie mantiene.
+    """
+    return tuple(
+        area
+        for fichero in sorted(rampe.FICHEROS)
+        for area in rampe.leer_coleccion(
+            (origen / fichero).read_bytes(), fichero=fichero
+        )
+    )
+
+
+def reconstruir_relaciones(
+    catalogo: dict[str, Any],
+    origen: Path = FUENTE_CAPTURADA,
+    *,
+    radio_km: float = RADIO_KM,
+) -> dict[tuple[str, str], dict[str, Any]]:
+    """Rehace, desde la geometría capturada, las relaciones puerto–área que le tocan al recorte.
+
+    Es el mismo camino que ``construir_dataset`` —``indexar`` + ``vecindad_de`` + ``_area_a_json``,
+    las mismas funciones y no una segunda versión— con la descarga sustituida por los ficheros
+    capturados. La clave es ``(slug del puerto, código RAMPE)``.
+    """
+    indexadas = indexar(areas_de_la_fuente_capturada(origen))
+    relaciones: dict[tuple[str, str], dict[str, Any]] = {}
+    for puerto in catalogo["ports"]:
+        for vecina in vecindad_de(puerto["lat"], puerto["lon"], indexadas, radio_km=radio_km):
+            relaciones[(puerto["slug"], vecina.area.codigo)] = _area_a_json(vecina)
+    return relaciones
+
+
+def alcance_de_la_reconstruccion(
+    dataset: dict[str, Any], origen: Path = FUENTE_CAPTURADA
+) -> dict[str, int]:
+    """Qué parte del artefacto cubre P6 y qué parte **no**, en números y sin adornos.
+
+    Va aparte del gate para que ``run.py check`` pueda imprimirlo: un gate parcial que no dice
+    dónde acaba se lee como uno completo, y entonces es peor que no tenerlo.
+    """
+    codigos = {area.codigo for area in areas_de_la_fuente_capturada(origen)}
+    cubiertas = sum(
+        1
+        for puerto in dataset.get("puertos", [])
+        for area in puerto.get("areas", [])
+        if area.get("codigo") in codigos
+    )
+    total = sum(len(puerto.get("areas", [])) for puerto in dataset.get("puertos", []))
+    censo = dataset.get("fuente", {}).get("censo", {}).get("areas", 0)
+    return {
+        "areasCubiertas": len(codigos),
+        "areasEnLaFuente": censo,
+        "relacionesCubiertas": cubiertas,
+        "relacionesPublicadas": total,
+    }
+
+
+#: Campos de una relación que P6 compara. Son los cuatro que se leen en la página: el nombre y la
+#: figura, que es lo que se busca en la fuente, y las dos cifras que dicen de qué lado del borde
+#: está el puerto y a cuánto.
+_CAMPOS_RECONSTRUIDOS = ("nombre", "tipo", "distanciaAproxKm", "dentro")
+
+
+def errores_de_reconstruccion(
+    dataset: dict[str, Any],
+    catalogo: dict[str, Any],
+    origen: Path = FUENTE_CAPTURADA,
+) -> list[str]:
+    """Gate P6: las relaciones del recorte capturado se **vuelven a derivar** y se diffean.
+
+    **Por qué existe.** El derivado se commitea y CI no lo vuelve a derivar de la fuente:
+    ``run.py areas-protegidas`` necesita red y el job de datos no la usa a propósito. La
+    consecuencia la midió el pase adversario: todos los demás gates del artefacto son de
+    **coherencia interna** —el resumen contra el contenido, la comparativa contra el resumen— más
+    dos cifras tecleadas en un test de la web, así que cualquier fichero coherente se publica. Dos
+    hallazgos por ahí:
+
+    * **H-2** · moviendo una relación de un puerto a otro y recalculando el resumen, el Vendrell
+      dejaba de publicar la reserva marina que tiene a 0,1 km y Carboneras publicaba esa misma
+      reserva «a menos de 28 km» estando a unos 700. Total: 348 antes y después. Todo verde.
+    * **H-4** · con el semieje mayor del GRS80 desviado **255 m** —un 0,004 %, el tamaño de una
+      errata— la ingesta produce el mismo recuento (348 relaciones, 143/153, 10 vacíos) con **191
+      distancias distintas y cinco ``dentro`` volcados**. El gate P1 no lo ve, y P1 es el gate que
+      existe para eso: su cuadratura usa el mismo semieje y se cancela, las invariantes de UTM son
+      independientes de la escala, el punto de Snyder corre sobre Clarke 1866 y las anclas tienen
+      25 km de tolerancia, que es 98 veces el desvío.
+
+    Este gate es el único que compara el fichero contra **la fuente** en vez de contra sí mismo.
+
+    **Y hasta dónde llega, dicho aquí y no sólo en el plan.** El fixture son **7 de las 86 áreas** de
+    RAMPE 2025: el ZIP entero son 12 MB comprimidos y 54,8 MB de GeoJSON, y commitearlo para que un
+    gate lo relea es un precio que no se paga. Sobre el artefacto de hoy eso son **14 de las 348
+    relaciones** publicadas, en 14 puertos, y **ninguna** de las 10 que dicen «cae dentro». O sea:
+
+    * lo que P6 caza es un derivado cuyas relaciones **con esas siete áreas** no salen de la
+      geometría —una fila movida, una distancia retocada, un ``dentro`` volcado, y una reproyección
+      desviada, que mueve 8 de las 14 (medido)—;
+    * lo que P6 **no** caza es lo mismo hecho sobre cualquiera de las otras 79 áreas.
+
+    Un gate parcial con su alcance escrito vale; uno que aparente cubrir las 348 sería peor que no
+    tenerlo, y por eso ``alcance_de_la_reconstruccion`` publica las dos cifras y ``run.py check`` las
+    imprime en la línea del ✓.
+
+    **Qué no puede cazar por construcción**: reconstruye con el código de hoy, así que un derivado
+    desviado *y* el ``utm.py`` desviado commiteados juntos le cuadrarían. Ese es el caso que atan las
+    anclas de ``tests/test_utm_reproyeccion.py``, fijadas a 1e-9 grados. Los dos hacen falta y
+    ninguno cubre al otro: P6 mira el artefacto contra el código, y aquéllas el código contra unas
+    cifras medidas.
+    """
+    if not origen.is_dir():
+        return [
+            f"no está la fuente capturada ({origen}): sin ella no se puede comprobar que lo "
+            "publicado sale de la geometría de RAMPE y no de una edición del JSON"
+        ]
+    radio = dataset.get("criterio", {}).get("radioKm", RADIO_KM)
+    if not isinstance(radio, int | float):
+        return [f"el dataset declara un radio ilegible ({radio!r}): no hay con qué reconstruir"]
+    try:
+        esperadas = reconstruir_relaciones(catalogo, origen, radio_km=float(radio))
+    except (rampe.ErrorRampe, OSError, KeyError, ValueError) as error:
+        return [f"la fuente capturada ya no se puede leer con el código de hoy: {error}"]
+    codigos = {codigo for _, codigo in esperadas} | {
+        area.codigo for area in areas_de_la_fuente_capturada(origen)
+    }
+    publicadas = {
+        (puerto.get("slug"), area.get("codigo")): area
+        for puerto in dataset.get("puertos", [])
+        for area in puerto.get("areas", [])
+        if area.get("codigo") in codigos
+    }
+    fallos: list[str] = []
+    for clave in sorted(set(esperadas) - set(publicadas)):
+        esperada = esperadas[clave]
+        fallos.append(
+            f"{clave[0]}/{esperada['nombre']}: la geometría de la fuente la pone a "
+            f"{esperada['distanciaAproxKm']} km de este puerto y el dataset no la publica"
+        )
+    for clave in sorted(set(publicadas) - set(esperadas)):
+        fallos.append(
+            f"{clave[0]}/{publicadas[clave].get('nombre')}: el dataset la publica y la geometría de "
+            "la fuente no la pone a menos del radio de este puerto"
+        )
+    for clave in sorted(set(esperadas) & set(publicadas)):
+        for campo in _CAMPOS_RECONSTRUIDOS:
+            if publicadas[clave].get(campo) != esperadas[clave][campo]:
+                fallos.append(
+                    f"{clave[0]}/{clave[1]}.{campo}: el dataset publica "
+                    f"{publicadas[clave].get(campo)!r} y la fuente da {esperadas[clave][campo]!r}"
+                )
+    return fallos

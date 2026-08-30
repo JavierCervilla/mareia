@@ -500,6 +500,10 @@ def _check_areas_protegidas() -> int:
       borde con lo que publicaría la distancia al vértice. La comparación se **calcula con la
       fuente** en la ingesta y viaja publicada en el artefacto, porque aquí no hay red: sin ese
       bloque, comprobar la divergencia costaría volver a bajarse los 54,8 MB de RAMPE.
+    * **P6 · lo publicado se vuelve a derivar de la geometría capturada.** Es el único que compara
+      el artefacto contra **la fuente** y no contra sí mismo, y cubre las 7 áreas del fixture de
+      RAMPE. Lo que no cubre lo dice su propia línea de ✓ y su docstring, porque un gate parcial que
+      no dice dónde acaba se lee como uno completo.
     """
     problems = 0
     desvios = utm.errores_de_reproyeccion()
@@ -565,6 +569,21 @@ def _check_areas_protegidas() -> int:
             f"arista más larga de la fuente mide {comparativa['aristaMaxM']} m"
         )
     catalogo = json.loads(PORTS_JSON.read_text(encoding="utf-8"))
+    reconstruccion = areas.errores_de_reconstruccion(dataset, catalogo)
+    for error in reconstruccion:
+        print(f"✗ P6 · reconstrucción: {error}", file=sys.stderr)
+    problems += len(reconstruccion)
+    if not reconstruccion:
+        alcance = areas.alcance_de_la_reconstruccion(dataset)
+        sin_cubrir = alcance["relacionesPublicadas"] - alcance["relacionesCubiertas"]
+        print(
+            f"✓ P6 · las {alcance['relacionesCubiertas']} relaciones de las "
+            f"{alcance['areasCubiertas']} áreas del recorte capturado se vuelven a derivar de su "
+            f"geometría y coinciden campo a campo (nombre, figura, distancia y «dentro»). NO cubre "
+            f"las otras {sin_cubrir} de {alcance['relacionesPublicadas']}: el fixture son "
+            f"{alcance['areasCubiertas']} de las {alcance['areasEnLaFuente']} áreas de la fuente, "
+            f"porque RAMPE 2025 son 54,8 MB que no se commitean"
+        )
     cobertura = areas.errores_de_cobertura(dataset, catalogo)
     for error in cobertura:
         print(f"✗ áreas protegidas: {error}", file=sys.stderr)

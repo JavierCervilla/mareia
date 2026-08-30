@@ -21,7 +21,7 @@ from typing import Any
 
 import pytest
 
-from mareia_pipeline import areas
+from mareia_pipeline import areas, utm
 from mareia_pipeline.sources import rampe
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures" / "rampe"
@@ -547,3 +547,134 @@ def test_el_readme_describe_el_recorte_que_hay() -> None:
     for area in lote:
         assert area.codigo in texto, f"el README no dice de dónde sale {area.codigo}"
 
+
+
+# --------------------------------------------------------------------------------------------
+# P6 · reconstrucción desde la geometría capturada
+# --------------------------------------------------------------------------------------------
+#
+# El gate que faltaba, y el eje que atraviesa dos hallazgos del pase adversario: el derivado se
+# commitea y **nada en CI lo vuelve a derivar de la fuente**, así que todos los demás gates del
+# artefacto miran coherencia interna y cualquier fichero coherente se publica. Los recorridos de
+# abajo son las dos formas medidas de romperlo —una fila movida de puerto (H-2) y un derivado salido
+# de una reproyección desviada (H-4)— más el alcance del gate, que se mide en vez de prometerse.
+
+#: Una relación del recorte, elegida porque es la más cercana de las 14 y porque su área es la única
+#: RESERVA MARINA del fixture: es la forma exacta del ataque H-2, que le quitaba a un puerto la
+#: reserva que tenía a 0,1 km.
+_PALOS = ("cabo-de-palos", "555552487")
+
+
+def test_p6_en_verde_las_relaciones_del_recorte_salen_de_su_geometria() -> None:
+    """Las 14 relaciones de las 7 áreas capturadas se rehacen y coinciden campo a campo."""
+    catalogo = json.loads(areas.PORTS_JSON.read_text(encoding="utf-8"))
+    assert areas.errores_de_reconstruccion(publicado(), catalogo) == []
+
+
+def test_p6_dice_lo_que_cubre_y_lo_que_no_en_numeros() -> None:
+    """El alcance es parte del gate, no una nota al pie.
+
+    Un gate de reconstrucción que cubriera las 348 relaciones exigiría commitear los 54,8 MB de
+    RAMPE. Éste cubre las de las 7 áreas del recorte, y esa cifra se **mide** aquí para que el día
+    que el fixture crezca o encoja haya que venir a mirarla en vez de enterarse por el ✓.
+    """
+    alcance = areas.alcance_de_la_reconstruccion(publicado())
+    assert alcance == {
+        "areasCubiertas": 7,
+        "areasEnLaFuente": 86,
+        "relacionesCubiertas": 14,
+        "relacionesPublicadas": 348,
+    }
+    # Y lo que NO cubre, dicho como lo que es: la mayor parte. 334 de 348.
+    assert alcance["relacionesPublicadas"] - alcance["relacionesCubiertas"] == 334
+
+
+def test_p6_en_rojo_si_una_relacion_desaparece_de_su_puerto() -> None:
+    """H-2, sobre un área del recorte: el total se conserva y el gate lo caza igual.
+
+    `errores_de_cobertura` recalcula el resumen desde el contenido, así que a un fichero al que le
+    falte una relación y traiga el resumen al día no le ve nada; y `errores_de_divergencia` compara
+    dos cifras que tampoco se mueven. Éste no compara el fichero consigo mismo.
+    """
+    catalogo = json.loads(areas.PORTS_JSON.read_text(encoding="utf-8"))
+    copia = json.loads(json.dumps(publicado()))
+    puerto = next(p for p in copia["puertos"] if p["slug"] == _PALOS[0])
+    puerto["areas"] = [a for a in puerto["areas"] if a["codigo"] != _PALOS[1]]
+    copia["resumen"] = areas.resumen_de(copia["puertos"])
+    errores = areas.errores_de_reconstruccion(copia, catalogo)
+    assert any("y el dataset no la publica" in error for error in errores), errores
+    assert any(_PALOS[0] in error for error in errores), errores
+    # Y el resto de la escalera, en verde: es lo que hace falta este gate.
+    assert areas.errores_de_cobertura(copia, catalogo) == []
+    assert areas.errores_de_geometria(copia) == []
+
+
+def test_p6_en_rojo_si_a_un_puerto_le_aparece_un_area_que_no_tiene_cerca() -> None:
+    """La otra mitad de H-2: la relación no se pierde, se le regala a otro puerto."""
+    catalogo = json.loads(areas.PORTS_JSON.read_text(encoding="utf-8"))
+    copia = json.loads(json.dumps(publicado()))
+    origen = next(p for p in copia["puertos"] if p["slug"] == _PALOS[0])
+    fila = next(a for a in origen["areas"] if a["codigo"] == _PALOS[1])
+    destino = next(p for p in copia["puertos"] if p["slug"] == "vigo")
+    destino["areas"] = sorted(
+        [*destino["areas"], {**fila, "distanciaAproxKm": 28.0}],
+        key=lambda area: area["distanciaAproxKm"],
+    )
+    copia["resumen"] = areas.resumen_de(copia["puertos"])
+    errores = areas.errores_de_reconstruccion(copia, catalogo)
+    assert any("la geometría de la fuente no la pone" in error for error in errores), errores
+
+
+@pytest.mark.parametrize(
+    ("campo", "plantado"),
+    [("distanciaAproxKm", 0.4), ("dentro", True), ("tipo", "ZEPA")],
+    ids=["distancia", "dentro", "figura"],
+)
+def test_p6_en_rojo_si_un_campo_de_una_relacion_no_es_el_que_da_la_geometria(
+    campo: str, plantado: Any
+) -> None:
+    """Los cuatro campos que se leen en la página, no sólo que la fila esté.
+
+    El `dentro` importa aparte: es la frase más fuerte que la sección sabe decir —«el punto de este
+    puerto cae dentro de esta área»— y hasta ahora no había nada que lo atara a la geometría.
+    """
+    catalogo = json.loads(areas.PORTS_JSON.read_text(encoding="utf-8"))
+    copia = json.loads(json.dumps(publicado()))
+    puerto = next(p for p in copia["puertos"] if p["slug"] == _PALOS[0])
+    next(a for a in puerto["areas"] if a["codigo"] == _PALOS[1])[campo] = plantado
+    errores = areas.errores_de_reconstruccion(copia, catalogo)
+    assert any(f".{campo}: el dataset publica" in error for error in errores), errores
+
+
+def test_p6_en_rojo_con_el_elipsoide_desviado_255_metros(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """**H-4.** El derivado que sale de una constante mal copiada deja de cuadrar con la fuente.
+
+    Se reproduce la equivocación del pase adversario: el semieje mayor del GRS80 pasa de
+    6.378.137,0 m a 6.378.392,1 —255,1 m, un 0,004 %, el tamaño de una errata— y se reconstruye. El
+    montaje va al revés que el ataque (allí se desviaba la ingesta y se comparaba con el código
+    bueno; aquí se desvía el código y se compara con el artefacto bueno) y mide lo mismo: si las dos
+    cosas no salen del mismo elipsoide, el gate lo dice.
+
+    Medido: **8 de las 14** relaciones del recorte cambian de distancia. El gate P1 no ve nada —su
+    cuadratura usa el mismo semieje, las invariantes de UTM no dependen de la escala, el punto de
+    Snyder corre sobre Clarke 1866 y las anclas tienen 25 km de tolerancia—, y eso se comprueba aquí
+    también: un rojo de P6 con P1 en verde es exactamente la situación que el hallazgo describe.
+    """
+    catalogo = json.loads(areas.PORTS_JSON.read_text(encoding="utf-8"))
+    desviado = utm.Elipsoide("GRS80", 6_378_392.1, 1 / 298.257222101)
+    monkeypatch.setitem(
+        utm.PROYECCIONES, 25830, utm.Proyeccion(25830, "ETRS89 / UTM zona 30N", 30, desviado)
+    )
+    assert utm.errores_de_reproyeccion() == [], "P1 sigue en verde, que es la mitad del hallazgo"
+    errores = areas.errores_de_reconstruccion(publicado(), catalogo)
+    distancias = [error for error in errores if ".distanciaAproxKm:" in error]
+    assert len(distancias) == 8, errores
+
+
+def test_p6_en_rojo_si_falta_la_fuente_capturada(tmp_path: Path) -> None:
+    """Sin fuente no se da un verde: un gate que no puede comparar no ha comparado nada."""
+    catalogo = json.loads(areas.PORTS_JSON.read_text(encoding="utf-8"))
+    errores = areas.errores_de_reconstruccion(publicado(), catalogo, tmp_path / "no-existe")
+    assert errores and "no está la fuente capturada" in errores[0]

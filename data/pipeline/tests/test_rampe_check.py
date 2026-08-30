@@ -84,6 +84,37 @@ def test_check_rojo_si_falta_el_dataset(
     assert "genéralo con" in capsys.readouterr().err
 
 
+def test_check_rojo_si_una_relacion_del_recorte_no_sale_de_la_geometria(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """**P6 enchufado al comando, y medido solo.**
+
+    Se le quita a Cabo de Palos su reserva marina y se deja el resumen al día, que es la forma
+    exacta del hallazgo H-2: el fichero queda internamente coherente y ni la cobertura ni la
+    divergencia ni el gate de geometría tienen nada que decir. Se silencian los otros gates a
+    propósito para que el rojo no pueda venir de ninguno de ellos: un gate al que nunca se le ve
+    morder por su cuenta no es cobertura.
+    """
+    movido = areas.cargar()
+    puerto = next(p for p in movido["puertos"] if p["slug"] == "cabo-de-palos")
+    puerto["areas"] = [a for a in puerto["areas"] if a["codigo"] != "555552487"]
+    movido["resumen"] = areas.resumen_de(movido["puertos"])
+    monkeypatch.setattr(areas, "cargar", lambda *_, **__: movido)
+    monkeypatch.setattr(areas, "errores_de_cobertura", lambda *_, **__: [])
+    monkeypatch.setattr(areas, "errores_de_divergencia", lambda *_, **__: [])
+    monkeypatch.setattr(areas, "errores_de_geometria", lambda *_, **__: [])
+    assert run.command_check(argparse.Namespace()) == 1
+    assert "✗ P6 · reconstrucción" in capsys.readouterr().err
+
+
+def test_el_verde_de_p6_dice_cuanto_NO_cubre(capsys: pytest.CaptureFixture[str]) -> None:
+    """Un gate parcial que no dice dónde acaba se lee como uno completo, y eso es peor que nada."""
+    assert run._check_areas_protegidas() == 0
+    salida = capsys.readouterr().out
+    assert "✓ P6 · las 14 relaciones de las 7 áreas" in salida
+    assert "NO cubre las otras 334 de 348" in salida
+
+
 def test_check_rojo_si_falta_un_puerto_en_el_derivado(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
