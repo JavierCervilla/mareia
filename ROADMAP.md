@@ -136,6 +136,46 @@
       regenera las 118 cifras desde la fuente capturada y las diffea (G3 miraba 6), **G5** impide
       publicar un cero, el aviso de sin-red dice ahora **su condición** y la excepción balear **se
       resuelve** en los 17 puertos que excepciona y en los 63 que no
+- [x] T-21 · **Las áreas marinas protegidas que tienes al lado, y ninguna geometría en el móvil.**
+      La página de puerto publica los espacios marinos protegidos a menos de **30 km** con su nombre
+      oficial, su figura y su distancia: **143 de 153** puertos tienen alguno —**348** relaciones
+      salidas de las **86** áreas de RAMPE 2025 (MITECO)— y los **10** que no tienen ninguna **lo
+      dicen**, con el radio a la vista, en vez de perder la sección. Se hace **la mitad defendible**
+      del encargo «zonas de pesca y zonas prohibidas»: dónde **no** se puede, que tiene fuente
+      oficial; dónde sí no se publica porque no hay fuente, y el aviso de que **la ausencia de área
+      protegida no es un permiso** va antes de la lista en las 153 páginas, con un gate que busca en
+      el `dist/` ocho maneras de sugerir lo contrario. La distancia es **al borde** del área, punto a
+      segmento sobre cada arista, y se publica como **cota entera** («a menos de 9 km»), nunca como
+      una medida. La primera versión medía **al vértice más cercano** y el verificador midió el
+      coste: perdía **6 relaciones reales** —tres del Corredor de Cetáceos, la única AMP del
+      catálogo— porque RAMPE tiene aristas de hasta **159,6 km**; el gate **P5** compara ahora las
+      dos métricas en cada ingesta y aborta si la fuente pierde densidad. Y la misma revisión ató
+      **`k0`** a un punto UTM publicado por un tercero: las cuatro capas anteriores del gate P1
+      seguían **en verde** con `k0 = 1`, porque todas arrancaban de nuestro propio `k0` y se
+      cancelaba. Entra por el
+      contrato `AppModule` como módulo propio (`ModuleId` se amplía por segunda vez, a cinco), en
+      `static`, **cero JavaScript** y con **`order: 12`: la primera de las secciones de módulo**,
+      porque es una advertencia y no una consulta (ese orden manda entre módulos, no sobre los
+      bloques del core: se lee justo después del dato de marea, no como un banner). **Ni un vértice cruza a `dist/`** —la
+      licencia de la fuente no está declarada en origen y se publican hechos derivados, no
+      geometrías—, y el hueco de licencia se publica con esas palabras. Gate P3 comprobado en rojo
+      con dos mutaciones (quitarle la frase a la rama vacía y esconder la sección en los 10 puertos)
+      · **pase de `qa-adversario`: 4 hallazgos reproducidos, todos del mismo eje** —el derivado se
+      commitea y **nada en CI lo vuelve a derivar de la fuente**, así que todos los gates del
+      artefacto eran de coherencia interna—. Arreglados dos: la **regla dura** («esto no autoriza a
+      pescar») viajaba como **texto libre del dataset** y la filtraban ocho regex, que un aviso
+      plantado de los mismos 186 bytes pasaba entero —ahora es una **constante del módulo** y un gate
+      la exige **literal** en las 153 páginas—, y **`dentro: true` apagaba la única cota del radio**,
+      que dejaba publicar «a menos de **480 km**» bajo un rótulo de 30 —ahora una fila que cae dentro
+      no publica cota y una cota fuera del radio **levanta**—. Los otros dos —una fila movida de
+      puerto y un derivado salido de un elipsoide desviado **255 m**, que mueve 191 distancias y 5
+      `dentro` con el gate P1 en verde— los cubre parcialmente el gate nuevo **P6**, que **vuelve a
+      derivar** lo publicado desde el recorte de RAMPE commiteado (precedente: G4 de T-19) y **dice
+      por escrito qué no cubre**: **14 de las 348** relaciones y **7 de las 86** áreas, porque la
+      fuente son 54,8 MB que no se commitean. Sus recorridos siguen con `test.fail()` y el informe lo
+      dice. Y el pase **refutó** el apunte de desbordamiento: con la tinta real de los nodos de texto
+      son **0/153** páginas, no 36. Medido al cerrar: `pnpm test` 243 · `pnpm test:e2e` **61 passed**
+      · `pytest` **1862 passed** · `ruff`, `typecheck`, `lint`, `astro check` y `run.py check` en 0
 - [ ] T-14 · Metodología pública + QC navegable + dataset con su licencia por puerto declarada
       (el reparto real ya publicado en T-14A) + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario

@@ -33,7 +33,7 @@ fuente, su licencia y el código que lo calcula.
 | `packages/domain-core` | Dominio puro: motor de mareas, astronomía, solunar, coeficiente |
 | `packages/usecases` | Casos de uso + puertos (interfaces) |
 | `packages/module-contract` | Contrato `AppModule` que hace enchufables los módulos |
-| `packages/modules/*` | Módulos: `fishing` (solunar), `weather` (meteo marina) |
+| `packages/modules/*` | Módulos: `fishing` (solunar), `weather` (meteo marina), `regulations` (tallas mínimas del BOE), `protected-areas` (áreas marinas protegidas) |
 | `packages/adapters` | Adapters: stations JSON, caché KV, Open-Meteo, AEMET |
 | `data/pipeline` | Pipeline Python offline: armónicos → JSON canónico por puerto |
 | `data/stations` | Dataset canónico de constituyentes por puerto (licencia por estación) |
@@ -59,6 +59,13 @@ usa) o si falta (usar un dato sin decir de dónde sale, que es la falta grave de
 - Meteorología: [Open-Meteo (CC-BY 4.0)](https://open-meteo.com/) ·
   [AEMET OpenData](https://opendata.aemet.es/) · [NOAA NDBC](https://www.ndbc.noaa.gov/)
 - Astronomía: [Astronomy Engine (MIT)](https://github.com/cosinekitty/astronomy)
+- Áreas marinas protegidas:
+  [RAMPE 2025 · MITECO](https://www.miteco.gob.es/es/biodiversidad/temas/biodiversidad-marina/espacios-marinos-protegidos/rampe.html)
+  — **la página de descarga no declara licencia ni condiciones de uso**, y eso no se maquilla: se
+  acredita como «condiciones de uso no declaradas en origen». La consecuencia es la que da forma al
+  módulo `protected-areas`: se publican **hechos derivados** —nombre oficial, figura, código y
+  distancia aproximada— y **ninguna geometría**, que es justo lo que una licencia no declarada no
+  deja redistribuir (ver `data/geo/README.md`).
 
 **Evaluadas y no usadas.** Se nombran aquí, con su motivo, y no en la tabla de arriba: una
 atribución es una afirmación de procedencia, y acreditar una fuente de la que no sale ni un dato

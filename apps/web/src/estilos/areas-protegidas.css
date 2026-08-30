@@ -1,0 +1,112 @@
+/* =============================================================================
+ * Sección «Áreas marinas protegidas» — la UI del módulo `protected-areas` (T-21).
+ *
+ * La importa el layout, como las demás hojas del sitio (design-brief, «dónde
+ * vive el CSS»: `.css` de verdad y no un `<style>` en la plantilla, porque el
+ * gate anti-slop escanea `.css` y no `.astro`). Se sigue el mismo camino que
+ * `tallas-minimas.css` por lo medido en T-10: importada desde el componente,
+ * Astro no la incluye en el bundle cuando la sección llega por el mapa de
+ * renderizadores, y se publicaría sin estilos con el build en verde.
+ *
+ * **Cero juice sobre una advertencia, y aquí es la regla más dura de la hoja**:
+ * ni parpadeo, ni halo, ni sombra, ni esquina redondeada, ni transición, ni un
+ * peso extra sobre el nombre del área o sobre la distancia. La sección va por
+ * encima del dato (`order: 12`) porque avisa, y una advertencia que además se
+ * adorna consigue que se le crea por el adorno. Lo único con color son los dos
+ * avisos, con el mismo filete de terracota que ya usan los avisos del puerto y
+ * la sección de tallas; ninguno cae sobre un nombre ni sobre una distancia.
+ *
+ * Ni un literal de color ni de fuente: todo sale de los tokens.
+ * ========================================================================== */
+
+.areas__intro {
+  font-size: var(--m-text-body);
+}
+
+/* --- Los dos avisos ------------------------------------------------------- */
+/* El de la fuente («que no haya un área protegida cerca no autoriza a pescar»)
+   y el de lectura sin red. Mismo tratamiento que `.tallas__aviso`: filete
+   lateral en el acento cálido y texto en tinta, para que se vean sin gritar más
+   que el «No apto para navegación» del pie. */
+.areas__aviso {
+  border-inline-start: 2px solid var(--m-terra);
+  padding-inline-start: 12px;
+  font-size: var(--m-text-body);
+}
+
+/* --- Los 10 puertos sin ninguna área -------------------------------------- */
+/* La frase que sostiene la sección cuando no hay nada que listar. Se compone en
+   cuerpo de texto —no más pequeño— porque es la respuesta, no una nota al pie:
+   quien abre esa página tiene que poder leer «ninguna a menos de 30 km» sin
+   buscarla. Y sin color: no es una alarma ni una buena noticia, es un hecho, y
+   ninguna de las dos lecturas es la que queremos provocar. */
+.areas__ninguna {
+  font-size: var(--m-text-body);
+}
+
+/* --- La tabla ------------------------------------------------------------- */
+.tabla-areas {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--m-text-body);
+  text-align: left;
+}
+
+.tabla-areas th,
+.tabla-areas td {
+  padding: var(--m-gap-fila) 10px var(--m-gap-fila) 0;
+  border-top: 1px solid var(--m-rule-soft);
+  vertical-align: baseline;
+}
+
+.tabla-areas thead th {
+  font-size: var(--m-text-eyebrow);
+  font-weight: 400;
+  letter-spacing: var(--m-track-label);
+  text-transform: uppercase;
+  color: var(--m-sub);
+  border-top: 0;
+  border-bottom: 1px solid var(--m-rule);
+}
+
+/* El nombre oficial manda en la fila; el código de la fuente baja un peldaño.
+   Nada de negrita: la cabecera de fila ya la identifica. */
+.tabla-areas tbody th {
+  font-weight: 400;
+}
+
+.tabla-areas__codigo,
+.tabla-areas__glosa,
+.tabla-areas__dentro {
+  display: block;
+  font-size: var(--m-text-meta);
+  color: var(--m-sub);
+}
+
+.tabla-areas__codigo {
+  font-variant-numeric: tabular-nums;
+}
+
+/* La sigla es la que trae la fuente y se lee tal cual; la glosa va debajo, en el
+   mismo cuerpo pequeño que el resto de la meta. Sin versalita ni recuadro: no es
+   una etiqueta de estado, es una clase administrativa. */
+.tabla-areas__sigla {
+  font-size: var(--m-text-body);
+}
+
+/* `tabular-nums` porque hay una magnitud, pero sin peso ni color: la distancia
+   es una cota aproximada y destacarla la haría leerse como una medida. Sin
+   `nowrap` a propósito: «a menos de 30 km» es prosa con espacios y parte bien;
+   el `nowrap` de un literal largo fue lo que desbordó la página a 320 px en la
+   sección de tallas (T-19), y aquí no hace falta. */
+.tabla-areas__distancia {
+  font-variant-numeric: tabular-nums;
+}
+
+/* «El punto de este puerto cae dentro de esta área»: un hecho más fuerte que la
+   distancia de encima, en renglón propio y en el cuerpo de la meta. Sin color y
+   sin negrita, por lo mismo que el resto: son 10 relaciones del dataset y
+   marcarlas en rojo las convertiría en la parte interesante de la sección. */
+.tabla-areas__dentro {
+  margin-top: 4px;
+}

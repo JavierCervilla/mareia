@@ -47,6 +47,9 @@ importers:
       '@mareia/module-fishing':
         specifier: workspace:*
         version: link:../../packages/modules/fishing
+      '@mareia/module-protected-areas':
+        specifier: workspace:*
+        version: link:../../packages/modules/protected-areas
       '@mareia/module-regulations':
         specifier: workspace:*
         version: link:../../packages/modules/regulations
@@ -96,6 +99,12 @@ importers:
       '@mareia/domain-core':
         specifier: workspace:*
         version: link:../../domain-core
+      '@mareia/module-contract':
+        specifier: workspace:*
+        version: link:../../module-contract
+
+  packages/modules/protected-areas:
+    dependencies:
       '@mareia/module-contract':
         specifier: workspace:*
         version: link:../../module-contract

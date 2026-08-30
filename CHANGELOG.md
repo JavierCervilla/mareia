@@ -2,6 +2,158 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-30 — T-21 · Áreas marinas protegidas: 348 avisos, 10 «ninguna» y ni un vértice
+
+La página de puerto publica los espacios marinos protegidos que tiene a menos de **30 km** —nombre
+oficial, figura y distancia aproximada— a partir de **RAMPE 2025** (MITECO). Es la primera sección
+del portal que **no es información sino advertencia**, y eso mueve dónde se coloca y cómo se
+escribe.
+
+- **Se hace la mitad defendible del encargo.** Lo pedido era «zonas de pesca y zonas prohibidas».
+  Las de pesca **no se publican**: no hay fuente, y decir dónde *sí* se puede pescar es inventar. Las
+  protegidas sí, porque hay fuente oficial y el error cae del lado conservador. La consecuencia va
+  escrita en la página y no insinuada: el aviso de la fuente —«que no haya un área protegida cerca no
+  autoriza a pescar: esto dice dónde NO se puede, nunca dónde sí»— va **antes** de la lista, en las
+  **153** páginas, y un gate del `dist/` busca ocho maneras de sugerir lo contrario («pesca
+  permitida», «zona libre», «apto para la pesca»…).
+- **143 de 153 puertos tienen alguna, y son 348 relaciones de las 86 áreas de la fuente.** El
+  reparto por figura de lo publicado: **208 ZEPA · 108 ZEC · 26 reservas marinas · 6 AMP**. La quinta
+  figura de RAMPE, `ZEC/AMP`, tiene una sola área —El Cachucho, en el Cantábrico abierto— y no cae a
+  menos de 30 km de ningún puerto del catálogo: está glosada y probada en el módulo, y el gate lo
+  dice en vez de fingir que la mide.
+- **Los 10 puertos sin ninguna área lo DICEN**, y es la decisión de producto de la trayectoria.
+  Alboraya, Arenys de Mar, Donostia, Getaria, Mataró, Melilla, Sagunto, Sevilla, Silla y Valencia no
+  pierden la sección: publican «Ninguna a menos de 30 km de este puerto» y, debajo, hasta dónde se ha
+  mirado y que el radio es **una decisión nuestra, no una ausencia de la fuente**. Una sección que
+  desaparece se lee como «no hay nada que saber» y no se distingue de «esto no lo hemos hecho».
+- **La distancia es al BORDE del área, y la primera versión de esta trayectoria la medía al vértice
+  más cercano.** El verificador rechazó ese primer intento y midió el coste: la cota por vértice
+  **perdía 6 relaciones reales** de las 348, tres de ellas del **Corredor de Migración de Cetáceos
+  del Mediterráneo**, que es la **única AMP** del catálogo y que así se publicaba en tres puertos y
+  se perdía en otros tres. Que el error cayera siempre del lado de «alejar» no lo hacía inofensivo:
+  en una sección cuya única razón de ser es avisar, alejar es **avisar de menos**. La causa está en
+  la fuente —RAMPE tiene una mediana de arista de 2,01 m pero **728 aristas de más de 1 km y una de
+  159,6 km**, y el error de la cota es del orden de media arista—, y el arreglo es distancia punto a
+  segmento sobre cada arista, en `geo.distancia_a_segmento_km`, con `math` y sin `pyproj` ni
+  `shapely`. Pollença tenía el Corredor a **27,6 km** de su borde y a **69,8 km** de su vértice.
+  Se sigue publicando como **cota entera** —«a menos de 9 km» y no «8,7 km»—, ahora con los dos
+  redondeos hacia arriba (la décima en el dato, el kilómetro en la página). Las **59** relaciones por
+  debajo del kilómetro dicen todas «a menos de 1 km», y las **10** en las que el puerto cae
+  **dentro** de un área lo dicen con esas palabras en vez de disolverlo en una distancia corta.
+- **Gate P5: las dos métricas, comparadas en cada ingesta.** El derivado publica cuánto se separan
+  —**6 relaciones de diferencia, 342 → 348**, la mayor de **42,2 km**— y `run.py check` lo comprueba
+  sin red contra un umbral declarado, porque CI no se baja los 54,8 MB de RAMPE. Dos rojos distintos:
+  por **umbral**, si la fuente pierde densidad de vértices y la divergencia crece; y sin umbral
+  ninguno, si alguna relación *desaparece* al medir el borde, que es aritméticamente imposible —el
+  vértice **es** un punto del borde— y por tanto sólo puede ser un error en la distancia
+  punto-segmento. Probado en rojo por las dos vías.
+- **Y `k0` quedó atado a algo que no somos nosotros.** El gate P1 anunciaba una capa de «escala» que
+  validaba `k0 = 0,9996`, y no la validaba: `k0` entraba por los dos lados de la comparación y se
+  cancelaba. Medido con `K0 = 1` —olvidarse entero del factor de escala de UTM, 1,8 km sobre el
+  terreno—: las **cuatro** capas seguían en verde. La quinta capa es un punto que publica un tercero
+  con sus **dos** coordenadas a la vez, la UTM y la geográfica —el ejemplo numérico de la transversa
+  de Mercator de Snyder, USGS Professional Paper 1395 (1987), págs. 269-270—; nuestra inversa lo
+  devuelve a **4,7 cm** de donde su autor lo puso, con tolerancia de 1 m, y se pone roja en cuanto
+  `k0` se equivoca en la **séptima cifra** (verde en +2,0 × 10⁻⁷, roja en +2,2 × 10⁻⁷).
+- **Las siglas se glosan; el régimen, no.** ZEPA → «Zona de Especial Protección para las Aves», ZEC →
+  «Zona Especial de Conservación», AMP → «Área Marina Protegida», pegadas a la sigla y no en un pie.
+  Lo que **no** se escribe es qué permite o prohíbe cada figura: eso lo fija la declaración oficial de
+  cada espacio y no está en esta fuente. Desarrollar una sigla es leer; contar su régimen sería
+  redactar derecho por nuestra cuenta. El `switch` que las escribe cierra con `never`: una sexta
+  figura **no compila** hasta que alguien decida qué significa.
+- **Módulo propio, y `order: 12`: la primera de las secciones de módulo.** `ModuleId` pasa a
+  cinco (`fishing | weather | navigation | regulations | protected-areas`); es la **segunda** vez que
+  se ejerce esa puerta y el motivo está en el diff del contrato: no es pesca —aquélla calcula una
+  convención sin respaldo experimental— ni normativa —el BOE dice qué mide una pieza; RAMPE, qué
+  espacios están protegidos—, y colgarla de cualquiera de las dos habría metido en una sola lista de
+  atribuciones la licencia real del BOE junto al hueco de licencia de RAMPE. El `order: 12` la pone
+  delante de solunar y meteo (20) y de las tallas (30) porque **es una advertencia y no una
+  consulta**: en la jerarquía del design brief las advertencias están fuera de los tres niveles. El
+  hueco por debajo de 20 lo dejó reservado T-19 con esas palabras. Lo que ese 12 **no** hace, dicho
+  para que nadie lo suponga: `order` ordena las secciones de módulo entre sí, no por encima de los
+  bloques del core, así que la sección se lee justo **después** del dato de marea y no es un banner.
+- **Ni un vértice cruza a `dist/`.** La página de descarga de RAMPE **no declara licencia ni
+  condiciones de uso**, así que se publican **hechos derivados** —nombre, figura, código, distancia—
+  y ninguna geometría, ni simplificada ni en una caja envolvente. La atribución dice el hueco tal
+  cual: «MITECO · RAMPE 2025 — condiciones de uso no declaradas en origen». No se le pone una CC
+  porque otras fuentes del ministerio la lleven. Un gate mide el HTML publicado —nada con pinta de
+  coordenadas, y tope de bytes por sección— porque el último sitio por el que la geometría podría
+  escaparse es un `data-` puesto para «un mapita».
+- **Cero *juice* sobre una advertencia.** Ni parpadeo, ni halo, ni recuadro de estado, ni contador,
+  ni orden por «más interesante»: el orden es el del dato, que es la proximidad, y la plantilla **no
+  reordena** —si el derivado llegara desordenado, levanta, porque ordenarlo aquí taparía el fallo—.
+  La mancha de terracota cae solo en los dos avisos, nunca sobre un nombre ni sobre una distancia, y
+  hay un gate que lo mide sobre la hoja (sin `@keyframes`, `animation`, `transition`, `box-shadow`
+  ni `border-radius`).
+- **Sin cobertura la lista se lee, y el aviso empieza por su condición.** `offline: cache-first` y
+  **cero JavaScript**: el aviso no se enciende, va horneado siempre, y empieza por «si guardas este
+  puerto» porque quien guarda una página es la caja de favoritos y solo la del puerto que el lector
+  marque. Es la corrección de H-4 de T-19 aplicada **antes** de publicar, no después.
+- **El gate de la trayectoria, probado en rojo dos veces.** «Los 10 puertos sin área lo dicen» se
+  mide sobre el `dist/`: la frase, el motivo del dato y la marca del caso vacío, en las 10 páginas
+  construidas. Se probó (a) quitándole la frase a la rama vacía —salieron los 10 listados por su
+  slug— y (b) escondiendo la sección en esos 10 puertos con un `isEnabledForPort`, que es la
+  tentación real: se cayeron **9 de los 11** recorridos del fichero —los nueve que leen el `dist/`—,
+  nombrando el primer puerto sin sección.
+- **Lo que pesa, medido sobre el `dist/`** —la página con la sección menos la página sin ella, sobre
+  las 153—. La sección añade **1.955 B** en Valencia (sin ninguna área, +4,7 %), **2.944 B** en Vigo
+  (una área, +6,3 %) y **4.925 B** en Guía de Isora (seis, el máximo del catálogo, +11,5 %);
+  comprimida, entre **599 y 1.186 B**. La hoja de estilos suma **1.004 B** al bundle común
+  (18.782 → 19.786, +5,3 %) y el `dist/` entero pasa de 7,733 a 8,249 MB (+6,7 %). **Ni un byte de
+  JavaScript.** El máximo ya no se teclea: un recorrido lo recalcula sobre las 153 páginas
+  construidas. Hasta la revisión de esta trayectoria aquí figuraba **Agaete** como el más gordo con
+  4.808 B, y Agaete es el **quinto** —4.684 B—: la cifra reproducía, la palabra «máximo» no.
+  (Tras el pase adversario el máximo es **4.866 B**: las filas en las que el puerto cae dentro del
+  área ya no publican cota. Comprimido, entre **607 y 1.174 B**, gzip por defecto sobre ese mismo
+  coste marginal.)
+- **El pase adversario reprodujo cuatro hallazgos, y el eje de los cuatro es el mismo**: el derivado
+  se **commitea** y **nada en CI lo vuelve a derivar de la fuente** —`run.py areas-protegidas`
+  necesita red y el job de datos no la usa, a propósito—, así que todos los gates del artefacto eran
+  de **coherencia interna** y cualquier fichero coherente se publicaba. Lo arreglado:
+  - **La regla dura ya no viaja como texto libre del dataset.** «Que no haya un área protegida cerca
+    no autoriza a pescar» llegaba a las 153 páginas desde `fuente.aviso`, y lo único que lo miraba
+    eran **ocho expresiones regulares y una subcadena**: un aviso plantado de los mismos 186 bytes
+    —«…no autoriza a pescar **sin licencia; con ella, en el resto no hay veda**»— las pasaba todas y
+    se publicaba en negrita, antes de la lista, con `pnpm test`, `run.py check`, `pytest` y `ruff` en
+    verde. Igual el «hasta dónde hemos mirado» de los 10 puertos vacíos, que era `puertos[].motivo`.
+    Las dos frases son ahora **constantes del módulo** (`NO_AUTORIZA_A_PESCAR`,
+    `hastaDondeSeHaMirado`) y la sección las pinta venga lo que venga en el dato; el derivado sigue
+    trayendo las suyas —son su registro— pero **no llegan al HTML**. El texto publicado no cambia ni
+    una palabra: cambia **quién responde de él**. Gate: las 153 páginas del `dist/` tienen que traer
+    la constante **literal**, y se probó en rojo quitando el párrafo (0 ocurrencias en la página de
+    Vigo, `pnpm --filter web test` a 241/2) y volviendo a pintar el texto del dato (el recorrido
+    adversario, en rojo por el permiso plantado).
+  - **Ninguna fila puede contradecir el título de su sección.** `dentro: true` apagaba la única cota
+    numérica del radio —en el pipeline la condición era `distancia > radio and not dentro`, y del
+    lado de la web no había segunda opinión—, así que Alicante podía publicar *«Reserva marina de la
+    Isla de Tabarca · a menos de **480 km** · El punto de este puerto cae dentro de esta área»* bajo
+    el rótulo **«Áreas marinas protegidas a menos de 30 km»**, todo verde. Ahora
+    `proximidadDeArea` recibe el radio que el título publica: si el puerto **cae dentro** no se
+    publica cota —ahí la distancia al borde mide lo metido que está el puerto, no lo lejos que está
+    el área— y si está **fuera** y la cota pasa del radio, **levanta** y rompe el build, que es
+    fail-safe. Las 10 relaciones con `dentro` de hoy están todas a 0,1 km o menos, así que la cota
+    que se deja de publicar decía «a menos de 1 km» y no añadía nada al hecho que la sustituye.
+- **Gate P6: lo publicado se vuelve a derivar de la fuente, y dice por escrito qué NO cubre.** Es el
+  único gate que compara el artefacto contra **la fuente** y no contra sí mismo, y es la respuesta
+  parcial a los otros dos hallazgos: (a) moviendo una fila de puerto y recalculando el resumen, el
+  Vendrell perdía la reserva marina que tiene a **0,1 km** y Carboneras publicaba esa misma reserva
+  «a menos de 28 km» estando a unos 700, con el total en **348** antes y después; (b) con el semieje
+  mayor del GRS80 desviado **255 m** —un **0,004 %**, el tamaño de una errata— las cinco capas del
+  gate P1 devuelven **cero fallos** y salen las mismas 348 relaciones, pero **191 distancias cambian
+  y 5 `dentro` vuelcan**. P6 rehace las relaciones desde el **recorte de RAMPE ya commiteado** —el
+  mismo parser, la misma `vecindad_de`, el mismo `_area_a_json`— y las diffea campo a campo; el
+  precedente es **G4 de T-19** con las respuestas capturadas del BOE. **Su alcance va escrito y no
+  prometido**: cubre las **14 relaciones de las 7 áreas** del fixture y **NO cubre las otras 334 de
+  348**, porque RAMPE 2025 son 54,8 MB que no se commitean; la línea del ✓ de `run.py check` imprime
+  las dos cifras. Probado en rojo cinco veces, incluido **el elipsoide desviado**, que mueve **8 de
+  las 14** con P1 en verde —eso se afirma en el mismo test—, y enchufado al comando con los otros
+  tres gates silenciados a propósito.
+- **Y lo que el pase adversario *refutó*.** La revisión previa contaba **36 de 153** páginas con la
+  tabla fuera de la columna de contenido. Medido con la **tinta real** de los nodos de texto y no con
+  cajas ni `scrollWidth`, son **0/153** a 320 px y **0/153** a 412 px: lo que contaba de más era el
+  `<caption class="solo-lectores">`, que está en `clip-path: inset(50%)` y **no se pinta**. No se ha
+  tocado nada por ese motivo.
+
 ## 2026-08-30 — T-19 · Tallas mínimas por caladero: 118 cifras del BOE, y ninguna sin su excepción
 
 La página de puerto publica la talla mínima legal de captura del caladero al que pertenece, con la

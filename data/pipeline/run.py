@@ -6,6 +6,7 @@
     python run.py check      # valida los JSON ya commiteados contra el schema station/v1
     python run.py normativa  # ingesta del RD 560/1995 del BOE → data/normativa/tallas-minimas.json
     python run.py verificar-normativa   # gate G2: ¿sigue en vigor lo que publicamos?
+    python run.py areas-protegidas      # ingesta de RAMPE 2025 → data/geo/areas-protegidas.json
 
 Todas las fuentes son públicas y anónimas: el pipeline no lee ninguna credencial.
 """
@@ -21,11 +22,11 @@ import urllib.error
 from collections import Counter
 from pathlib import Path
 
-from mareia_pipeline import catalog, normativa, report, schema
+from mareia_pipeline import areas, catalog, normativa, report, schema, utm
 from mareia_pipeline import grade as grading
 from mareia_pipeline.ports import PILOT_PORTS, Port
 from mareia_pipeline.reconcile import Selection, select, to_station_v1
-from mareia_pipeline.sources import boe, geonames, ioc
+from mareia_pipeline.sources import boe, cache, geonames, ioc, rampe
 from mareia_pipeline.sources.tide_database import GaugeRecord, load_gauges
 from mareia_pipeline.tides.predict import Harmonic
 from mareia_pipeline.validate import Metrics, evaluate
@@ -354,6 +355,7 @@ def command_check(_: argparse.Namespace) -> int:
     print(f"✓ {len(files) - failures} de {len(files)} estaciones validan contra station/v1")
     failures += _check_catalogue()
     failures += _check_normativa()
+    failures += _check_areas_protegidas()
     return 1 if failures else 0
 
 
@@ -480,6 +482,179 @@ def command_normativa(args: argparse.Namespace) -> int:
     return 0
 
 
+def _check_areas_protegidas() -> int:
+    """Gates P1, P2 y P4 del derivado de áreas marinas protegidas. Offline y determinista.
+
+    Los tres miran cosas distintas y ninguno cubre a los otros:
+
+    * **P1 · la reproyección está atada.** Vive en `utm` y no necesita ningún dato publicado: es
+      aritmética contra una cuadratura, tres invariantes exactas y dos anclas geográficas. Corre
+      aunque el dataset no exista todavía, porque si la inversa se ha ido lo que hay que saber es
+      eso y no que falta un fichero.
+    * **P4 · el CRS se lee, no se supone.** La lectura real pasa en la ingesta, con red; aquí se
+      comprueba que el camino de aborto sigue vivo y que todo lo publicado salió de un EPSG del mapa
+      cerrado. Un gate cuyo rojo se ha muerto da verde igual que uno que funciona.
+    * **P2 · la geometría no cruza.** Se mide sobre el **artefacto**: ni una clave de geometría, ni
+      una lista de números, ni un puerto que pase del tope de bytes.
+    * **P5 · las dos métricas siguen diciendo lo mismo.** Compara lo que publicaría la distancia al
+      borde con lo que publicaría la distancia al vértice. La comparación se **calcula con la
+      fuente** en la ingesta y viaja publicada en el artefacto, porque aquí no hay red: sin ese
+      bloque, comprobar la divergencia costaría volver a bajarse los 54,8 MB de RAMPE.
+    * **P6 · lo publicado se vuelve a derivar de la geometría capturada.** Es el único que compara
+      el artefacto contra **la fuente** y no contra sí mismo, y cubre las 7 áreas del fixture de
+      RAMPE. Lo que no cubre lo dice su propia línea de ✓ y su docstring, porque un gate parcial que
+      no dice dónde acaba se lee como uno completo.
+    """
+    problems = 0
+    desvios = utm.errores_de_reproyeccion()
+    for desvio in desvios:
+        print(f"✗ P1 · reproyección: {desvio}", file=sys.stderr)
+    problems += len(desvios)
+    if not desvios:
+        print(
+            f"✓ P1 · la inversa de Krüger cae donde debe: arco de meridiano, invariantes de UTM, "
+            f"escala de la serie, el punto UTM que publica un tercero a "
+            f"{utm.PUNTO_PUBLICADO.desvio_medido_m} m de donde lo publica —única capa que ata "
+            f"k0={utm.K0}; la cita, en `utm.PUNTO_PUBLICADO.fuente`— y {len(utm.ANCLAS)} anclas "
+            f"geográficas a menos de {utm.TOLERANCIA_ANCLA_KM:.0f} km de su puerto"
+        )
+    muertos = rampe.errores_de_gate_de_crs()
+    for muerto in muertos:
+        print(f"✗ P4 · CRS: {muerto}", file=sys.stderr)
+    problems += len(muertos)
+    if not muertos:
+        print(
+            f"✓ P4 · el CRS se lee de la fuente: {len(utm.PROYECCIONES)} EPSG conocidos y "
+            f"{len(rampe._CRS_QUE_DEBEN_ABORTAR)} plausibles que abortan, sin zona por defecto"
+        )
+    if not areas.DATASET.exists():
+        print(
+            f"✗ falta {areas.DATASET.relative_to(REPO_ROOT)}: genéralo con "
+            "`python run.py areas-protegidas`",
+            file=sys.stderr,
+        )
+        return problems + 1
+    dataset = areas.cargar()
+    epsg_publicados = set(dataset.get("fuente", {}).get("censo", {}).get("porEpsg", {}))
+    desconocidos = sorted(epsg_publicados - {str(codigo) for codigo in utm.PROYECCIONES})
+    for codigo in desconocidos:
+        problems += 1
+        print(
+            f"✗ P4 · el dataset publica áreas reproyectadas desde EPSG:{codigo}, que no está en el "
+            "mapa cerrado de proyecciones",
+            file=sys.stderr,
+        )
+    geometria = areas.errores_de_geometria(dataset)
+    for error in geometria:
+        print(f"✗ P2 · geometría: {error}", file=sys.stderr)
+    problems += len(geometria)
+    if not geometria:
+        censo = dataset["fuente"]["censo"]
+        print(
+            f"✓ P2 · las {censo['areas']} áreas publican nombre, tipo y distancia y ni uno de sus "
+            f"{censo['verticesEnOrigen']} vértices"
+        )
+    divergencia = areas.errores_de_divergencia(dataset)
+    for error in divergencia:
+        print(f"✗ P5 · métrica: {error}", file=sys.stderr)
+    problems += len(divergencia)
+    if not divergencia:
+        comparativa = dataset["comparativa"]
+        print(
+            f"✓ P5 · la distancia se mide al borde y no al vértice: son "
+            f"{comparativa['entranSoloPorElBorde']} relaciones de diferencia sobre "
+            f"{comparativa['relacionesPorBorde']} —exactamente las "
+            f"{areas.DIVERGENCIA_MEDIDA_RELACIONES} medidas, ni una más ni una menos—, la mayor de "
+            f"{comparativa['mayorDiferenciaKm']} km en {comparativa['mayorDiferenciaEn']}; la "
+            f"arista más larga de la fuente mide {comparativa['aristaMaxM']} m"
+        )
+    catalogo = json.loads(PORTS_JSON.read_text(encoding="utf-8"))
+    reconstruccion = areas.errores_de_reconstruccion(dataset, catalogo)
+    for error in reconstruccion:
+        print(f"✗ P6 · reconstrucción: {error}", file=sys.stderr)
+    problems += len(reconstruccion)
+    if not reconstruccion:
+        alcance = areas.alcance_de_la_reconstruccion(dataset)
+        sin_cubrir = alcance["relacionesPublicadas"] - alcance["relacionesCubiertas"]
+        print(
+            f"✓ P6 · las {alcance['relacionesCubiertas']} relaciones de las "
+            f"{alcance['areasCubiertas']} áreas del recorte capturado se vuelven a derivar de su "
+            f"geometría y coinciden campo a campo (nombre, figura, distancia y «dentro»). NO cubre "
+            f"las otras {sin_cubrir} de {alcance['relacionesPublicadas']}: el fixture son "
+            f"{alcance['areasCubiertas']} de las {alcance['areasEnLaFuente']} áreas de la fuente, "
+            f"porque RAMPE 2025 son 54,8 MB que no se commitean"
+        )
+    cobertura = areas.errores_de_cobertura(dataset, catalogo)
+    for error in cobertura:
+        print(f"✗ áreas protegidas: {error}", file=sys.stderr)
+    problems += len(cobertura)
+    if not cobertura:
+        resumen = dataset["resumen"]
+        print(
+            f"✓ los {resumen['puertos']} puertos declaran sus áreas protegidas: "
+            f"{resumen['conArea']} con alguna ({resumen['relaciones']} relaciones) y "
+            f"{resumen['sinArea']} que dicen que no hay ninguna a "
+            f"{dataset['criterio']['radioKm']:.0f} km"
+        )
+    return problems
+
+
+def command_areas_protegidas(args: argparse.Namespace) -> int:
+    """Ingesta de RAMPE 2025: MITECO → `data/geo/areas-protegidas.json`.
+
+    Necesita red y no corre en CI, igual que `build` y `normativa`: el dataset se commitea. Los
+    gates P2, P5 y de cobertura se pasan **antes** de escribir, así que un documento con geometría
+    dentro, con un puerto de menos o con las dos métricas separándose más de lo declarado no llega
+    ni al disco.
+    """
+    cuerpo = rampe.descargar(refresh=args.refresh)
+    huella = cache.sha256(cuerpo)
+    lote = rampe.leer_zip(cuerpo)
+    print(f"RAMPE 2025 · {len(cuerpo)} bytes · sha256 {huella[:16]}…")
+    for fichero, que in rampe.FICHEROS.items():
+        del_fichero = [area for area in lote if area.fichero == fichero]
+        epsg = {area.epsg for area in del_fichero}
+        print(
+            f"  {fichero:18} {len(del_fichero):3} áreas · {que} · CRS declarado "
+            f"{', '.join(f'EPSG:{codigo}' for codigo in sorted(epsg))}"
+        )
+    for tipo, cuantas in sorted(Counter(area.tipo for area in lote).items()):
+        print(f"      {tipo:15} {cuantas}")
+    catalogo = json.loads(PORTS_JSON.read_text(encoding="utf-8"))
+    dataset = areas.construir_dataset(
+        catalogo,
+        lote,
+        descargado_en=dt.datetime.now(dt.timezone.utc).date(),
+        sha256=huella,
+    )
+    errores = [
+        *(f"geometría: {error}" for error in areas.errores_de_geometria(dataset)),
+        *(f"cobertura: {error}" for error in areas.errores_de_cobertura(dataset, catalogo)),
+        *(f"métrica: {error}" for error in areas.errores_de_divergencia(dataset)),
+    ]
+    if errores:
+        for error in errores:
+            print(f"✗ {error}", file=sys.stderr)
+        return 1
+    areas.volcar(dataset)
+    resumen = dataset["resumen"]
+    print(
+        f"  {resumen['conArea']} de {resumen['puertos']} puertos tienen alguna área a "
+        f"{dataset['criterio']['radioKm']:.0f} km ({resumen['relaciones']} relaciones); "
+        f"{resumen['sinArea']} publican que no hay ninguna"
+    )
+    comparativa = dataset["comparativa"]
+    print(
+        f"  medir al borde y no al vértice añade {comparativa['entranSoloPorElBorde']} relaciones "
+        f"({comparativa['relacionesPorVertice']} → {comparativa['relacionesPorBorde']}); la mayor "
+        f"diferencia son {comparativa['mayorDiferenciaKm']} km en "
+        f"{comparativa['mayorDiferenciaEn']}, y la arista más larga de la fuente mide "
+        f"{comparativa['aristaMaxM']} m"
+    )
+    print(f"áreas protegidas → {areas.DATASET.relative_to(REPO_ROOT)}")
+    return 0
+
+
 def command_verificar_normativa(_: argparse.Namespace) -> int:
     """Gate G2: ¿lo que publicamos sigue siendo lo que dice el BOE hoy?
 
@@ -538,6 +713,9 @@ def main(argv: list[str] | None = None) -> int:
     subparsers.add_parser(
         "verificar-normativa", help="gate G2: comprueba que el RD 560/1995 sigue en vigor"
     )
+    subparsers.add_parser(
+        "areas-protegidas", help="ingesta de RAMPE 2025 (áreas marinas protegidas por puerto)"
+    )
 
     args = parser.parse_args(argv)
     if getattr(args, "commit", None) is None:
@@ -551,6 +729,7 @@ def main(argv: list[str] | None = None) -> int:
         "check": command_check,
         "normativa": command_normativa,
         "verificar-normativa": command_verificar_normativa,
+        "areas-protegidas": command_areas_protegidas,
     }
     return handlers[args.command](args)
 

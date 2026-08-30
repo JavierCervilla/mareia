@@ -17,8 +17,18 @@
  * identidad, una sola versión y las atribuciones mezcladas —la teoría solunar y el BOE en la misma
  * lista—, y darlos de baja por separado dejaría de ser borrar una línea. Ampliar la unión es
  * exactamente para lo que está cerrada.
+ *
+ * `protected-areas` (T-21) es la **segunda** vez que se ejerce, y el motivo es el mismo con una
+ * vuelta más: las áreas marinas protegidas de RAMPE no son ni pesca ni normativa. No son `fishing`
+ * porque aquélla calcula una convención sin respaldo experimental y ésta publica un hecho de una
+ * fuente oficial; y no son `regulations` porque el BOE fija qué talla ha de medir una pieza,
+ * mientras que RAMPE solo dice qué espacios están protegidos y dónde caen — **no** qué se puede
+ * hacer dentro, que vive en la declaración de cada espacio y aquí no se publica. Colgarla de
+ * cualquiera de las dos metería en una sola lista de atribuciones una licencia real (la del BOE)
+ * junto a un hueco de licencia declarado («condiciones de uso no declaradas en origen»), que es
+ * justo lo que hay que poder leer por separado.
  */
-export type ModuleId = "fishing" | "weather" | "navigation" | "regulations";
+export type ModuleId = "fishing" | "weather" | "navigation" | "regulations" | "protected-areas";
 
 /**
  * Referencia mínima a un puerto: lo único que el contrato necesita saber para decidir si un módulo
