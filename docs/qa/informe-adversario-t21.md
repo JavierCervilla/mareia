@@ -339,3 +339,71 @@ la cura es del arquitecto: aquí sólo se dice dónde se manifiesta.
 - H-4 · `data/pipeline/mareia_pipeline/utm.py` → `errores_de_reproyeccion` (las cinco capas y la
   tolerancia de 25 km de las anclas) · y, sobre todo, el hueco de arriba: **nada re-deriva el
   artefacto**
+
+## Qué se ha arreglado, y qué queda abierto
+
+Añadido **después** del pase, por el implementador. Lo de arriba es el informe del adversario y no
+se ha tocado: esto es la respuesta.
+
+### Arreglado, con el `test.fail()` retirado
+
+| hallazgo | arreglo | dónde | trinquete |
+|---|---|---|---|
+| **H-1** | La regla dura y el «hasta dónde hemos mirado» son **constantes del módulo** (`NO_AUTORIZA_A_PESCAR`, `hastaDondeSeHaMirado`) y la sección las pinta venga lo que venga en el dato. `fuente.aviso` y `puertos[].motivo` siguen en el derivado —son su registro y sus gates los exigen— y **no llegan al HTML**. El texto publicado no cambia ni una palabra: cambia quién responde de él. | `textos.ts`, `AreasProtegidas.astro` | `a12-la-regla-dura-viaja-como-texto-libre.spec.ts` (2 cuerpos) + un gate del `dist/` que exige la constante **literal** en las 153 páginas |
+| **H-3** | `proximidadDeArea` recibe el **radio que el título publica**. Si el puerto cae dentro, **no se publica cota** —la distancia al borde mide entonces lo metido que está el puerto, no lo lejos que está el área—; si está fuera y la cota pasa del radio, **levanta** y rompe el build (fail-safe). | `vista.ts` | `a4-el-dentro-apaga-la-unica-cota-del-radio.spec.ts` + 3 unitarios + un gate que lee la tinta de las 153 páginas y la compara con el número del propio título |
+
+**Probados en rojo, comprobando antes que el sabotaje llega donde el gate mira:**
+
+- quitando el párrafo de la regla dura y reconstruyendo, `grep -c "no autoriza a pescar"` en la
+  página de Vigo da **0** y `pnpm --filter web test` cae a **241 pass / 2 fail**;
+- volviendo a pintar `fuente.aviso` y `motivo` junto a las constantes, el recorrido de H-1 se pone
+  en **2 failed** («la sección publica un permiso plantado en el dato»);
+- revirtiendo la rama `dentro` para que vuelva a publicar cota, el recorrido de H-3 se pone rojo con
+  «la sección publica una cota fuera del radio: `[30,30,2,9,480,9]`» — el 480 llega al HTML.
+
+### Abierto, con su `test.fail()` puesto: H-2 y H-4
+
+Los dos recorridos —`a12-una-relacion-real-puede-desaparecer-de-su-puerto.spec.ts` y
+`a12-el-derivado-desviado-se-publica-igual.spec.ts`— **siguen con `test.fail()`**, y conviene decir
+exactamente por qué, porque el gate nuevo **sí** ataca su causa.
+
+El gate **P6** (`areas.errores_de_reconstruccion`, enchufado a `run.py check`) es lo que faltaba: el
+único que compara el artefacto contra **la fuente** en vez de contra sí mismo. Rehace las relaciones
+desde el recorte de RAMPE ya commiteado —el mismo parser, la misma `vecindad_de`, el mismo
+`_area_a_json`— y las diffea campo a campo, nombre, figura, distancia y `dentro`. Precedente: **G4
+de T-19**.
+
+Pero el recorte son **7 de las 86 áreas** de RAMPE 2025, y sobre el artefacto de hoy eso son **14 de
+las 348 relaciones**, en 14 puertos, y **ninguna** de las 10 que dicen «cae dentro». Commitear las 86
+serían 54,8 MB. Así que:
+
+- **lo que P6 caza**: una fila movida, una distancia retocada, un `dentro` volcado o una reproyección
+  desviada, **si tocan a una de esas siete áreas**. El elipsoide desviado 255,1 m mueve **8 de las
+  14** (medido, y el mismo test afirma que P1 sigue en verde mientras tanto);
+- **lo que P6 no caza**: lo mismo hecho sobre cualquiera de las otras **79** áreas.
+
+Y los dos ataques del informe caen justo ahí: la *Reserva marina de Masía Blanca* (`555552489`) de
+H-2 y las cinco áreas cuyo `dentro` vuelca en H-4 (`555552486`, `ES0000490`, `ES0000521`,
+`ES0000508`, `ES0000554`) **no están en el recorte**, así que sus recorridos siguen pasando y por eso
+conservan el trinquete. Reproducirlos dentro del alcance de P6 sí se pone rojo, y así está escrito en
+`tests/test_rampe_areas.py` (fila que desaparece, fila regalada a otro puerto, los cuatro campos de
+una relación y el elipsoide desviado).
+
+El ✓ de `run.py check` imprime las dos cifras —«las **14** relaciones de las **7** áreas del recorte
+… NO cubre las otras **334** de **348**»— porque un gate parcial que no dice dónde acaba se lee como
+uno completo, y entonces es peor que no tenerlo. Cerrar H-2 y H-4 del todo pide otra decisión, y no
+es de código: o se versiona un recorte mayor de RAMPE, o CI baja la fuente, o el derivado deja de
+commitearse. Es del arquitecto.
+
+### Lo que no se ha tocado, a propósito
+
+El apunte nº 2 de la revisión previa —36 de 153 páginas con la tabla fuera de la columna— **quedó
+refutado** por este mismo pase (no reproducido nº 3): medido con la tinta real de los nodos de texto
+son **0/153** a 320 px y **0/153** a 412 px, y lo que contaba de más era el
+`<caption class="solo-lectores">`, que no se pinta. Nada que arreglar ahí.
+
+### Medido al cerrar
+
+`pnpm --filter web build` 0 · `pnpm test` **243 passed** · `pnpm typecheck` 0 · `pnpm lint` 0 ·
+`pnpm --filter web check` 0 errores · `pnpm test:e2e` **61 passed** · `ruff check .` 0 ·
+`python -m pytest tests -q` **1862 passed** · `python run.py check` 0.

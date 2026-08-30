@@ -103,6 +103,56 @@ escribe.
   JavaScript.** El máximo ya no se teclea: un recorrido lo recalcula sobre las 153 páginas
   construidas. Hasta la revisión de esta trayectoria aquí figuraba **Agaete** como el más gordo con
   4.808 B, y Agaete es el **quinto** —4.684 B—: la cifra reproducía, la palabra «máximo» no.
+  (Tras el pase adversario el máximo es **4.866 B**: las filas en las que el puerto cae dentro del
+  área ya no publican cota. Comprimido, entre **607 y 1.174 B**, gzip por defecto sobre ese mismo
+  coste marginal.)
+- **El pase adversario reprodujo cuatro hallazgos, y el eje de los cuatro es el mismo**: el derivado
+  se **commitea** y **nada en CI lo vuelve a derivar de la fuente** —`run.py areas-protegidas`
+  necesita red y el job de datos no la usa, a propósito—, así que todos los gates del artefacto eran
+  de **coherencia interna** y cualquier fichero coherente se publicaba. Lo arreglado:
+  - **La regla dura ya no viaja como texto libre del dataset.** «Que no haya un área protegida cerca
+    no autoriza a pescar» llegaba a las 153 páginas desde `fuente.aviso`, y lo único que lo miraba
+    eran **ocho expresiones regulares y una subcadena**: un aviso plantado de los mismos 186 bytes
+    —«…no autoriza a pescar **sin licencia; con ella, en el resto no hay veda**»— las pasaba todas y
+    se publicaba en negrita, antes de la lista, con `pnpm test`, `run.py check`, `pytest` y `ruff` en
+    verde. Igual el «hasta dónde hemos mirado» de los 10 puertos vacíos, que era `puertos[].motivo`.
+    Las dos frases son ahora **constantes del módulo** (`NO_AUTORIZA_A_PESCAR`,
+    `hastaDondeSeHaMirado`) y la sección las pinta venga lo que venga en el dato; el derivado sigue
+    trayendo las suyas —son su registro— pero **no llegan al HTML**. El texto publicado no cambia ni
+    una palabra: cambia **quién responde de él**. Gate: las 153 páginas del `dist/` tienen que traer
+    la constante **literal**, y se probó en rojo quitando el párrafo (0 ocurrencias en la página de
+    Vigo, `pnpm --filter web test` a 241/2) y volviendo a pintar el texto del dato (el recorrido
+    adversario, en rojo por el permiso plantado).
+  - **Ninguna fila puede contradecir el título de su sección.** `dentro: true` apagaba la única cota
+    numérica del radio —en el pipeline la condición era `distancia > radio and not dentro`, y del
+    lado de la web no había segunda opinión—, así que Alicante podía publicar *«Reserva marina de la
+    Isla de Tabarca · a menos de **480 km** · El punto de este puerto cae dentro de esta área»* bajo
+    el rótulo **«Áreas marinas protegidas a menos de 30 km»**, todo verde. Ahora
+    `proximidadDeArea` recibe el radio que el título publica: si el puerto **cae dentro** no se
+    publica cota —ahí la distancia al borde mide lo metido que está el puerto, no lo lejos que está
+    el área— y si está **fuera** y la cota pasa del radio, **levanta** y rompe el build, que es
+    fail-safe. Las 10 relaciones con `dentro` de hoy están todas a 0,1 km o menos, así que la cota
+    que se deja de publicar decía «a menos de 1 km» y no añadía nada al hecho que la sustituye.
+- **Gate P6: lo publicado se vuelve a derivar de la fuente, y dice por escrito qué NO cubre.** Es el
+  único gate que compara el artefacto contra **la fuente** y no contra sí mismo, y es la respuesta
+  parcial a los otros dos hallazgos: (a) moviendo una fila de puerto y recalculando el resumen, el
+  Vendrell perdía la reserva marina que tiene a **0,1 km** y Carboneras publicaba esa misma reserva
+  «a menos de 28 km» estando a unos 700, con el total en **348** antes y después; (b) con el semieje
+  mayor del GRS80 desviado **255 m** —un **0,004 %**, el tamaño de una errata— las cinco capas del
+  gate P1 devuelven **cero fallos** y salen las mismas 348 relaciones, pero **191 distancias cambian
+  y 5 `dentro` vuelcan**. P6 rehace las relaciones desde el **recorte de RAMPE ya commiteado** —el
+  mismo parser, la misma `vecindad_de`, el mismo `_area_a_json`— y las diffea campo a campo; el
+  precedente es **G4 de T-19** con las respuestas capturadas del BOE. **Su alcance va escrito y no
+  prometido**: cubre las **14 relaciones de las 7 áreas** del fixture y **NO cubre las otras 334 de
+  348**, porque RAMPE 2025 son 54,8 MB que no se commitean; la línea del ✓ de `run.py check` imprime
+  las dos cifras. Probado en rojo cinco veces, incluido **el elipsoide desviado**, que mueve **8 de
+  las 14** con P1 en verde —eso se afirma en el mismo test—, y enchufado al comando con los otros
+  tres gates silenciados a propósito.
+- **Y lo que el pase adversario *refutó*.** La revisión previa contaba **36 de 153** páginas con la
+  tabla fuera de la columna de contenido. Medido con la **tinta real** de los nodos de texto y no con
+  cajas ni `scrollWidth`, son **0/153** a 320 px y **0/153** a 412 px: lo que contaba de más era el
+  `<caption class="solo-lectores">`, que está en `clip-path: inset(50%)` y **no se pinta**. No se ha
+  tocado nada por ese motivo.
 
 ## 2026-08-30 — T-19 · Tallas mínimas por caladero: 118 cifras del BOE, y ninguna sin su excepción
 

@@ -160,7 +160,22 @@
       licencia de la fuente no está declarada en origen y se publican hechos derivados, no
       geometrías—, y el hueco de licencia se publica con esas palabras. Gate P3 comprobado en rojo
       con dos mutaciones (quitarle la frase a la rama vacía y esconder la sección en los 10 puertos)
-      · el pase de `qa-adversario` y sus trinquetes se anotan aquí al cerrarlo, como en T-11/T-19
+      · **pase de `qa-adversario`: 4 hallazgos reproducidos, todos del mismo eje** —el derivado se
+      commitea y **nada en CI lo vuelve a derivar de la fuente**, así que todos los gates del
+      artefacto eran de coherencia interna—. Arreglados dos: la **regla dura** («esto no autoriza a
+      pescar») viajaba como **texto libre del dataset** y la filtraban ocho regex, que un aviso
+      plantado de los mismos 186 bytes pasaba entero —ahora es una **constante del módulo** y un gate
+      la exige **literal** en las 153 páginas—, y **`dentro: true` apagaba la única cota del radio**,
+      que dejaba publicar «a menos de **480 km**» bajo un rótulo de 30 —ahora una fila que cae dentro
+      no publica cota y una cota fuera del radio **levanta**—. Los otros dos —una fila movida de
+      puerto y un derivado salido de un elipsoide desviado **255 m**, que mueve 191 distancias y 5
+      `dentro` con el gate P1 en verde— los cubre parcialmente el gate nuevo **P6**, que **vuelve a
+      derivar** lo publicado desde el recorte de RAMPE commiteado (precedente: G4 de T-19) y **dice
+      por escrito qué no cubre**: **14 de las 348** relaciones y **7 de las 86** áreas, porque la
+      fuente son 54,8 MB que no se commitean. Sus recorridos siguen con `test.fail()` y el informe lo
+      dice. Y el pase **refutó** el apunte de desbordamiento: con la tinta real de los nodos de texto
+      son **0/153** páginas, no 36. Medido al cerrar: `pnpm test` 243 · `pnpm test:e2e` **61 passed**
+      · `pytest` **1862 passed** · `ruff`, `typecheck`, `lint`, `astro check` y `run.py check` en 0
 - [ ] T-14 · Metodología pública + QC navegable + dataset con su licencia por puerto declarada
       (el reparto real ya publicado en T-14A) + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario
