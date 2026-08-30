@@ -61,26 +61,30 @@ function caladero(especies: readonly EspecieConTalla[], notas: Caladero["notas"]
 // =================================================================================================
 
 test("longitud en cm: entera sin decimales de adorno, decimal con los suyos", () => {
+  // El separador entre cifra y unidad es un espacio DURO (U+00A0), no uno normal: una talla legal
+  // partida entre dos líneas se lee mal y se cita peor. Pegarlas aquí es lo que permite que la celda
+  // no lleve `white-space: nowrap`, y sin ese `nowrap` la disyunción del atún rojo deja de imponerle
+  // a la tabla un ancho que desbordaba la página en los 80 puertos mediterráneos.
   assert.deepEqual(textoDeTalla({ tipo: "longitud_cm", cm: 36 }, FORMATO), {
-    texto: "36 cm",
+    texto: "36\u00a0cm",
     hayCifra: true,
     explicacion: null,
   });
   // Las colas de cigala: `3,7`. Con los decimales fijados a cero esto diría «4 cm», que es media
   // talla de más sobre una cifra legal.
-  assert.equal(textoDeTalla({ tipo: "longitud_cm", cm: 3.7 }, FORMATO).texto, "3,7 cm");
-  assert.equal(textoDeTalla({ tipo: "longitud_cm", cm: 8.5 }, FORMATO).texto, "8,5 cm");
+  assert.equal(textoDeTalla({ tipo: "longitud_cm", cm: 3.7 }, FORMATO).texto, "3,7\u00a0cm");
+  assert.equal(textoDeTalla({ tipo: "longitud_cm", cm: 8.5 }, FORMATO).texto, "8,5\u00a0cm");
 });
 
 test("peso: se dice que son kilos y que son de peso, porque la columna del BOE dice «en cm»", () => {
-  assert.equal(textoDeTalla({ tipo: "peso_kg", kg: 6.4 }, FORMATO).texto, "6,4 kg de peso");
-  assert.equal(textoDeTalla({ tipo: "peso_kg", kg: 1 }, FORMATO).texto, "1 kg de peso");
+  assert.equal(textoDeTalla({ tipo: "peso_kg", kg: 6.4 }, FORMATO).texto, "6,4\u00a0kg de peso");
+  assert.equal(textoDeTalla({ tipo: "peso_kg", kg: 1 }, FORMATO).texto, "1\u00a0kg de peso");
 });
 
 test("longitud o peso: las dos, y con la disyunción de la norma", () => {
   assert.equal(
     textoDeTalla({ tipo: "longitud_o_peso", cm: 80, kg: 10 }, FORMATO).texto,
-    "80 cm o 10 kg de peso",
+    "80\u00a0cm o 10\u00a0kg de peso",
   );
 });
 
@@ -252,8 +256,8 @@ test("la cigala partida en dos medidas da dos filas con clave distinta y su rót
   assert.deepEqual(
     filas.map((fila) => [fila.clave, fila.medida, fila.talla.texto]),
     [
-      ["cigala-entera-longitud-cefalotorax", "Longitud cefalotórax", "2 cm"],
-      ["cigala-entera-longitud-total", "Longitud total", "7 cm"],
+      ["cigala-entera-longitud-cefalotorax", "Longitud cefalotórax", "2\u00a0cm"],
+      ["cigala-entera-longitud-total", "Longitud total", "7\u00a0cm"],
     ],
   );
 });

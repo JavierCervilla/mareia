@@ -138,19 +138,19 @@ test("las tres notas que cambian la cifra para puertos de este portal dicen el n
   // Lubina: 36 cm salvo en las divisiones 8a/8b del CIEM —el golfo de Vizcaya, o sea los puertos
   // cantábricos de este portal—, donde son 44. Ocho centímetros, del lado que multa.
   const lubina = filasI.find((fila) => fila.clave === "lubina");
-  assert.equal(lubina?.talla.texto, "36 cm");
+  assert.equal(lubina?.talla.texto, "36\u00a0cm");
   assert.match(lubina?.notas[0]?.texto ?? "", /44 cent[ií]metros/u);
   assert.match(lubina?.notas[0]?.texto ?? "", /8a y 8b/u);
 
   // Boquerón: 12 cm salvo en la división IX a) —golfo de Cádiz y Atlántico ibérico—, donde son 10.
   const boqueron = filasI.find((fila) => fila.clave === "boqueron");
-  assert.equal(boqueron?.talla.texto, "12 cm");
+  assert.equal(boqueron?.talla.texto, "12\u00a0cm");
   assert.match(boqueron?.notas[0]?.texto ?? "", /10 cent[ií]metros/u);
 
   // Pulpo del Anexo II: la talla no se aplica en aguas interiores de Illes Balears, y ahí hay 17
   // puertos del catálogo.
   const pulpo = filasII.find((fila) => fila.clave === "pulpo");
-  assert.equal(pulpo?.talla.texto, "1 kg de peso");
+  assert.equal(pulpo?.talla.texto, "1\u00a0kg de peso");
   assert.match(pulpo?.notas[0]?.texto ?? "", /Balears/u);
 });
 

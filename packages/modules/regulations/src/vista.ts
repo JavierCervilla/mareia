@@ -89,14 +89,21 @@ function decimalesDe(valor: number): number {
   return String(valor).split(".")[1]?.length ?? 0;
 }
 
-/** `36 cm`, `3,7 cm`. */
+/**
+ * `36 cm`, `3,7 cm`. El espacio entre la cifra y la unidad es **duro** (U+00A0) a propósito: una
+ * talla legal partida entre dos líneas —«36» arriba y «cm» abajo— se lee mal y se cita peor. Pegar
+ * la unidad aquí es lo que permite que la celda NO lleve `white-space: nowrap`, y eso es lo que
+ * arregla el desbordamiento de los 80 puertos mediterráneos: la disyunción del atún rojo puede
+ * partir por el «o», que es una separación de verdad, sin que ninguna de sus dos magnitudes se
+ * rompa por dentro.
+ */
 function centimetros(valor: number, formato: FormatoDeTallas): string {
-  return `${formato.numero(valor, decimalesDe(valor))} cm`;
+  return `${formato.numero(valor, decimalesDe(valor))}\u00a0cm`;
 }
 
-/** `6,4 kg`. */
+/** `6,4 kg`, con el mismo espacio duro que `centimetros`. */
 function kilos(valor: number, formato: FormatoDeTallas): string {
-  return `${formato.numero(valor, decimalesDe(valor))} kg`;
+  return `${formato.numero(valor, decimalesDe(valor))}\u00a0kg`;
 }
 
 /**

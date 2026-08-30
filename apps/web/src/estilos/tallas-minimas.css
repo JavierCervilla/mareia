@@ -88,9 +88,12 @@
 /* `tabular-nums` SOLO donde hay una magnitud. Alinear como cifra una frase
    —«La norma no fija talla»— la haría parecer un dato numérico, que es
    exactamente lo que la norma no dice. */
+/* Sin `nowrap`: la cifra y su unidad ya van pegadas con un espacio duro desde `vista.ts`, así que
+   lo único que este `nowrap` añadía era impedir que la disyunción del atún rojo —«80 cm o 10 kg de
+   peso», el literal más largo del Anexo II— partiera por el «o». Con él, esa celda le imponía a la
+   tabla un ancho que desbordaba la página en los 80 puertos mediterráneos. */
 .tabla-tallas__cifra {
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 
 .tabla-tallas__sin-cifra {
@@ -113,12 +116,20 @@
 }
 
 /* El literal del BOE es lo que permite comparar lo que pintamos con lo que dice
-   la norma. Va al lado y en cuerpo pequeño: se consulta, no se lee. */
+   la norma. Va al lado y en cuerpo pequeño: se consulta, no se lee.
+
+   SIN `white-space: nowrap`, y no es un olvido. Lo llevaba, y el literal más largo del Anexo II
+   —«80 cm o 10 kg de peso», la disyunción del atún rojo— le imponía a la tabla un ancho mínimo que
+   desbordaba la página 77 px a 320: medido, `scrollWidth` 397 en Valencia contra 320 de ventana, y
+   con él los 80 puertos del caladero mediterráneo. Vigo y Telde salían limpios porque el Anexo I y
+   el III no tienen ningún literal largo, y el recorrido A5 corre sobre Vigo: un trinquete que mira
+   una sola de las 153 páginas no ve un defecto que vive en las otras 80. El literal es prosa con
+   espacios y parte bien; lo que no puede partirse es la cifra, y esa va en `__cifra`, que sí
+   conserva su `nowrap`. */
 .tabla-tallas__literal {
   font-size: var(--m-text-meta);
   color: var(--m-sub);
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 
 /* El ELI se imprime entero como texto del enlace —es la dirección canónica de la norma y el lector
