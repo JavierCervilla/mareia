@@ -39,7 +39,8 @@ se sustituye el legal por el científico.
 
 ### 2. Los 22 que no resuelven son de dos clases muy distintas, y se tratan distinto
 
-**(a) Trece son un GÉNERO, no una especie** — la norma regula el género entero:
+**(a) Quince filas son un GÉNERO, no una especie** —**catorce géneros distintos**— y la norma
+regula el género entero:
 
 `Alosa spp` · `Diplodus spp` · `Epinephelus spp` · `Lepidorhombus spp` · `Lophius spp` · `Mugil spp`
 · `Mullus spp` · `Pagellus spp` · `Pecten spp` · `Scomber spp` · `Sepia spp` · `Trachurus spp` ·
@@ -123,8 +124,8 @@ precisión.
      si en alguna solo está el aceptado, rojo.
    - **E2 · el mapeo tiene dueño**: toda correspondencia que no venga de WoRMS va marcada como
      nuestra, con su motivo. Un mapeo sin dueño, rojo.
-   - **E3 · el género no se convierte en especie**: las 14 filas `spp` publican rango género y
-     ninguna nombra una especie concreta.
+   - **E3 · el género no se convierte en especie**: las 15 filas `spp` (14 géneros distintos, porque
+     `Mugil` sale dos veces) publican rango género y ninguna nombra una especie concreta.
    - **E4 · la presencia no se lee como abundancia**: ninguna página publica un número de registros
      sin su frase de sesgo al lado.
    Los cuatro, **medidos sobre el artefacto** y **probados en rojo**.

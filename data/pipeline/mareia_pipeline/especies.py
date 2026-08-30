@@ -37,12 +37,14 @@ a mano.
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from mareia_pipeline.catalog import slugify
 from mareia_pipeline.sources import obis, worms
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -125,6 +127,10 @@ ERRATAS_NO_MAPEADAS: dict[str, str] = {
 #: procedencia hay que ir a buscar al repositorio no la tiene declarada.
 ORIGENES: dict[str, str] = {
     "nombreBoe": "BOE · RD 560/1995, texto consolidado. Literal, sin corregir.",
+    "clave": (
+        "Mareia · slug del nombre del BOE más el digest de su literal exacto. Ni corrige la grafía "
+        "de la norma ni la colapsa: «Thunnus thynnus» y «Thunnus Thynnus» son dos claves."
+    ),
     "nombreComun / nombresComunes": "BOE · el nombre común que escribe cada anexo.",
     "correspondencia": (
         "Mareia, salvo cuando «tipo» es «literal»: entonces se preguntó a WoRMS exactamente el "
@@ -141,6 +147,38 @@ def es_genero(nombre: str) -> str | None:
     """El género que una fila ``spp`` regula, o ``None`` si la fila no es de género."""
     coincidencia = _SPP.match(nombre.strip())
     return coincidencia.group("genero") if coincidencia else None
+
+
+def clave_de(nombre_boe: str) -> str:
+    """La clave con la que se identifica una especie del catálogo, **única y estable**.
+
+    Es un slug legible **más el digest del literal exacto de la norma**, y el sufijo no es adorno:
+    lo pide un caso medido. El BOE escribe ``Thunnus thynnus`` (Anexos I y II) y ``Thunnus
+    Thynnus`` (Anexo III), que son dos filas distintas del catálogo, y **cualquier slug en
+    minúsculas las colapsa en una**. Con la clave repetida, quien busca una fila encuentra siempre
+    la primera y la segunda puede publicarse a medias sin que nada se ponga rojo.
+
+    Tres propiedades, y las tres son el motivo de que la clave se construya así y no de otra forma:
+
+    1. **Única**, porque el digest se calcula sobre el literal **sin normalizar**: dos grafías
+       distintas de la norma dan dos claves distintas. La ortografía del BOE no se corrige aquí ni
+       en ningún sitio; lo que cambia es que ahora se distingue.
+    2. **Estable**, porque es función **sólo** del nombre: no depende de la posición de la fila, de
+       cuántas filas haya ni de qué otras grafías existan. Un sufijo ``-2`` puesto al detectar la
+       colisión cumpliría lo primero y no lo segundo —bastaría con que la norma ganara o perdiera
+       una fila para repuntar claves ajenas—, y un ``data-especie`` que cambia de sitio en silencio
+       es justo lo que esta clave existe para evitar.
+    3. **No se apoya en las mayúsculas para distinguir.** ``thunnus-thynnus`` y ``Thunnus-Thynnus``
+       sólo se diferencian en la caja, y cualquier comparación insensible a ella —un selector con
+       ``i``, un sistema de ficheros, un ``lower()`` de conveniencia— las vuelve a colapsar. El
+       digest las separa en cualquier comparación.
+
+    El sufijo va **siempre**, también en las 84 filas que no colisionan con nadie: una clave que
+    cambia de forma según lo que hagan las demás vuelve a depender de las demás, que es lo que la
+    propiedad 2 descarta. Seis dígitos hexadecimales, y una colisión del propio digest tampoco
+    pasaría callada: la caza ``errores_de_clave`` antes de escribir y el lector de la web al leer.
+    """
+    return f"{slugify(nombre_boe)}-{hashlib.sha256(nombre_boe.encode('utf-8')).hexdigest()[:6]}"
 
 
 @dataclass(frozen=True)
@@ -406,6 +444,7 @@ def construir_dataset(
         especies.append(
             {
                 "nombreBoe": nombre,
+                "clave": clave_de(nombre),
                 "nombreComun": distintos[0],
                 "nombresComunes": distintos,
                 "correspondencia": {
@@ -624,6 +663,48 @@ def errores_de_genero(dataset: dict[str, Any]) -> list[str]:
 def filas_de_genero(dataset: dict[str, Any]) -> list[dict[str, Any]]:
     """Las filas que regulan un género entero, que son las que mira E3."""
     return [e for e in dataset["especies"] if es_genero(e["nombreBoe"])]
+
+
+# --------------------------------------------------------------------------------------------
+# Estructura: dos filas de la norma no acaban en una
+# --------------------------------------------------------------------------------------------
+
+
+def errores_de_clave(dataset: dict[str, Any]) -> list[str]:
+    """Cada especie trae su ``clave``, y **no hay dos iguales**.
+
+    Son dos comprobaciones y hacen falta las dos:
+
+    * **No hay dos iguales**, porque dos filas con la misma clave son dos filas que nadie puede
+      distinguir: quien busca una encuentra siempre la primera, y la segunda se puede publicar a
+      medias en verde. El caso está medido —``Thunnus thynnus`` y ``Thunnus Thynnus``— y hoy sólo
+      lo puede provocar una colisión del propio digest o una edición a mano del JSON.
+    * **La clave sale del nombre**, recomputada con ``clave_de`` en vez de leída. Una clave
+      tecleada podría no repetirse con ninguna y aun así haber dejado de ser función del literal,
+      que es de donde sale su estabilidad.
+
+    La repetición se mira **antes**, para que el sabotaje que de verdad ocurre —colapsar una grafía
+    sobre otra— salga nombrando las dos filas que colisionan y no la recomputación.
+    """
+    fallos: list[str] = []
+    vistas: dict[str, str] = {}
+    for especie in dataset["especies"]:
+        nombre = especie["nombreBoe"]
+        clave = especie.get("clave")
+        esperada = clave_de(nombre)
+        if clave in vistas:
+            fallos.append(
+                f"«{nombre}» y «{vistas[clave]}» comparten la clave {clave!r}: son dos filas de la "
+                "norma que nadie puede distinguir"
+            )
+        elif clave != esperada:
+            fallos.append(
+                f"«{nombre}» publica la clave {clave!r} y la que sale de su nombre es {esperada!r}: "
+                "la clave se calcula del literal de la norma, no se escribe"
+            )
+        else:
+            vistas[clave] = nombre
+    return fallos
 
 
 # --------------------------------------------------------------------------------------------

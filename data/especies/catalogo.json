@@ -33,6 +33,7 @@
   },
   "origenes": {
     "nombreBoe": "BOE · RD 560/1995, texto consolidado. Literal, sin corregir.",
+    "clave": "Mareia · slug del nombre del BOE más el digest de su literal exacto. Ni corrige la grafía de la norma ni la colapsa: «Thunnus thynnus» y «Thunnus Thynnus» son dos claves.",
     "nombreComun / nombresComunes": "BOE · el nombre común que escribe cada anexo.",
     "correspondencia": "Mareia, salvo cuando «tipo» es «literal»: entonces se preguntó a WoRMS exactamente el nombre del BOE y la correspondencia es de la fuente.",
     "taxon": "WoRMS · AphiaID, nombre aceptado, estado y rango, con la cita que pide la fuente.",
@@ -121,6 +122,7 @@
   "especies": [
     {
       "nombreBoe": "Alosa spp",
+      "clave": "alosa-spp-8c0b29",
       "nombreComun": "Sabalos",
       "nombresComunes": [
         "Sabalos"
@@ -190,6 +192,7 @@
     },
     {
       "nombreBoe": "Anguilla anguilla",
+      "clave": "anguilla-anguilla-5bf2aa",
       "nombreComun": "Anguila",
       "nombresComunes": [
         "Anguila"
@@ -261,6 +264,7 @@
     },
     {
       "nombreBoe": "Belone belone",
+      "clave": "belone-belone-ad6f1d",
       "nombreComun": "Aguja",
       "nombresComunes": [
         "Aguja"
@@ -397,6 +401,7 @@
     },
     {
       "nombreBoe": "Boops boops",
+      "clave": "boops-boops-4520ef",
       "nombreComun": "Boga",
       "nombresComunes": [
         "Boga"
@@ -533,6 +538,7 @@
     },
     {
       "nombreBoe": "Brama brama",
+      "clave": "brama-brama-d0a710",
       "nombreComun": "Palometa negra o japuta",
       "nombresComunes": [
         "Palometa negra o japuta"
@@ -669,6 +675,7 @@
     },
     {
       "nombreBoe": "Clupea harengus",
+      "clave": "clupea-harengus-33361c",
       "nombreComun": "Arenque",
       "nombresComunes": [
         "Arenque"
@@ -738,6 +745,7 @@
     },
     {
       "nombreBoe": "Conger conger",
+      "clave": "conger-conger-c8ac0d",
       "nombreComun": "Congrio",
       "nombresComunes": [
         "Congrio"
@@ -807,6 +815,7 @@
     },
     {
       "nombreBoe": "Cáncer pagurus",
+      "clave": "cancer-pagurus-18c950",
       "nombreComun": "Buey",
       "nombresComunes": [
         "Buey"
@@ -878,6 +887,7 @@
     },
     {
       "nombreBoe": "Dentex filosus",
+      "clave": "dentex-filosus-6367f6",
       "nombreComun": "Sama de pluma",
       "nombresComunes": [
         "Sama de pluma"
@@ -948,6 +958,7 @@
     },
     {
       "nombreBoe": "Dentex macrophtalmus",
+      "clave": "dentex-macrophtalmus-a86e2f",
       "nombreComun": "Cachucho",
       "nombresComunes": [
         "Cachucho"
@@ -1018,6 +1029,7 @@
     },
     {
       "nombreBoe": "Dicentrarchus labrax",
+      "clave": "dicentrarchus-labrax-7ff4d6",
       "nombreComun": "Lubina",
       "nombresComunes": [
         "Lubina"
@@ -1156,6 +1168,7 @@
     },
     {
       "nombreBoe": "Dicologoglossa cuneata",
+      "clave": "dicologoglossa-cuneata-88330a",
       "nombreComun": "Acedia",
       "nombresComunes": [
         "Acedia"
@@ -1225,6 +1238,7 @@
     },
     {
       "nombreBoe": "Diplodus sargus",
+      "clave": "diplodus-sargus-5ca6e9",
       "nombreComun": "Sargo",
       "nombresComunes": [
         "Sargo"
@@ -1295,6 +1309,7 @@
     },
     {
       "nombreBoe": "Diplodus spp",
+      "clave": "diplodus-spp-50f481",
       "nombreComun": "Sargo",
       "nombresComunes": [
         "Sargo"
@@ -1364,6 +1379,7 @@
     },
     {
       "nombreBoe": "Diplodus vulgaris",
+      "clave": "diplodus-vulgaris-77fe3e",
       "nombreComun": "Mojarra",
       "nombresComunes": [
         "Mojarra"
@@ -1434,6 +1450,7 @@
     },
     {
       "nombreBoe": "Engraulis encrasicholus",
+      "clave": "engraulis-encrasicholus-038632",
       "nombreComun": "Boquerón",
       "nombresComunes": [
         "Boquerón"
@@ -1572,6 +1589,7 @@
     },
     {
       "nombreBoe": "Epinephelus marginatus",
+      "clave": "epinephelus-marginatus-8aaefd",
       "nombreComun": "Mero",
       "nombresComunes": [
         "Mero"
@@ -1642,6 +1660,7 @@
     },
     {
       "nombreBoe": "Epinephelus spp",
+      "clave": "epinephelus-spp-bfd66a",
       "nombreComun": "Mero",
       "nombresComunes": [
         "Mero"
@@ -1711,6 +1730,7 @@
     },
     {
       "nombreBoe": "Gadus morhua",
+      "clave": "gadus-morhua-b06a04",
       "nombreComun": "Bacalao",
       "nombresComunes": [
         "Bacalao"
@@ -1780,6 +1800,7 @@
     },
     {
       "nombreBoe": "Gliptocephalus cynoglossus",
+      "clave": "gliptocephalus-cynoglossus-332a73",
       "nombreComun": "Mendo",
       "nombresComunes": [
         "Mendo"
@@ -1849,6 +1870,7 @@
     },
     {
       "nombreBoe": "Gymnothorax unicolor",
+      "clave": "gymnothorax-unicolor-85efe0",
       "nombreComun": "Murión",
       "nombresComunes": [
         "Murión"
@@ -1918,6 +1940,7 @@
     },
     {
       "nombreBoe": "Homarus gammarus",
+      "clave": "homarus-gammarus-ded453",
       "nombreComun": "Bogavante",
       "nombresComunes": [
         "Bogavante"
@@ -1988,6 +2011,7 @@
     },
     {
       "nombreBoe": "Lepidorhombus spp",
+      "clave": "lepidorhombus-spp-e7b35e",
       "nombreComun": "Gallos",
       "nombresComunes": [
         "Gallos",
@@ -2091,6 +2115,7 @@
     },
     {
       "nombreBoe": "Limanda limanda",
+      "clave": "limanda-limanda-ad83d4",
       "nombreComun": "Limanda",
       "nombresComunes": [
         "Limanda"
@@ -2160,6 +2185,7 @@
     },
     {
       "nombreBoe": "Loligo vulgaris",
+      "clave": "loligo-vulgaris-9d1c03",
       "nombreComun": "Calamar",
       "nombresComunes": [
         "Calamar"
@@ -2231,6 +2257,7 @@
     },
     {
       "nombreBoe": "Lophius piscatorius, L. Budegassa",
+      "clave": "lophius-piscatorius-l-budegassa-bec159",
       "nombreComun": "Rape",
       "nombresComunes": [
         "Rape"
@@ -2278,6 +2305,7 @@
     },
     {
       "nombreBoe": "Lophius spp",
+      "clave": "lophius-spp-05f70d",
       "nombreComun": "Rape",
       "nombresComunes": [
         "Rape"
@@ -2347,6 +2375,7 @@
     },
     {
       "nombreBoe": "Maja squinado",
+      "clave": "maja-squinado-193977",
       "nombreComun": "Centolla",
       "nombresComunes": [
         "Centolla"
@@ -2416,6 +2445,7 @@
     },
     {
       "nombreBoe": "Melanogrammús aeglefinus",
+      "clave": "melanogrammus-aeglefinus-8165b7",
       "nombreComun": "Eglefino",
       "nombresComunes": [
         "Eglefino"
@@ -2485,6 +2515,7 @@
     },
     {
       "nombreBoe": "Merlangus merlangus",
+      "clave": "merlangus-merlangus-30d311",
       "nombreComun": "Merlán",
       "nombresComunes": [
         "Merlán"
@@ -2554,6 +2585,7 @@
     },
     {
       "nombreBoe": "Merluccius merluccius",
+      "clave": "merluccius-merluccius-9adab9",
       "nombreComun": "Merluza",
       "nombresComunes": [
         "Merluza"
@@ -2656,6 +2688,7 @@
     },
     {
       "nombreBoe": "Micromesistius poutassou",
+      "clave": "micromesistius-poutassou-4c54f1",
       "nombreComun": "Bacaladilla",
       "nombresComunes": [
         "Bacaladilla"
@@ -2725,6 +2758,7 @@
     },
     {
       "nombreBoe": "Microstommus kitt",
+      "clave": "microstommus-kitt-bf3bba",
       "nombreComun": "Mendo limón",
       "nombresComunes": [
         "Mendo limón"
@@ -2794,6 +2828,7 @@
     },
     {
       "nombreBoe": "Molva dypterygia",
+      "clave": "molva-dypterygia-28f41b",
       "nombreComun": "Maruca Azul",
       "nombresComunes": [
         "Maruca Azul"
@@ -2863,6 +2898,7 @@
     },
     {
       "nombreBoe": "Molva molva",
+      "clave": "molva-molva-512b0a",
       "nombreComun": "Maruca",
       "nombresComunes": [
         "Maruca"
@@ -2932,6 +2968,7 @@
     },
     {
       "nombreBoe": "Mugil auratus",
+      "clave": "mugil-auratus-f3881f",
       "nombreComun": "Lisa",
       "nombresComunes": [
         "Lisa"
@@ -3002,6 +3039,7 @@
     },
     {
       "nombreBoe": "Mugil spp",
+      "clave": "mugil-spp-cd2ece",
       "nombreComun": "Lisas",
       "nombresComunes": [
         "Lisas"
@@ -3071,6 +3109,7 @@
     },
     {
       "nombreBoe": "Mugil spps",
+      "clave": "mugil-spps-9aef58",
       "nombreComun": "Lisa",
       "nombresComunes": [
         "Lisa"
@@ -3140,6 +3179,7 @@
     },
     {
       "nombreBoe": "Mullus spp",
+      "clave": "mullus-spp-dc725c",
       "nombreComun": "Salmonete",
       "nombresComunes": [
         "Salmonete",
@@ -3244,6 +3284,7 @@
     },
     {
       "nombreBoe": "Mullus surmuletus",
+      "clave": "mullus-surmuletus-38842d",
       "nombreComun": "Salmonete de roca",
       "nombresComunes": [
         "Salmonete de roca"
@@ -3313,6 +3354,7 @@
     },
     {
       "nombreBoe": "Muraena augusti",
+      "clave": "muraena-augusti-b55238",
       "nombreComun": "Morena negra",
       "nombresComunes": [
         "Morena negra"
@@ -3382,6 +3424,7 @@
     },
     {
       "nombreBoe": "Mycteroperca fusca",
+      "clave": "mycteroperca-fusca-a3e8ca",
       "nombreComun": "Gitano",
       "nombresComunes": [
         "Gitano"
@@ -3452,6 +3495,7 @@
     },
     {
       "nombreBoe": "Nephrops norvegicus",
+      "clave": "nephrops-norvegicus-25e653",
       "nombreComun": "Cigala (entera)",
       "nombresComunes": [
         "Cigala (entera)",
@@ -3585,6 +3629,7 @@
     },
     {
       "nombreBoe": "Octopus vulgaris",
+      "clave": "octopus-vulgaris-d16a1f",
       "nombreComun": "Pulpo",
       "nombresComunes": [
         "Pulpo"
@@ -3722,6 +3767,7 @@
     },
     {
       "nombreBoe": "Pagellus acarne",
+      "clave": "pagellus-acarne-a9fdf1",
       "nombreComun": "Aligote",
       "nombresComunes": [
         "Aligote"
@@ -3792,6 +3838,7 @@
     },
     {
       "nombreBoe": "Pagellus bogaraveo",
+      "clave": "pagellus-bogaraveo-ff4ec6",
       "nombreComun": "Besugo",
       "nombresComunes": [
         "Besugo"
@@ -3861,6 +3908,7 @@
     },
     {
       "nombreBoe": "Pagellus erythrinus",
+      "clave": "pagellus-erythrinus-dfb485",
       "nombreComun": "Pagel",
       "nombresComunes": [
         "Pagel"
@@ -3931,6 +3979,7 @@
     },
     {
       "nombreBoe": "Pagellus spp",
+      "clave": "pagellus-spp-10da02",
       "nombreComun": "Pagel, besugo",
       "nombresComunes": [
         "Pagel, besugo"
@@ -4000,6 +4049,7 @@
     },
     {
       "nombreBoe": "Pagrus pagrus",
+      "clave": "pagrus-pagrus-337bd7",
       "nombreComun": "Pargo",
       "nombresComunes": [
         "Pargo"
@@ -4136,6 +4186,7 @@
     },
     {
       "nombreBoe": "Palinuridae",
+      "clave": "palinuridae-7760bb",
       "nombreComun": "Langosta",
       "nombresComunes": [
         "Langosta"
@@ -4205,6 +4256,7 @@
     },
     {
       "nombreBoe": "Panaeux kerathurus",
+      "clave": "panaeux-kerathurus-0e8ff6",
       "nombreComun": "Langostino",
       "nombresComunes": [
         "Langostino"
@@ -4274,6 +4326,7 @@
     },
     {
       "nombreBoe": "Pecten maximus",
+      "clave": "pecten-maximus-f09355",
       "nombreComun": "Vieira",
       "nombresComunes": [
         "Vieira"
@@ -4343,6 +4396,7 @@
     },
     {
       "nombreBoe": "Pecten spp",
+      "clave": "pecten-spp-8d8fd4",
       "nombreComun": "Vieira",
       "nombresComunes": [
         "Vieira"
@@ -4412,6 +4466,7 @@
     },
     {
       "nombreBoe": "Platichthys flesus",
+      "clave": "platichthys-flesus-7efdc5",
       "nombreComun": "Platija",
       "nombresComunes": [
         "Platija"
@@ -4481,6 +4536,7 @@
     },
     {
       "nombreBoe": "Pleuronectes platessa",
+      "clave": "pleuronectes-platessa-3ad4c2",
       "nombreComun": "Solla",
       "nombresComunes": [
         "Solla"
@@ -4550,6 +4606,7 @@
     },
     {
       "nombreBoe": "Pollachius pollachius",
+      "clave": "pollachius-pollachius-dadc7d",
       "nombreComun": "Abadejo",
       "nombresComunes": [
         "Abadejo"
@@ -4619,6 +4676,7 @@
     },
     {
       "nombreBoe": "Pollachius virens",
+      "clave": "pollachius-virens-e470c2",
       "nombreComun": "Carbonero",
       "nombresComunes": [
         "Carbonero"
@@ -4688,6 +4746,7 @@
     },
     {
       "nombreBoe": "Polyprion americanus",
+      "clave": "polyprion-americanus-bebe7c",
       "nombreComun": "Cherna",
       "nombresComunes": [
         "Cherna"
@@ -4757,6 +4816,7 @@
     },
     {
       "nombreBoe": "Psetta maxima",
+      "clave": "psetta-maxima-2b4003",
       "nombreComun": "Rodaballo",
       "nombresComunes": [
         "Rodaballo"
@@ -4826,6 +4886,7 @@
     },
     {
       "nombreBoe": "Salmo salar",
+      "clave": "salmo-salar-756513",
       "nombreComun": "Salmón",
       "nombresComunes": [
         "Salmón"
@@ -4895,6 +4956,7 @@
     },
     {
       "nombreBoe": "Salmo trutta",
+      "clave": "salmo-trutta-45df15",
       "nombreComun": "Trucha marisca o reo",
       "nombresComunes": [
         "Trucha marisca o reo"
@@ -4964,6 +5026,7 @@
     },
     {
       "nombreBoe": "Sardina pilchardus",
+      "clave": "sardina-pilchardus-eae857",
       "nombreComun": "Sardina",
       "nombresComunes": [
         "Sardina"
@@ -5100,6 +5163,7 @@
     },
     {
       "nombreBoe": "Sarpa salpa",
+      "clave": "sarpa-salpa-b0fe9f",
       "nombreComun": "Salema",
       "nombresComunes": [
         "Salema"
@@ -5236,6 +5300,7 @@
     },
     {
       "nombreBoe": "Scomber japonicus",
+      "clave": "scomber-japonicus-a83a1f",
       "nombreComun": "Estornino",
       "nombresComunes": [
         "Estornino"
@@ -5339,6 +5404,7 @@
     },
     {
       "nombreBoe": "Scomber scombrus",
+      "clave": "scomber-scombrus-ad9295",
       "nombreComun": "Caballa",
       "nombresComunes": [
         "Caballa"
@@ -5408,6 +5474,7 @@
     },
     {
       "nombreBoe": "Scomber spp",
+      "clave": "scomber-spp-19b2d9",
       "nombreComun": "Caballa, Estornino",
       "nombresComunes": [
         "Caballa, Estornino"
@@ -5477,6 +5544,7 @@
     },
     {
       "nombreBoe": "Scophthalmus rhombus",
+      "clave": "scophthalmus-rhombus-0a1325",
       "nombreComun": "Ramal",
       "nombresComunes": [
         "Ramal"
@@ -5546,6 +5614,7 @@
     },
     {
       "nombreBoe": "Sepia spp",
+      "clave": "sepia-spp-2f3b90",
       "nombreComun": "Jibias",
       "nombresComunes": [
         "Jibias"
@@ -5617,6 +5686,7 @@
     },
     {
       "nombreBoe": "Serranus atricauda",
+      "clave": "serranus-atricauda-6ecfda",
       "nombreComun": "Serrano imperial",
       "nombresComunes": [
         "Serrano imperial"
@@ -5687,6 +5757,7 @@
     },
     {
       "nombreBoe": "Serranus cabrilla",
+      "clave": "serranus-cabrilla-768285",
       "nombreComun": "Cabrilla",
       "nombresComunes": [
         "Cabrilla"
@@ -5757,6 +5828,7 @@
     },
     {
       "nombreBoe": "Solea vulgaris",
+      "clave": "solea-vulgaris-798256",
       "nombreComun": "Lenguado",
       "nombresComunes": [
         "Lenguado"
@@ -5859,6 +5931,7 @@
     },
     {
       "nombreBoe": "Sparisoma cretense",
+      "clave": "sparisoma-cretense-e05c2f",
       "nombreComun": "Vieja colorada",
       "nombresComunes": [
         "Vieja colorada"
@@ -5929,6 +6002,7 @@
     },
     {
       "nombreBoe": "Sparus aurata",
+      "clave": "sparus-aurata-2805b5",
       "nombreComun": "Dorada",
       "nombresComunes": [
         "Dorada"
@@ -6031,6 +6105,7 @@
     },
     {
       "nombreBoe": "Sparus auratus",
+      "clave": "sparus-auratus-0cb85c",
       "nombreComun": "Dorada",
       "nombresComunes": [
         "Dorada"
@@ -6101,6 +6176,7 @@
     },
     {
       "nombreBoe": "Spondyliosoma cantharus",
+      "clave": "spondyliosoma-cantharus-a481c2",
       "nombreComun": "Chopa",
       "nombresComunes": [
         "Chopa"
@@ -6204,6 +6280,7 @@
     },
     {
       "nombreBoe": "Thunnus Thynnus",
+      "clave": "thunnus-thynnus-4cc84f",
       "nombreComun": "Atún rojo",
       "nombresComunes": [
         "Atún rojo"
@@ -6274,6 +6351,7 @@
     },
     {
       "nombreBoe": "Thunnus aibacares",
+      "clave": "thunnus-aibacares-9d9037",
       "nombreComun": "Rabil",
       "nombresComunes": [
         "Rabil"
@@ -6344,6 +6422,7 @@
     },
     {
       "nombreBoe": "Thunnus albacares",
+      "clave": "thunnus-albacares-7d7888",
       "nombreComun": "Rabil",
       "nombresComunes": [
         "Rabil"
@@ -6413,6 +6492,7 @@
     },
     {
       "nombreBoe": "Thunnus obesus",
+      "clave": "thunnus-obesus-eebbf6",
       "nombreComun": "Patudo",
       "nombresComunes": [
         "Patudo"
@@ -6516,6 +6596,7 @@
     },
     {
       "nombreBoe": "Thunnus thynnus",
+      "clave": "thunnus-thynnus-4b2118",
       "nombreComun": "Atún rojo",
       "nombresComunes": [
         "Atún rojo"
@@ -6619,6 +6700,7 @@
     },
     {
       "nombreBoe": "Trachurus spp",
+      "clave": "trachurus-spp-55b2d2",
       "nombreComun": "Jurel",
       "nombresComunes": [
         "Jurel",
@@ -6723,6 +6805,7 @@
     },
     {
       "nombreBoe": "Trachurus trachurus",
+      "clave": "trachurus-trachurus-1a82e9",
       "nombreComun": "Jurel",
       "nombresComunes": [
         "Jurel"
@@ -6792,6 +6875,7 @@
     },
     {
       "nombreBoe": "Trisopterus luscus",
+      "clave": "trisopterus-luscus-ea4af2",
       "nombreComun": "Faneca",
       "nombresComunes": [
         "Faneca"
@@ -6863,6 +6947,7 @@
     },
     {
       "nombreBoe": "Trisopterus minutus capelanus",
+      "clave": "trisopterus-minutus-capelanus-2f7f78",
       "nombreComun": "Capellán/mollera",
       "nombresComunes": [
         "Capellán/mollera"
@@ -6932,6 +7017,7 @@
     },
     {
       "nombreBoe": "Venerupis spp",
+      "clave": "venerupis-spp-abec02",
       "nombreComun": "Almeja",
       "nombresComunes": [
         "Almeja"
@@ -7001,6 +7087,7 @@
     },
     {
       "nombreBoe": "Venus spp",
+      "clave": "venus-spp-6b4d43",
       "nombreComun": "Chirla",
       "nombresComunes": [
         "Chirla"

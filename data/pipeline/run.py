@@ -708,6 +708,9 @@ def _check_especies() -> int:
       especie concreta de ese género.
     * **Los recortes de OBIS cubren su caladero y ninguno más.** Se comprueba contra `ports.json`,
       no contra una declaración del dataset: es lo que hace que la presencia sea de ese caladero.
+    * **La clave no colapsa dos filas de la norma.** Se recomputa del literal de cada nombre y se
+      comprueba que no haya dos iguales: el BOE escribe «Thunnus thynnus» y «Thunnus Thynnus», que
+      cualquier slug en minúsculas convierte en una sola fila que nadie puede distinguir.
     * **Cobertura**: las especies del BOE están todas y las 118 filas de la norma están contadas
       (117 con nombre científico y la de «Cigalas (colas)», que no lo trae y se publica aparte).
     """
@@ -763,6 +766,15 @@ def _check_especies() -> int:
         print(
             f"✓ E3 · las {len(filas)} filas «spp» ({len(distintos)} géneros) publican rango género "
             "y ninguna nombra una especie concreta"
+        )
+    claves = especies.errores_de_clave(dataset)
+    for error in claves:
+        print(f"✗ clave: {error}", file=sys.stderr)
+    problems += len(claves)
+    if not claves:
+        print(
+            f"✓ las {len(dataset['especies'])} claves salen del literal de la norma y ninguna se "
+            "repite: «Thunnus thynnus» y «Thunnus Thynnus» son dos filas y dos claves"
         )
     presencia = especies.errores_de_presencia(dataset)
     for error in presencia:
@@ -839,6 +851,7 @@ def command_especies(args: argparse.Namespace) -> int:
         *(f"cobertura: {error}" for error in especies.errores_de_cobertura(dataset, tallas)),
         *(f"E2 · mapeo: {error}" for error in especies.errores_de_mapeo(dataset)),
         *(f"E3 · género: {error}" for error in especies.errores_de_genero(dataset)),
+        *(f"clave: {error}" for error in especies.errores_de_clave(dataset)),
         *(f"presencia: {error}" for error in especies.errores_de_presencia(dataset)),
     ]
     if errores:

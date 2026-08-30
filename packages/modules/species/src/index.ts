@@ -75,5 +75,6 @@ export type {
   OrigenDeLaCorrespondencia,
   PresenciaObis,
   RangoDelNombre,
+  TallaDelAnexo,
   TaxonEnWorms,
 } from "./tipos.ts";

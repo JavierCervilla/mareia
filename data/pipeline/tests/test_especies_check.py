@@ -15,6 +15,9 @@ recorrido rojo de uno que se pone rojo por otro motivo:
 * **E3** no mira sólo el rango: recorre **todas** las cadenas de la ficha. Por eso hay un sabotaje
   que deja el rango intacto en «genero» y cuela el nombre de una especie por otro campo, que es
   exactamente el atajo que un gate de rango no vería.
+* **La clave** no se lee, se recomputa del literal del nombre. Por eso hay dos sabotajes y no uno:
+  repetir una clave (el caso real, `Thunnus Thynnus` colapsado sobre `Thunnus thynnus`) y teclear
+  una que no salga del nombre, que no se repite con nadie y aun así deja de ser estable.
 """
 
 from __future__ import annotations
@@ -27,6 +30,7 @@ import pytest
 
 import run
 from mareia_pipeline import especies, normativa
+from mareia_pipeline.catalog import slugify
 
 
 def _publicado() -> dict[str, Any]:
@@ -52,6 +56,7 @@ def test_el_check_entero_pasa_en_verde(capsys: pytest.CaptureFixture[str]) -> No
     salida = capsys.readouterr().out
     assert "✓ E2 · las 22 correspondencias que no salen de WoRMS" in salida
     assert "✓ E3 · las 15 filas «spp» (14 géneros)" in salida
+    assert "✓ las 86 claves salen del literal de la norma y ninguna se repite" in salida
 
 
 def test_el_catalogo_publica_las_86_especies_del_boe() -> None:
@@ -277,6 +282,73 @@ def test_e3_no_confunde_la_autoridad_del_genero_con_una_especie() -> None:
     assert not especies.errores_de_genero(especies.cargar())
     cita = _especie(especies.cargar(), "Alosa spp")["taxon"]["cita"]
     assert "Alosa Linck, 1790" in cita
+
+
+# =====================================================================================
+# La clave · dos filas de la norma no acaban en una
+# =====================================================================================
+
+
+def test_la_clave_separa_las_dos_grafias_del_atun_que_escribe_la_norma() -> None:
+    """El caso que obliga a que la clave lleve digest, medido sobre el artefacto publicado.
+
+    El BOE escribe `Thunnus thynnus` en los Anexos I y II y `Thunnus Thynnus` en el III. Son dos
+    filas del catálogo con sus tallas y sus caladeros, y **el mismo slug en minúsculas**: sin el
+    digest, quien busca una encuentra siempre la primera.
+    """
+    dataset = especies.cargar()
+    minusculas = _especie(dataset, "Thunnus thynnus")
+    mayusculas = _especie(dataset, "Thunnus Thynnus")
+    assert minusculas["clave"] != mayusculas["clave"]
+    # Y el prefijo legible SÍ coincide, que es justo lo que hace falta que no baste.
+    assert minusculas["clave"].rsplit("-", 1)[0] == mayusculas["clave"].rsplit("-", 1)[0]
+    assert len({e["clave"] for e in dataset["especies"]}) == len(dataset["especies"])
+
+
+def test_la_clave_no_depende_de_las_otras_filas_del_catalogo() -> None:
+    """Es función sólo del nombre: quitar filas del dataset no le mueve la clave a nadie.
+
+    Es la propiedad que no tiene un sufijo `-2` asignado al detectar la colisión, y la que impide
+    que un `data-especie` cambie de sitio porque la norma haya ganado o perdido una especie.
+    """
+    antes = {e["nombreBoe"]: e["clave"] for e in especies.cargar()["especies"]}
+    assert all(clave == especies.clave_de(nombre) for nombre, clave in antes.items())
+    # Distinguir sólo por la caja sería apoyarse en una diferencia que cualquier `lower()` de
+    # conveniencia borra; estas claves aguantan comparadas en minúsculas.
+    assert len({clave.lower() for clave in antes.values()}) == len(antes)
+
+
+def test_rojo_si_la_clave_colapsa_dos_grafias_de_la_norma(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """El sabotaje es **el slug en minúsculas**, que es la clave que esto vino a sustituir.
+
+    No se edita ninguna fila a mano: se cambia **cómo** se construye la clave y se reconstruyen las
+    86, que es la única forma en que esto pasaría de verdad. Las 86 siguen saliendo de su nombre
+    —la recomputación se queda en verde y no es ella la que avisa— y aun así el atún del Anexo III
+    y el de los Anexos I y II acaban en la misma fila.
+    """
+    monkeypatch.setattr(especies, "clave_de", slugify)
+    dataset = _publicado()
+    for especie in dataset["especies"]:
+        especie["clave"] = especies.clave_de(especie["nombreBoe"])
+    _con(monkeypatch, dataset)
+    assert run.command_check(argparse.Namespace()) == 1
+    salida = capsys.readouterr().err
+    assert "✗ clave" in salida
+    assert "comparten la clave 'thunnus-thynnus'" in salida
+    assert "nadie puede distinguir" in salida
+
+
+def test_rojo_si_la_clave_se_escribe_a_mano_en_vez_de_salir_del_nombre(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Una clave tecleada no se repite y tampoco es estable: el gate la recomputa, no la lee."""
+    dataset = _publicado()
+    _especie(dataset, "Alosa spp")["clave"] = "sabalos"
+    _con(monkeypatch, dataset)
+    assert run._check_especies() > 0
+    assert "no se escribe" in capsys.readouterr().err
 
 
 # =====================================================================================

@@ -1,10 +1,19 @@
 /**
- * La forma del dataset `especies/v1` (`data/especies/catalogo.json`), escrita en tipos.
+ * Lo que el módulo `species` consume del dataset `especies/v1` (`data/especies/catalogo.json`),
+ * escrito en tipos.
  *
- * Es el **contrato de lectura** entre el pipeline que lo construye (carril A de T-20) y esta
- * interfaz. Vive en el módulo y no en la web por lo mismo que `regulations` y `protected-areas`:
- * quien tiene que saber qué es una especie regulada es el módulo; la web solo sabe abrir un JSON y
- * dárselo (`apps/web/src/modulos/especies.ts`).
+ * **No es la forma literal del fichero**, y la distinción importa desde que los dos carriles de
+ * T-20 se juntaron. El dataset que publica el pipeline trae bastante más de lo que se pinta —la
+ * cita que exige WoRMS, la autoridad de cada nombre, el WKT del recorte, la procedencia de cada
+ * cifra del BOE— y lo agrupa a su manera. Quien traduce una cosa en la otra es el **adaptador** de
+ * la web (`apps/web/src/modulos/especies/catalogo.ts`), que además es la frontera donde el JSON
+ * deja de ser `unknown`. Este fichero es el otro extremo de esa traducción: lo mínimo con lo que se
+ * puede escribir una fila sin mentir.
+ *
+ * La regla del adaptador, que es lo que mantiene honesta esa traducción: **renombra campos, nunca
+ * reescribe valores**. `taxon` pasa a `worms` porque el nombre del campo es cosa nuestra; en cambio
+ * `origen: "mareia"` viaja tal cual hasta aquí —y no traducido a un «nuestro» más bonito— porque es
+ * una **firma de procedencia**, y un adaptador que reescribe firmas publica una que nadie estampó.
  *
  * Las tres piezas que mandan sobre todo lo demás, y las tres existen para que el catálogo no pueda
  * publicar una afirmación que no tiene:
@@ -13,10 +22,10 @@
  *    especie —el que tiene consecuencia legal— y por eso es el único campo del que ningún camino
  *    del código puede prescindir. El taxón aceptado vive en `worms`, aparte, y **nunca lo
  *    sustituye**: el gate E1 mide justo eso sobre el `dist/`.
- * 2. **`rango` es una unión cerrada de dos valores.** 15 de los 86 nombres del BOE son un
- *    **género** (`Sepia spp`, `Mullus spp`…) y que la talla aplique a todo el género es un hecho
- *    jurídico. Modelarlo como texto libre dejaría que un día llegase «especie» en una fila `spp`, y
- *    convertir un género en una especie es inventarle a la norma un alcance que no tiene.
+ * 2. **`rango` es una unión cerrada.** Que una talla aplique a un género entero —15 de las 86
+ *    filas: `Sepia spp`, `Mullus spp`…— es un hecho jurídico. Modelarlo como texto libre dejaría
+ *    que un día llegase «especie» en una fila `spp`, y convertir un género en una especie es
+ *    inventarle a la norma un alcance que no tiene.
  * 3. **`PresenciaObis` no tiene ningún campo que se pueda leer como abundancia**: registros,
  *    conjuntos de datos y rango de años, y nada más. No hay densidad, no hay probabilidad y no hay
  *    geometría, porque la cifra mide **esfuerzo de muestreo** (12 registros de dorada en toda
@@ -34,11 +43,19 @@ import type { Talla } from "@mareia/module-regulations";
 /**
  * El rango taxonómico al que se resuelve el nombre que escribe la norma.
  *
- * Dos valores porque dos son los que el BOE usa: nombra especies y nombra géneros. No hay
- * `desconocido`: cuando no se sabe, no hay registro de WoRMS del que colgar un rango (`worms` es
- * `null`) y el catálogo lo dice con esas palabras en vez de rellenar el hueco.
+ * **Cuatro valores, medidos sobre el dataset publicado** y no elegidos de antemano: la norma nombra
+ * 68 especies, 15 géneros (`Sepia spp`, `Mullus spp`…), una **familia** (`Palinuridae`) y una
+ * **subespecie** (`Trisopterus minutus capelanus`). La primera versión de este tipo tenía dos, y no
+ * era una simplificación deliberada: era una previsión escrita antes de que el dataset existiera.
+ * Los dos casos raros son una fila cada uno y son exactamente los que un rango en dos valores
+ * habría tenido que aplastar contra «especie», que es el error que este tipo existe para impedir.
+ *
+ * Sigue siendo una unión cerrada, y por el mismo motivo de siempre: un rango de texto libre deja
+ * que un día llegue «especie» en una fila `spp`. No hay `desconocido`: cuando no se sabe, no hay
+ * registro de WoRMS del que colgar un rango (`worms` es `null`) y el catálogo lo dice con esas
+ * palabras en vez de rellenar el hueco.
  */
-export type RangoDelNombre = "especie" | "genero";
+export type RangoDelNombre = "especie" | "genero" | "familia" | "subespecie";
 
 /**
  * Cómo se llegó al registro de WoRMS: preguntándole el nombre del BOE tal cual, o con una
@@ -47,8 +64,11 @@ export type RangoDelNombre = "especie" | "genero";
  * Es el campo que sostiene el gate E2 del carril A. Aquí se lee para una sola cosa, pero es la que
  * importa en la página: cuando el mapeo es nuestro, la fila lo dice y dice por qué. Un mapeo sin
  * dueño se lee como si lo firmase la fuente, que es lo mismo que una cifra inventada.
+ *
+ * `"mareia"` es el valor que escribe el dataset y llega hasta aquí **sin traducir**: es una firma de
+ * procedencia, y el adaptador renombra campos pero no reescribe firmas (ver la cabecera).
  */
-export type OrigenDeLaCorrespondencia = "worms" | "nuestro";
+export type OrigenDeLaCorrespondencia = "worms" | "mareia";
 
 /** Un nombre de WoRMS con su identificador, que es lo que permite comprobarlo sin fiarse del texto. */
 export interface NombreEnWorms {
@@ -72,7 +92,7 @@ export interface TaxonEnWorms extends NombreEnWorms {
    * una talla.
    */
   readonly estado: string;
-  /** Especie o género. La norma nombra las dos cosas y no se convierte la una en la otra. */
+  /** Especie, género, familia o subespecie. Lo que la norma nombra, sin convertir lo uno en lo otro. */
   readonly rango: RangoDelNombre;
   /** Ficha del taxón en WoRMS: el enlace con el que cualquiera comprueba esta fila. */
   readonly url: string;
@@ -80,15 +100,20 @@ export interface TaxonEnWorms extends NombreEnWorms {
    * El nombre aceptado hoy, **solo cuando difiere del que escribe la norma**; `null` cuando WoRMS
    * acepta el del BOE tal cual.
    *
-   * Son 10 de los 86 (`Solea vulgaris` → `Solea solea`, `Psetta maxima` → `Scophthalmus
+   * Son 11 de los 86 (`Solea vulgaris` → `Solea solea`, `Psetta maxima` → `Scophthalmus
    * maximus`…). No es un error del BOE que haya que arreglar: la norma es de 1995 y la taxonomía se
    * mueve. Por eso son dos campos y no uno corregido.
+   *
+   * El dataset publica aquí el aceptado **siempre** que WoRMS lo dé, también cuando es el mismo
+   * nombre; el adaptador lo deja en `null` en ese caso, porque lo que la página escribe sale de si
+   * este campo aporta un nombre distinto o no. Repetir el binomio en 74 filas perdería las 11 que
+   * de verdad difieren.
    */
   readonly aceptado: NombreEnWorms | null;
   /** Si el nombre se le preguntó a WoRMS tal cual o se llegó a él con una correspondencia nuestra. */
   readonly origen: OrigenDeLaCorrespondencia;
   /**
-   * Qué correspondencia se hizo y por qué, cuando `origen` es `nuestro`; `null` cuando el nombre
+   * Qué correspondencia se hizo y por qué, cuando `origen` es `mareia`; `null` cuando el nombre
    * del BOE resolvió tal cual.
    *
    * Obligatorio en ese caso —el lector defensivo de la web lo exige y `filasDeEspecies` lo
@@ -117,23 +142,12 @@ export interface PresenciaObis {
 }
 
 /**
- * Una especie **en uno de los caladeros que la regulan**: qué talla le fija ese anexo y qué
- * presencia tiene registrada ahí.
- *
- * La talla y la presencia van juntas y por caladero porque las dos lo son: el BOE fija cifras
- * distintas para la misma especie en anexos distintos (la lisa son 20 cm en el Cantábrico y 16 en
- * el Mediterráneo) y la consulta a OBIS se hace por caja envolvente de caladero.
+ * Una talla que un anexo le fija a una especie: la cifra, qué mide y el literal de la celda.
  *
  * `talla` es **la misma unión cerrada de cinco clases** de `normativa/v1` y se importa de
  * `@mareia/module-regulations` en vez de copiarse: ver la cabecera de `vista.ts`.
  */
-export interface EspecieEnCaladero {
-  /** Identificador del caladero, el mismo que declara cada puerto en `data/geo/ports.json`. */
-  readonly id: string;
-  /** Nombre para leer («Mediterráneo»). */
-  readonly nombre: string;
-  /** El nombre común con el que **ese anexo** la nombra («Lisas» en uno, «Lisa» en otro). */
-  readonly nombreComun: string;
+export interface TallaDelAnexo {
   /**
    * Qué se mide, cuando el anexo mide la misma especie de más de una forma; `null` cuando no lo
    * dice.
@@ -148,8 +162,43 @@ export interface EspecieEnCaladero {
   readonly talla: Talla;
   /** El literal de la celda del BOE, para poder comparar lo pintado con lo publicado. */
   readonly textoOriginal: string;
-  /** Lo que OBIS registra dentro de la caja de ese caladero; `null` si no hay ningún registro. */
+}
+
+/**
+ * Una especie **en uno de los caladeros que la regulan**: **sus** tallas y **una** presencia.
+ *
+ * Las tallas y la presencia van por caladero porque las dos lo son: el BOE fija cifras distintas
+ * para la misma especie en anexos distintos (la lisa son 20 cm en el Cantábrico y 16 en el
+ * Mediterráneo) y la consulta a OBIS se hace por el recorte de un caladero.
+ *
+ * **La asimetría —tallas en plural, presencia en singular— es la forma del hecho, y es la que ya
+ * emite el dataset.** El mismo anexo puede fijarle a una especie más de una talla —la cigala, por
+ * cefalotórax y por longitud total—, mientras que la presencia es de la especie en el recorte y no
+ * de cada medida. Una entrada por talla obligaría a repetir el recuento de OBIS dentro de la misma
+ * fila, y 950 y 950 no son 1.900 registros: son el mismo dato dos veces.
+ */
+export interface EspecieEnCaladero {
+  /** Identificador del caladero, el mismo que declara cada puerto en `data/geo/ports.json`. */
+  readonly id: string;
+  /** Nombre para leer («Mediterráneo»). */
+  readonly nombre: string;
+  /** El nombre común con el que **ese anexo** la nombra («Lisas» en uno, «Lisa» en otro). */
+  readonly nombreComun: string;
+  /** Las tallas que ese anexo le fija, en el orden del BOE. Casi siempre una; la cigala, dos. */
+  readonly tallas: readonly TallaDelAnexo[];
+  /** Lo que OBIS registra dentro del recorte de ese caladero; `null` si no hay cifra que publicar. */
   readonly presencia: PresenciaObis | null;
+  /**
+   * Por qué no hay cifra, cuando **no se llegó a preguntar**; `null` cuando sí se preguntó.
+   *
+   * Distingue los dos silencios que el dataset distingue y que no significan lo mismo: preguntarle
+   * a OBIS y que no tenga ningún registro dentro del recorte (9 pares especie-caladero, y eso se
+   * dice con `SIN_REGISTROS`) y **no haberle preguntado**, que es lo que pasa cuando el nombre no
+   * resuelve en WoRMS y no hay taxón por el que consultar (una: `Lophius piscatorius, L.
+   * Budegassa`). Publicar «nadie lo ha anotado ahí» en el segundo caso sería afirmar algo sobre
+   * OBIS que no hemos comprobado.
+   */
+  readonly presenciaAusente: string | null;
 }
 
 /** Una de las 86 especies que el BOE regula. */
@@ -162,7 +211,16 @@ export interface EspecieDelCatalogo {
    * no lleva, aquí pone `Cáncer pagurus`.
    */
   readonly nombreBoe: string;
-  /** Clave estable para el `data-especie` de la fila y para los gates. La calcula el pipeline. */
+  /**
+   * Clave estable para el `data-especie` de la fila y para los gates. **La calcula el pipeline** y
+   * aquí no se recalcula: recalcularla sería un segundo camino al mismo identificador, y un
+   * segundo camino puede discrepar.
+   *
+   * Es única por especie y **no colapsa dos grafías de la norma**: el BOE escribe `Thunnus
+   * thynnus` y `Thunnus Thynnus`, dos filas que cualquier slug en minúsculas convierte en una
+   * (`clave_de` en `data/pipeline/mareia_pipeline/especies.py`). Que no se repita lo comprueba el
+   * adaptador al leer, y el rechazo es duro: dos filas indistinguibles no se publican.
+   */
   readonly clave: string;
   /** Lo que WoRMS sabe de ese nombre; `null` cuando no resuelve. */
   readonly worms: TaxonEnWorms | null;
@@ -174,7 +232,7 @@ export interface EspecieDelCatalogo {
    * no se distingue de un fallo nuestro.
    */
   readonly sinResolver: string | null;
-  /** Los caladeros que la regulan, con su talla y su presencia. Nunca vacío: por eso está aquí. */
+  /** Los caladeros que la regulan, con sus tallas y su presencia. Nunca vacío: por eso está aquí. */
   readonly caladeros: readonly EspecieEnCaladero[];
 }
 
@@ -204,6 +262,14 @@ export interface FuentesDelCatalogo {
 export interface CajaDelCaladero {
   /** Identificador del caladero al que corresponde la caja. */
   readonly caladero: string;
+  /**
+   * Cómo se llama ese rectángulo («Golfo de Cádiz»), porque un caladero puede tener más de uno.
+   *
+   * Sin el nombre, los tres rectángulos del caladero cantábrico-noroeste-golfo de Cádiz se
+   * publicarían como tres filas con la misma etiqueta y tres pares de coordenadas distintos, que se
+   * lee como una contradicción en vez de como lo que es: una consulta con tres recortes.
+   */
+  readonly nombre: string;
   readonly latMin: number;
   readonly latMax: number;
   readonly lonMin: number;
@@ -212,7 +278,15 @@ export interface CajaDelCaladero {
 
 /** Con qué criterio se consultó la presencia, dicho por el propio dataset. */
 export interface CriterioDelCatalogo {
-  /** Una caja por caladero. Sin ella, ninguna cifra de presencia se puede interpretar. */
+  /**
+   * Las cajas de todos los caladeros, **una o varias por caladero**. Sin ellas, ninguna cifra de
+   * presencia se puede interpretar ni repetir.
+   *
+   * Son varias donde el caladero no cabe en un rectángulo: el del Cantábrico, noroeste y golfo de
+   * Cádiz son tres —un único rectángulo que fuera del Cantábrico a Cádiz se tragaría el mar de
+   * Alborán, que es del caladero mediterráneo— y se consultan a OBIS en una sola petición, porque
+   * los recuentos de dos recortes no son sumables.
+   */
   readonly cajas: readonly CajaDelCaladero[];
 }
 

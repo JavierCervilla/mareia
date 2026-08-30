@@ -102,7 +102,7 @@ const migas = migasDeEspecies();
     <p class="especies__intro">{POR_QUE_DOS_NOMBRES}</p>
     {/*
       El censo, contado del propio catálogo. Va aquí y no en la entradilla porque es lo que da la
-      medida de la distancia entre la norma y la taxonomía: 10 de 86 no es una anécdota y tampoco es
+      medida de la distancia entre la norma y la taxonomía: 11 de 86 no es una anécdota y tampoco es
       un desastre, y sin la cifra cada lector se imagina una de las dos cosas.
     */}
     <div class="datos">
@@ -110,8 +110,14 @@ const migas = migasDeEspecies();
         <span>Resuelven en WoRMS con el nombre de la norma</span>
         <span class="datos__valor">{censo.resueltasTalCual} de {censo.especies}</span>
       </p>
+      {/*
+        Esta cifra NO es la de los géneros: son las que resuelven porque nosotros decidimos qué
+        preguntarle a WoRMS —las filas de género más las erratas de la propia norma que se mapean—,
+        y los géneros van en su propia línea, abajo. Rotularla «al género» las confundiría en una
+        página que existe para separar lo que dice la fuente de lo que decidimos nosotros.
+      */}
       <p class="datos__fila">
-        <span>Resuelven al género porque la norma nombra un género</span>
+        <span>Resuelven porque nosotros decidimos qué preguntar: un género o una errata de la norma</span>
         <span class="datos__valor">{censo.porCorrespondenciaNuestra}, con la correspondencia declarada como nuestra</span>
       </p>
       <p class="datos__fila">
@@ -147,7 +153,12 @@ const migas = migasDeEspecies();
           const caladero = censo.caladeros.find((candidato) => candidato.id === caja.caladero);
           return (
             <p class="datos__fila">
-              <span>{caladero?.nombre ?? caja.caladero}</span>
+              {/*
+                El caladero Y el nombre del rectángulo: hay caladeros que se consultan con varios
+                —el cantábrico-noroeste-golfo de Cádiz, con tres—, y tres filas con la misma
+                etiqueta y tres pares de coordenadas distintos se leen como una contradicción.
+              */}
+              <span>{caladero?.nombre ?? caja.caladero} · {caja.nombre}</span>
               <span class="datos__valor">{cajaEscrita(caja, numero)}</span>
             </p>
           );

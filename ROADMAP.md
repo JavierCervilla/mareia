@@ -180,11 +180,13 @@
       —`/pesca/especies/`, ruta decidida por el humano— con las **86** especies a las que el RD
       560/1995 le fija talla mínima: el nombre de la norma **literal y siempre presente**, el taxón
       que WoRMS acepta hoy, el rango, los caladeros que la regulan con su talla y los registros de
-      OBIS. De los 86 nombres, **64 resuelven tal cual**, **15 son un género** que se resuelve al
-      género con la correspondencia **declarada como nuestra** (15 nombres sobre **14 géneros**:
-      `Mugil` sale dos veces, con la errata `Mugil spps` de la propia norma) y **7 no resuelven** y
-      publican por qué; **10** tienen hoy un nombre aceptado distinto (`Solea vulgaris` → **Solea
-      solea**). **No es un error del BOE**: la norma es de 1995 y la taxonomía se movió, así que se
+      OBIS. De los 86 nombres, **64 resuelven tal cual**, **21 resuelven porque nosotros decidimos
+      qué preguntar** —las **15 filas** de género sobre **14 géneros distintos** (`Mugil` sale dos
+      veces, con la errata `Mugil spps` de la propia norma) más **6 erratas** de la norma—, con la
+      correspondencia **declarada como nuestra**, y **1 no resuelve** y publica por qué; **11**
+      tienen hoy un nombre aceptado distinto (`Solea vulgaris` → **Solea solea**). Se rotula todo lo
+      que **no es una especie**: los 15 géneros, la familia `Palinuridae` y la subespecie `Trisopterus
+      minutus capelanus`, **17 rótulos sobre 86**. **No es un error del BOE**: la norma es de 1995 y la taxonomía se movió, así que se
       publican los dos nombres con su fuente y su `AphiaID` y **el legal no se sustituye nunca**. Los
       registros de OBIS se publican como lo que son —**esfuerzo de muestreo, no abundancia**: la
       dorada en toda Galicia son **12 registros**— y **no existe el elemento «número»** en la página:
@@ -201,12 +203,15 @@
       filtrado), con un gate que exige reglas para **todo** caladero del dataset para que un cuarto no
       lo rompa en silencio. Gates **E1** (el nombre del BOE, literal, en las 86 filas del `dist/`) y
       **E4** (ninguna cifra de registros sin su sesgo **en el bloque más interno** que la contiene:
-      114 cifras medidas) **probados en rojo** — el sabotaje de E4 dejó **113 cifras desnudas** con la
+      106 cifras medidas) **probados en rojo** — el sabotaje de E4 dejó **105 cifras desnudas** con la
       explicación larga todavía en la página, o sea que un gate a nivel de página habría seguido
       verde. Y dos hallazgos que salieron de medir: el BOE escribe **`Thunnus thynnus`** y **`Thunnus
-      Thynnus`**, que cualquier slug colapsa —el lector rechaza claves repetidas—, y la cigala tiene
-      **dos tallas en el mismo anexo**, que sin decir qué mide cada una se leen como una
-      contradicción. Medido: `pnpm test` **641 en verde**, catálogo de **99.289 B** (8.935
+      Thynnus`**, que cualquier slug en minúsculas colapsa, así que la `clave` del dataset es el slug
+      **más el digest del literal** —sale sólo del nombre, así que no se mueve porque se muevan las
+      demás— y hay dos gates que lo defienden, `run.py check` y el lector, los dos probados en rojo
+      con el mismo sabotaje; y la cigala tiene **dos tallas en el mismo anexo**, que sin decir qué
+      mide cada una se leen como una contradicción. Medido con el comando de CI: `pnpm test` **651 en
+      verde**, `pnpm test:e2e` **61**, `pytest` **1.903**, catálogo de **105.902 B** (10.280
       comprimidos) con cero scripts
 - [ ] T-14 · Metodología pública + QC navegable + dataset con su licencia por puerto declarada
       (el reparto real ya publicado en T-14A) + API pública documentada

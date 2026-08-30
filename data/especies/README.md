@@ -36,8 +36,14 @@ de esos, **10 resuelven a un nombre distinto del que usa la norma**, porque el r
 **Esto no es un error del BOE que haya que arreglar.** Ninguna de esas diez filas cambia de nombre
 en el catálogo.
 
-**2 · El género no se convierte en especie.** Las **15 filas `spp`** (14 géneros: el Anexo II
-escribe además `Mugil spps`) se resuelven **al género** en WoRMS y publican `taxon.rango: "genero"`.
+Son diez **de los 64 que se preguntaron tal cual**. En el censo del catálogo entero son **11**: se
+suma `Panaeux kerathurus`, que llega a WoRMS por una correspondencia nuestra (regla 3) y allí resulta
+ser una combinación superada de *Penaeus (Melicertus) kerathurus*. Las dos cifras son la misma cosa
+contada sobre poblaciones distintas, y por eso van dichas las dos.
+
+**2 · El género no se convierte en especie.** Las **15 filas `spp`** —**14 géneros distintos**,
+porque el Anexo II escribe además `Mugil spps` y las dos filas se publican tal cual— se resuelven
+**al género** en WoRMS y publican `taxon.rango: "genero"`.
 Que una talla mínima aplique a todo un género es un hecho jurídico; elegirle una especie concreta
 sería inventar un alcance que la norma no tiene. Lo comprueba el **gate E3**, que además recorre
 todas las cadenas de la ficha: no basta con dejar el rango bien y colar el nombre de una especie
@@ -70,15 +76,27 @@ y con su motivo, como el `1 1` ilegible de la boga en `data/normativa`.
 schema      "especies/v1"
 fuentes     BOE, WoRMS y OBIS, cada una con su licencia y la fecha en que se consultó
 origenes    de qué fuente sale cada campo
-recortes    los rectángulos con los que se pregunta a OBIS, uno por caladero
+recortes    los rectángulos con los que se pregunta a OBIS, uno o varios por caladero
 resumen     el censo, recontado sobre lo publicado
-especies[]  nombreBoe · nombreComun/nombresComunes · correspondencia · taxon · caladeros[]
+especies[]  nombreBoe · clave · nombreComun/nombresComunes · correspondencia · taxon · caladeros[]
 sinNombreCientifico[]   las filas del BOE que no dan latín (hoy, «Cigalas (colas)»)
 ```
 
 Censo de la última generación: **86 especies**, **85 resueltas** en WoRMS (68 especies, 15 géneros,
 1 familia —`Palinuridae`— y 1 subespecie) y **1 sin resolver**; **118 filas** del real decreto
-contadas (117 con nombre científico y la que no lo trae); **114 cifras de presencia**.
+contadas (117 con nombre científico y la que no lo trae); **114 cifras de presencia**, de las cuales
+9 son un cero.
+
+### La `clave`: dos grafías de la norma no acaban en una
+
+Cada especie trae una `clave` única y estable, que es el identificador con el que la interfaz nombra
+su fila. **No es un slug**: es el slug del nombre **más el digest del literal exacto**
+(`clave_de`, en `mareia_pipeline/especies.py`), y el sufijo lo pide un caso medido —el BOE escribe
+`Thunnus thynnus` en los Anexos I y II y `Thunnus Thynnus` en el III, dos filas que cualquier slug
+en minúsculas convierte en una—. Al salir sólo del nombre, no depende de la posición de la fila ni
+de qué otras filas existan: añadir o quitar una especie no le mueve la clave a ninguna otra. Que
+ninguna se repita y que todas salgan de su nombre lo comprueba `run.py check`, y el lector de la web
+**rechaza el dataset entero** si dos especies comparten clave.
 
 ## La presencia es esfuerzo de muestreo, no abundancia
 
@@ -97,7 +115,7 @@ Tres cifras medidas el 2026-08-30 que dicen por qué:
 - **`Clupea harengus` (arenque) sale con 0 registros** en ese mismo recorte, y el BOE le pone talla
   mínima.
 - La dorada, que sí está bien nombrada, son **56 registros** en ese recorte y **3.190** en todo
-  OBIS. La mediana de las 114 cifras publicadas son **141 registros**, y 9 están en cero: un número
+  OBIS. La mediana de las 114 cifras del dataset son **141 registros**, y 9 están en cero: un número
   bajo puede significar sólo que ahí no se ha muestreado, y uno alto, que hay una campaña
   científica cerca.
 

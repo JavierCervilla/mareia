@@ -376,7 +376,7 @@ que parece**, y cómo se filtra sin JavaScript algo a lo que **otra página tien
 filtrado**.
 
 - **Los dos nombres se publican, y ninguno de los dos es la letra pequeña del otro.** La norma es de
-  1995 y la taxonomía se ha movido: **10 de las 86** especies tienen hoy en WoRMS un nombre aceptado
+  1995 y la taxonomía se ha movido: **11 de las 86** especies tienen hoy en WoRMS un nombre aceptado
   distinto del que escribe el BOE (`Solea vulgaris` → **Solea solea**, `Psetta maxima` →
   **Scophthalmus maximus**…). Tipográficamente eso se resuelve **no resolviéndolo**: los dos van en
   cursiva, en el mismo cuerpo y en columnas distintas —el del BOE en la cabecera de fila, el

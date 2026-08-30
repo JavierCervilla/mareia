@@ -20,6 +20,7 @@ import type {
   EspecieDelCatalogo,
   EspecieEnCaladero,
   PresenciaObis,
+  TallaDelAnexo,
 } from "../tipos.ts";
 import {
   anclaDeCaladero,
@@ -39,10 +40,18 @@ function enCaladero(parcial: Partial<EspecieEnCaladero> = {}): EspecieEnCaladero
     id: "mediterraneo",
     nombre: "Mediterráneo",
     nombreComun: "Lisa",
+    tallas: [conTalla()],
+    presencia: { registros: 412, datasets: 3, desde: 2003, hasta: 2019 },
+    presenciaAusente: null,
+    ...parcial,
+  };
+}
+
+function conTalla(parcial: Partial<TallaDelAnexo> = {}): TallaDelAnexo {
+  return {
     medida: null,
     talla: { tipo: "longitud_cm", cm: 16 },
     textoOriginal: "16",
-    presencia: { registros: 412, datasets: 3, desde: 2003, hasta: 2019 },
     ...parcial,
   };
 }
@@ -85,7 +94,16 @@ function catalogo(especies: readonly EspecieDelCatalogo[]): CatalogoDeEspecies {
       },
     },
     criterio: {
-      cajas: [{ caladero: "mediterraneo", latMin: 35.1, latMax: 42.5, lonMin: -5.6, lonMax: 4.6 }],
+      cajas: [
+        {
+          caladero: "mediterraneo",
+          nombre: "Alborán y Levante",
+          latMin: 35.1,
+          latMax: 42.5,
+          lonMin: -5.6,
+          lonMax: 4.6,
+        },
+      ],
     },
     especies,
   };
@@ -168,7 +186,7 @@ test("una correspondencia NUESTRA se publica firmada y con su motivo", () => {
       rango: "genero",
       url: "https://www.marinespecies.org/aphia.php?p=taxdetails&id=138477",
       aceptado: null,
-      origen: "nuestro",
+      origen: "mareia",
       comoSeLlego: "la norma escribe «Sepia spp», que no es un binomio; se resuelve el género",
     },
   });
@@ -179,7 +197,7 @@ test("una correspondencia NUESTRA se publica firmada y con su motivo", () => {
 
 test("un mapeo NUESTRO sin motivo no se publica: se lee como si lo firmase WoRMS", () => {
   const huerfano = especie({
-    worms: { ...especie().worms!, origen: "nuestro", comoSeLlego: null },
+    worms: { ...especie().worms!, origen: "mareia", comoSeLlego: null },
   });
   assert.throws(
     () => filasDeEspecies(catalogo([huerfano]), FORMATO),
@@ -202,15 +220,36 @@ test("las filas de género se rotulan como género, y las de especie no se rotul
       rango: "genero",
       url: "https://www.marinespecies.org/aphia.php?p=taxdetails&id=125917",
       aceptado: null,
-      origen: "nuestro",
+      origen: "mareia",
       comoSeLlego: "se resuelve el género que la norma regula",
     },
   });
   const filas = filasDeEspecies(catalogo([genero, especie()]), FORMATO);
   assert.equal(filas.find((fila) => fila.clave === "mullus-spp")?.rango, "género, no especie");
-  // Y la de especie NO se rotula: 71 rótulos «especie» serían ruido que le quitaría fuerza a los 15
+  // Y la de especie NO se rotula: 68 rótulos «especie» serían ruido que le quitaría fuerza a los 17
   // que cambian lo que la fila significa.
   assert.equal(filas.find((fila) => fila.clave === "sparus-auratus")?.rango, null);
+});
+
+test("la familia y la subespecie también se rotulan: lo que cambia es a qué alcanza la talla", () => {
+  // Los dos rangos que el dataset trae y que una unión de dos valores habría tenido que aplastar
+  // contra «especie»: `Palinuridae` es una familia entera y `Trisopterus minutus capelanus` es una
+  // subespecie. Son una fila cada uno y son justo las que más falta hace no aplastar.
+  const familia = especie({
+    nombreBoe: "Palinuridae",
+    clave: "palinuridae-ab12cd",
+    worms: { ...especie().worms!, rango: "familia", aceptado: null },
+  });
+  const subespecie = especie({
+    nombreBoe: "Trisopterus minutus capelanus",
+    clave: "trisopterus-minutus-capelanus-ef34ab",
+    worms: { ...especie().worms!, rango: "subespecie", aceptado: null },
+  });
+  const filas = filasDeEspecies(catalogo([familia, subespecie]), FORMATO);
+  assert.deepEqual(
+    filas.map((fila) => fila.rango),
+    ["familia, no especie", "subespecie, no especie"],
+  );
 });
 
 // =================================================================================================
@@ -253,9 +292,33 @@ test("sin registros se publica el motivo, y NO un cero que se leería como ausen
 // La talla se toma prestada de `regulations`, no se vuelve a escribir
 // =================================================================================================
 
+test("no haber preguntado a OBIS no se publica como «nadie lo ha anotado»", () => {
+  // Los dos silencios no son el mismo y la fila no puede confundirlos. Cuando el nombre no resuelve
+  // en WoRMS no hay taxón por el que preguntar, así que **no se pregunta**: decir que nadie lo ha
+  // anotado en OBIS sería afirmar de la fuente algo que no hemos comprobado. Es una fila real,
+  // `Lophius piscatorius, L. Budegassa`, la celda que nombra dos especies.
+  const noSePregunto = especie({
+    worms: null,
+    sinResolver: "la celda nombra dos especies dentro de una sola fila",
+    caladeros: [
+      enCaladero({
+        presencia: null,
+        presenciaAusente: "sin taxón resuelto no se pregunta a OBIS",
+      }),
+    ],
+  });
+  const [fila] = filasDeEspecies(catalogo([noSePregunto]), FORMATO);
+  assert.equal(fila?.caladeros[0]?.presencia, "sin taxón resuelto no se pregunta a OBIS");
+  assert.equal(fila?.caladeros[0]?.hayCifra, false);
+  // Y no se publica NINGUNA de las dos frases de más: ni la cifra ni la de cero registros.
+  assert.ok(!(fila?.caladeros[0]?.presencia ?? "").includes(SIN_REGISTROS));
+});
+
 test("la talla se escribe igual que en la página de puerto, con la coma del sitio", () => {
   const conDecimal = especie({
-    caladeros: [enCaladero({ talla: { tipo: "longitud_cm", cm: 3.7 }, textoOriginal: "3,7" })],
+    caladeros: [
+      enCaladero({ tallas: [conTalla({ talla: { tipo: "longitud_cm", cm: 3.7 }, textoOriginal: "3,7" })] }),
+    ],
   });
   const [fila] = filasDeEspecies(catalogo([conDecimal]), FORMATO);
   assert.equal(fila?.caladeros[0]?.tallas[0]?.talla.texto, "3,7\u00a0cm");
@@ -266,7 +329,9 @@ test("la talla se escribe igual que en la página de puerto, con la coma del sit
 test("una talla que la norma no fija se escribe como frase y no como cifra", () => {
   const sinTalla = especie({
     caladeros: [
-      enCaladero({ talla: { tipo: "por_determinar", segunNota: "(*)" }, textoOriginal: "(*)" }),
+      enCaladero({
+        tallas: [conTalla({ talla: { tipo: "por_determinar", segunNota: "(*)" }, textoOriginal: "(*)" })],
+      }),
     ],
   });
   const [fila] = filasDeEspecies(catalogo([sinTalla]), FORMATO);
@@ -294,15 +359,18 @@ test("la cigala publica QUÉ mide cada una de sus dos cifras del mismo anexo", (
     caladeros: [
       enCaladero({
         nombreComun: "Cigala",
-        medida: "Longitud cefalotórax",
-        talla: { tipo: "longitud_cm", cm: 2 },
-        textoOriginal: "2",
-      }),
-      enCaladero({
-        nombreComun: "Cigala",
-        medida: "Longitud total",
-        talla: { tipo: "longitud_cm", cm: 7 },
-        textoOriginal: "7",
+        tallas: [
+          conTalla({
+            medida: "Longitud cefalotórax",
+            talla: { tipo: "longitud_cm", cm: 2 },
+            textoOriginal: "2",
+          }),
+          conTalla({
+            medida: "Longitud total",
+            talla: { tipo: "longitud_cm", cm: 7 },
+            textoOriginal: "7",
+          }),
+        ],
       }),
     ],
   });
@@ -355,7 +423,7 @@ test("el censo se cuenta del catálogo que se está pintando, no de un campo del
           rango: "genero",
           url: "https://www.marinespecies.org/aphia.php?p=taxdetails&id=138477",
           aceptado: null,
-          origen: "nuestro",
+          origen: "mareia",
           comoSeLlego: "se resuelve el género",
         },
         caladeros: [enCaladero(), enCaladero({ id: "canario", nombre: "Canario" })],

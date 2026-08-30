@@ -44,7 +44,7 @@ import {
 import type {
   CatalogoDeEspecies,
   EspecieDelCatalogo,
-  PresenciaObis,
+  EspecieEnCaladero,
   TaxonEnWorms,
 } from "./tipos.ts";
 
@@ -78,7 +78,7 @@ export type TaxonDeLaFila =
       readonly ficha: { readonly aphiaId: number; readonly url: string };
       /**
        * El nombre aceptado hoy y su propio `AphiaID`, **solo cuando difiere del de la norma**.
-       * **Se suma al del BOE; no lo sustituye.** Son 10 de las 86.
+       * **Se suma al del BOE; no lo sustituye.** Son 11 de las 86.
        */
       readonly aceptado: { readonly nombre: string; readonly aphiaId: number } | null;
       /** Cómo llegamos a este registro, cuando el mapeo es nuestro; `null` si lo resolvió WoRMS. */
@@ -106,9 +106,10 @@ export interface TallaDeLaFila {
  *
  * La forma no es indiferente y sale de lo que cada cosa es: el BOE puede fijarle a una especie más
  * de una talla en el mismo anexo —la cigala, por cefalotórax y por longitud total—, mientras que la
- * presencia es de la especie **en la caja de ese caladero** y no de cada medida. Con una talla por
- * entrada, la cigala publicaba dos veces el mismo recuento de OBIS en la misma fila, que es una
- * invitación a sumarlos: 950 y 950 no son 1.900 registros, son el mismo dato dos veces.
+ * presencia es de la especie **en el recorte de ese caladero** y no de cada medida. Con una talla
+ * por entrada, la cigala publicaría dos veces el mismo recuento de OBIS en la misma fila, que es
+ * una invitación a sumarlos: 950 y 950 no son 1.900 registros, son el mismo dato dos veces. Es la
+ * forma que ya tiene el dataset (`EspecieEnCaladero`), así que aquí no hay nada que agrupar.
  */
 export interface CaladeroDeLaFila {
   readonly id: string;
@@ -133,7 +134,7 @@ export interface FilaDeEspecie {
   /** Los nombres comunes con los que la norma la llama, sin repetir y en el orden de los anexos. */
   readonly nombresComunes: readonly string[];
   readonly taxon: TaxonDeLaFila;
-  /** «género, no especie» en las 15 filas que lo son; `null` en las demás. */
+  /** «género, no especie» y sus dos hermanos, en las 17 filas que no son una especie; `null` en las demás. */
   readonly rango: string | null;
   readonly caladeros: readonly CaladeroDeLaFila[];
   /** Los identificadores de sus caladeros, que es de lo que se agarra el filtro sin JavaScript. */
@@ -215,7 +216,7 @@ function filaDeEspecie(especie: EspecieDelCatalogo, formato: FormatoDelCatalogo)
         "talla; una fila sin ninguna no sale de la norma.",
     );
   }
-  const caladeros = agruparPorCaladero(especie, formato);
+  const caladeros = especie.caladeros.map((caladero) => caladeroDeLaFila(caladero, formato));
   return {
     clave: especie.clave,
     nombreBoe: especie.nombreBoe,
@@ -228,61 +229,34 @@ function filaDeEspecie(especie: EspecieDelCatalogo, formato: FormatoDelCatalogo)
 }
 
 /**
- * Las entradas del dataset agrupadas por caladero: varias tallas, una presencia.
+ * Un caladero de la fila, listo para pintarse: sus tallas escritas y su presencia **como frase**.
  *
- * **Levanta si dos entradas del mismo caladero traen presencias distintas**, y no es una manía de
- * validación: la presencia es de la especie en la caja de ese caladero, así que dos valores para lo
- * mismo significan que una de las dos consultas a OBIS mide otra cosa. Publicar cualquiera de las
- * dos sería elegir a cara o cruz cuál es la buena.
+ * Aquí no se agrupa nada —el dataset ya publica una entrada por especie y caladero, con sus tallas
+ * dentro— y la única decisión es cuál de los dos silencios se escribe cuando no hay cifra. Son dos y
+ * no significan lo mismo: que se le preguntara a OBIS y no tuviera ningún registro en el recorte
+ * (`SIN_REGISTROS`, que dice que nadie lo ha anotado ahí) y que **no se le preguntara**, porque el
+ * nombre no resuelve en WoRMS y no hay taxón por el que consultar. Escribir el primero en el segundo
+ * caso afirmaría sobre OBIS algo que no hemos comprobado, que es la misma clase de mentira que
+ * publicar un cero.
  */
-function agruparPorCaladero(
-  especie: EspecieDelCatalogo,
+function caladeroDeLaFila(
+  caladero: EspecieEnCaladero,
   formato: FormatoDelCatalogo,
-): readonly CaladeroDeLaFila[] {
-  const porCaladero = new Map<string, { nombre: string; presencia: PresenciaObis | null; tallas: TallaDeLaFila[] }>();
-  for (const entrada of especie.caladeros) {
-    const talla: TallaDeLaFila = {
+): CaladeroDeLaFila {
+  return {
+    id: caladero.id,
+    nombre: caladero.nombre,
+    tallas: caladero.tallas.map((entrada) => ({
       medida: entrada.medida,
       talla: textoDeTalla(entrada.talla, formato),
       literal: entrada.textoOriginal,
-    };
-    const visto = porCaladero.get(entrada.id);
-    if (visto === undefined) {
-      porCaladero.set(entrada.id, {
-        nombre: entrada.nombre,
-        presencia: entrada.presencia,
-        tallas: [talla],
-      });
-      continue;
-    }
-    if (!mismaPresencia(visto.presencia, entrada.presencia)) {
-      throw new CatalogoIncompleto(
-        especie.nombreBoe,
-        `el caladero ${entrada.id} trae dos presencias distintas para la misma especie. La ` +
-          `presencia es de la especie en la caja del caladero, no de cada talla.`,
-      );
-    }
-    visto.tallas.push(talla);
-  }
-  return [...porCaladero.entries()].map(([id, agrupado]) => ({
-    id,
-    nombre: agrupado.nombre,
-    tallas: agrupado.tallas,
+    })),
     presencia:
-      agrupado.presencia === null ? SIN_REGISTROS : presenciaEscrita(agrupado.presencia),
-    hayCifra: agrupado.presencia !== null,
-  }));
-}
-
-/** Dos presencias son la misma cuando lo son sus cuatro cifras, o cuando las dos son ausencia. */
-function mismaPresencia(una: PresenciaObis | null, otra: PresenciaObis | null): boolean {
-  if (una === null || otra === null) return una === otra;
-  return (
-    una.registros === otra.registros &&
-    una.datasets === otra.datasets &&
-    una.desde === otra.desde &&
-    una.hasta === otra.hasta
-  );
+      caladero.presencia === null
+        ? (caladero.presenciaAusente ?? SIN_REGISTROS)
+        : presenciaEscrita(caladero.presencia),
+    hayCifra: caladero.presencia !== null,
+  };
 }
 
 // =================================================================================================
@@ -330,13 +304,13 @@ export function censoDelCatalogo(catalogo: CatalogoDeEspecies): CensoDelCatalogo
   const especies = catalogo.especies;
   const caladeros = new Map<string, CaladeroDelCatalogo>();
   for (const especie of especies) {
-    // Una especie cuenta **una vez por caladero**, aunque el anexo le dedique dos filas: la cigala
-    // tiene dos —longitud del cefalotórax y longitud total— y contarlas por separado haría que la
-    // opción del filtro dijera 52 mientras el enlace de la página de puerto dice 51. Dos cuentas de
-    // lo mismo que no coinciden se leen como que una de las dos está mal, y lo estaría.
-    for (const id of new Set(especie.caladeros.map((caladero) => caladero.id))) {
-      const enEsteCaladero = especie.caladeros.find((caladero) => caladero.id === id);
-      if (enEsteCaladero === undefined) continue;
+    // Una especie cuenta **una vez por caladero**, y aquí eso es contar entradas porque el dataset
+    // publica una por especie y caladero, con sus tallas dentro. Cuando eran una entrada por talla,
+    // la cigala —cefalotórax y longitud total en el mismo anexo— se contaba dos veces y la opción
+    // del filtro decía 52 mientras el enlace de la página de puerto decía 51. Dos cuentas de lo
+    // mismo que no coinciden se leen como que una está mal, y lo estaría.
+    for (const enEsteCaladero of especie.caladeros) {
+      const id = enEsteCaladero.id;
       caladeros.set(id, {
         id,
         nombre: enEsteCaladero.nombre,
@@ -347,7 +321,7 @@ export function censoDelCatalogo(catalogo: CatalogoDeEspecies): CensoDelCatalogo
   return {
     especies: especies.length,
     resueltasTalCual: especies.filter((especie) => especie.worms?.origen === "worms").length,
-    porCorrespondenciaNuestra: especies.filter((especie) => especie.worms?.origen === "nuestro")
+    porCorrespondenciaNuestra: especies.filter((especie) => especie.worms?.origen === "mareia")
       .length,
     conAceptadoDistinto: especies.filter(
       (especie) => especie.worms !== null && especie.worms.aceptado !== null,

@@ -17,6 +17,22 @@
  * Aquí no se resuelve ninguna taxonomía ni se consulta ninguna API: quien preguntó a WoRMS y a OBIS
  * fue el pipeline. Este fichero lee hechos ya derivados y **levanta nombrando el campo** cuando no
  * cuadran: una fila que se publica a medias es una fila que dice algo que no sabemos.
+ *
+ * **Y es literalmente un adaptador**: el dataset publicado y lo que el módulo consume no tienen la
+ * misma forma, y no la tienen a propósito. `especies/v1` lleva bastante más de lo que se pinta —la
+ * cita que WoRMS pide por cada registro, la autoridad de cada nombre, el WKT del recorte, la
+ * procedencia por cifra que fija T-19— porque es un dato publicable por sí mismo; `tipos.ts` es lo
+ * mínimo con lo que se escribe una fila sin mentir. La traducción entre los dos vive aquí, y tiene
+ * **una regla**:
+ *
+ * > **Se renombran campos; no se reescriben valores.**
+ *
+ * `taxon` se lee como `worms` porque cómo se llame el campo es cosa nuestra. En cambio el origen de
+ * una correspondencia llega como `"mareia"` y se publica como `"mareia"`, sin traducirlo a un
+ * «nuestro» más cómodo: es una **firma de procedencia**, y un adaptador que reescribe firmas acaba
+ * publicando una que no estampó nadie. La única conversión que sí cambia un valor está acotada y
+ * dicha donde ocurre: **cero registros de OBIS no es una cifra**, es la ausencia que `SIN_REGISTROS`
+ * explica (ver `leerPresencia`).
  */
 
 import { readFile } from "node:fs/promises";
@@ -34,6 +50,7 @@ import type {
   OrigenDeLaCorrespondencia,
   PresenciaObis,
   RangoDelNombre,
+  TallaDelAnexo,
   TaxonEnWorms,
 } from "@mareia/module-species";
 import type { Talla } from "@mareia/module-regulations";
@@ -51,11 +68,14 @@ const SCHEMA = "especies/v1";
 
 const FICHERO_CATALOGO = `${DATA_DIR}/especies/catalogo.json`;
 
-/** Los dos rangos que la norma nombra. Fuera de aquí, el fichero no se publica. */
-const RANGOS: readonly RangoDelNombre[] = ["especie", "genero"];
+/**
+ * Los rangos que la norma nombra, **medidos sobre el dataset**: 68 especies, 15 géneros, la familia
+ * `Palinuridae` y la subespecie `Trisopterus minutus capelanus`. Fuera de aquí, no se publica.
+ */
+const RANGOS: readonly RangoDelNombre[] = ["especie", "genero", "familia", "subespecie"];
 
 /** Cómo se pudo llegar a un registro de WoRMS. Un tercer origen sería un origen sin dueño. */
-const ORIGENES: readonly OrigenDeLaCorrespondencia[] = ["worms", "nuestro"];
+const ORIGENES: readonly OrigenDeLaCorrespondencia[] = ["worms", "mareia"];
 
 /** El dataset no tiene la forma esperada. El mensaje señala fichero y campo. */
 class CatalogoMalFormado extends Error {
@@ -123,17 +143,17 @@ function anioONulo(fuente: Record<string, unknown>, clave: string, ruta: string)
 }
 
 /**
- * Una cuenta de OBIS. **Entera y mayor que cero**, y las dos condiciones son del dominio: medio
- * registro no existe, y «cero registros» no se publica como cifra sino como la frase de
- * `SIN_REGISTROS` (`presencia: null`). Un `0` aquí sería un número que se lee como una medida de
- * ausencia, que es justo lo que OBIS no puede afirmar.
+ * Una cuenta de OBIS que ya se sabe que hay que publicar. **Entera y mayor que cero**, y las dos
+ * condiciones son del dominio: medio registro no existe, y un cero no llega hasta aquí porque
+ * `leerPresencia` lo ha convertido antes en la ausencia que es. Si llegara —un `0` conjuntos de
+ * datos junto a 12 registros, por ejemplo— sería una cifra que se contradice a sí misma.
  */
 function cuenta(fuente: Record<string, unknown>, clave: string, ruta: string): number {
   const valor = magnitud(fuente, clave, ruta);
   if (!Number.isInteger(valor) || valor <= 0) {
     throw new CatalogoMalFormado(
-      `${ruta}.${clave} es ${valor} y debería ser un entero mayor que cero. Sin registros, la ` +
-        `presencia se publica como ausencia con motivo (presencia: null), no como un cero.`,
+      `${ruta}.${clave} es ${valor} y debería ser un entero mayor que cero: una presencia que se ` +
+        `publica es una presencia con registros y con conjuntos de datos de los que salen.`,
     );
   }
   return valor;
@@ -181,27 +201,67 @@ function leerTalla(valor: unknown, ruta: string): Talla {
   }
 }
 
+/**
+ * Lo que OBIS registra, o **la ausencia que es un cero**.
+ *
+ * Aquí está la única conversión del adaptador que cambia un valor y no un nombre, y está acotada a
+ * propósito: el dataset publica los recuentos tal y como los devolvió OBIS —con su recorte y su
+ * frase de sesgo dentro del mismo objeto—, **incluidos los ceros**, que son 9 de los 115 pares
+ * especie-caladero (`Maja squinado` en el Cantábrico, `Clupea harengus`…). Un cero no es una cifra
+ * que publicar: publicado como número se lee como «aquí no hay esa especie», que es exactamente lo
+ * que OBIS no puede afirmar. Así que se devuelve `null`, y el módulo escribe la frase que sí dice
+ * lo que sabemos: que nadie lo ha anotado ahí (`SIN_REGISTROS`).
+ *
+ * No se pierde nada por el camino: los dos silencios siguen siendo distinguibles, porque el de «no
+ * se preguntó» viaja aparte en `presenciaAusente`.
+ */
 function leerPresencia(valor: unknown, ruta: string): PresenciaObis | null {
   if (valor === null || valor === undefined) return null;
   const crudo = objeto(valor, ruta);
+  if (magnitud(crudo, "registros", ruta) === 0) return null;
   return {
     registros: cuenta(crudo, "registros", ruta),
     datasets: cuenta(crudo, "datasets", ruta),
-    desde: anioONulo(crudo, "desde", ruta),
-    hasta: anioONulo(crudo, "hasta", ruta),
+    desde: anioONulo(crudo, "desdeAnio", ruta),
+    hasta: anioONulo(crudo, "hastaAnio", ruta),
   };
 }
 
+/** Una de las tallas que un anexo le fija a la especie: la cifra, qué mide y el literal del BOE. */
+function leerTallaDelAnexo(valor: unknown, ruta: string): TallaDelAnexo {
+  const crudo = objeto(valor, ruta);
+  return {
+    medida: textoONulo(crudo, "medida", ruta),
+    talla: leerTalla(crudo["talla"], `${ruta}.talla`),
+    textoOriginal: texto(crudo, "textoOriginal", ruta),
+  };
+}
+
+/**
+ * Una especie en un caladero: sus tallas y su presencia.
+ *
+ * **Sin tallas no hay entrada**, y no es una comprobación de forma: el catálogo son exactamente las
+ * especies a las que la norma les fija una talla, así que un caladero que aparece sin ninguna es un
+ * caladero que se ha metido en la fila sin regularla.
+ */
 function leerCaladeroDeEspecie(valor: unknown, ruta: string): EspecieEnCaladero {
   const crudo = objeto(valor, ruta);
+  const tallas = lista(crudo, "tallas", ruta).map((talla, i) =>
+    leerTallaDelAnexo(talla, `${ruta}.tallas[${i}]`),
+  );
+  if (tallas.length === 0) {
+    throw new CatalogoMalFormado(
+      `${ruta}.tallas está vacío: un caladero está en la fila porque le fija una talla a esa ` +
+        `especie, así que sin ninguna no tiene por qué estar`,
+    );
+  }
   return {
     id: texto(crudo, "id", ruta),
     nombre: texto(crudo, "nombre", ruta),
     nombreComun: texto(crudo, "nombreComun", ruta),
-    medida: textoONulo(crudo, "medida", ruta),
-    talla: leerTalla(crudo["talla"], `${ruta}.talla`),
-    textoOriginal: texto(crudo, "textoOriginal", ruta),
+    tallas,
     presencia: leerPresencia(crudo["presencia"], `${ruta}.presencia`),
+    presenciaAusente: textoONulo(crudo, "presenciaAusente", ruta),
   };
 }
 
@@ -210,24 +270,66 @@ function leerNombreEnWorms(valor: unknown, ruta: string): NombreEnWorms {
   return { aphiaId: magnitud(crudo, "aphiaId", ruta), nombre: texto(crudo, "nombre", ruta) };
 }
 
-function leerWorms(valor: unknown, ruta: string): TaxonEnWorms | null {
-  if (valor === null || valor === undefined) return null;
+/**
+ * El taxón, cuando resuelve; `null` cuando no. Es `$.especies[i].taxon` leído en dos campos.
+ *
+ * El dataset lo cuenta con un discriminante (`resuelto`) y el módulo con un nulo más su motivo. Son
+ * dos formas de decir lo mismo y ninguna es mejor: lo que no vale es que aquí se mezclen, así que
+ * este par de funciones es toda la traducción y **fuera de ellas no hay nadie que mire `resuelto`**.
+ *
+ * `aceptado` sí se interpreta, y se dice por qué: el dataset publica el nombre aceptado **siempre**
+ * que WoRMS lo dé, también en las 74 filas en que es el mismo nombre de la norma. Lo que la página
+ * escribe sale de si hay un nombre **distinto** que añadir, así que aquí se deja en `null` cuando
+ * coincide. Repetir el binomio en esas 74 filas perdería las 11 que de verdad difieren.
+ */
+function leerTaxon(valor: unknown, correspondencia: Correspondencia, ruta: string): TaxonEnWorms | null {
   const crudo = objeto(valor, ruta);
+  const resuelto = crudo["resuelto"];
+  if (typeof resuelto !== "boolean") {
+    throw new CatalogoMalFormado(`${ruta}.resuelto debería ser true o false`);
+  }
+  if (!resuelto) return null;
+  const nombre = texto(crudo, "nombreCientifico", ruta);
   const aceptado = crudo["aceptado"];
+  const nombreAceptado =
+    aceptado === null || aceptado === undefined
+      ? null
+      : leerNombreEnWorms(aceptado, `${ruta}.aceptado`);
   return {
     aphiaId: magnitud(crudo, "aphiaId", ruta),
-    nombre: texto(crudo, "nombre", ruta),
+    nombre,
     // El estado se lee tal cual y no se valida contra ninguna lista: es una cita del vocabulario de
     // WoRMS y cerrarlo aquí rompería el build el día que la fuente use uno nuevo (ver `tipos.ts`).
     estado: texto(crudo, "estado", ruta),
     rango: unaDe(texto(crudo, "rango", ruta), RANGOS, `${ruta}.rango`),
     url: texto(crudo, "url", ruta),
-    aceptado:
-      aceptado === null || aceptado === undefined
-        ? null
-        : leerNombreEnWorms(aceptado, `${ruta}.aceptado`),
+    aceptado: nombreAceptado?.nombre === nombre ? null : nombreAceptado,
+    origen: correspondencia.origen,
+    comoSeLlego: correspondencia.motivo,
+  };
+}
+
+/** De quién es la decisión de preguntarle a WoRMS ese nombre, y por qué. */
+interface Correspondencia {
+  readonly origen: OrigenDeLaCorrespondencia;
+  readonly motivo: string | null;
+}
+
+/**
+ * La correspondencia, que vive **fuera** del taxón en el dataset y **dentro** en el contrato.
+ *
+ * Está separada allí porque hay una fila a la que se decidió no preguntarle nada —`Lophius
+ * piscatorius, L. Budegassa`, dos especies en una celda— y esa decisión también tiene dueño y
+ * motivo aunque no haya taxón del que colgarlos. Aquí se junta con el taxón porque es donde la
+ * página la lee: al lado del nombre al que llevó.
+ *
+ * El `origen` **no se traduce**: lo que el dataset firma como `mareia` se publica como `mareia`.
+ */
+function leerCorrespondencia(valor: unknown, ruta: string): Correspondencia {
+  const crudo = objeto(valor, ruta);
+  return {
     origen: unaDe(texto(crudo, "origen", ruta), ORIGENES, `${ruta}.origen`),
-    comoSeLlego: textoONulo(crudo, "comoSeLlego", ruta),
+    motivo: textoONulo(crudo, "motivo", ruta),
   };
 }
 
@@ -237,24 +339,31 @@ function leerWorms(valor: unknown, ruta: string): TaxonEnWorms | null {
  * Las dos comprobaciones de coherencia que hay aquí son las que impiden publicar una fila que
  * afirma algo que no sabemos, y **fallan el build en vez de degradar**: una especie que no resuelve
  * y no dice por qué (un hueco mudo no se distingue de un fallo nuestro) y una que dice que no
- * resuelve trayendo a la vez el registro que lo desmiente. La tercera —correspondencia nuestra sin
- * motivo— la hace el módulo, en `filasDeEspecies`, porque es criterio de publicación y no de forma.
+ * resuelve trayendo a la vez el registro que lo desmiente —un `AphiaID` colgando de un taxón que se
+ * declara sin resolver—. La tercera —correspondencia nuestra sin motivo— la hace el módulo, en
+ * `filasDeEspecies`, porque es criterio de publicación y no de forma.
  */
 function leerEspecie(valor: unknown, indice: number): EspecieDelCatalogo {
   const ruta = `$.especies[${indice}]`;
   const crudo = objeto(valor, ruta);
   const nombreBoe = texto(crudo, "nombreBoe", ruta);
-  const worms = leerWorms(crudo["worms"], `${ruta}.worms`);
-  const sinResolver = textoONulo(crudo, "sinResolver", ruta);
+  const taxon = objeto(crudo["taxon"], `${ruta}.taxon`);
+  const worms = leerTaxon(
+    taxon,
+    leerCorrespondencia(crudo["correspondencia"], `${ruta}.correspondencia`),
+    `${ruta}.taxon`,
+  );
+  const sinResolver = worms === null ? textoONulo(taxon, "motivo", `${ruta}.taxon`) : null;
   if (worms === null && sinResolver === null) {
     throw new CatalogoMalFormado(
       `${ruta} (${nombreBoe}) no trae taxón de WoRMS y tampoco el motivo. Una ausencia sin motivo ` +
         `se publica como un hueco del catálogo y no como lo que es.`,
     );
   }
-  if (worms !== null && sinResolver !== null) {
+  if (worms === null && taxon["aphiaId"] !== undefined) {
     throw new CatalogoMalFormado(
-      `${ruta} (${nombreBoe}) trae taxón de WoRMS y a la vez un motivo de que no resuelve`,
+      `${ruta} (${nombreBoe}) dice no resolver y trae el AphiaID ${String(taxon["aphiaId"])}, que ` +
+        `es el registro que lo desmiente`,
     );
   }
   const caladeros = lista(crudo, "caladeros", ruta).map((caladero, i) =>
@@ -287,11 +396,11 @@ function leerFuentes(valor: unknown): FuentesDelCatalogo {
   };
 }
 
-function leerCaja(valor: unknown, indice: number): CajaDelCaladero {
-  const ruta = `$.criterio.cajas[${indice}]`;
+function leerCaja(valor: unknown, caladero: string, ruta: string): CajaDelCaladero {
   const crudo = objeto(valor, ruta);
   return {
-    caladero: texto(crudo, "caladero", ruta),
+    caladero,
+    nombre: texto(crudo, "nombre", ruta),
     latMin: magnitud(crudo, "latMin", ruta),
     latMax: magnitud(crudo, "latMax", ruta),
     lonMin: magnitud(crudo, "lonMin", ruta),
@@ -300,19 +409,36 @@ function leerCaja(valor: unknown, indice: number): CajaDelCaladero {
 }
 
 /**
- * El criterio, y **sin cajas no hay catálogo**.
+ * Con qué se consultó OBIS, y **sin eso no hay catálogo**.
  *
- * Es la única parte del criterio que se exige, porque es la que hace interpretable cada cifra de
+ * Es la única parte del recorte que se exige, porque es la que hace interpretable cada cifra de
  * presencia: «12 registros en Galicia» no significa nada si no se sabe qué rectángulo es Galicia. Si
- * el dataset dejara de traerlas, la página seguiría pintando números perfectamente legibles y
+ * el dataset dejara de traerla, la página seguiría pintando números perfectamente legibles y
  * perfectamente huecos.
+ *
+ * El dataset la publica como `recortes`, **un objeto indexado por caladero** y con más cosas dentro
+ * de las que aquí se leen (el WKT con el que se consultó, la advertencia de qué mar sobra en cada
+ * rectángulo). Se aplana a una lista con el caladero metido en cada caja, que es como la pinta la
+ * página; el caladero viaja dentro y no como agrupación porque **hay caladeros con varios
+ * rectángulos** —el del Cantábrico, noroeste y golfo de Cádiz tiene tres— y una lista de pares no
+ * obliga a la plantilla a saber eso.
  */
 function leerCriterio(valor: unknown): CriterioDelCatalogo {
-  const crudo = objeto(valor, "$.criterio");
-  const cajas = lista(crudo, "cajas", "$.criterio").map(leerCaja);
+  const recortes = objeto(valor, "$.recortes");
+  const cajas = Object.entries(recortes).flatMap(([caladero, recorte]) => {
+    const ruta = `$.recortes.${caladero}`;
+    const propias = lista(objeto(recorte, ruta), "cajas", ruta);
+    if (propias.length === 0) {
+      throw new CatalogoMalFormado(
+        `${ruta}.cajas está vacío: el caladero ${caladero} publica cifras de presencia y ningún ` +
+          `rectángulo con el que se hayan sacado`,
+      );
+    }
+    return propias.map((caja, i) => leerCaja(caja, caladero, `${ruta}.cajas[${i}]`));
+  });
   if (cajas.length === 0) {
     throw new CatalogoMalFormado(
-      `$.criterio.cajas está vacío: sin la caja con la que se consultó OBIS, ninguna cifra de ` +
+      `$.recortes está vacío: sin el rectángulo con el que se consultó OBIS, ninguna cifra de ` +
         `presencia se puede interpretar ni repetir`,
     );
   }
@@ -349,7 +475,7 @@ export function leerCatalogo(crudo: unknown): CatalogoDeEspecies {
   return {
     schema,
     fuentes: leerFuentes(documento["fuentes"]),
-    criterio: leerCriterio(documento["criterio"]),
+    criterio: leerCriterio(documento["recortes"]),
     especies,
   };
 }

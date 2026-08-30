@@ -80,7 +80,7 @@ export const COLUMNA_PRESENCIA = "Registros en OBIS";
 /**
  * Cómo se rotula el enlace a la ficha de WoRMS.
  *
- * Dice **de qué nombre es la ficha**, y no es una precisión gratuita: en las 10 filas en las que
+ * Dice **de qué nombre es la ficha**, y no es una precisión gratuita: en las 11 filas en las que
  * hay dos nombres y dos identificadores, un «AphiaID 127160» a secas no diría a cuál de los dos
  * pertenece, y quien fuera a comprobarlo abriría el que no es.
  */
@@ -97,7 +97,7 @@ export function aphiaDelAceptado(aphiaId: number): string {
  * Lo que se escribe en la columna del taxón cuando WoRMS acepta el nombre del BOE tal cual.
  *
  * No se deja en blanco ni se repite el binomio: una celda vacía se lee como «esto no lo hemos
- * mirado», y repetirlo haría que las 10 filas en las que sí difiere se perdieran entre 54 filas
+ * mirado», y repetirlo haría que las 11 filas en las que sí difiere se perdieran entre las 74
  * idénticas. Se dice el hecho, que es que aquí no hay distancia entre la ley y la ciencia.
  */
 export const MISMO_NOMBRE = "WoRMS acepta el nombre de la norma.";
@@ -120,11 +120,31 @@ export function remiteA(estado: string, aceptado: string): string {
 /**
  * Cómo se rotula el rango de una fila.
  *
- * Solo se rotula el **género**: es el caso que cambia lo que la fila significa y son 15 de 86. Un
- * rótulo «especie» en las otras 71 sería ruido que además le restaría fuerza a éste.
+ * **Se rotula todo lo que no es una especie**, que son 17 de las 86: 15 géneros, una familia
+ * (`Palinuridae`, las langostas) y una subespecie (`Trisopterus minutus capelanus`). Son los casos
+ * que cambian lo que la fila significa —a qué alcance se aplica la talla mínima— y por eso son los
+ * que llevan rótulo; un «especie» en las otras 68 sería ruido que además le restaría fuerza a
+ * éstos.
+ *
+ * Los tres rótulos dicen «no especie» y no sólo el rango, porque un rango a secas se lee como una
+ * precisión taxonómica y esto no lo es: es el alcance de una norma. El `never` del final obliga a
+ * decidir qué se escribe el día que el dataset traiga un rango nuevo, en vez de dejar la fila muda.
  */
 export function rangoEscrito(rango: RangoDelNombre): string | null {
-  return rango === "genero" ? "género, no especie" : null;
+  switch (rango) {
+    case "especie":
+      return null;
+    case "genero":
+      return "género, no especie";
+    case "familia":
+      return "familia, no especie";
+    case "subespecie":
+      return "subespecie, no especie";
+    default: {
+      const nunca: never = rango;
+      return nunca;
+    }
+  }
 }
 
 /**
@@ -137,7 +157,9 @@ export function rangoEscrito(rango: RangoDelNombre): string | null {
 export const EL_GENERO_APLICA_A_TODO_EL_GENERO =
   "Cuando la norma escribe el género seguido de «spp» está regulando el género entero: la talla " +
   "mínima se aplica a todas sus especies. Aquí no se le elige ninguna, porque eso sería " +
-  "estrecharle a la norma un alcance que la norma no estrecha.";
+  "estrecharle a la norma un alcance que la norma no estrecha. Por eso lleva rótulo todo lo que " +
+  "no es una especie: además de los géneros, la norma nombra una familia entera (Palinuridae) y " +
+  "una subespecie, y en los tres casos lo que cambia es a qué alcanza la talla.";
 
 /**
  * Cómo se publica una correspondencia que no viene de WoRMS: **con dueño**.
@@ -245,9 +267,10 @@ export const SIN_REGISTROS =
  * dato es maquillaje.
  */
 export const LA_CAJA_NO_ES_LA_COSTA =
-  "La consulta a OBIS se hace sobre una caja rectangular por caladero, y una caja no es una costa: " +
-  "mete mar de más y no sigue el contorno de ninguna demarcación. Las coordenadas de cada caja " +
-  "están publicadas aquí abajo para que se pueda repetir la consulta.";
+  "La consulta a OBIS se hace sobre rectángulos —uno o varios por caladero, porque hay caladeros " +
+  "que no caben en uno—, y un rectángulo no es una costa: mete mar de más y no sigue el contorno " +
+  "de ninguna demarcación. Las coordenadas de todos están publicadas aquí abajo para que se pueda " +
+  "repetir la consulta.";
 
 /** Rótulo del bloque que publica las cajas envolventes. */
 export const ROTULO_CAJAS = "Con qué caja se ha consultado cada caladero";

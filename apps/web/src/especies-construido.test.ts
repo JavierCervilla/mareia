@@ -229,11 +229,28 @@ test("E4 · la explicación larga va antes de la primera cifra, y el cero no se 
   // Y el cero no existe como cifra: sin registros se publica el motivo.
   assert.ok(!/\b0 registros\b/u.test(leido), "se publica un «0 registros», que se lee como ausencia medida");
   const catalogo = await cargarCatalogoDeEspecies();
-  const vacios = catalogo.especies.flatMap((especie) =>
-    especie.caladeros.filter((caladero) => caladero.presencia === null),
+  // Los dos silencios se cuentan aparte porque no dicen lo mismo, y sólo el primero lleva la frase
+  // de `SIN_REGISTROS`: al segundo no se le preguntó a OBIS, así que decir que nadie lo ha anotado
+  // ahí sería afirmar de la fuente algo que no hemos comprobado.
+  const sinRegistros = catalogo.especies.flatMap((especie) =>
+    especie.caladeros.filter(
+      (caladero) => caladero.presencia === null && caladero.presenciaAusente === null,
+    ),
   );
-  if (vacios.length > 0) assert.ok(leido.includes(textoDe(SIN_REGISTROS)));
-  t.diagnostic(`${vacios.length} pares especie-caladero sin ningún registro en OBIS`);
+  const sinPreguntar = catalogo.especies.flatMap((especie) =>
+    especie.caladeros.filter((caladero) => caladero.presenciaAusente !== null),
+  );
+  if (sinRegistros.length > 0) assert.ok(leido.includes(textoDe(SIN_REGISTROS)));
+  for (const caladero of sinPreguntar) {
+    assert.ok(
+      leido.includes(textoDe(caladero.presenciaAusente ?? "")),
+      "una consulta que no se hizo se publica con su motivo, no con el de cero registros",
+    );
+  }
+  t.diagnostic(
+    `${sinRegistros.length} pares especie-caladero sin ningún registro en OBIS y ` +
+      `${sinPreguntar.length} a los que no se les preguntó`,
+  );
 });
 
 // =================================================================================================
