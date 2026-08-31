@@ -315,3 +315,76 @@ export async function cargarResumenDeAreas(): Promise<{
   const { fuente, criterio, resumen } = await cargarDerivado();
   return { fuente, criterio, resumen };
 }
+
+/**
+ * Lo que el derivado de T-21 sabe de un caladero entero: **recuentos de puertos y de espacios**.
+ *
+ * No lleva el nombre del caladero a propósito. Ese nombre lo escribe el catálogo de especies —es de
+ * su dataset, no del de áreas— y ponerlo aquí sería una segunda copia que puede discrepar de la que
+ * se pinta tres líneas más abajo en la misma página.
+ */
+export interface EspaciosProtegidosDelCaladero {
+  /** Puertos de ese caladero que publica el portal. */
+  readonly puertos: number;
+  /** Cuántos de ellos tienen algún espacio protegido a menos del radio. */
+  readonly conEspacio: number;
+  /** Cuántos espacios **distintos** son. No es el número de relaciones. */
+  readonly espacios: number;
+  /** El radio con el que se miró, declarado por el propio derivado. */
+  readonly radioKm: number;
+}
+
+/**
+ * El derivado agrupado **por caladero**: cuántos puertos de cada uno tienen algún espacio protegido
+ * cerca, y cuántos espacios distintos son.
+ *
+ * Existe para la ficha de especie de T-23, y su forma es la de una limitación de la fuente: **RAMPE
+ * no publica nada por especie**. El único vínculo que se puede sostener entre una especie y un
+ * espacio protegido es el caladero donde se le fija la talla, así que lo que se cuenta son **puertos
+ * y espacios**, no especies, y ningún campo de aquí se puede leer como que a una especie le afecte
+ * el régimen de un espacio. La frase que lo dice con esas palabras vive en el código del módulo
+ * (`RAMPE_NO_HABLA_DE_ESPECIES`).
+ *
+ * El reparto puerto→caladero **se le pide a quien ya lo sabe** (`cargarCaladeroDeCadaPuerto`, que lo
+ * lee de `ports.json`) en vez de releer el catálogo aquí: un segundo camino al mismo dato es un
+ * camino que puede discrepar, y discrepar aquí significa contarle a una especie los espacios de otro
+ * caladero.
+ *
+ * **Levanta si un puerto del catálogo no está en el derivado.** Es la misma decisión que toma
+ * `cargarAreasDelPuerto` y por el mismo motivo: contar como «sin espacios» un puerto sobre el que
+ * nadie ha mirado rebajaría la cifra de una advertencia.
+ */
+export async function cargarEspaciosPorCaladero(
+  caladeroDeCadaPuerto: ReadonlyMap<string, string>,
+): Promise<ReadonlyMap<string, EspaciosProtegidosDelCaladero>> {
+  const { criterio, porPuerto } = await cargarDerivado();
+  const acumulado = new Map<string, { puertos: number; conEspacio: number; codigos: Set<string> }>();
+  for (const [slug, caladero] of caladeroDeCadaPuerto) {
+    const puerto = porPuerto.get(slug);
+    if (puerto === undefined) {
+      throw new Error(
+        `El puerto ${slug} no está en ${FICHERO_AREAS}. No es lo mismo que no tener espacios ` +
+          `cerca: los que no tienen ninguno están en el fichero con su motivo, y contarlo como ` +
+          `«sin espacios» rebajaría la cifra que publica la ficha de especie.`,
+      );
+    }
+    const cuenta = acumulado.get(caladero) ?? { puertos: 0, conEspacio: 0, codigos: new Set() };
+    cuenta.puertos += 1;
+    if (puerto.areas.length > 0) cuenta.conEspacio += 1;
+    for (const area of puerto.areas) cuenta.codigos.add(area.codigo);
+    acumulado.set(caladero, cuenta);
+  }
+  return new Map(
+    [...acumulado].map(([caladero, cuenta]) => [
+      caladero,
+      {
+        puertos: cuenta.puertos,
+        conEspacio: cuenta.conEspacio,
+        // Espacios DISTINTOS y no relaciones: un espacio a menos de 30 km de doce puertos es uno,
+        // no doce, y sumar relaciones publicaría una cifra que no cuenta lo que dice contar.
+        espacios: cuenta.codigos.size,
+        radioKm: criterio.radioKm,
+      },
+    ]),
+  );
+}

@@ -23,12 +23,14 @@
 
 import { readFile } from "node:fs/promises";
 
+import { nombreSecundario, ROTULO_NOMBRE_LOCAL } from "@mareia/module-regulations";
 import type {
   Caladero,
   ComunidadDelPuerto,
   EspecieConTalla,
   FormatoDeTallas,
   FuenteNormativa,
+  NombreSecundario,
   Normativa,
   NotaDeCaladero,
   Procedencia,
@@ -288,6 +290,56 @@ export const cargarNotasDeLosAnexos = unaVez(
   },
 );
 
+/**
+ * El nombre local de cada especie **en cada anexo que lo escriba**, indexado por caladero y por
+ * binomio: el nombre, o el motivo por el que la norma deja la celda vacía.
+ *
+ * Existe por lo mismo que `cargarNotasDeLosAnexos`, y con el mismo precedente: hay una **segunda**
+ * superficie que publica un hecho de la norma —la ficha de especie de T-23, que lo pone en su
+ * retícula fija— y hornearlo en `especies/v1` sería una segunda copia del mismo texto legal. Así que
+ * el texto sigue viviendo en un solo derivado y la frontera lo resuelve para las dos superficies.
+ *
+ * **Se indexa por caladero y no se codifica «canario» aquí.** Hoy el nombre local sólo lo escribe el
+ * Anexo III, que es el del caladero canario; escribir ese identificador en el código lo convertiría
+ * en una suposición nuestra sobre la norma en vez de en una lectura del dataset, y el día que otro
+ * anexo traiga nombres locales el mapa los trae solo. Sólo entran las filas que declaran el nombre
+ * **o** su motivo: un anexo sin la columna no aparece en el mapa, que es cómo se distingue «este
+ * anexo no da nombres locales» de «esta fila no lo trae».
+ *
+ * La clave es el **binomio** porque es lo que comparten este derivado y el catálogo de especies: el
+ * nombre común no vale (el mismo anexo escribe «Lisa» y «Lisas») y la clave del catálogo no existe
+ * aquí. Las filas del anexo sin binomio se quedan fuera, que es lo correcto: no son especies del
+ * catálogo.
+ */
+export const cargarNombresLocales = unaVez(
+  async (): Promise<ReadonlyMap<string, ReadonlyMap<string, NombreSecundario>>> => {
+    const normativa = await cargarNormativa();
+    return new Map(
+      normativa.caladeros.map((caladero) => [
+        caladero.id,
+        new Map(
+          caladero.especies
+            .filter(
+              (especie) =>
+                especie.nombreCientifico !== undefined &&
+                (especie.nombreLocalCanario !== undefined ||
+                  especie.nombreLocalCanarioAusente !== undefined),
+            )
+            .map((especie) => [
+              especie.nombreCientifico ?? "",
+              nombreSecundario(
+                especie.nombreLocalCanario,
+                especie.nombreLocalCanarioAusente,
+                ROTULO_NOMBRE_LOCAL,
+                especie.nombreComun,
+              ),
+            ]),
+        ),
+      ]),
+    );
+  },
+);
+
 /** Lo que el catálogo dice de un puerto y esta sección necesita: qué tabla le toca y dónde está. */
 interface EncajeDelPuerto {
   readonly caladero: string;
@@ -331,6 +383,19 @@ const cargarEncajeDePuertos = unaVez(async (): Promise<ReadonlyMap<string, Encaj
 // =================================================================================================
 // Lo que consume la sección
 // =================================================================================================
+
+/**
+ * El caladero que declara cada puerto del catálogo, indexado por slug.
+ *
+ * **Es el mismo mapa que usa `cargarTablaDeTallas`**, expuesto para que nadie vuelva a leer
+ * `ports.json` por su cuenta: lo necesita el cruce de la ficha de especie con el derivado de
+ * espacios protegidos (T-23), y un segundo lector del mismo campo es un camino que puede discrepar
+ * —y discrepar aquí significa contarle a una especie los espacios de otro caladero—.
+ */
+export async function cargarCaladeroDeCadaPuerto(): Promise<ReadonlyMap<string, string>> {
+  const encaje = await cargarEncajeDePuertos();
+  return new Map([...encaje].map(([slug, puerto]) => [slug, puerto.caladero]));
+}
 
 /** La norma y el caladero que le toca a un puerto: todo lo que la sección necesita pintar. */
 export interface TablaDelPuerto {

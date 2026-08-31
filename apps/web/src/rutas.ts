@@ -32,6 +32,24 @@ export const RUTA_MAREAS = "/mareas/";
  */
 export const RUTA_ESPECIES = "/pesca/especies/";
 
+/**
+ * La ficha de una especie: `/pesca/especies/<clave>/` (T-23).
+ *
+ * **El slug es la `clave` del catálogo de T-20 y no se recalcula aquí.** Ya es única y estable, y lo
+ * que la hace única es lo que importa: el BOE escribe `Thunnus thynnus` en los Anexos I y II y
+ * `Thunnus Thynnus` en el III, que son **dos especies de la norma y dos fichas**; cualquier slug en
+ * minúsculas las colapsaría en una y una de las dos tallas legales desaparecería de la URL sin que
+ * nada se pusiera rojo. Recalcularla aquí sería un segundo camino al mismo identificador, y un
+ * segundo camino puede discrepar.
+ *
+ * Cuelga del catálogo, así que su padre **sí** se puede recortar en la barra de direcciones: subir
+ * un nivel desde una ficha lleva a la lista de las 86. El que no se puede recortar sigue siendo
+ * `/pesca/`, y eso está dicho arriba.
+ */
+export function rutaFichaDeEspecie(clave: string): string {
+  return `${RUTA_ESPECIES}${clave}/`;
+}
+
 export function rutaRegion(regionSlug: string): string {
   return `${RUTA_MAREAS}${regionSlug}/`;
 }

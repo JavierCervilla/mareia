@@ -509,3 +509,335 @@ export const SIN_RED_NO_ABRE =
 
 /** Rótulo del pie de fuentes, igual que en las otras secciones de módulo. */
 export const ROTULO_FUENTES = "Fuentes de esta sección";
+
+// =================================================================================================
+// LA FICHA DE UNA ESPECIE (T-23) · la retícula fija y sus huecos rotulados
+// =================================================================================================
+//
+// **La regla que gobierna todo lo que sigue.** Un pokédex ayuda a la honradez porque tiene siempre
+// los mismos campos: un campo vacío es **visible** y dice «esto no lo sabemos». Un párrafo libre
+// esconde el hueco, porque no se ve lo que no se escribió. Por eso la retícula es fija —las nueve
+// filas se publican en las 86 fichas, en este orden— y **ningún hueco se deja en blanco ni se omite
+// la fila**: cada uno publica su motivo.
+//
+// Y estorba si se le deja hacer lo que hacen los juegos —rellenar y puntuar—, así que aquí no hay
+// ninguna magnitud inventada: ni barras, ni estrellas, ni rareza, ni dificultad, ni puntos, ni
+// «mejor cebo», ni «temporada ideal», ni descripción narrativa nuestra. Todo lo de abajo o cita una
+// fuente o dice por qué no puede citarla.
+
+/**
+ * Identificador de cada fila de la retícula. Es una unión cerrada porque **la retícula no es una
+ * lista de sugerencias**: el `never` de quien la recorra obliga a decidir qué se escribe el día que
+ * alguien añada un campo, en vez de dejar una fila muda.
+ *
+ * Viaja al `dist/` como `data-campo`, que es de lo que se agarra el gate F3 para comprobar que las
+ * nueve están y en este orden.
+ */
+export type IdDeCampo =
+  | "nombre-boe"
+  | "nombre-comun"
+  | "nombre-local-canario"
+  | "taxon"
+  | "rango"
+  | "tallas"
+  | "presencia"
+  | "areas-protegidas"
+  | "foto";
+
+/** Una fila de la retícula: su identificador estable y el rótulo con el que se lee. */
+export interface CampoDeLaFicha {
+  readonly id: IdDeCampo;
+  readonly rotulo: string;
+}
+
+/**
+ * **La retícula, en su orden**, y el único sitio donde ese orden está escrito.
+ *
+ * La plantilla lo recorre para pintar y el gate F3 lo recorre para medir, así que no hay forma de
+ * que la página publique ocho campos y el gate siga creyendo que son nueve: eso es exactamente lo
+ * que pasa cuando el orden se teclea dos veces.
+ *
+ * Los rótulos dicen **de dónde sale cada cosa** —«que escribe la norma», «que acepta WoRMS hoy»,
+ * «en los caladeros que la regulan»— porque en esta ficha conviven cuatro fuentes con cuatro
+ * autoridades distintas, y un rótulo genérico las mezclaría en una sola voz que sería la nuestra.
+ */
+export const CAMPOS_DE_LA_FICHA: readonly CampoDeLaFicha[] = [
+  { id: "nombre-boe", rotulo: "Nombre que escribe la norma" },
+  { id: "nombre-comun", rotulo: "Nombre común en los anexos" },
+  { id: "nombre-local-canario", rotulo: "Nombre local canario" },
+  { id: "taxon", rotulo: "Taxón que acepta WoRMS hoy" },
+  { id: "rango", rotulo: "A qué alcanza la talla" },
+  { id: "tallas", rotulo: "Talla mínima por caladero" },
+  { id: "presencia", rotulo: "Registros en OBIS" },
+  { id: "areas-protegidas", rotulo: "Espacios protegidos en los caladeros que la regulan" },
+  { id: "foto", rotulo: "Foto" },
+];
+
+/** El `id` del título de una fila, que es lo que la nombra para un lector de pantalla. */
+export function tituloDelCampo(id: IdDeCampo): string {
+  return `titulo-${id}`;
+}
+
+/** Título de la ficha: **el nombre de la norma**, que es el que tiene consecuencia legal. */
+export function tituloDeLaFicha(nombreBoe: string): string {
+  return nombreBoe;
+}
+
+/**
+ * Qué es esta página, antes de la primera fila, y **por qué tiene siempre los mismos campos**.
+ *
+ * Se dice en voz alta porque es lo que hace legible un hueco: quien lee tiene que saber que la fila
+ * vacía no es un descuido de maquetación sino una respuesta. Sin esta frase, «Nombre local canario:
+ * la norma deja la celda vacía» se lee como que la página está a medias.
+ */
+export const QUE_ES_ESTA_FICHA =
+  "Todo lo que este portal sabe de una de las especies a las que el Real Decreto 560/1995 le fija " +
+  "una talla mínima de captura. La ficha tiene siempre los mismos campos y en el mismo orden, " +
+  "también cuando no hay nada que poner en uno: en ese caso el campo dice por qué está vacío. Un " +
+  "hueco rotulado es información —dice qué no sabemos—; un hueco en blanco no se distingue de un " +
+  "fallo nuestro.";
+
+/**
+ * Lo que esta ficha **no** hace, dicho donde se lee y no sólo en el design doc.
+ *
+ * Es la mitad de la promesa: la otra es la retícula. Quien llega a una ficha de especie desde
+ * cualquier otro sitio de internet viene acostumbrado a que le puntúen el animal, y esta frase
+ * dice que aquí eso no está por decisión, no por falta de datos.
+ */
+export const AQUI_NO_SE_PUNTUA_NADA =
+  "Aquí no hay ninguna magnitud inventada: ni rareza, ni dificultad, ni puntuación, ni mejor " +
+  "cebo, ni temporada ideal, ni un orden que sugiera qué especies son mejores. Cada campo o cita " +
+  "una fuente con su fecha o dice por qué no puede citarla. Sobre una cifra con consecuencia " +
+  "jurídica el adorno consigue que se le crea más de lo que merece, y lo que merece está escrito " +
+  "al lado.";
+
+/** Vuelta al catálogo, que es de donde se llega. Dice **cuántas** son, contadas del dataset. */
+export function volverAlCatalogo(especies: number): string {
+  return `Volver al catálogo de las ${especies} especies que el BOE regula`;
+}
+
+// --- Los motivos de los huecos -------------------------------------------------------------------
+
+/**
+ * Por qué una especie no tiene nombre local canario **cuando la norma no la regula en Canarias**.
+ *
+ * Es el hueco más numeroso de la retícula —55 de las 86— y el que peor se leería en blanco: quien
+ * viera la fila vacía concluiría que la especie no tiene nombre en las islas, cuando lo que pasa es
+ * que el Anexo III no la nombra. La frase distingue las dos cosas.
+ */
+export const FUERA_DEL_ANEXO_III =
+  "El nombre local canario sólo lo escribe el Anexo III del Real Decreto 560/1995, que es el del " +
+  "caladero canario, y esta especie no está en ese anexo. No es que no tenga nombre en las islas: " +
+  "es que la norma no lo escribe aquí, y este portal no le pone uno de su cosecha.";
+
+/** Lo que se lee en la fila del rango cuando la norma nombra **una especie** y no un alcance mayor. */
+export const LA_NORMA_NOMBRA_UNA_ESPECIE =
+  "La norma nombra una especie: la talla mínima se aplica a ella y a ninguna otra.";
+
+/**
+ * Por qué no hay rango cuando no hay registro de WoRMS.
+ *
+ * El rango es lo que la fuente dice del nombre, no una lectura nuestra de cómo está escrito.
+ * Deducirlo del texto —«esto acaba en spp, luego es un género»— sería exactamente el mapeo sin
+ * dueño que el catálogo se prohíbe en la columna del taxón.
+ */
+export const RANGO_SIN_TAXON =
+  "Sin registro en WoRMS no hay rango que publicar: el rango es lo que la fuente dice del nombre, " +
+  "no una deducción nuestra a partir de cómo está escrito.";
+
+/** Por qué puede faltar el nombre común. No pasa hoy en ninguna de las 86, y la fila existe igual. */
+export const SIN_NOMBRE_COMUN =
+  "Ninguno de los anexos que regulan esta especie le escribe un nombre común.";
+
+// --- La fila de los espacios protegidos ----------------------------------------------------------
+
+/**
+ * **La frase que sostiene esta fila entera, y por eso es lo primero que se lee en ella.**
+ *
+ * RAMPE publica espacios y sus límites; **no publica nada por especie**. El vínculo honesto entre
+ * una especie y un espacio protegido es el **caladero** —dónde se aplica su talla—, y ni siquiera
+ * eso dice que a la especie le afecte el régimen del espacio. Sin esta frase delante, una lista de
+ * espacios debajo del nombre de un animal se lee como «esta especie está protegida aquí», que es
+ * una afirmación que no tenemos con qué sostener.
+ *
+ * Es constante del código y no texto del dataset por la lección del hallazgo H-1 de T-21: la frase
+ * que sostiene una promesa vive donde cambiarla es un diff revisado.
+ */
+export const RAMPE_NO_HABLA_DE_ESPECIES =
+  "La Red de Áreas Marinas Protegidas publica espacios, no especies: no dice qué especie está " +
+  "protegida en cada uno, así que esta ficha no puede decirlo. Lo que sí se puede decir es dónde " +
+  "hay espacios protegidos en los caladeros que fijan la talla de esta especie, y eso está abajo, " +
+  "contado por caladero. El régimen de cada espacio lo fija su declaración oficial.";
+
+/**
+ * Cuántos puertos de un caladero tienen algún espacio protegido cerca: **un recuento de puertos, no
+ * una afirmación sobre la especie**, y la frase lo dice con esas palabras.
+ *
+ * La cifra sale de contar el derivado de T-21 contra el caladero que cada puerto declara en
+ * `ports.json`; no hay ninguna magnitud nueva. Va con el radio dentro porque un «tienen espacios
+ * cerca» sin decir cuánto es «cerca» no significa nada, y con el número de espacios distintos
+ * porque 110 relaciones sobre 37 espacios y sobre 110 no son lo mismo.
+ */
+export function espaciosEnElCaladero(
+  nombreDelCaladero: string,
+  puertos: number,
+  conEspacio: number,
+  espacios: number,
+  radioKm: number,
+): string {
+  return (
+    `De los ${puertos} puertos del caladero ${nombreDelCaladero} que publica este portal, ` +
+    `${conEspacio} tienen algún espacio protegido a menos de ${kmDelRadio(radioKm)} km: ` +
+    `${espacios} espacios distintos. Cuáles son y a qué distancia está en la página de cada puerto.`
+  );
+}
+
+/** El radio, escrito sin decimales cuando no los tiene. Un «30,0 km» finge una precisión que no hay. */
+function kmDelRadio(radioKm: number): number {
+  return Math.round(radioKm * 10) / 10;
+}
+
+// --- La foto ------------------------------------------------------------------------------------
+
+/**
+ * El crédito de la foto: **autor y licencia, juntos y pegados a la imagen**.
+ *
+ * No hay pie global de la página y no puede haberlo: en la muestra de 12 ficheros que midió el plan
+ * salieron **seis licencias distintas**, así que un «fotos de Wikimedia Commons» sería falso para
+ * cinco de ellas. Cada foto lleva la suya, en su mismo bloque, y el gate F2 lo mide ahí.
+ */
+export function creditoDeLaFoto(autor: string, licencia: string): string {
+  return `Foto de ${autor} · ${licencia}`;
+}
+
+/**
+ * Quién identificó la foto, que **no fuimos nosotros**.
+ *
+ * Es la asunción 2 del plan escrita en la página: la foto se coge de la propiedad `P18` de Wikidata,
+ * que es la imagen que alguien vinculó a mano al taxón. Publicarla sin decirlo convertiría una
+ * decisión editorial ajena en una afirmación nuestra sobre qué animal es ése.
+ */
+export function identificadaPor(fuente: string, entidad: string, propiedad: string): string {
+  return `La identificación es de ${fuente} (${entidad}, propiedad ${propiedad}), no nuestra.`;
+}
+
+/**
+ * Que una foto **no sirve para identificar una captura**, dicho junto a la foto.
+ *
+ * Es el riesgo propio de esta fila: una imagen debajo de una talla mínima se lee como una guía de
+ * campo, y equivocarse identificando una captura tiene la misma consecuencia que equivocarse con la
+ * cifra. La ficha publica una foto para ilustrar, no para que nadie decida con ella.
+ */
+export const LA_FOTO_NO_IDENTIFICA =
+  "Una foto no sirve para identificar una captura: hay especies que se distinguen por caracteres " +
+  "que no se ven en una imagen, y el nombre que tiene consecuencia legal es el de la norma, que " +
+  "está arriba.";
+
+/** Texto alternativo: dice **quién** asocia la imagen al taxón, no que la imagen sea el taxón. */
+export function textoAlternativoDeLaFoto(nombreBoe: string, fuente: string): string {
+  return `Fotografía que ${fuente} asocia al taxón «${nombreBoe}».`;
+}
+
+/**
+ * Enlace a la página del fichero, que es donde se comprueba el crédito sin fiarse de esta página.
+ *
+ * **No lleva el nombre del fichero, y ése es el cambio.** Lo llevaba, entero y entrecomillado, y
+ * los nombres de Commons son cadenas cualesquiera: uno de ellos —`File:Brachsenmakrele (Brama
+ * Brama) 22.12.2008 Strand von Callantsoog Nord Holland.JPG`— metía «22.12» en el texto visible de
+ * la ficha del bicho, donde un lector español lee un decimal con punto inglés y el gate A-19 lee
+ * una regresión. Las dos lecturas son razonables, y las dos son culpa de imprimir el nombre: la
+ * etiqueta de un enlace no necesita nombrar su destino cuando el destino **es** la página donde ese
+ * nombre está escrito. El `fichero` sigue en el dataset, que es donde hace falta: es procedencia.
+ */
+export const VER_EL_FICHERO_EN_COMMONS = "Ver el fichero en Wikimedia Commons";
+
+/**
+ * Lo que se lee **en lugar** del enlace al texto de la licencia cuando la foto es de dominio
+ * público.
+ *
+ * No hay texto de licencia al que mandar al lector porque no hay condiciones que cumplir, y un
+ * enlace vacío o un «licencia: —» serían un crédito que no lleva a ninguna parte. Lo que sí hay es
+ * quién lo declara y con qué motivo: la página del fichero en Commons, que va justo debajo y es
+ * obligatoria en toda foto publicada.
+ */
+export const DOMINIO_PUBLICO_SIN_CONDICIONES =
+  "Dominio público: no hay texto de licencia que enlazar porque no hay condiciones que cumplir. " +
+  "Quién lo declara así está en la página del fichero.";
+
+/**
+ * El crédito de una foto **cuya fuente declara que no hace falta atribuir**.
+ *
+ * Es la enmienda del 2026-08-31 escrita en la página. Dos ficheros de la NOAA —el bacalao y las
+ * lisas— publican `AttributionRequired = "false"` y `Copyrighted = "False"` y no registran autor:
+ * publicarlos sin acreditar a nadie no incumple nada, y lo que sí incumpliría es publicar así uno
+ * que exija atribuir. Lo que no vale es callarlo: un «Foto de  · Public domain» con el hueco donde
+ * iría el nombre es una atribución que no atribuye, y una foto sin línea de crédito parece nuestra.
+ *
+ * Así que se dice el estado, **quién lo declara** y dónde comprobarlo: la página del fichero en
+ * Commons va justo debajo y la lleva toda foto publicada.
+ */
+export function creditoSinAutor(licencia: string): string {
+  return (
+    `Sin autor acreditado · ${licencia}. Wikimedia Commons no registra quién hizo esta foto y ` +
+    `declara que su licencia no exige atribuir; quien dude puede comprobarlo en la página del ` +
+    `fichero.`
+  );
+}
+
+/**
+ * El rótulo de la foto de una fila que **regula un género** y no puede publicar la imagen del suyo.
+ *
+ * Pasa en `Lophius spp`: la única `P18` del género es `File:Monkfish.jpg`, `CC BY-SA 3.0`, que
+ * exige atribuir y cuya fuente no dice a quién. La salida no es relajar el crédito —eso sería
+ * incumplir la licencia— sino publicar la foto de una especie del género **que nombra la propia
+ * norma**, y decirlo aquí.
+ *
+ * La frase nombra la fila del BOE de donde sale la elección porque eso es lo que la hace
+ * comprobable: sin ella, «la elige la norma» sería una afirmación nuestra sobre un texto que el
+ * lector tendría que ir a buscar. Y va **dentro de la figura**, no en una nota al final: quien mira
+ * la foto tiene que leer de qué animal es sin bajar.
+ */
+export function fotoDeUnaEspecieDelGenero(nombre: string, nombreBoe: string): string {
+  return (
+    `Esta fila regula un género entero y la imagen que Wikidata le vincula no se puede publicar. ` +
+    `La foto es de «${nombre}», una de las especies de ese género que la propia norma nombra —en ` +
+    `la fila «${nombreBoe}»—, y no ilustra a las demás del género.`
+  );
+}
+
+/**
+ * El rótulo de la foto de una fila que **nombra varias especies** en una sola celda.
+ *
+ * Pasa en `Lophius piscatorius, L. Budegassa`. El catálogo deja esa fila sin taxón a propósito
+ * —repartir una fila legal en dos decide a qué alcance se aplica una talla mínima, y esa decisión
+ * no es nuestra—, pero para ilustrarla no hace falta repartir nada: se publica la primera especie
+ * que la norma nombra **diciendo que hay más**. Callarlo sería contar media fila.
+ */
+export function fotoDeLaPrimeraEspecieDeLaFila(nombre: string, nombreBoe: string): string {
+  return (
+    `La norma nombra más de una especie en esta fila («${nombreBoe}»): la foto es de «${nombre}», ` +
+    `la primera que nombra, y no ilustra a las demás.`
+  );
+}
+
+/** El día en que se consultaron los créditos. Una licencia envejece, y se dice cuándo se leyó. */
+export function fotosConsultadasEn(fecha: string): string {
+  return `Créditos de las fotos consultados el ${fecha}.`;
+}
+
+/**
+ * Lo que se lee en la fila de la foto **cuando el dataset de fotos todavía no está en el build**.
+ *
+ * Es el hueco que más fácil sería dejar mudo, y el que peor se leería: sin esta frase, una ficha sin
+ * imagen dice «esta especie no tiene foto», que es una afirmación sobre Wikidata que nadie ha
+ * comprobado. Lo que se sabe es otra cosa —que aún no se ha preguntado— y es lo que se publica.
+ */
+export const SIN_DATASET_DE_FOTOS =
+  "El dataset de fotos todavía no se ha ingerido, así que ninguna ficha de este portal publica " +
+  "imagen. No quiere decir que esta especie no tenga foto: quiere decir que aún no se ha " +
+  "preguntado por ella.";
+
+/** Rótulo del enlace al texto de la licencia. Nombra **cuál** es: hay seis distintas en la muestra. */
+export function enlaceALaLicencia(licencia: string): string {
+  return `Texto de la licencia ${licencia}`;
+}

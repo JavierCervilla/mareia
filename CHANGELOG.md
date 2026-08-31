@@ -2,6 +2,155 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-08-31 — T-23 · Una página por especie, con los mismos nueve campos siempre — y con su foto
+
+El catálogo de T-20 deja de ser el final del camino: cada una de las **86** especies estrena su
+**ficha** en `/pesca/especies/<clave>/`, enlazada desde el nombre de su fila. El problema de diseño de
+esta trayectoria no es cómo se enseña un dato: es **cómo se enseña que falta**.
+
+- **La retícula es fija, y por eso el hueco se ve.** Nueve campos, siempre los mismos y siempre en el
+  mismo orden —nombre del BOE · nombre común · nombre local canario · taxón aceptado y su estado · a
+  qué alcanza la talla · talla por caladero con su nota entera · registros de OBIS con su sesgo ·
+  espacios protegidos de sus caladeros · foto con su licencia y su autor—, **también cuando no hay
+  nada que poner en uno**. Un campo vacío es entonces **visible** y dice «esto no lo sabemos»; un
+  párrafo libre lo escondería, porque no se ve lo que no se escribió. **Ningún hueco se deja en blanco
+  ni se omite la fila**: todos publican su motivo, y los motivos distinguen cosas que no son la misma.
+  El nombre local canario lo enseña: **28 de las 31** especies del Anexo III lo tienen, **3** dicen que
+  la norma deja vacía esa celda y las **55** que no están en ese anexo dicen que la norma no lo escribe
+  fuera de Canarias. Tres frases distintas donde un guion habría dicho lo mismo tres veces, que es
+  nada. Gate **F3**, **774 campos** comprobados en las 86 fichas; probado en rojo con un hueco en
+  blanco (**58 campos** vacíos: las fichas que no publican nombre local) y con una fila omitida
+  (tres pruebas en rojo a la vez).
+- **La nota legal viaja con la cifra por tercera vez, y esta vez el gate nace con la página.** T-19
+  pegó la nota a la talla en las **153** páginas de puerto; T-20 la reintrodujo como defecto en el
+  catálogo y hubo que arreglarla **después** de un pase adversario. La ficha es la **tercera**
+  superficie de la misma cifra legal y no espera a que un adversario lo encuentre: el gate **F1**
+  entra con el primer commit de la página y exige el **texto entero** de la nota —no la marca— dentro
+  del bloque de **su** cifra. **Probado en rojo** con el sabotaje que importa: la nota movida fuera del
+  bloque **pero todavía en la página**, que es el defecto real —**9 cifras** en rojo, y un gate que
+  mirase «en la página» habría seguido en verde—.
+- **A qué alcanza la talla se rotula en las 86, también en las 68 que son una especie.** Es la única
+  divergencia deliberada con la tabla de T-20, y sale de la diferencia entre una tabla y una retícula:
+  allí un «especie» repetido 68 veces sería ruido que le restaría fuerza a los **17** rótulos que
+  cambian el alcance —**15 filas de género sobre 14 géneros distintos** (`Mugil` sale dos veces), una
+  familia y una subespecie—; aquí, callar sería dejar la fila en blanco. Las 15 de género arrastran
+  además la glosa de que la norma regula el género entero, y las otras 71 no la arrastran.
+- **Nada de puntuar, y el gate mira el artefacto y no la intención.** Cero barras de 0-100, cero
+  estrellas, cero rareza, cero dificultad, cero puntos, cero «mejor cebo», cero «temporada ideal»,
+  cero descripción narrativa de cosecha propia y ninguna ordenación que sugiera «mejores especies» —la
+  única lista ordenada de una ficha son las migas—. **Una talla mínima no parpadea, no cuenta hacia
+  arriba y no tiene halo**: el *juice* sobre un dato con consecuencia jurídica es el mecanismo por el
+  que una interfaz consigue que le crean más de lo que merece. El gate **F4** mide marcado
+  (`<progress>`, `<meter>`, `aria-valuenow`, `<canvas>`), vocabulario, listas ordenadas y la hoja
+  (nada de `@keyframes`/`animation`/`transition`/`box-shadow`/`border-radius`/degradados, terracota
+  sólo en el aviso y `tabular-nums` sólo en la cifra). **Probado en rojo** con una barra de dificultad:
+  cae por cuatro vías en las 86 páginas, incluida la palabra «dificultad» —que el propio aviso de la
+  página nombra, así que el gate retira los dos avisos literales antes de buscar y los comprueba
+  aparte—.
+- **La foto lleva su autor y su licencia dentro de su misma figura, nunca en un pie global.** El
+  censo de las **85** publicadas son **ocho** licencias distintas, así que un «fotos de Wikimedia
+  Commons» al pie sería falso para siete de ellas y no acreditaría a ninguna de las **46 personas**
+  que las firman. Junto a la imagen van autor, licencia, enlace al fichero en Commons, **quién
+  identificó el taxón** (Wikidata `P18`, que no somos nosotros) y el aviso de que una foto no sirve
+  para identificar una captura. La imagen no se busca por texto —buscar el nombre científico
+  **siempre devuelve algo**, y ese algo puede ser un sello o un animal distinto—: sale de la `P18`
+  que alguien vinculó a mano al ítem del taxón, y el ítem se comprueba contra el `P225` que él mismo
+  declara. De los **81** taxones consultados, **3** llevan a otro sitio y no publican foto.
+- **Se corrigió un contrato que dejaba 15 especies sin foto y les publicaba una razón falsa.** El
+  contrato congelado exigía `licenciaUrl` en **toda** foto, y eso es un error de categoría: el
+  **dominio público no tiene condiciones de reutilización**, así que no hay ninguna URL de
+  condiciones que enlazar. Medido sobre los 26 ficheros que había detrás de los 23 huecos: **25 son
+  `License = "pd"`, `Copyrighted = "False"` y sin `LicenseUrl`**. Lo grave no era la cobertura: era
+  que **15 fichas publicaban «Una imagen sin autor o sin licencia no se publica» de ficheros que
+  publican las dos cosas**. Un motivo que no es el motivo es peor que no dar ninguno, porque el que
+  lo lee no vuelve a preguntar — y era, además, la única señal de que el contrato estaba mal.
+  Enmienda: `autor` y `licencia` siguen siendo obligatorios **sin excepción**; nace
+  **`licenciaCodigo`** (el `License` legible por máquina de Commons), obligatorio siempre, para que
+  la excepción sea **comprobable en el artefacto** en vez de confiada; y `licenciaUrl` pasa a
+  condicional —obligatoria y URL válida con condiciones, **ausente** sin ellas—. Una licencia cuenta
+  como sin condiciones **sólo si dos campos independientes de la fuente coinciden**: `License` en un
+  allowlist **cerrado** (`pd`, y nada más: `cc0` sí trae texto y URL) **y** `Copyrighted == "False"`.
+  Un campo solo es una afirmación; dos que coinciden es una comprobación. Efecto de esta enmienda
+  sola: **63 → 78 fotos de 86**; los ocho huecos que dejaba los cierra el punto siguiente.
+  **Efecto que hay que decir: 6 de las 63 que ya se publicaban
+  cambian de fichero**, no porque se tocara la elección de imagen sino porque en esos taxones la
+  **primera** `P18` de Wikidata era de dominio público y el contrato viejo la rechazaba.
+- **85 de las 86 especies publican foto, y los tres caminos que lo consiguen hacen la identificación
+  más estricta, no más laxa.** (1) Se pregunta a Wikidata por **el ítem que declara ese nombre
+  científico** (`haswbstatement:"P225=<nombre>"` — **las comillas importan**: sin ellas los nombres
+  de dos palabras devuelven vacío) en vez de buscar el nombre como texto. La búsqueda de texto
+  llevaba a `Q234014` (que declara *Mugil cephalus*, no el género), a `Q286026` (que declara
+  «Sapia») y a `Q47652` (que no es un animal). (2) Una foto se publica **sin autor** sólo cuando la
+  fuente dice que no hace falta atribuir: `AttributionRequired = false` **y** `Copyrighted = False`,
+  que son los cuatro ficheros de dominio público de la NOAA. Con `AttributionRequired = true` y sin
+  autor **no se publica jamás** —ahí quien lo impide es la licencia, no nosotros: es el caso de
+  `File:Monkfish.jpg`—. (3) Dos filas de género toman prestada la foto de una especie **que nombra
+  el propio BOE** en otra fila, y la ficha lo rotula: la elección la hace la norma.
+- **Cuando dos ítems declaran el mismo nombre científico, la ambigüedad se deshace con la fuente o
+  no se deshace.** Primero se descartan los que Wikidata marca como duplicados (`P31 = Q17362920`):
+  eso no es elegir, es leer lo que la fuente ya decidió. Si aún quedan varios, decide **la
+  concordancia de los dos caminos** —el exacto y el de texto—, que fallan de maneras distintas y por
+  eso su coincidencia es una comprobación y no una preferencia. Lo que no se hace nunca es
+  desempatar por el primero, por el número más bajo o por cuál tiene foto. Sin esto, `Merluccius
+  merluccius` y `Melanogrammus aeglefinus` **perdían** la foto que ya publicaban. Los cuatro
+  recorridos se probaron en rojo uno por uno, y **dos de ellos pasaban por el camino equivocado** —el
+  del duplicado se ponía verde gracias a la concordancia— hasta que se les quitó esa salida.
+- **El único hueco que queda no es «no hay foto»: es que dos autoridades escriben distinto el mismo
+  nombre.** WoRMS publica `Penaeus (Melicertus) kerathurus` con el subgénero entre paréntesis y el
+  `P225` de Wikidata no escribe así, de modo que ningún ítem declara esa forma exacta. Cerrarlo
+  obligaría al módulo de fotos a caminar la lista de sinónimos de WoRMS, o sea a ampliarle la
+  superficie de fuentes; mientras esa decisión no se tome, el hueco **publica su motivo**.
+- **El pase adversario encontró dos cosas, y las dos son daño colateral de la enmienda de arriba.**
+  (1) La excepción del dominio público existía para **no perder fotos** y estaba perdiendo
+  **créditos**: `pagellus-spp` publicaba «Sin autor acreditado» teniendo, en el mismo ítem, una foto
+  **firmada** —al volverse publicable la anónima, ganaba por orden de la fuente—. Ahora, entre
+  candidatas igualmente publicables, se prefiere la que **acredita a su autor** (`Artist`, un campo
+  de la fuente, no un criterio nuestro), y la preferencia **sólo elige entre publicables**: si
+  ninguna acredita, se publica la primera, que es lo que impide que «prefiere» se vuelva «exige» y
+  cierre los huecos que la excepción abrió. Fotos sin autor: **4 → 3**. (2) **F2 comprobaba la página
+  llamando a la misma función que la escribe**: vaciándola, la ficha se quedó en «Foto · Public
+  domain» —sin una palabra sobre autoría— y el gate siguió verde, porque su expectativa se vació con
+  ella. Es el defecto de **E4 en T-20** en otro sitio, y se cierra igual que lo cerró **E6**: el gate
+  exige ahora **literales escritos en él mismo**. La duplicación de la frase es el precio de la
+  independencia. Informe en `docs/qa/informe-adversario-t23.md`.
+- **`autor: "  "` colaba.** El lector rechazaba la cadena vacía pero no la de dos espacios, y un
+  autor en blanco pinta «Foto de   · CC BY-SA 4.0»: una atribución que no atribuye a nadie, con todo
+  en verde. Ahora ninguno de los campos publicables admite una cadena que no diga nada.
+- **En la ficha, el dominio público se publica como estado y no como enlace vacío.** Con condiciones,
+  el crédito enlaza el texto de la licencia; sin ellas dice que no hay texto que enlazar porque no
+  hay condiciones que cumplir, y deja el enlace a la página del fichero —que lleva **toda** foto
+  publicada— como evidencia de quién lo declara. **Nunca un crédito que no lleve a ninguna parte**, y
+  el gate **F2** sobre el `dist/` lo mide entrada a entrada. Los cuatro sabotajes, **probados en
+  rojo**: una foto de dominio público con `licenciaUrl` presente (F2 la daba en **verde**), una
+  licencia con condiciones sin URL (roja, pero acusando de faltar el autor), un `License = pd` con
+  `Copyrighted = True` y el lector de la web.
+- **Los espacios protegidos se cuentan por caladero, porque RAMPE no habla de especies.** La fuente
+  publica espacios y no dice qué especie está protegida en cada uno, así que la ficha no puede
+  decirlo, y lo dice con esas palabras **antes** del recuento. Lo que sí sostiene el cruce con T-21 es
+  el caladero donde se aplica la talla: **44 de 47** puertos del cantábrico-noroeste-golfo de Cádiz
+  tienen algún espacio a menos de 30 km, sobre **7** espacios distintos; **73 de 80** en el
+  mediterráneo, sobre **36**; **26 de 26** en el canario, sobre **37**. Detrás va literal el aviso de
+  T-21, de su propio módulo: esto dice dónde **no** se puede, nunca dónde sí.
+- **`Thunnus thynnus` y `Thunnus Thynnus` son dos fichas**, porque son dos nombres de la norma. El
+  slug es la `clave` de T-20 con su digest —fea y difícil de recortar, y se acepta: un slug legible
+  las colapsaría en una y los **6,4 kg** del Anexo III desaparecerían de la URL sin que nada se
+  pusiera rojo—. Cada una enlaza a la otra, que es lo que el aviso de T-20 no podía hacer.
+- **Y el gate A-19 dejó de exonerar por la forma, que es como se le rompió.** La excepción de las
+  versiones de licencia estaba escrita `^(3|4)\.0$` —un catálogo disfrazado de patrón— y enrojeció en
+  cuanto el dataset de fotos estrenó `CC BY 2.5`. Es exactamente lo que la cabecera del propio test
+  predica para la excepción de millares. Ahora se ata **al sitio**: un decimal se exonera sólo detrás
+  del nombre de una licencia, con su **prueba de sensibilidad** hermana —las **2.713** cifras
+  españolas con forma de versión que el sitio publica, devueltas al punto inglés, tienen que seguir
+  denunciándose, y alguna coincide carácter a carácter con una versión publicada (`2,5` contra el
+  `2.5` de `CC BY 2.5`), que es lo que prueba que exonera por posición y no por valor—. El otro rojo
+  no era del gate: la ficha imprimía el **nombre entero** del fichero de Commons en la etiqueta de su
+  enlace, y uno de ellos metía «22.12» en el texto de la página. La etiqueta pasa a `Ver el fichero en
+  Wikimedia Commons` —el nombre está en la página a la que lleva— y el campo `fichero` se queda en el
+  dataset, que es donde hace falta.
+- **Cero JavaScript**, como el resto del portal. Las 86 fichas ocupan **897.959 B** de HTML (media
+  **10.441 B**), la hoja **6.873 B**, y el `dist/` pasa de 193 a **279** páginas. Medido con el
+  comando de CI: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm --filter web build` en verde.
+
 ## 2026-08-30 — T-20 · Las 86 especies que el BOE regula, con los dos nombres que tienen
 
 El portal estrena página: **`/pesca/especies/`**, el catálogo de las **86 especies** a las que el RD

@@ -62,7 +62,7 @@ import {
   cargarCatalogoDeEspecies,
   FORMATO_DEL_CATALOGO,
 } from "../../../modulos/especies/catalogo.ts";
-import { RUTA_ESPECIES, urlAbsoluta } from "../../../rutas.ts";
+import { RUTA_ESPECIES, rutaFichaDeEspecie, urlAbsoluta } from "../../../rutas.ts";
 import { grafo, migasEstructuradas } from "../../../seo.ts";
 
 const catalogo = await cargarCatalogoDeEspecies();
@@ -235,7 +235,16 @@ const migas = migasDeEspecies();
                   EL NOMBRE DEL BOE, literal y primero. No es una preferencia de composición: es el
                   que tiene consecuencia legal, y el gate E1 exige encontrarlo en todas las filas.
                 */}
-                <span class="tabla-especies__boe">{fila.nombreBoe}</span>
+                <span class="tabla-especies__boe">
+                  {/*
+                    Y el nombre es el enlace a SU ficha (T-23). Enlaza el nombre del BOE y no un
+                    «ver ficha» al final de la fila porque es el nombre lo que se busca, y porque
+                    el texto del enlace es entonces el nombre legal: quien recorre la página con un
+                    lector de pantalla oye a dónde va. El texto no cambia, así que el gate E1 sigue
+                    encontrándolo literal en las 86 filas.
+                  */}
+                  <a href={rutaFichaDeEspecie(fila.clave)}>{fila.nombreBoe}</a>
+                </span>
                 <span class="tabla-especies__comun">{fila.nombresComunes.join(" · ")}</span>
                 {fila.rango !== null && <span class="tabla-especies__rango">{fila.rango}</span>}
                 {/*

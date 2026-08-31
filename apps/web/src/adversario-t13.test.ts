@@ -462,8 +462,25 @@ function textoVisible(html: string): string {
   return html.replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<[^>]+>/g, " ");
 }
 
-/** Las versiones de licencia («CC BY 4.0», «AGPL-3.0»), que no son la medida de nada. */
-const VERSIONES_DE_LICENCIA = /^(3|4)\.0$/;
+/**
+ * Dónde va la versión de una licencia: **detrás del nombre de la licencia**, y en ningún otro sitio.
+ *
+ * La excepción se ata al SITIO y no a la forma, por la misma razón que `DISTANCIA_A_LA_LUNA` — y
+ * porque la de antes ya se rompió. Estaba escrita por la forma, `^(3|4)\.0$`, y esa lista era un
+ * catálogo disfrazado de patrón: el día en que el dataset de fotos estrenó `CC BY 2.5` y
+ * `CC BY-SA 2.5`, el gate enrojeció por dos versiones de licencia perfectamente correctas. Es
+ * exactamente lo que la cabecera de A-19 predica dos párrafos más abajo para la excepción de
+ * millares: «un instrumento que funciona por la forma del dato y no por su significado se rompe
+ * cuando el catálogo cambia».
+ *
+ * Cubre las dos familias de licencia que el sitio publica de verdad: las Creative Commons de las
+ * fotos y de los datasets —`CC BY 2.5`, `CC BY-SA 4.0`, `CC-BY-NC-4.0`, en mayúsculas o minúsculas
+ * y con espacio o con guion, que son las formas medidas en el `dist/`— y la `AGPL-3.0-or-later` del
+ * propio proyecto. El tradeoff es el mismo que se aceptó allí y se acepta aquí: si mañana se
+ * publica una licencia de otra familia, el gate enrojece sin que haya avería y alguien tiene que
+ * venir a mirarlo. Un rojo que obliga a releer cuesta menos que una excepción que exonera medidas.
+ */
+const VERSION_DE_LICENCIA = /(?<=\b(?:CC[- ]BY(?:[- ](?:NC|SA|ND))*[- ]|AGPL-))\d+\.\d+/gi;
 
 /**
  * El único punto de millares que el sitio escribe de verdad: la distancia a la Luna, que sale de
@@ -490,11 +507,15 @@ const CIFRA_CON_FORMA_DE_MILLAR = /(?<![\d.,])[1-9]\d{0,2},\d{3}(?![\d.,])/g;
  */
 function cifrasConDecimalIngles(html: string): readonly string[] {
   const visible = textoVisible(html);
-  const millares = new Set<number>();
-  for (const millar of visible.matchAll(DISTANCIA_A_LA_LUNA)) millares.add(millar.index);
+  // Las dos excepciones se calculan por POSICIÓN, no por forma: lo que exonera a un punto entre
+  // dígitos es el sitio en el que está —detrás de «Distancia», detrás del nombre de una licencia—,
+  // porque por la forma un millar, una versión y una medida son el mismo string.
+  const exoneradas = new Set<number>();
+  for (const millar of visible.matchAll(DISTANCIA_A_LA_LUNA)) exoneradas.add(millar.index);
+  for (const version of visible.matchAll(VERSION_DE_LICENCIA)) exoneradas.add(version.index);
   const ofensas: string[] = [];
   for (const encontrado of visible.matchAll(/\d+\.\d+/g)) {
-    if (VERSIONES_DE_LICENCIA.test(encontrado[0]) || millares.has(encontrado.index)) continue;
+    if (exoneradas.has(encontrado.index)) continue;
     ofensas.push(encontrado[0]);
   }
   return ofensas;
@@ -542,6 +563,12 @@ function cifrasConDecimalIngles(html: string): readonly string[] {
  * si mañana se renombra ese rótulo, el gate enrojece sin que haya avería. Se acepta a propósito —un
  * rojo que obliga a releer cuesta menos que una excepción que exonera medidas—, y el sensibilidad
  * de abajo comprueba que la excepción sigue sin tragarse ninguna.
+ *
+ * **La excepción de las versiones de licencia siguió el mismo camino, y tarde** (2026-08-31). Nació
+ * escrita por la forma —`^(3|4)\.0$`— pese a que la lección estaba ya escrita aquí al lado, y se
+ * rompió en cuanto el catálogo cambió: el dataset de fotos de T-23 estrenó `CC BY 2.5` y
+ * `CC BY-SA 2.5` y el gate denunció dos versiones correctas. Ahora se ata al sitio
+ * (`VERSION_DE_LICENCIA`), con su propia prueba de sensibilidad debajo.
  */
 test("A-19 · ninguna página publica una cifra con el decimal en formato inglés", async (t) => {
   if (!HAY_BUILD) {
@@ -591,6 +618,66 @@ test("A-19 sensibilidad · una medida en formato inglés no se salva por parecer
     candidatas.length > 0,
     "ninguna cifra publicada tiene ya la forma de un millar: o el catálogo ha cambiado, o esta " +
       "prueba de sensibilidad ha dejado de medir nada",
+  );
+  assert.deepEqual(exoneradas, []);
+});
+
+/**
+ * Una cifra española publicada que, escrita con el punto inglés, tendría **la forma de la versión de
+ * una licencia**: `2,5` → `2.5`, `3,7` → `3.7`. Es la clase entera que una excepción por forma
+ * exoneraría, y el sitio publica 2713 de ellas.
+ */
+const CIFRA_CON_FORMA_DE_VERSION = /(?<![\d.,])\d{1,2},\d(?![\d.,])/g;
+
+/**
+ * A-19 sensibilidad (versiones) · **que la excepción de las licencias no exonere una medida**, que
+ * es la única forma de que la excepción nueva se coma una regresión sin decir nada.
+ *
+ * Hermana de la de los millares y por el mismo motivo, porque la excepción de las versiones acaba de
+ * cometer el error que aquélla ya había corregido: estaba escrita por la forma y se rompió en cuanto
+ * el catálogo estrenó `2.5`. Al reescribirla atada al sitio hace falta la otra mitad de la prueba —
+ * que atarla al sitio no la haya vuelto laxa en ningún otro sitio.
+ *
+ * El escenario no se inventa: se coge cada cifra española que el sitio publica **hoy** con la forma
+ * de la versión de una licencia, se le devuelve el punto que A-19 vino a quitar y se exige que el
+ * detector la denuncie **allí donde está**, que no es detrás del nombre de una licencia. Y se exige
+ * además que alguna de esas cifras coincida, carácter a carácter, con una versión que el sitio de
+ * verdad publica —`2,5` de una talla mínima contra el `2.5` de `CC BY 2.5`—: es lo que prueba que la
+ * excepción exonera por **posición** y no por valor, que era justo el fallo de la anterior.
+ *
+ * Las dos premisas van en la misma aserción a propósito: el día en que el catálogo no publique
+ * ninguna cifra así, o ninguna licencia versionada, este test dejaría de medir en silencio.
+ */
+test("A-19 sensibilidad · una medida en formato inglés no se salva por parecerse a una licencia", (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  const versionesPublicadas = new Set<string>();
+  const candidatas: string[] = [];
+  const exoneradas: string[] = [];
+  for (const pagina of paginasHtml(DIST)) {
+    const html = readFileSync(pagina, "utf8");
+    const visible = textoVisible(html);
+    for (const version of visible.matchAll(VERSION_DE_LICENCIA)) versionesPublicadas.add(version[0]);
+    const medidas = new Set([...visible.matchAll(CIFRA_CON_FORMA_DE_VERSION)].map((m) => m[0]));
+    for (const medida of medidas) {
+      const enIngles = medida.replace(",", ".");
+      candidatas.push(enIngles);
+      if (!cifrasConDecimalIngles(html.replaceAll(medida, enIngles)).includes(enIngles)) {
+        exoneradas.push(`${pagina.slice(DIST.length + 1)}: «${medida}» → «${enIngles}»`);
+      }
+    }
+  }
+  assert.ok(
+    candidatas.length > 0 && versionesPublicadas.size > 0,
+    "o el sitio ya no publica cifras con forma de versión, o ya no publica ninguna licencia " +
+      "versionada: en cualquiera de los dos casos esta prueba de sensibilidad ha dejado de medir",
+  );
+  assert.ok(
+    candidatas.some((cifra) => versionesPublicadas.has(cifra)),
+    `ninguna medida publicada coincide con una versión publicada (${[...versionesPublicadas]}), ` +
+      "así que este recorrido ya no comprueba que la excepción exonere por posición y no por valor",
   );
   assert.deepEqual(exoneradas, []);
 });

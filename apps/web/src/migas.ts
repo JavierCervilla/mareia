@@ -6,7 +6,7 @@
  * jerarquía una de las dos se quedaría atrás y Google leería una ruta que la página no enseña.
  */
 
-import { RUTA_MAREAS, rutaProvincia, rutaRegion } from "./rutas.ts";
+import { RUTA_ESPECIES, RUTA_MAREAS, rutaProvincia, rutaRegion } from "./rutas.ts";
 
 /** Un escalón de la ruta. La página actual va sin `ruta`: no se enlaza a sí misma. */
 export interface Miga {
@@ -37,6 +37,25 @@ export function migasDeMareas(): readonly Miga[] {
  */
 export function migasDeEspecies(): readonly Miga[] {
   return [INICIO, { nombre: "Especies que regula el BOE", ruta: undefined }];
+}
+
+/**
+ * Migas de la ficha de una especie.
+ *
+ * **Tres escalones**, y el del medio sí enlaza: el catálogo de las 86 existe y es de donde se llega.
+ * La ficha es la única página del portal con una miga intermedia que lleva a una página real de
+ * `/pesca/`; `/pesca/` a secas sigue sin serlo y sigue sin enlazarse.
+ *
+ * El nombre de la miga es **el del BOE**, literal, por lo mismo que encabeza la ficha: es el que
+ * tiene consecuencia legal, y una ruta de navegación que nombrase la especie con el binomio aceptado
+ * hoy le pondría al portal un nombre que la norma no escribe.
+ */
+export function migasDeFichaDeEspecie(nombreBoe: string): readonly Miga[] {
+  return [
+    INICIO,
+    { nombre: "Especies que regula el BOE", ruta: RUTA_ESPECIES },
+    { nombre: nombreBoe, ruta: undefined },
+  ];
 }
 
 /** Migas de la página de una región. */

@@ -8,6 +8,7 @@
     python run.py verificar-normativa   # gate G2: ¿sigue en vigor lo que publicamos?
     python run.py areas-protegidas      # ingesta de RAMPE 2025 → data/geo/areas-protegidas.json
     python run.py especies              # WoRMS + OBIS → data/especies/catalogo.json
+    python run.py fotos                 # Wikidata P18 + Commons → data/especies/fotos.json
 
 Todas las fuentes son públicas y anónimas: el pipeline no lee ninguna credencial.
 """
@@ -23,11 +24,11 @@ import urllib.error
 from collections import Counter
 from pathlib import Path
 
-from mareia_pipeline import areas, catalog, especies, normativa, report, schema, utm
+from mareia_pipeline import areas, catalog, especies, fotos, normativa, report, schema, utm
 from mareia_pipeline import grade as grading
 from mareia_pipeline.ports import PILOT_PORTS, Port
 from mareia_pipeline.reconcile import Selection, select, to_station_v1
-from mareia_pipeline.sources import boe, cache, geonames, ioc, obis, rampe, worms
+from mareia_pipeline.sources import boe, cache, commons, geonames, ioc, obis, rampe, worms
 from mareia_pipeline.sources.tide_database import GaugeRecord, load_gauges
 from mareia_pipeline.tides.predict import Harmonic
 from mareia_pipeline.validate import Metrics, evaluate
@@ -358,6 +359,7 @@ def command_check(_: argparse.Namespace) -> int:
     failures += _check_normativa()
     failures += _check_areas_protegidas()
     failures += _check_especies()
+    failures += _check_fotos()
     return 1 if failures else 0
 
 
@@ -924,6 +926,154 @@ def command_especies(args: argparse.Namespace) -> int:
     return 0
 
 
+def _check_fotos() -> int:
+    """Gate F2 del dataset de fotos, más su cobertura. Offline y determinista.
+
+    * **F2 · ninguna foto sin autor y sin licencia.** Toda entrada de `fotos` publica `url`,
+      `descripcion`, `autor`, `licencia`, `licenciaUrl` y el `identificadaPor` que dice de qué ítem
+      de Wikidata y de qué propiedad sale. Publicar una imagen de Commons sin acreditar a su autor
+      y sin decir bajo qué licencia se reutiliza es incumplir la licencia con la que se obtuvo, y
+      **no se puede tapar con un pie global**: no hay una licencia común (seis distintas en doce
+      ficheros medidos).
+    * **Ningún hueco mudo.** Cada una de las claves del catálogo está exactamente en un sitio: en
+      `fotos` con su foto o en `sinFoto` **con su motivo**. Una especie que faltara del fichero
+      dejaría su ficha sin foto y sin explicación, que es lo que costaron los diez puertos sin área
+      de T-21.
+
+    Corre en cada ejecución de CI porque la promesa de la ingesta —que descarta la foto incompleta—
+    es del código de hoy, y esto es una condición del artefacto que se publica.
+    """
+    if not fotos.DATASET.exists():
+        print(
+            f"✗ falta {fotos.DATASET.relative_to(REPO_ROOT)}: genéralo con `python run.py fotos`",
+            file=sys.stderr,
+        )
+        return 1
+    dataset = fotos.cargar()
+    catalogo = especies.cargar()
+    problems = 0
+
+    cobertura = fotos.errores_de_cobertura(dataset, catalogo)
+    for error in cobertura:
+        print(f"✗ fotos · cobertura: {error}", file=sys.stderr)
+    problems += len(cobertura)
+    if not cobertura:
+        print(
+            f"✓ las {len(catalogo['especies'])} especies del catálogo están en el dataset de "
+            f"fotos: {len(dataset['fotos'])} con foto y {len(dataset['sinFoto'])} con el motivo "
+            "de no tenerla"
+        )
+
+    incompletas = fotos.errores_de_fotos(dataset)
+    for error in incompletas:
+        print(f"✗ F2 · foto: {error}", file=sys.stderr)
+    problems += len(incompletas)
+    if not incompletas:
+        reparto = fotos.reparto_de_licencias(dataset)
+        print(
+            f"✓ F2 · las {len(dataset['fotos'])} fotos publican autor y licencia "
+            f"({len(reparto)} licencias distintas) y el ítem de Wikidata que las identifica"
+        )
+    return problems
+
+
+def command_fotos(args: argparse.Namespace) -> int:
+    """Ingesta de Wikidata + Commons: `data/especies/catalogo.json` → `data/especies/fotos.json`.
+
+    Necesita red y no corre en CI, igual que `especies`: el dataset se commitea. Las consultas van
+    **en serie** y con caché, y cada una que sale de verdad a la red se identifica con nuestro
+    `User-Agent` y obedece el `Retry-After` — Wikimedia limita **por IP** y esto corre desde un
+    datacenter compartido.
+
+    Se pregunta **una vez por nombre científico** y no una por especie: el catálogo tiene 86 filas y
+    dos grafías del BOE («Thunnus thynnus» y «Thunnus Thynnus») resuelven al mismo taxón, así que
+    preguntar por fila sería pedirle a la fuente lo mismo dos veces.
+
+    Los gates se pasan **antes** de escribir: una foto sin autor o sin licencia y una especie sin
+    motivo no llegan ni al disco.
+    """
+    hoy = dt.datetime.now(dt.timezone.utc).date()
+    catalogo = especies.cargar()
+    nombres = sorted(
+        {
+            nombre
+            for especie in catalogo["especies"]
+            if (nombre := fotos.nombre_a_consultar(especie)) is not None
+        }
+    )
+    print(
+        f"{len(catalogo['especies'])} especies en {especies.DATASET.relative_to(REPO_ROOT)}, "
+        f"{len(nombres)} taxones distintos que preguntar"
+    )
+
+    resultados: dict[str, commons.Resultado] = {}
+    for nombre in nombres:
+        resultados[nombre] = commons.resolver(nombre, refresh=args.refresh)
+    reparto = Counter(resultado.desenlace for resultado in resultados.values())
+    for desenlace, cuantos in sorted(reparto.items()):
+        print(f"  Wikidata/Commons {desenlace:15} {cuantos} taxones")
+
+    # Segunda pasada: **sólo** las filas que no han podido publicar su propio taxón. Los préstamos
+    # posibles se calculan para todas las candidatas —es una función pura del catálogo—, pero
+    # preguntar por todos sería pedirle a la fuente los taxones de once géneros que ya publicaron su
+    # foto. Se paga la red de lo que de verdad se va a usar.
+    posibles = fotos.prestamos_posibles(catalogo)
+    prestamos: dict[str, fotos.Prestamo] = {}
+    for especie in catalogo["especies"]:
+        prestamo = posibles.get(especie["clave"])
+        if prestamo is None:
+            continue
+        propio = fotos.nombre_a_consultar(especie)
+        if propio is None or resultados[propio].foto is None:
+            prestamos[especie["clave"]] = prestamo
+    for prestamo in prestamos.values():
+        if prestamo.nombre not in resultados:
+            resultados[prestamo.nombre] = commons.resolver(prestamo.nombre, refresh=args.refresh)
+    for clave, prestamo in sorted(prestamos.items()):
+        publicable = resultados[prestamo.nombre].foto is not None
+        print(
+            f"  préstamo {clave:42} {prestamo.tipo:22} «{prestamo.nombre}» "
+            f"{'sí' if publicable else 'no'}"
+        )
+
+    dataset = fotos.construir_dataset(
+        catalogo, resultados, consultado_en=hoy, prestamos=prestamos
+    )
+    errores = [
+        *(f"cobertura: {error}" for error in fotos.errores_de_cobertura(dataset, catalogo)),
+        *(f"F2 · foto: {error}" for error in fotos.errores_de_fotos(dataset)),
+    ]
+    if errores:
+        for error in errores:
+            print(f"✗ {error}", file=sys.stderr)
+        return 1
+    fotos.volcar(dataset)
+
+    # El censo **por especie**, que no es el mismo que el de taxones de arriba: 86 filas del BOE se
+    # preguntan con menos nombres, y la que no resuelve en WoRMS ni se pregunta. Es la cifra que se
+    # publica en el README, así que se cuenta sobre lo escrito y no sobre lo consultado.
+    por_desenlace = Counter(
+        "prestada"
+        if especie["clave"] in dataset["fotos"] and especie["clave"] in prestamos
+        else (
+            resultados[nombre].desenlace
+            if (nombre := fotos.nombre_a_consultar(especie)) is not None
+            else "sin_taxon"
+        )
+        for especie in catalogo["especies"]
+    )
+    for desenlace, cuantas in sorted(por_desenlace.items()):
+        print(f"  especies {desenlace:15} {cuantas}")
+    for licencia, cuantas in fotos.reparto_de_licencias(dataset).items():
+        print(f"  licencia {licencia:30} {cuantas}")
+    print(
+        f"  {len(dataset['fotos'])} de las {len(catalogo['especies'])} especies publican foto; "
+        f"las otras {len(dataset['sinFoto'])} publican el motivo de no tenerla"
+    )
+    print(f"fotos → {fotos.DATASET.relative_to(REPO_ROOT)}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -950,6 +1100,9 @@ def main(argv: list[str] | None = None) -> int:
     subparsers.add_parser(
         "especies", help="ingesta de WoRMS + OBIS (catálogo de las especies que regula el BOE)"
     )
+    subparsers.add_parser(
+        "fotos", help="ingesta de Wikidata P18 + Commons (la foto de cada especie, con su licencia)"
+    )
 
     args = parser.parse_args(argv)
     if getattr(args, "commit", None) is None:
@@ -965,6 +1118,7 @@ def main(argv: list[str] | None = None) -> int:
         "verificar-normativa": command_verificar_normativa,
         "areas-protegidas": command_areas_protegidas,
         "especies": command_especies,
+        "fotos": command_fotos,
     }
     return handlers[args.command](args)
 
