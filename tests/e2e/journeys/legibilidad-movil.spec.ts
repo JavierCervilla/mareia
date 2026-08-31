@@ -105,8 +105,16 @@ const TIPOGRAFIAS_CARGADAS = `[...document.fonts].some((fuente) => fuente.status
 /** Los elementos que cruzan el borde derecho, buscados en `body *` y no en un contenedor sospechado. */
 const CULPABLES_DEL_DESBORDE = (ancho: number) => `(() => {
   if (document.documentElement.scrollWidth <= ${ancho} + 1) return [];
-  return [...document.querySelectorAll("body *")]
-    .filter((el) => el.getBoundingClientRect().right > ${ancho} + 1)
+  const cruzan = [...document.querySelectorAll("body *")]
+    .filter((el) => el.getBoundingClientRect().right > ${ancho} + 1);
+  // **Sólo las hojas.** Cuando algo desborda, TODOS sus ancestros desbordan con él: la lista en
+  // orden de documento sale llena de \`table\`, \`thead\`, \`tr\`, \`td\`… y el elemento que de verdad
+  // impone el ancho queda fuera del corte. Reproducido en el pase adversario (A-T26-1) poniéndole
+  // un \`min-width\` a \`.tabla-especies__literal\`: el gate enrojecía nombrando diez contenedores y
+  // **no nombraba al culpable**. Es la lección de A5 —acertar el veredicto y fallar el culpable—
+  // repitiéndose dentro del gate que la citaba.
+  const conCulpaPropia = cruzan.filter((el) => !cruzan.some((otro) => otro !== el && el.contains(otro)));
+  return conCulpaPropia
     .slice(0, 10)
     .map((el) => el.tagName.toLowerCase() + "." + (el.className || "(sin clase)"));
 })()`;
