@@ -36,8 +36,8 @@ import {
   creditoDeLaFoto,
   enlaceALaLicencia,
   EL_GENERO_APLICA_A_TODO_EL_GENERO,
+  DOMINIO_PUBLICO_SIN_CONDICIONES,
   espaciosEnElCaladero,
-  fichaDelFichero,
   FUERA_DEL_ANEXO_III,
   identificadaPor,
   LA_NORMA_NOMBRA_UNA_ESPECIE,
@@ -46,6 +46,7 @@ import {
   SIN_DATASET_DE_FOTOS,
   SIN_NOMBRE_COMUN,
   textoAlternativoDeLaFoto,
+  VER_EL_FICHERO_EN_COMMONS,
 } from "./textos.ts";
 import type { CatalogoDeEspecies, EspecieDelCatalogo } from "./tipos.ts";
 import { CatalogoIncompleto, clavesDelMismoTaxon, filasDeEspecies } from "./vista.ts";
@@ -95,12 +96,34 @@ export interface EspaciosDelCaladero {
 }
 
 /**
+ * Los códigos de licencia que **no tienen condiciones de reutilización que enlazar**.
+ *
+ * Es el mismo allowlist cerrado que aplica la ingesta (`LICENCIAS_SIN_CONDICIONES` en
+ * `sources/commons.py`), y está escrito aquí porque este módulo tiene que decidir **qué se pinta**
+ * sin leer el disco. Hoy tiene un solo elemento: `pd`, el dominio público, donde la obra no está
+ * sujeta a derechos y no hay texto de licencia al que mandar al lector. `cc0` **no** entra: es una
+ * renuncia con texto y con URL, y la trae.
+ */
+export const LICENCIAS_SIN_CONDICIONES: ReadonlySet<string> = new Set(["pd"]);
+
+/** Si una licencia no tiene condiciones que enlazar, dicho por su código legible por máquina. */
+export function esDominioPublico(licenciaCodigo: string): boolean {
+  return LICENCIAS_SIN_CONDICIONES.has(licenciaCodigo.trim().toLowerCase());
+}
+
+/**
  * Una foto de Commons con **todo lo que hace falta para poder publicarla**: su fichero, su autor, su
  * licencia y quién identificó el taxón.
  *
- * Es la forma del contrato congelado `fotos/v1`. Los cuatro últimos campos no son metadatos de
- * adorno: una imagen sin autor o sin licencia no se puede publicar, y una imagen cuya identificación
- * no se atribuye convierte en afirmación nuestra la decisión editorial de un tercero.
+ * Es la forma del contrato `fotos/v1`. Los campos de crédito no son metadatos de adorno: una imagen
+ * sin autor o sin licencia no se puede publicar, y una imagen cuya identificación no se atribuye
+ * convierte en afirmación nuestra la decisión editorial de un tercero.
+ *
+ * **`licenciaUrl` es el único opcional, y lo es en los dos sentidos** (enmienda del 2026-08-30):
+ * obligatoria cuando la licencia tiene condiciones, y **ausente** cuando no las tiene, porque el
+ * dominio público no tiene condiciones que enlazar. `licenciaCodigo` es lo que permite distinguir
+ * las dos cosas sin adivinarlo de la ausencia: sin él, «no hay condiciones» y «se perdió la URL»
+ * son el mismo JSON.
  */
 export interface FotoDeCommons {
   readonly fichero: string;
@@ -108,13 +131,29 @@ export interface FotoDeCommons {
   readonly descripcion: string;
   readonly autor: string;
   readonly licencia: string;
-  readonly licenciaUrl: string;
+  readonly licenciaCodigo: string;
+  readonly licenciaUrl?: string;
   readonly identificadaPor: {
     readonly fuente: string;
     readonly entidad: string;
     readonly propiedad: string;
   };
 }
+
+/**
+ * Cómo se publica la licencia de una foto, que **son dos formas y no una**.
+ *
+ * Con condiciones, el crédito lleva al texto de la licencia, que es donde se leen. Sin ellas no hay
+ * texto al que llevar, y un enlace vacío sería un crédito que no lleva a ninguna parte: se publica
+ * el estado y queda el enlace a la página del fichero —obligatorio en toda foto— como evidencia de
+ * quién lo declara. Que sean dos variantes de un tipo y no un `licenciaUrl` que a veces está vacío
+ * es lo que impide pintar un `<a href="">`.
+ */
+export type LicenciaEscrita =
+  /** La licencia tiene condiciones: el enlace va a su texto, rotulado con **cuál** es. */
+  | { readonly tipo: "enlace"; readonly url: string; readonly rotulo: string }
+  /** Dominio público: no hay condiciones que enlazar, y se dice en vez de callarlo. */
+  | { readonly tipo: "sin_condiciones"; readonly estado: string };
 
 /** La foto ya escrita: la imagen y **el crédito que viaja pegado a ella**, nunca en un pie global. */
 export interface FotoEscrita {
@@ -123,9 +162,8 @@ export interface FotoEscrita {
   readonly alternativo: string;
   /** «Foto de X · CC BY-SA 4.0» — autor y licencia en la misma frase y en el mismo bloque. */
   readonly credito: string;
-  /** Enlace al texto de la licencia, rotulado con **cuál** es: hay seis distintas en la muestra. */
-  readonly licenciaUrl: string;
-  readonly rotuloDeLaLicencia: string;
+  /** La licencia, enlazada a su texto o dicha como estado. Nunca un crédito mudo. */
+  readonly licencia: LicenciaEscrita;
   /** Enlace a la página del fichero, que es donde se comprueba el crédito sin fiarse de aquí. */
   readonly descripcionUrl: string;
   readonly rotuloDelFichero: string;
@@ -342,6 +380,31 @@ function espaciosDeLaFicha(fila: FilaDeEspecie, datos: DatosDeLaFicha): readonly
  * escribió la ingesta), y el dataset está y la tiene. Una clave que el dataset no mencione en
  * ninguno de sus dos mapas **levanta**: es el hueco mudo que `sinFoto` existe para impedir.
  */
+/**
+ * La licencia de una foto, escrita por la rama que le toca. **La manda el código de licencia**, no
+ * la ausencia de la URL: adivinar la excepción de un campo que falta es exactamente lo que
+ * `licenciaCodigo` vino a evitar.
+ *
+ * Y la tercera combinación —una licencia con condiciones a la que le falta su URL— **levanta**. No
+ * se degrada a «dominio público», que sería publicar sobre esa imagen una afirmación jurídica que
+ * nadie ha hecho, ni a un enlace vacío. Es la misma doctrina que el hueco mudo: si el dataset se
+ * contradice con su propio contrato, la ficha no elige por él.
+ */
+function licenciaDeLaFoto(fila: FilaDeEspecie, foto: FotoDeCommons): LicenciaEscrita {
+  if (esDominioPublico(foto.licenciaCodigo)) {
+    return { tipo: "sin_condiciones", estado: DOMINIO_PUBLICO_SIN_CONDICIONES };
+  }
+  if (foto.licenciaUrl === undefined) {
+    throw new CatalogoIncompleto(
+      fila.nombreBoe,
+      `su foto declara la licencia ${JSON.stringify(foto.licenciaCodigo)}, que tiene condiciones, ` +
+        "y no dice dónde están. Publicarla sin eso sería reutilizar una imagen ajena sin decir " +
+        "bajo qué permiso, y llamarla «dominio público» sería afirmarlo por nuestra cuenta.",
+    );
+  }
+  return { tipo: "enlace", url: foto.licenciaUrl, rotulo: enlaceALaLicencia(foto.licencia) };
+}
+
 function fotoDeLaFicha(fila: FilaDeEspecie, datos: DatosDeLaFicha): Rellenado<FotoEscrita> {
   const { fotos } = datos;
   if (fotos.tipo === "sin_dataset") return hueco(SIN_DATASET_DE_FOTOS);
@@ -362,10 +425,9 @@ function fotoDeLaFicha(fila: FilaDeEspecie, datos: DatosDeLaFicha): Rellenado<Fo
     // global de la página: en la muestra de 12 ficheros del plan hay seis licencias distintas, así
     // que un pie único sería falso para cinco de ellas. El gate F2 lo mide ahí.
     credito: creditoDeLaFoto(foto.autor, foto.licencia),
-    licenciaUrl: foto.licenciaUrl,
-    rotuloDeLaLicencia: enlaceALaLicencia(foto.licencia),
+    licencia: licenciaDeLaFoto(fila, foto),
     descripcionUrl: foto.descripcion,
-    rotuloDelFichero: fichaDelFichero(foto.fichero),
+    rotuloDelFichero: VER_EL_FICHERO_EN_COMMONS,
     identificacion: identificadaPor(
       foto.identificadaPor.fuente,
       foto.identificadaPor.entidad,

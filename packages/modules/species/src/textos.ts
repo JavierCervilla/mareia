@@ -738,10 +738,31 @@ export function textoAlternativoDeLaFoto(nombreBoe: string, fuente: string): str
   return `Fotografía que ${fuente} asocia al taxón «${nombreBoe}».`;
 }
 
-/** Enlace a la página del fichero, que es donde se comprueba el crédito sin fiarse de esta página. */
-export function fichaDelFichero(fichero: string): string {
-  return `Ver «${fichero}» en Wikimedia Commons`;
-}
+/**
+ * Enlace a la página del fichero, que es donde se comprueba el crédito sin fiarse de esta página.
+ *
+ * **No lleva el nombre del fichero, y ése es el cambio.** Lo llevaba, entero y entrecomillado, y
+ * los nombres de Commons son cadenas cualesquiera: uno de ellos —`File:Brachsenmakrele (Brama
+ * Brama) 22.12.2008 Strand von Callantsoog Nord Holland.JPG`— metía «22.12» en el texto visible de
+ * la ficha del bicho, donde un lector español lee un decimal con punto inglés y el gate A-19 lee
+ * una regresión. Las dos lecturas son razonables, y las dos son culpa de imprimir el nombre: la
+ * etiqueta de un enlace no necesita nombrar su destino cuando el destino **es** la página donde ese
+ * nombre está escrito. El `fichero` sigue en el dataset, que es donde hace falta: es procedencia.
+ */
+export const VER_EL_FICHERO_EN_COMMONS = "Ver el fichero en Wikimedia Commons";
+
+/**
+ * Lo que se lee **en lugar** del enlace al texto de la licencia cuando la foto es de dominio
+ * público.
+ *
+ * No hay texto de licencia al que mandar al lector porque no hay condiciones que cumplir, y un
+ * enlace vacío o un «licencia: —» serían un crédito que no lleva a ninguna parte. Lo que sí hay es
+ * quién lo declara y con qué motivo: la página del fichero en Commons, que va justo debajo y es
+ * obligatoria en toda foto publicada.
+ */
+export const DOMINIO_PUBLICO_SIN_CONDICIONES =
+  "Dominio público: no hay texto de licencia que enlazar porque no hay condiciones que cumplir. " +
+  "Quién lo declara así está en la página del fichero.";
 
 /** El día en que se consultaron los créditos. Una licencia envejece, y se dice cuándo se leyó. */
 export function fotosConsultadasEn(fecha: string): string {

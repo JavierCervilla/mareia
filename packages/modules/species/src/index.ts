@@ -32,13 +32,13 @@ export {
   COLUMNA_TAXON,
   correspondenciaNuestra,
   creditoDeLaFoto,
+  DOMINIO_PUBLICO_SIN_CONDICIONES,
   EL_FILTRO_NO_RECORTA_LA_FILA,
   EL_GENERO_APLICA_A_TODO_EL_GENERO,
   enElCaladero,
   enlaceALaLicencia,
   enlaceAlCatalogo,
   espaciosEnElCaladero,
-  fichaDelFichero,
   fichaEnWorms,
   FILTRO_TODAS,
   fotosConsultadasEn,
@@ -77,11 +77,12 @@ export {
   tituloDelCampo,
   tituloDeLaSeccion,
   tituloDelCatalogo,
+  VER_EL_FICHERO_EN_COMMONS,
   volverAlCatalogo,
 } from "./textos.ts";
 export type { CampoDeLaFicha, IdDeCampo } from "./textos.ts";
 
-export { fichasDeEspecies } from "./ficha.ts";
+export { esDominioPublico, fichasDeEspecies, LICENCIAS_SIN_CONDICIONES } from "./ficha.ts";
 export type {
   DatosDeLaFicha,
   EspaciosDelCaladero,
@@ -89,6 +90,7 @@ export type {
   FotoDeCommons,
   FotoEscrita,
   FotosDeLaFicha,
+  LicenciaEscrita,
   Rellenado,
 } from "./ficha.ts";
 

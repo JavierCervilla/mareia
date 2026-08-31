@@ -319,11 +319,22 @@ const migas = migasDeFichaDeEspecie(ficha.nombreBoe);
                   />
                   <figcaption class="ficha__credito">
                     <span class="ficha__dato">{ficha.foto.valor.credito}</span>
-                    <span class="ficha__enlace">
-                      <a href={ficha.foto.valor.licenciaUrl}>
-                        {ficha.foto.valor.rotuloDeLaLicencia}
-                      </a>
-                    </span>
+                    {/*
+                      La licencia, por la rama que le toque. Con condiciones, el enlace a su texto;
+                      sin ellas —dominio público—, el estado dicho, porque no hay texto que enlazar
+                      y un `href` vacío sería un crédito que no lleva a ninguna parte. A dónde ir a
+                      comprobarlo lo da igualmente el enlace al fichero, que va justo debajo y lo
+                      lleva TODA foto publicada.
+                    */}
+                    {ficha.foto.valor.licencia.tipo === "enlace" ? (
+                      <span class="ficha__enlace">
+                        <a href={ficha.foto.valor.licencia.url}>
+                          {ficha.foto.valor.licencia.rotulo}
+                        </a>
+                      </span>
+                    ) : (
+                      <span class="ficha__nota-de-campo">{ficha.foto.valor.licencia.estado}</span>
+                    )}
                     <span class="ficha__enlace">
                       <a href={ficha.foto.valor.descripcionUrl}>
                         {ficha.foto.valor.rotuloDelFichero}

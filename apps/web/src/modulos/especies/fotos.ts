@@ -7,8 +7,11 @@
  * T-20 los dos carriles divergieron en **nueve campos** porque el contrato no estaba escrito en
  * ninguna parte. Aquí sí lo está (`docs/trayectorias/T-23-plan.md`, entregable 2) y este lector lo
  * respeta al pie de la letra: `schema`, `consultadoEn`, `fotos` por clave de T-20 con
- * `fichero`/`url`/`descripcion`/`autor`/`licencia`/`licenciaUrl`/`identificadaPor`, y `sinFoto` por
- * clave con su `motivo`. Ni un nombre inventado.
+ * `fichero`/`url`/`descripcion`/`autor`/`licencia`/`licenciaCodigo`/`licenciaUrl`/
+ * `identificadaPor`, y `sinFoto` por clave con su `motivo`. Ni un nombre inventado. El contrato se
+ * **enmendó** el 2026-08-30 —`licenciaUrl` pasó a condicional y nació `licenciaCodigo`— y la
+ * enmienda está escrita en el mismo sitio que el contrato, que es lo que la hace una enmienda y no
+ * una divergencia de carril.
  *
  * Las tres decisiones que dan forma al fichero:
  *
@@ -30,6 +33,7 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 
+import { esDominioPublico } from "@mareia/module-species";
 import type { FotoDeCommons, FotosDeLaFicha, Rellenado } from "@mareia/module-species";
 
 import { DATA_DIR } from "../../datos/deps.ts";
@@ -68,23 +72,50 @@ function texto(fuente: Record<string, unknown>, clave: string, ruta: string): st
 }
 
 /**
- * Una foto, con los siete campos que hacen falta para poder publicarla.
+ * La URL de la licencia, que es **condicional en los dos sentidos** y por eso se lee aparte.
  *
- * Los siete son obligatorios y ninguno admite cadena vacía, que es la forma en que un crédito
- * desaparece sin que nada se ponga rojo: `autor: ""` pinta «Foto de  · CC BY-SA 4.0», que es una
- * atribución que no atribuye a nadie.
+ * Con condiciones, obligatoria y no vacía: la cadena vacía es la forma en que un enlace desaparece
+ * sin que nada enrojezca. Sin condiciones (dominio público), **ausente**: ni `""`, ni `null`, ni
+ * presente. Que la ausencia sea obligatoria y no meramente tolerada es lo que impide que esa rama
+ * —la única del dataset cuyo enlace nadie iría a comprobar, «total, es dominio público»— sea donde
+ * acabe escondida una URL rota.
+ */
+function leerLicenciaUrl(
+  crudo: Record<string, unknown>,
+  licenciaCodigo: string,
+  ruta: string,
+): string | undefined {
+  if (!esDominioPublico(licenciaCodigo)) return texto(crudo, "licenciaUrl", ruta);
+  if (!("licenciaUrl" in crudo)) return undefined;
+  throw new FotosMalFormadas(
+    `${ruta}.licenciaUrl no debería estar: ${ruta}.licenciaCodigo es ` +
+      `${JSON.stringify(licenciaCodigo)}, que no tiene condiciones de reutilización, así que no ` +
+      `hay URL de condiciones que enlazar (y es ${JSON.stringify(crudo["licenciaUrl"])})`,
+  );
+}
+
+/**
+ * Una foto, con los campos que hacen falta para poder publicarla.
+ *
+ * Todos son obligatorios menos `licenciaUrl` y ninguno admite cadena vacía, que es la forma en que
+ * un crédito desaparece sin que nada se ponga rojo: `autor: ""` pinta «Foto de  · CC BY-SA 4.0»,
+ * que es una atribución que no atribuye a nadie. `licenciaCodigo` **no** es una excepción a eso: es
+ * lo que hace que la de `licenciaUrl` sea comprobable en vez de confiada.
  */
 function leerFoto(valor: unknown, clave: string): FotoDeCommons {
   const ruta = `$.fotos[${JSON.stringify(clave)}]`;
   const crudo = objeto(valor, ruta);
   const identificada = objeto(crudo["identificadaPor"], `${ruta}.identificadaPor`);
+  const licenciaCodigo = texto(crudo, "licenciaCodigo", ruta);
+  const licenciaUrl = leerLicenciaUrl(crudo, licenciaCodigo, ruta);
   return {
     fichero: texto(crudo, "fichero", ruta),
     url: texto(crudo, "url", ruta),
     descripcion: texto(crudo, "descripcion", ruta),
     autor: texto(crudo, "autor", ruta),
     licencia: texto(crudo, "licencia", ruta),
-    licenciaUrl: texto(crudo, "licenciaUrl", ruta),
+    licenciaCodigo,
+    ...(licenciaUrl === undefined ? {} : { licenciaUrl }),
     identificadaPor: {
       fuente: texto(identificada, "fuente", `${ruta}.identificadaPor`),
       entidad: texto(identificada, "entidad", `${ruta}.identificadaPor`),

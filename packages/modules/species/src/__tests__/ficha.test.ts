@@ -134,8 +134,20 @@ const FOTO: FotoDeCommons = {
   descripcion: "https://commons.wikimedia.org/wiki/File:Sparus_aurata.jpg",
   autor: "Roberto Pillon",
   licencia: "CC BY-SA 3.0",
+  licenciaCodigo: "cc-by-sa-3.0",
   licenciaUrl: "https://creativecommons.org/licenses/by-sa/3.0/",
   identificadaPor: { fuente: "Wikidata", entidad: "Q26718", propiedad: "P18" },
+};
+
+/** La otra rama del contrato: dominio público, que no tiene condiciones ni URL que enlazar. */
+const FOTO_DE_DOMINIO_PUBLICO: FotoDeCommons = {
+  fichero: "File:Belone belone1.jpg",
+  url: "https://upload.wikimedia.org/wikipedia/commons/d/d2/Belone_belone1.jpg",
+  descripcion: "https://commons.wikimedia.org/wiki/File:Belone_belone1.jpg",
+  autor: "Krüger",
+  licencia: "Public domain",
+  licenciaCodigo: "pd",
+  identificadaPor: { fuente: "Wikidata", entidad: "Q643373", propiedad: "P18" },
 };
 
 function conFoto(clave: string, foto: FotoDeCommons = FOTO): FotosDeLaFicha {
@@ -281,12 +293,58 @@ test("la foto lleva autor y licencia en la misma frase, y dice quién la identif
   // Autor y licencia van JUNTOS en la misma frase: en la muestra de 12 ficheros del plan hay seis
   // licencias distintas, así que un pie global de la página sería falso para cinco de ellas.
   assert.equal(ficha.foto.valor.credito, "Foto de Roberto Pillon · CC BY-SA 3.0");
-  assert.equal(ficha.foto.valor.rotuloDeLaLicencia, "Texto de la licencia CC BY-SA 3.0");
-  assert.equal(ficha.foto.valor.licenciaUrl, FOTO.licenciaUrl);
+  assert.deepEqual(ficha.foto.valor.licencia, {
+    tipo: "enlace",
+    url: FOTO.licenciaUrl,
+    rotulo: "Texto de la licencia CC BY-SA 3.0",
+  });
+  // La etiqueta del enlace al fichero NO lleva su nombre: lleva a la página donde el nombre está, y
+  // los nombres de Commons meten cadenas cualesquiera en el texto de la ficha (uno traía «22.12»).
+  assert.equal(ficha.foto.valor.rotuloDelFichero, "Ver el fichero en Wikimedia Commons");
+  assert.doesNotMatch(ficha.foto.valor.rotuloDelFichero, /File:/u);
   // Y la identificación es de Wikidata, no nuestra: publicarla sin decirlo convertiría una decisión
   // editorial ajena en una afirmación nuestra sobre qué animal es ése.
   assert.match(ficha.foto.valor.identificacion, /Wikidata \(Q26718, propiedad P18\)/u);
   assert.match(ficha.foto.valor.alternativo, /Wikidata asocia al taxón «Sparus auratus»/u);
+});
+
+test("una foto de dominio público publica su estado, no un enlace a ninguna parte", () => {
+  const especies = [especie()];
+  const [ficha] = fichasDeEspecies(
+    catalogo(especies),
+    datos(especies, { fotos: conFoto("sparus-auratus", FOTO_DE_DOMINIO_PUBLICO) }),
+    FORMATO,
+  );
+  assert.equal(ficha?.foto.tipo, "dato");
+  if (ficha?.foto.tipo !== "dato") return;
+  // Autor y licencia SIGUEN publicándose: la promesa de F2 no se relaja por esta rama.
+  assert.equal(ficha.foto.valor.credito, "Foto de Krüger · Public domain");
+  assert.equal(ficha.foto.valor.licencia.tipo, "sin_condiciones");
+  // Y el crédito lleva a alguna parte: a la página del fichero, que es donde se declara el estado.
+  assert.equal(ficha.foto.valor.descripcionUrl, FOTO_DE_DOMINIO_PUBLICO.descripcion);
+});
+
+test("una licencia con condiciones y sin URL levanta, no se degrada a «dominio público»", () => {
+  const especies = [especie()];
+  // El sabotaje: una CC BY-SA a la que le falta su URL. Si la rama se decidiera por la ausencia de
+  // la URL, esto pintaría «dominio público» sobre una imagen que no lo es.
+  const sinCondicionesDeMentira: FotoDeCommons = {
+    ...FOTO_DE_DOMINIO_PUBLICO,
+    licencia: "CC BY-SA 3.0",
+    licenciaCodigo: "cc-by-sa-3.0",
+  };
+  assert.throws(
+    () =>
+      fichasDeEspecies(
+        catalogo(especies),
+        datos(especies, { fotos: conFoto("sparus-auratus", sinCondicionesDeMentira) }),
+        FORMATO,
+      ),
+    // Llamar «dominio público» a una CC BY-SA sería hacer por nuestra cuenta una afirmación
+    // jurídica sobre una imagen ajena, y es lo que pasaría si la rama se decidiera por la ausencia
+    // de la URL en vez de por el código de licencia.
+    /tiene condiciones/u,
+  );
 });
 
 test("una especie que el dataset de fotos no menciona hace levantar, no publica un hueco mudo", () => {

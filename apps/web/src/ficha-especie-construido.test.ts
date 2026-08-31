@@ -38,6 +38,7 @@ import { fileURLToPath } from "node:url";
 import {
   AQUI_NO_SE_PUNTUA_NADA,
   CAMPOS_DE_LA_FICHA,
+  DOMINIO_PUBLICO_SIN_CONDICIONES,
   FUERA_DEL_ANEXO_III,
   LA_FOTO_NO_IDENTIFICA,
   SIN_DATASET_DE_FOTOS,
@@ -294,6 +295,22 @@ test("F2 · toda foto publicada lleva su autor y su licencia en su misma figura"
     }
     if (!leido.includes(textoDe(LA_FOTO_NO_IDENTIFICA))) {
       desnudas.push(`${especie.nombreBoe}: la figura no avisa de que una foto no identifica`);
+    }
+    // NINGÚN CRÉDITO QUE NO LLEVE A NINGUNA PARTE. La página del fichero es obligatoria en toda
+    // foto: es donde se comprueba el crédito sin fiarse de esta página, y es lo único que ofrece
+    // una foto de dominio público EN LUGAR de la URL de condiciones que no tiene.
+    if (!figura.includes(`href="${esperada.valor.descripcion}"`)) {
+      desnudas.push(`${especie.nombreBoe}: la figura no enlaza la página del fichero`);
+    }
+    // Y la licencia, por la rama que le toque: enlazada a su texto cuando tiene condiciones, dicha
+    // como estado cuando no las tiene. Nunca callada, y nunca un enlace a la nada.
+    const licenciaUrl = esperada.valor.licenciaUrl;
+    if (licenciaUrl === undefined) {
+      if (!leido.includes(textoDe(DOMINIO_PUBLICO_SIN_CONDICIONES))) {
+        desnudas.push(`${especie.nombreBoe}: la figura no dice que no hay condiciones que enlazar`);
+      }
+    } else if (!figura.includes(`href="${licenciaUrl}"`)) {
+      desnudas.push(`${especie.nombreBoe}: la figura no enlaza el texto de la licencia`);
     }
   }
   assert.deepEqual(desnudas, [], "fotos publicadas sin su crédito pegado a ellas");
