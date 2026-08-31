@@ -81,10 +81,10 @@ export const COLUMNA_NOMBRE_BOE = "Nombre en el BOE";
 export const COLUMNA_TAXON = "Taxón aceptado hoy";
 
 /** Rótulo de la columna de caladeros y tallas. */
-export const COLUMNA_CALADEROS = "Caladeros que la regulan";
+export const COLUMNA_CALADEROS = "Caladeros";
 
 /** Rótulo de la columna de presencia. */
-export const COLUMNA_PRESENCIA = "Registros en OBIS";
+export const COLUMNA_PRESENCIA = "OBIS";
 
 /**
  * Cómo se rotula el enlace a la ficha de WoRMS: **con el nombre del registro al que lleva**.

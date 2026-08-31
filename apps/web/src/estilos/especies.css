@@ -261,12 +261,30 @@
   color: var(--m-ink);
 }
 
-/* Los nombres científicos son palabras largas sin espacios y la celda de la
-   izquierda es estrecha en un móvil: es el mismo defecto que H-5 curó en el
-   boletín de AEMET y en el ELI de la sección de tallas, y se aplica la misma
-   cura (`anywhere`, no `break-word`: sólo aquélla reduce el tamaño mínimo de
-   contenido, que es lo que empuja al contenedor). */
-.tabla-especies th,
-.tabla-especies td {
+/* `anywhere` SÓLO en el binomio científico, y esta acotación es el arreglo entero
+   de T-26.
+
+   La regla nació aplicada a `th, td` —a las 258 celdas— con este razonamiento,
+   que era correcto: los nombres científicos son palabras largas sin espacios,
+   la celda es estrecha en un móvil, y `anywhere` es la única cura que reduce el
+   tamaño mínimo de contenido, que es lo que empuja al contenedor. El problema
+   es que ESO ES JUSTAMENTE LO QUE HACE: al anular el `min-content` de todas las
+   celdas, el reparto `auto` de la tabla queda libre para dejar la tercera
+   columna en 8,9 `ch` a 360 px, y entonces `anywhere` mete ahí lo que sea,
+   letra a letra.
+
+   Medido en producción el 2026-08-31: **376 palabras partidas a media palabra**
+   a 360 px («Cantábri/co», «Mediterr/áneo», «abundanci/a»), y **365 de ellas
+   son daño colateral** — sólo 11 caen en el binomio que la regla venía a curar.
+   No es un caso límite de móviles pequeños: la página no se arregla hasta los
+   768 px (866 roturas a 320, 484 a 360, 219 a 390, 36 a 600, 0 a 768).
+
+   Acotada al binomio: 376 → 1 rotura, la tercera columna sube a 14,8 `ch` y la
+   página encoge un 34 %. La lección, que vale más que la regla: **una cura que
+   funciona en un elemento puede ser catastrófica aplicada a su contenedor**, y
+   el `min-content` de una celda es de la tabla entera, no de la celda. */
+.tabla-especies__boe,
+.tabla-especies__aceptado {
   overflow-wrap: anywhere;
 }
+
