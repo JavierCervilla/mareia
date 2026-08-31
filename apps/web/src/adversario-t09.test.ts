@@ -621,7 +621,10 @@ test("promesa 1 · la tabla del HTML construido dice lo que dicen los casos de u
       hourCycle: "h23",
     }).format(new Date(evento.timeUtcMs));
     const nombre = evento.kind === "high" ? "pleamar" : "bajamar";
-    return `${nombre} ${hora} ${evento.height_m.toFixed(2).replace(".", ",")} m`;
+    // El `\u00a0` va ESCRITO y no importado de `formato.ts` a propósito: este recorrido
+    // re-deriva a mano lo que la página debería decir, y tomar prestada la función que la
+    // escribe lo convertiría en una comprobación de que el código es igual a sí mismo.
+    return `${nombre} ${hora} ${evento.height_m.toFixed(2).replace(".", ",")}\u00a0m`;
   });
 
   assert.deepEqual(filas, esperadas, "la tabla de mareas no coincide con los casos de uso");

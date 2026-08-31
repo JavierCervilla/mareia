@@ -33,14 +33,30 @@
 
 .indice__entrada {
   border-top: 1px solid var(--m-rule-soft);
-  padding: 9px 0;
 }
 
+/* El relleno vive en el ENLACE, no en la entrada que lo contiene.
+
+   Medido a 360 px: el ritmo vertical de la lista era correcto —44,8 px de paso, por encima de los
+   44 que pide la guía— pero el **área pulsable** eran 21,8 px, la mitad, porque los 9 px de relleno
+   los ponía el `li` y el `a` sólo ocupaba su línea de texto. Entre un enlace y el siguiente quedaban
+   **23 px de hueco muerto**, y en la portada **170 de 170** objetivos bajaban de 44 px de alto.
+
+   Nota honesta de la auditoría: como el hueco está vacío, un toque fallido **no acierta el enlace
+   equivocado** — sólo no acierta ninguno. Por eso esto es una molestia y no un peligro, y por eso el
+   gate de objetivo táctil se deja fuera de T-26: aun con esto arreglado seguiría naciendo en rojo
+   —quedan 14 objetivos por debajo de 44 px en la portada—, y un gate que nace en rojo se ignora.
+
+   Y el relleno sube de 9 a 12 px: con 9 el enlace medía 39,8 px, que es mejor que 21,8 pero sigue
+   por debajo del criterio. Con 12 mide **45,8** y los objetivos que no llegan a 44 en la portada
+   bajan de **170 a 14**. El coste es el ritmo: la lista se estira ~6 px por fila, unos 900 px sobre
+   una página de ~57.000. Se paga. */
 .indice__enlace {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
+  padding: 12px 0;
   text-decoration: none;
 }
 

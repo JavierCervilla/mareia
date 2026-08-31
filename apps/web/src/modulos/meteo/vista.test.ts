@@ -12,6 +12,7 @@
  */
 
 import assert from "node:assert/strict";
+import { PEGADO } from "../../formato.ts";
 import test from "node:test";
 
 import type { BulletinPayload, WeatherPayload } from "@mareia/module-weather/ui";
@@ -91,12 +92,12 @@ test("estado ok: el mar y la atmósfera traen sus magnitudes con dirección en r
   const atmosfera = textoDe(bloque(vista, "meteo-atmosfera"));
 
   // Los valores son los de la captura real de Open-Meteo para la celda 42,2 / -8,7.
-  assert.match(mar, /Ola \| 1,68 m \| de 287° \(ONO\) · periodo 8,9 s/u);
-  assert.match(mar, /Mar de fondo \| 1,68 m \| de 287° \(ONO\) · periodo 7,5 s/u);
-  assert.match(mar, /Temperatura del agua \| 18,3 °C/u);
-  assert.match(atmosfera, /Viento \| 9,4 km\/h \| de 272° \(O\) · rachas 20,2 km\/h/u);
-  assert.match(atmosfera, /Presión \| 1021,5 hPa/u);
-  assert.match(atmosfera, /Visibilidad \| 33,6 km/u);
+  assert.match(mar, /Ola \| 1,68\sm \| de 287° \(ONO\) · periodo 8,9\ss/u);
+  assert.match(mar, /Mar de fondo \| 1,68\sm \| de 287° \(ONO\) · periodo 7,5\ss/u);
+  assert.match(mar, /Temperatura del agua \| 18,3\s°C/u);
+  assert.match(atmosfera, /Viento \| 9,4\skm\/h \| de 272° \(O\) · rachas 20,2\skm\/h/u);
+  assert.match(atmosfera, /Presión \| 1021,5\shPa/u);
+  assert.match(atmosfera, /Visibilidad \| 33,6\skm/u);
   assert.match(atmosfera, /Índice UV \| 1,3/u);
 });
 
@@ -105,7 +106,7 @@ test("un 0 del modelo es un cero, no un hueco: la mar de viento en calma se publ
   const marDeViento = mar.filas.find((fila) => fila.titulo === "Mar de viento");
 
   assert.ok(marDeViento);
-  assert.equal(marDeViento.valor, "0,00 m");
+  assert.equal(marDeViento.valor, `0,00${PEGADO}m`);
   assert.equal(marDeViento.ausencia, undefined, "un 0 medido no puede pintarse como ausencia");
 });
 
@@ -135,7 +136,7 @@ test("estado stale: la antigüedad va en la cara, con horas y minutos", () => {
 test("estado stale: sigue enseñando el dato viejo, que para eso lo guarda el backend", () => {
   const mar = bloque(escena(METEO_STALE, BOLETIN_OK), "meteo-mar");
 
-  assert.match(textoDe(mar), /Ola \| 1,68 m/u, "un dato caducado se publica, marcado, no se esconde");
+  assert.match(textoDe(mar), /Ola \| 1,68\sm/u, "un dato caducado se publica, marcado, no se esconde");
 });
 
 test("la edad se mide como intervalo desde que llegó la respuesta, no con el reloj del cliente", () => {
@@ -291,7 +292,7 @@ test("el mar que ya llegó no espera al boletín: se pinta con su sello mientras
   );
 
   assert.equal(bloque(vista, "meteo-mar").sello.clase, "fresco");
-  assert.match(textoDe(bloque(vista, "meteo-mar")), /Ola \| 1,68 m/u);
+  assert.match(textoDe(bloque(vista, "meteo-mar")), /Ola \| 1,68\sm/u);
   assert.equal(bloque(vista, "meteo-boletin").sello.clase, "pidiendo");
 });
 
@@ -331,7 +332,7 @@ test("un hueco del modelo NO se dice como una fuente caída: son dos ausencias d
   assert.equal(ola.valor, undefined);
   assert.equal(ola.ausencia, "el modelo no publica la altura de esta ola en esta celda");
   // Y la atmósfera de la misma celda sí trae valores: el hueco es del modelo de oleaje, no del día.
-  assert.match(textoDe(bloque(vista, "meteo-atmosfera")), /Viento \| 7,0 km\/h/u);
+  assert.match(textoDe(bloque(vista, "meteo-atmosfera")), /Viento \| 7,0\skm\/h/u);
 });
 
 // --- Lo que oye quien no ve la pantalla ----------------------------------------------------------

@@ -42,8 +42,35 @@ export function numero(valor: number, decimales = 2): string {
 }
 
 /** Una altura de marea, con su unidad. */
+/**
+ * El espacio que **no** separa una cifra de su unidad: U+00A0.
+ *
+ * Medido en producción el 2026-08-31: a 360 px, **25 de las 31 filas** de la tabla del mes partían
+ * la altura de su unidad con un salto de línea —`3,33` arriba y `m` abajo—. A 390 px, ninguna: es el
+ * ancho el que decide, y por eso no se ve escribiendo el código ni leyendo el HTML.
+ *
+ * Una cifra y su unidad son **un solo dato**: «3,33» sin su «m» no dice nada, y peor, dice algo
+ * distinto según lo que el lector suponga. Es la misma cura que T-19 aplicó a las tallas del BOE, y
+ * va aquí —donde el número se convierte en texto— y no en cada plantilla, porque una plantilla que
+ * se olvide vuelve a separarlos sin que nada enrojezca.
+ *
+ * Se aplica a las **cuatro** unidades del sitio y no sólo a la que se midió partida: el defecto es de
+ * la forma del dato, no de la tabla del mes, y dejar tres latentes para superficies que la auditoría
+ * no midió a 360 px es la lección de T-20 —una superficie nueva no hereda los gates de la vieja—
+ * sabida y desoída.
+ */
+export const PEGADO = "\u00a0";
+
+/**
+ * Una cifra ya formateada y su unidad, pegadas. Úsese **siempre**: es la única forma de que la
+ * próxima magnitud que alguien escriba no nazca separable, y el gate del `dist/` la vigila.
+ */
+export function conUnidad(cifra: string, unidad: string): string {
+  return `${cifra}${PEGADO}${unidad}`;
+}
+
 export function metros(valor: number, decimales = 2): string {
-  return `${numero(valor, decimales)} m`;
+  return `${numero(valor, decimales)}${PEGADO}m`;
 }
 
 /**
@@ -53,7 +80,7 @@ export function metros(valor: number, decimales = 2): string {
  * decimales para entender que ahí no sube nada.
  */
 export function centimetros(valorEnMetros: number): string {
-  return `${Math.round(valorEnMetros * 100)} cm`;
+  return `${Math.round(valorEnMetros * 100)}${PEGADO}cm`;
 }
 
 /** Un ángulo en grados, redondeado al grado. */
@@ -63,7 +90,7 @@ export function grados(valor: number): string {
 
 /** Un porcentaje a partir de una fracción 0–1. */
 export function porcentaje(fraccion: number, decimales = 0): string {
-  return `${numero(fraccion * 100, decimales)} %`;
+  return `${numero(fraccion * 100, decimales)}${PEGADO}%`;
 }
 
 /** Coordenadas del puerto como se escriben en una carta: «43,362° N · 8,406° O». */
@@ -77,7 +104,7 @@ const kilometrosFmt = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 }
 
 /** Una distancia en kilómetros con separador de millar español: «384.400 km». */
 export function kilometros(valor: number): string {
-  return `${kilometrosFmt.format(valor)} km`;
+  return `${kilometrosFmt.format(valor)}${PEGADO}km`;
 }
 
 const ROSA = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"];

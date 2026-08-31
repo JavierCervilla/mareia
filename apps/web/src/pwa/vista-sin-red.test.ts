@@ -8,6 +8,7 @@
  */
 
 import assert from "node:assert/strict";
+import { PEGADO } from "../formato.ts";
 import test from "node:test";
 
 import { kilobytes, vistaSinRed } from "./vista-sin-red.ts";
@@ -71,7 +72,7 @@ test("estado 4 · guardado y con red: la edad de la copia va delante y el peso s
 
   assert.deepEqual(vista.accion, { verbo: "olvidar", etiqueta: "Dejar de guardar Vigo" });
   assert.match(vista.sello.titular, /Guardado en este dispositivo hace 2 h/u);
-  assert.match(texto(vista), /3,4 kB/u);
+  assert.match(texto(vista), /3,4\skB/u);
 });
 
 test("estado 5 · guardado y sin red: esto es la copia, de cuándo es, y qué depende de la red", () => {
@@ -112,7 +113,7 @@ test("estado 6 · si el registro dice guardado y los bytes no están, se dice y 
   );
   assert.match(vista.sello.titular, /ya no está en este dispositivo/u);
   // Las constantes sí siguen: se dice qué se puede hacer todavía y qué no.
-  assert.match(texto(vista), /3,4 kB/u);
+  assert.match(texto(vista), /3,4\skB/u);
   assert.match(texto(vista), /lo que no está es la página/u);
   assert.deepEqual(vista.accion, { verbo: "guardar", etiqueta: "Volver a guardar Vigo" });
 });
@@ -203,8 +204,8 @@ test("el tono del sello acompaña al texto, y sin red siempre avisa", () => {
  * cifra que se publica al lado de «ocupa».
  */
 test("el peso se publica en kB del SI, con la unidad escrita y sin ambigüedad", () => {
-  assert.equal(kilobytes(3_412), "3,4 kB");
-  assert.equal(kilobytes(1_000), "1,0 kB");
-  assert.equal(kilobytes(0), "0,0 kB");
+  assert.equal(kilobytes(3_412), `3,4${PEGADO}kB`);
+  assert.equal(kilobytes(1_000), `1,0${PEGADO}kB`);
+  assert.equal(kilobytes(0), `0,0${PEGADO}kB`);
   assert.doesNotMatch(kilobytes(3_412), /KiB|KB/u);
 });
