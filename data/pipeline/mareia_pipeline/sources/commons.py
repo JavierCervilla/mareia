@@ -25,9 +25,25 @@ rango `preferred`, nunca las `deprecated`, y se publica **la primera cuyos metad
 completos**. Descartar el ítem entero porque su imagen principal no acredite autor sería tirar una
 identificación buena por un problema de otra cosa.
 
-**3 · Sin autor o sin licencia, no se publica.** `extmetadata` da `Artist`, `LicenseShortName` y
-`LicenseUrl`, y los tres faltan a veces. Una imagen sin autor o sin licencia **no se puede
-publicar**: la fila cae a `sinFoto` con el motivo dicho, y **aborta la fila, no el proceso**.
+**3 · Sin autor o sin licencia, no se publica; la URL de la licencia es condicional.**
+`extmetadata` da `Artist`, `LicenseShortName` y `LicenseUrl`, y los tres faltan a veces. Autor y
+licencia no tienen excepción: sin ellos la fila cae a `sinFoto` con el motivo dicho, y **aborta la
+fila, no el proceso**.
+
+La URL sí la tiene, y es una enmienda del 2026-08-30 pagada con una medición. Exigirla en toda foto
+dejó 15 especies sin imagen teniendo una perfectamente acreditada: **25 de los 26 ficheros** que
+había detrás de los huecos son `License = "pd"`, `LicenseShortName = "Public domain"`,
+`Copyrighted = "False"` y **sin `LicenseUrl`**. El dominio público no tiene condiciones, así que no
+hay condiciones que enlazar: pedir su URL era un error de categoría, y encima publicaba un motivo
+falso —«una imagen sin autor o sin licencia no se publica»— de ficheros que publican las dos cosas.
+
+De ahí las dos piezas que este módulo añade. Se piden a la API **dos** campos más, `License` (el
+código legible por máquina) y `Copyrighted`, y una licencia cuenta como sin condiciones **sólo si
+los dos están de acuerdo**: el código en un allowlist cerrado (`LICENCIAS_SIN_CONDICIONES`) y
+`Copyrighted == "False"`. Un campo solo es una afirmación; dos que coinciden es una comprobación.
+Cualquier otra licencia sin URL sigue cayendo a `sinFoto`, y `descripcion` —la página del fichero en
+Commons— es lo que el dominio público ofrece **en lugar** de la URL: el lector siempre llega a la
+fuente.
 
 **4 · La URL que devuelve la API viene con parámetros de analítica.** Medido: el `url` del
 `imageinfo` acaba en `?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original`.
@@ -41,9 +57,9 @@ del datacenter. De ahí el `User-Agent` que dice quiénes somos y dónde encontr
 caché, igual que en `sources.worms` y `sources.rampe`.
 
 **Licencia**: no hay «la licencia de las fotos». Es **por fichero** —seis distintas en la muestra de
-doce del plan, incluida una `CC BY-SA 3.0 de` de jurisdicción alemana— y por eso `licencia`, `autor`
-y `licenciaUrl` viajan dentro de cada foto y no en un pie global. **No se mirrorea Commons**: se
-guardan los metadatos y se enlaza el fichero.
+doce del plan, incluida una `CC BY-SA 3.0 de` de jurisdicción alemana— y por eso `licencia`,
+`licenciaCodigo`, `autor` y (cuando la hay) `licenciaUrl` viajan dentro de cada foto y no en un pie
+global. **No se mirrorea Commons**: se guardan los metadatos y se enlaza el fichero.
 
 Todo es público y anónimo: no se usa ninguna credencial.
 """
@@ -91,10 +107,33 @@ RANGO_DESCARTADO = "deprecated"
 #: Rango de los enunciados que la propia Wikidata pone por delante.
 RANGO_PREFERIDO = "preferred"
 
-#: Los tres metadatos sin los cuales la foto no se publica, con el nombre que les da Commons.
+#: Los metadatos que se le piden a Commons, con el nombre que les da Commons. Los tres primeros son
+#: lo que se publica; los dos últimos son los que deciden si hay condiciones que enlazar.
 ARTISTA = "Artist"
 LICENCIA_CORTA = "LicenseShortName"
 LICENCIA_URL = "LicenseUrl"
+
+#: El código de licencia legible por máquina (`cc-by-sa-4.0`, `pd`, `cc0`). Se publica porque es lo
+#: que hace la excepción del dominio público **comprobable en el artefacto**: sin él, el gate F2
+#: —que lee el JSON publicado, no la ingesta— no puede distinguir «dominio público, no hay
+#: condiciones» de «se nos perdió la URL».
+LICENCIA_CODIGO = "License"
+
+#: Si Commons dice que la obra está sujeta a derechos de autor. Viene como `"True"`/`"False"`.
+CON_DERECHOS = "Copyrighted"
+
+#: Los códigos de `License` que significan **no hay condiciones de reutilización que enlazar**.
+#:
+#: Es un **allowlist cerrado** y hoy tiene un solo elemento, y esa estrechez es la decisión. `pd` es
+#: el dominio público: la obra no está sujeta a derechos, así que no hay texto de licencia al que
+#: mandar al lector. Lo que **no** entra: `cc0` —que sí es una renuncia con texto y con URL, y la
+#: trae—, ni ninguna `cc-*`, ni «no me consta la licencia». Una lista abierta («todo lo que no
+#: traiga URL») convertiría el descuido de la fuente en un permiso.
+LICENCIAS_SIN_CONDICIONES: frozenset[str] = frozenset({"pd"})
+
+#: El valor de `Copyrighted` que corrobora al allowlist. Se compara en minúsculas porque lo que se
+#: comprueba es lo que dijo la fuente, no cómo lo escribió.
+SIN_DERECHOS_DE_AUTOR = "false"
 
 _ETIQUETA_HTML = re.compile(r"<[^>]+>")
 #: Forma de un ítem de Wikidata. Se comprueba aquí y lo vuelve a comprobar el gate F2
@@ -129,25 +168,56 @@ class ErrorCommons(RuntimeError):
 
 @dataclass(frozen=True)
 class Metadatos:
-    """Lo que Commons dice de un fichero. Los tres campos publicables pueden faltar, y faltan."""
+    """Lo que Commons dice de un fichero. Los campos publicables pueden faltar, y faltan."""
 
     fichero: str
     url: str | None
     descripcion: str | None
     autor: str | None
     licencia: str | None
+    licencia_codigo: str | None
     licencia_url: str | None
+    #: El `Copyrighted` crudo. No se publica: sólo corrobora al código de licencia, que es lo que
+    #: convierte la excepción del dominio público en una comprobación y no en una afirmación.
+    con_derechos: str | None
+
+    @property
+    def dominio_publico(self) -> bool:
+        """Si esta imagen **no tiene condiciones de reutilización que enlazar**.
+
+        Hacen falta tres cosas, y ninguna sobra:
+
+        1. El código de licencia está en el allowlist cerrado (`LICENCIAS_SIN_CONDICIONES`).
+        2. `Copyrighted` dice que **no** hay derechos. Es el segundo campo, independiente del
+           primero: uno solo es una afirmación de la fuente; dos que coinciden es una comprobación.
+        3. La fuente **no** da `LicenseUrl`. La excepción existe porque no hay condiciones que
+           enlazar, así que el día en que Commons enlazara unas, el fichero se publica por el camino
+           normal —con su URL— y no por la excepción. Es lo que hace imposible por construcción que
+           una entrada de dominio público lleve URL: ni buena, ni rota.
+        """
+        return (
+            (self.licencia_codigo or "").strip().lower() in LICENCIAS_SIN_CONDICIONES
+            and (self.con_derechos or "").strip().lower() == SIN_DERECHOS_DE_AUTOR
+            and not self.licencia_url
+        )
 
     @property
     def carencias(self) -> tuple[str, ...]:
-        """Qué le falta para poder publicarse, dicho con el nombre que usa el dataset."""
+        """Qué le falta para poder publicarse, dicho con el nombre que usa el dataset.
+
+        `licenciaUrl` es el único campo condicional: se exige salvo que los dos campos de la fuente
+        estén de acuerdo en que no hay condiciones que enlazar. Autor, licencia y su código no
+        tienen excepción ninguna.
+        """
         faltan = {
             "url": self.url,
             "descripcion": self.descripcion,
             "autor": self.autor,
             "licencia": self.licencia,
-            "licenciaUrl": self.licencia_url,
+            "licenciaCodigo": self.licencia_codigo,
         }
+        if not self.dominio_publico:
+            faltan["licenciaUrl"] = self.licencia_url
         return tuple(campo for campo, valor in faltan.items() if not valor)
 
     @property
@@ -165,7 +235,12 @@ class Foto:
     descripcion: str
     autor: str
     licencia: str
-    licencia_url: str
+    #: El código legible por máquina de la licencia. Obligatorio siempre.
+    licencia_codigo: str
+    #: La URL de las condiciones, o ``None`` cuando no hay condiciones que enlazar. `None` no es «se
+    #: nos perdió»: es la única forma de decir «dominio público» sin inventarse un enlace, y el
+    #: contrato exige entonces que el campo **no aparezca** en el JSON.
+    licencia_url: str | None
 
 
 @dataclass(frozen=True)
@@ -217,14 +292,21 @@ def url_claims(entidad: str, propiedad: str) -> str:
 
 
 def url_imageinfo(fichero: str) -> str:
-    """La URL del fichero y su `extmetadata`, pidiendo **sólo** los tres campos que se publican."""
+    """La URL del fichero y su `extmetadata`, pidiendo **sólo** los campos que hacen falta.
+
+    Cinco: los tres que se publican tal cual y los dos que deciden si hay condiciones que enlazar.
+    `extmetadata` trae por defecto decenas de campos —descripción, categorías, EXIF, fechas— y
+    pedirlos todos sería guardar en caché un montón de dato ajeno del que no respondemos.
+    """
     parametros = {
         "action": "query",
         "format": "json",
         "titles": fichero if fichero.startswith("File:") else f"File:{fichero}",
         "prop": "imageinfo",
         "iiprop": "url|extmetadata",
-        "iiextmetadatafilter": f"{LICENCIA_CORTA}|{ARTISTA}|{LICENCIA_URL}",
+        "iiextmetadatafilter": (
+            f"{LICENCIA_CORTA}|{ARTISTA}|{LICENCIA_URL}|{LICENCIA_CODIGO}|{CON_DERECHOS}"
+        ),
     }
     return f"{URL_COMMONS}?{urllib.parse.urlencode(parametros)}"
 
@@ -358,7 +440,7 @@ def leer_metadatos(cuerpo: bytes, *, fichero: str) -> Metadatos:
     pagina = next(iter(paginas.values()))
     if "missing" in pagina or not pagina.get("imageinfo"):
         return Metadatos(fichero=fichero, url=None, descripcion=None, autor=None, licencia=None,
-                         licencia_url=None)
+                         licencia_codigo=None, licencia_url=None, con_derechos=None)
     info = pagina["imageinfo"][0]
     extra = info.get("extmetadata") or {}
 
@@ -372,7 +454,9 @@ def leer_metadatos(cuerpo: bytes, *, fichero: str) -> Metadatos:
         descripcion=_texto(info.get("descriptionurl")),
         autor=texto_plano(campo(ARTISTA)),
         licencia=_texto(campo(LICENCIA_CORTA)),
+        licencia_codigo=_texto(campo(LICENCIA_CODIGO)),
         licencia_url=_texto(campo(LICENCIA_URL)),
+        con_derechos=_texto(campo(CON_DERECHOS)),
     )
 
 
@@ -386,6 +470,31 @@ def descargar(url: str, *, refresh: bool = False) -> bytes:
     return cache.fetch_educado(
         url, suffix=".json", refresh=refresh, agente=AGENTE, pausa=PAUSA_SEGUNDOS
     )
+
+
+#: Los campos cuya falta es «no acredita a su autor» y «no dice bajo qué condiciones», que son las
+#: dos mitades del crédito. Se separan porque el motivo tiene que nombrar la que de verdad falta.
+_ES_LICENCIA = frozenset({"licencia", "licenciaCodigo", "licenciaUrl"})
+
+
+def _cierre_del_motivo(faltan: set[str]) -> str:
+    """La última frase del motivo del hueco, que tiene que decir la verdad sobre lo que falta.
+
+    Había una sola, escrita para el caso frecuente —«una imagen sin autor o sin licencia no se
+    publica»— y se publicaba también donde no venía a cuento: el 2026-08-30, **15 fichas** daban
+    esa razón de ficheros que acreditan autor **y** licencia y a los que sólo les faltaba una URL de
+    condiciones que el dominio público no tiene. Un motivo que no es el motivo es peor que no dar
+    ninguno, porque el que lo lee no vuelve a preguntar; y era, además, la única señal de que el
+    contrato estaba mal.
+    """
+    partes = []
+    if "autor" in faltan:
+        partes.append("sin autor")
+    if faltan & _ES_LICENCIA:
+        partes.append("sin licencia")
+    if faltan - _ES_LICENCIA - {"autor"}:
+        partes.append("sin imagen ni página donde comprobarla")
+    return f"Una foto {' y '.join(partes)} no se publica, y el hueco es más honrado"
 
 
 def _sin_foto(
@@ -446,6 +555,7 @@ def resolver(nombre: str, *, refresh: bool = False) -> Resultado:
         )
 
     descartadas: list[str] = []
+    faltan: set[str] = set()
     for fichero in ficheros:
         metadatos = leer_metadatos(
             descargar(url_imageinfo(fichero), refresh=refresh), fichero=fichero
@@ -461,15 +571,16 @@ def resolver(nombre: str, *, refresh: bool = False) -> Resultado:
                     descripcion=metadatos.descripcion or "",
                     autor=metadatos.autor or "",
                     licencia=metadatos.licencia or "",
-                    licencia_url=metadatos.licencia_url or "",
+                    licencia_codigo=metadatos.licencia_codigo or "",
+                    licencia_url=metadatos.licencia_url,
                 ),
             )
         descartadas.append(f"«{fichero}» no publica {', '.join(metadatos.carencias)}")
+        faltan.update(metadatos.carencias)
     return _sin_foto(
         consultado,
         f"ninguna de las {len(ficheros)} imágenes {PROPIEDAD_IMAGEN} de «{consultado}» ({entidad}) "
-        f"se puede publicar: {'; '.join(descartadas)}. Una imagen sin autor o sin licencia no se "
-        "publica, y el hueco es más honrado",
+        f"se puede publicar: {'; '.join(descartadas)}. {_cierre_del_motivo(faltan)}",
         SIN_METADATOS,
         entidad,
     )

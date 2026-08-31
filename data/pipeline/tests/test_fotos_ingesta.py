@@ -54,6 +54,17 @@ def _imageinfo() -> bytes:
     return _fixture("commons-imageinfo-dicentrarchus-labrax.json")
 
 
+def _imageinfo_dominio_publico() -> bytes:
+    """La captura de `File:Belone belone1.jpg`: `pd`, `Copyrighted=False` y **sin `LicenseUrl`**.
+
+    Es uno de los 25 de 26 ficheros de dominio público que había detrás de los huecos del
+    2026-08-30, y está aquí porque el caso que rompía el contrato no se puede probar con un doble:
+    lo que hay que comprobar es que la fuente **de verdad** no manda URL de condiciones cuando la
+    imagen no las tiene.
+    """
+    return _fixture("commons-imageinfo-belone-belone.json")
+
+
 # =====================================================================================
 # 1 · Leer lo que la fuente dice de verdad
 # =====================================================================================
@@ -140,6 +151,69 @@ def test_el_autor_se_publica_en_texto_y_no_en_html() -> None:
     assert commons.texto_plano('<a href="//x" title="y">Hans Hillewaert</a>') == "Hans Hillewaert"
     assert commons.texto_plano("Ana &amp; Luis") == "Ana & Luis"
     assert commons.texto_plano("<span></span>") is None
+
+
+def test_un_fichero_de_dominio_publico_se_publica_sin_url_de_condiciones() -> None:
+    """El dominio público no tiene condiciones, así que no hay URL de condiciones que exigirle.
+
+    Exigírsela era un error de categoría, y el precio medido el 2026-08-30 fueron **15 especies**
+    sin foto teniendo una perfectamente acreditada — y, peor, con un motivo publicado que decía que
+    faltaba el autor o la licencia de ficheros que publican las dos cosas.
+    """
+    metadatos = commons.leer_metadatos(
+        _imageinfo_dominio_publico(), fichero="File:Belone belone1.jpg"
+    )
+    assert metadatos.autor == "Kr\u00fcger"
+    assert metadatos.licencia == "Public domain"
+    assert metadatos.licencia_codigo == "pd"
+    assert metadatos.licencia_url is None
+    assert metadatos.dominio_publico
+    assert metadatos.completa, metadatos.carencias
+
+
+def test_el_dominio_publico_lo_dicen_dos_campos_y_no_uno() -> None:
+    """`License = pd` es una afirmación; `License = pd` **y** `Copyrighted = False` es una
+    comprobación.
+
+    Un fichero que dijera ser de dominio público con la plantilla y a la vez declarase derechos se
+    está contradiciendo, y la excepción —la única puerta por la que una foto se publica sin URL de
+    licencia— no se abre con un solo campo, que es justo por donde se colaría lo que no debe.
+    """
+    crudo = json.loads(_imageinfo_dominio_publico())
+    extra = next(iter(crudo["query"]["pages"].values()))["imageinfo"][0]["extmetadata"]
+    extra["Copyrighted"]["value"] = "True"
+    metadatos = commons.leer_metadatos(json.dumps(crudo).encode(), fichero="File:x")
+    assert not metadatos.dominio_publico
+    assert metadatos.carencias == ("licenciaUrl",)
+    assert not metadatos.completa
+
+
+def test_una_licencia_con_condiciones_y_sin_url_sigue_sin_publicarse() -> None:
+    """La excepción es del dominio público y de nadie más: «sin URL» no es un pase libre.
+
+    Una `CC BY-SA 4.0` sí tiene condiciones que enlazar, y publicarla sin decir dónde están es
+    exactamente lo que el contrato original quería impedir. Eso no cambia.
+    """
+    crudo = json.loads(_imageinfo())
+    extra = next(iter(crudo["query"]["pages"].values()))["imageinfo"][0]["extmetadata"]
+    del extra["LicenseUrl"]
+    metadatos = commons.leer_metadatos(json.dumps(crudo).encode(), fichero="File:x")
+    assert metadatos.licencia_codigo == "cc-by-sa-4.0"
+    assert not metadatos.dominio_publico
+    assert metadatos.carencias == ("licenciaUrl",)
+
+
+def test_una_licencia_sin_codigo_legible_por_maquina_no_esta_completa() -> None:
+    """`licenciaCodigo` es obligatorio siempre: es lo que hace la excepción **comprobable**.
+
+    Sin él, el gate F2 —que lee el JSON publicado y no la ingesta— no puede distinguir «dominio
+    público, no hay condiciones» de «se nos perdió la URL».
+    """
+    crudo = json.loads(_imageinfo())
+    extra = next(iter(crudo["query"]["pages"].values()))["imageinfo"][0]["extmetadata"]
+    del extra["License"]
+    metadatos = commons.leer_metadatos(json.dumps(crudo).encode(), fichero="File:x")
+    assert metadatos.carencias == ("licenciaCodigo",)
 
 
 def test_un_fichero_sin_autor_no_esta_completo() -> None:
@@ -294,6 +368,48 @@ def test_si_ninguna_imagen_acredita_autor_no_se_publica_ninguna(
     assert resultado.foto is None
     assert "no publica autor" in resultado.motivo
     assert "ninguna de las 3 imágenes" in resultado.motivo
+
+
+def test_el_motivo_del_hueco_no_dice_que_falta_lo_que_no_falta(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Un motivo que no es el motivo es peor que no dar ninguno: el que lo lee no vuelve a preguntar.
+
+    El 2026-08-30, **15 fichas** publicaban «una imagen sin autor o sin licencia no se publica» de
+    ficheros que acreditaban las dos cosas y a los que sólo les faltaba una URL de condiciones que
+    el dominio público no tiene. Aquí se sabotea al revés —una licencia con condiciones a la que
+    se le quita la URL— y se exige que el motivo hable de la licencia y **no** del autor.
+    """
+    sin_url = json.loads(_imageinfo())
+    extra = next(iter(sin_url["query"]["pages"].values()))["imageinfo"][0]["extmetadata"]
+    del extra["LicenseUrl"]
+    respuestas = _respuestas_completas()
+    for fichero in commons.leer_imagenes(_p18(), entidad=ENTIDAD):
+        respuestas[commons.url_imageinfo(fichero)] = json.dumps(sin_url).encode()
+    _red(monkeypatch, respuestas)
+    resultado = commons.resolver(NOMBRE)
+    assert resultado.desenlace == commons.SIN_METADATOS
+    assert "no publica licenciaUrl" in resultado.motivo
+    assert "sin autor" not in resultado.motivo, (
+        f"el motivo acusa de faltar el autor a un fichero que lo publica: {resultado.motivo}"
+    )
+
+
+def test_cuando_lo_que_falta_es_el_autor_el_motivo_no_habla_de_la_licencia(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """El caso simétrico, que es el de `File:Monkfish.jpg`: licencia y URL sí, autor no."""
+    sin_autor = json.loads(_imageinfo())
+    del next(iter(sin_autor["query"]["pages"].values()))["imageinfo"][0]["extmetadata"]["Artist"]
+    respuestas = _respuestas_completas()
+    for fichero in commons.leer_imagenes(_p18(), entidad=ENTIDAD):
+        respuestas[commons.url_imageinfo(fichero)] = json.dumps(sin_autor).encode()
+    _red(monkeypatch, respuestas)
+    resultado = commons.resolver(NOMBRE)
+    assert "sin autor" in resultado.motivo
+    assert "sin licencia" not in resultado.motivo, (
+        f"el motivo acusa de faltar la licencia a un fichero que la publica: {resultado.motivo}"
+    )
 
 
 # =====================================================================================

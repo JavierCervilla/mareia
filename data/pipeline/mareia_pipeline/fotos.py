@@ -17,6 +17,12 @@ poder publicarse (el **gate F2**). Leer las dos APIs es cosa de `sources/commons
 3. **No hay «la licencia de las fotos».** Licencia, autor y URL de licencia van **por fichero**,
    dentro de cada entrada, porque en la muestra del plan salieron **seis licencias distintas en
    doce ficheros**. Un pie global sería falso para las seis a la vez.
+4. **`licenciaUrl` es condicional, y `licenciaCodigo` es lo que lo hace comprobable.** El contrato
+   original la exigía en toda foto y eso dejó fuera 15 especies cuya única imagen es de dominio
+   público —que no tiene condiciones, así que no hay URL de condiciones que enlazar— publicando
+   además un motivo falso. Desde la enmienda del 2026-08-30: obligatoria y URL válida cuando la
+   licencia tiene condiciones, **ausente** cuando no las tiene, y el `licenciaCodigo` de Commons
+   siempre, para que el gate pueda distinguir «no hay condiciones» de «se nos perdió la URL».
 
 Y la de siempre: **la identificación no es nuestra**. Cada foto publica en `identificadaPor` el
 ítem de Wikidata y la propiedad (`P18`) de los que sale, para que quien dude pueda ir a mirarlo.
@@ -42,17 +48,26 @@ DATASET = REPO_ROOT / "data" / "especies" / "fotos.json"
 
 SCHEMA = "fotos/v1"
 
-#: Los campos que una foto publicada tiene que traer. Son exactamente los del contrato congelado:
-#: sin `url` no hay imagen, sin `descripcion` no hay dónde comprobarla, y sin `autor`, `licencia` y
-#: `licenciaUrl` la foto no se puede publicar. El gate F2 los exige **todos**.
+#: Los campos que una foto publicada tiene que traer **siempre**: sin `url` no hay imagen, sin
+#: `descripcion` no hay dónde comprobarla, y sin `autor`, `licencia` y `licenciaCodigo` la foto no se
+#: puede publicar. El gate F2 los exige todos, sin excepción y sin admitir la cadena vacía.
 CAMPOS_DE_FOTO: tuple[str, ...] = (
     "fichero",
     "url",
     "descripcion",
     "autor",
     "licencia",
-    "licenciaUrl",
+    "licenciaCodigo",
 )
+
+#: El único campo **condicional** del contrato, y lo es en los dos sentidos (ver `errores_de_fotos`):
+#: obligatorio y URL válida cuando la licencia tiene condiciones, y **ausente** cuando no las tiene.
+CAMPO_LICENCIA_URL = "licenciaUrl"
+
+#: Los códigos de licencia que no tienen condiciones que enlazar. Es el allowlist cerrado de la
+#: ingesta, y se importa en vez de repetirse: dos listas iguales escritas en dos sitios son dos
+#: listas que un día dejan de serlo, y aquí la que manda es la que decidió si la foto se publicaba.
+LICENCIAS_SIN_CONDICIONES = commons.LICENCIAS_SIN_CONDICIONES
 
 #: Los campos de `identificadaPor`: quién identificó el taxón, en qué ítem y por qué propiedad.
 CAMPOS_DE_IDENTIFICACION: tuple[str, ...] = ("fuente", "entidad", "propiedad")
@@ -88,20 +103,28 @@ def nombre_a_consultar(especie: dict[str, Any]) -> str | None:
 
 
 def _foto_a_json(foto: commons.Foto) -> dict[str, Any]:
-    """Una foto → su entrada del dataset. **Estos campos y no otros** (contrato congelado)."""
-    return {
+    """Una foto → su entrada del dataset. **Estos campos y no otros** (contrato congelado).
+
+    `licenciaUrl` se **omite** —no se escribe vacía ni a `null`— cuando la licencia no tiene
+    condiciones que enlazar. Escribir `""` o `null` diría «aquí falta algo» de una foto a la que no
+    le falta nada, y dejaría abierto el sitio donde después cabría una URL rota.
+    """
+    entrada: dict[str, Any] = {
         "fichero": foto.fichero,
         "url": foto.url,
         "descripcion": foto.descripcion,
         "autor": foto.autor,
         "licencia": foto.licencia,
-        "licenciaUrl": foto.licencia_url,
-        "identificadaPor": {
-            "fuente": commons.FUENTE_IDENTIFICACION,
-            "entidad": foto.entidad,
-            "propiedad": commons.PROPIEDAD_IMAGEN,
-        },
+        "licenciaCodigo": foto.licencia_codigo,
     }
+    if foto.licencia_url is not None:
+        entrada[CAMPO_LICENCIA_URL] = foto.licencia_url
+    entrada["identificadaPor"] = {
+        "fuente": commons.FUENTE_IDENTIFICACION,
+        "entidad": foto.entidad,
+        "propiedad": commons.PROPIEDAD_IMAGEN,
+    }
+    return entrada
 
 
 def construir_dataset(
@@ -177,6 +200,44 @@ def _es_url(valor: Any) -> bool:
 # --------------------------------------------------------------------------------------------
 
 
+def _errores_de_licencia(clave: str, entrada: dict[str, Any]) -> list[str]:
+    """La regla condicional de `licenciaUrl`, que tiene **dos** mitades y las dos son obligatorias.
+
+    * **Con condiciones** (todo lo que no esté en el allowlist): `licenciaUrl` obligatoria. «Sin
+      URL» no es un pase libre; publicar una `CC BY-SA 4.0` sin decir dónde están sus condiciones
+      es lo que el contrato original vino a impedir, y eso no cambia.
+    * **Sin condiciones** (dominio público): `licenciaUrl` **ausente**. No `""`, no `null`, no
+      presente. La ausencia obligatoria es a propósito: la rama del dominio público es el sitio
+      exacto donde escondería una URL rota quien quisiera —nadie comprueba el enlace de una foto
+      «que total, es de dominio público»—, y publicar unas condiciones donde no las hay es una
+      afirmación falsa sobre lo que se puede hacer con la imagen.
+
+    El código de licencia se lee del artefacto y no se recomputa, y ése es justo el porqué de
+    `licenciaCodigo`: el gate mira **lo publicado**, no lo que la ingesta se acuerde de haber hecho.
+    """
+    codigo = entrada.get("licenciaCodigo")
+    codigo = codigo.strip().lower() if isinstance(codigo, str) else ""
+    url = entrada.get(CAMPO_LICENCIA_URL)
+    if codigo in LICENCIAS_SIN_CONDICIONES:
+        if CAMPO_LICENCIA_URL not in entrada:
+            return []
+        return [
+            f"«{clave}» publica «licenciaCodigo»: «{codigo}» —que no tiene condiciones de "
+            f"reutilización— y además «{CAMPO_LICENCIA_URL}» = {url!r}. Cuando no hay condiciones "
+            "no hay URL de condiciones que enlazar, así que el campo tiene que estar ausente: "
+            "admitirlo aquí sería dejar abierto el único sitio del dataset donde una URL rota no "
+            "la comprobaría nadie"
+        ]
+    if isinstance(url, str) and url.strip():
+        return []
+    return [
+        f"«{clave}» publica una foto con licencia «{codigo or '(sin código)'}», que tiene "
+        f"condiciones, y sin «{CAMPO_LICENCIA_URL}» ({url!r}). La excepción es sólo del dominio "
+        f"público ({', '.join(sorted(LICENCIAS_SIN_CONDICIONES))}), corroborado por la propia "
+        "fuente: fuera de ahí, una licencia sin decir dónde están sus condiciones no se publica"
+    ]
+
+
 def _errores_de_foto(clave: str, entrada: Any) -> list[str]:
     if not isinstance(entrada, dict):
         return [f"«{clave}» publica una foto que no es un objeto ({type(entrada).__name__})"]
@@ -189,7 +250,8 @@ def _errores_de_foto(clave: str, entrada: Any) -> list[str]:
                 "licencia no se puede publicar, y una sin URL no se puede ni mirar: la especie "
                 "tenía que haber caído a «sinFoto» con su motivo"
             )
-    for campo in ("url", "licenciaUrl", "descripcion"):
+    fallos.extend(_errores_de_licencia(clave, entrada))
+    for campo in ("url", CAMPO_LICENCIA_URL, "descripcion"):
         if entrada.get(campo) and not _es_url(entrada[campo]):
             fallos.append(f"«{clave}» publica «{campo}» = {entrada[campo]!r}, que no es una URL")
     identificacion = entrada.get("identificadaPor")
@@ -232,8 +294,9 @@ def errores_de_fotos(dataset: dict[str, Any]) -> list[str]:
     entrada editada a mano, un dataset regenerado con otra versión del parser o un campo que se
     vacíe en una migración tienen que salir en rojo aquí, sin red y en cada ejecución de CI.
 
-    Comprueba, entrada a entrada: los seis campos del contrato con contenido, que las tres URLs sean
-    URLs, y que `identificadaPor` diga fuente, ítem y propiedad —con el ítem con forma de ítem de
+    Comprueba, entrada a entrada: los seis campos incondicionales del contrato con contenido, la
+    regla condicional de `licenciaUrl` (`_errores_de_licencia`), que las URLs que haya sean URLs, y
+    que `identificadaPor` diga fuente, ítem y propiedad —con el ítem con forma de ítem de
     Wikidata—, porque una identificación que no se puede ir a comprobar no es una cita.
     """
     fotos = dataset.get("fotos")

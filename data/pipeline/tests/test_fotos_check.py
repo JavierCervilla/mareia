@@ -41,8 +41,28 @@ def _con(monkeypatch: pytest.MonkeyPatch, dataset: dict[str, Any]) -> None:
 
 
 def _una_foto(dataset: dict[str, Any]) -> dict[str, Any]:
-    """La primera foto publicada, que es sobre la que se ceba cada sabotaje."""
-    return dataset["fotos"][next(iter(dataset["fotos"]))]
+    """La primera foto **con condiciones de licencia**, que es sobre la que se ceba cada sabotaje.
+
+    No vale «la primera del fichero» desde que `licenciaUrl` es condicional: si el orden alfabético
+    pusiera delante una foto de dominio público, los sabotajes que hablan de la URL de la licencia
+    estarían cebándose sobre la única entrada que **no** tiene que traerla, y pasarían en verde por
+    el motivo equivocado.
+    """
+    for entrada in dataset["fotos"].values():
+        if entrada.get("licenciaCodigo") not in fotos.LICENCIAS_SIN_CONDICIONES:
+            return entrada
+    raise AssertionError("todas las fotos publicadas son de dominio público: revisa los sabotajes")
+
+
+def _una_foto_de_dominio_publico(dataset: dict[str, Any]) -> dict[str, Any]:
+    """La primera foto **sin condiciones**, que es la rama nueva del contrato."""
+    for entrada in dataset["fotos"].values():
+        if entrada.get("licenciaCodigo") in fotos.LICENCIAS_SIN_CONDICIONES:
+            return entrada
+    raise AssertionError(
+        "ninguna foto publicada es de dominio público: o el dataset ha cambiado o la rama que "
+        "estos recorridos vigilan ha dejado de existir"
+    )
 
 
 def _en_rojo(
@@ -84,7 +104,12 @@ def test_el_dataset_publicado_respeta_el_contrato_congelado() -> None:
     assert set(dataset) == {"schema", "consultadoEn", "fotos", "sinFoto"}
     assert dataset["schema"] == fotos.SCHEMA
     for clave, entrada in dataset["fotos"].items():
-        assert set(entrada) == {*fotos.CAMPOS_DE_FOTO, "identificadaPor"}, clave
+        # `licenciaUrl` es el único campo condicional del contrato, y lo es en los dos sentidos:
+        # obligatorio cuando la licencia tiene condiciones y **ausente** cuando no las tiene.
+        esperados = {*fotos.CAMPOS_DE_FOTO, "identificadaPor"}
+        if entrada.get("licenciaCodigo") not in fotos.LICENCIAS_SIN_CONDICIONES:
+            esperados.add(fotos.CAMPO_LICENCIA_URL)
+        assert set(entrada) == esperados, clave
         assert set(entrada["identificadaPor"]) == set(fotos.CAMPOS_DE_IDENTIFICACION), clave
     for clave, entrada in dataset["sinFoto"].items():
         assert set(entrada) == {"motivo"}, clave
@@ -137,6 +162,51 @@ def test_una_licencia_que_no_enlaza_a_sus_condiciones_no_pasa(
     dataset = _publicado()
     _una_foto(dataset)["licenciaUrl"] = "CC BY-SA 4.0"
     _en_rojo(monkeypatch, capsys, dataset, "que no es una URL")
+
+
+def test_una_foto_de_dominio_publico_con_url_de_licencia_no_pasa(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """El dominio público no tiene condiciones, así que **no puede** traer URL de condiciones.
+
+    La ausencia es obligatoria a propósito y no es una manía de forma: si en esta rama se admitiera
+    una URL, la rama del dominio público sería el sitio exacto donde esconder una URL rota —nadie
+    la comprobaría, porque «total, es dominio público»—. Y publicar unas condiciones donde no las
+    hay es una afirmación falsa sobre lo que se puede hacer con la imagen.
+    """
+    dataset = _publicado()
+    _una_foto_de_dominio_publico(dataset)["licenciaUrl"] = (
+        "https://creativecommons.org/publicdomain/mark/1.0/"
+    )
+    _en_rojo(monkeypatch, capsys, dataset, "tiene que estar ausente")
+
+
+def test_una_licencia_con_condiciones_sin_url_no_pasa_y_lo_dice_por_su_nombre(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """«Sin URL» no es un pase libre: sólo lo es para el allowlist de dominio público.
+
+    Y el motivo tiene que decir **por qué** se exige aquí y no allí, que es lo único que impide que
+    el siguiente que se lo encuentre lo arregle metiendo su licencia en el allowlist.
+    """
+    dataset = _publicado()
+    foto = _una_foto(dataset)
+    del foto[fotos.CAMPO_LICENCIA_URL]
+    _en_rojo(monkeypatch, capsys, dataset, "que tiene condiciones")
+
+
+def test_declararse_de_dominio_publico_no_borra_la_url_que_ya_estaba(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """El sabotaje que no borra nada: se cambia sólo el código de licencia.
+
+    Es la forma barata de saltarse el contrato —«pongo `pd` y ya no me piden la URL»— y tiene que
+    salir en rojo, porque el `licenciaCodigo` que se publica es el que dijo Commons, no el que nos
+    venga bien.
+    """
+    dataset = _publicado()
+    _una_foto(dataset)["licenciaCodigo"] = next(iter(fotos.LICENCIAS_SIN_CONDICIONES))
+    _en_rojo(monkeypatch, capsys, dataset, "tiene que estar ausente")
 
 
 def test_una_foto_sin_decir_quien_la_identifico_no_pasa(
@@ -252,6 +322,28 @@ def test_todas_las_especies_del_catalogo_estan_contadas() -> None:
     assert set(dataset["fotos"]) | set(dataset["sinFoto"]) == claves
     assert not set(dataset["fotos"]) & set(dataset["sinFoto"])
     assert len(dataset["fotos"]) + len(dataset["sinFoto"]) == len(claves)
+
+
+def test_las_dos_ramas_de_la_licencia_existen_de_verdad_en_lo_publicado() -> None:
+    """El dataset publica fotos **con** condiciones y fotos **sin** ellas, y cada una como toca.
+
+    La premisa va en la misma aserción a propósito: el día en que el catálogo no publicara ninguna
+    foto de dominio público, los tres sabotajes de la rama condicional dejarían de medir nada en
+    silencio, y eso hay que verlo. Medido el 2026-08-30: 21 de dominio público y 57 con condiciones.
+    """
+    publicadas = fotos.cargar()["fotos"]
+    sin_condiciones = {
+        clave
+        for clave, entrada in publicadas.items()
+        if entrada["licenciaCodigo"] in fotos.LICENCIAS_SIN_CONDICIONES
+    }
+    assert sin_condiciones, "ninguna foto de dominio público: la rama condicional no se está midiendo"
+    assert len(sin_condiciones) < len(publicadas), "todas de dominio público: falta la otra rama"
+    for clave, entrada in publicadas.items():
+        if clave in sin_condiciones:
+            assert fotos.CAMPO_LICENCIA_URL not in entrada, clave
+        else:
+            assert entrada[fotos.CAMPO_LICENCIA_URL].startswith("http"), clave
 
 
 def test_no_hay_una_licencia_de_las_fotos_sino_una_por_fichero() -> None:
