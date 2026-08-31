@@ -105,12 +105,60 @@ ingesta tiene que ser **educada**: `User-Agent` que diga quiénes somos y cómo 
      "fotos": { "<clave de T-20>": {
         "fichero": "File:…jpg", "url": "https://upload.wikimedia.org/…",
         "descripcion": "https://commons.wikimedia.org/wiki/File:…",
-        "autor": "…", "licencia": "CC BY-SA 4.0", "licenciaUrl": "https://…",
+        "autor": "…", "licencia": "CC BY-SA 4.0", "licenciaCodigo": "cc-by-sa-4.0",
+        "licenciaUrl": "https://…",   // sólo si la licencia tiene condiciones (ver enmienda 1)
         "identificadaPor": { "fuente": "Wikidata", "entidad": "Q217129", "propiedad": "P18" } } },
      "sinFoto": { "<clave>": { "motivo": "el taxón no tiene P18 en Wikidata" } } }
    ```
    **`sinFoto` es obligatorio y explícito**: una especie ausente del mapa es un hueco mudo, y el
    hueco tiene que llevar motivo. Es la lección de los 10 puertos sin área de T-21.
+
+   > ### Enmienda 1 (2026-08-31) · `licenciaUrl` deja de ser incondicional
+   >
+   > **Qué cambia.** El campo `licenciaCodigo` es nuevo y **obligatorio siempre**: es el `License`
+   > legible por máquina de Commons (`cc-by-sa-4.0`, `pd`, `cc0`). Y `licenciaUrl` pasa a
+   > **condicional**: obligatoria y URL válida cuando la licencia tiene condiciones, y **ausente**
+   > —ni `""`, ni `null`, ni presente— cuando no las tiene. `autor` y `licencia` **no se tocan**:
+   > siguen siendo obligatorios sin excepción y la promesa de F2 sigue entera.
+   >
+   > **Por qué, medido.** El contrato congelado exigía `licenciaUrl` en toda foto, y eso es un error
+   > de categoría: el dominio público no tiene condiciones de reutilización, así que no hay ninguna
+   > URL de condiciones que enlazar. Medido el 2026-08-30 sobre los 26 ficheros que había detrás de
+   > los 23 huecos de `fotos.json`: **25 son `License = "pd"`, `LicenseShortName = "Public domain"`,
+   > `Copyrighted = "False"` y sin `LicenseUrl`**; el único que no lo es (`File:Monkfish.jpg`,
+   > `cc-by-sa-3.0`) tiene otro problema —no acredita autor— y sigue siendo un hueco legítimo.
+   >
+   > Y lo que lo convierte en defecto y no en preferencia: el motivo que se publicaba en las fichas
+   > decía «Una imagen sin autor o sin licencia no se publica» de ficheros que publican **las dos
+   > cosas**. **15 fichas publicaban una razón falsa**, que es peor que no dar ninguna: el que la
+   > lee no vuelve a preguntar.
+   >
+   > **Cómo se comprueba, y por qué así.** Una licencia cuenta como sin condiciones **sólo si dos
+   > campos independientes de la fuente están de acuerdo**: `License` en un allowlist **cerrado**
+   > (hoy `pd` y nada más; `cc0` **no** entra, porque es una renuncia con texto y con URL) **y**
+   > `Copyrighted == "False"`. Un campo solo es una afirmación; dos que coinciden es una
+   > comprobación. Cualquier otra licencia sin URL sigue cayendo a `sinFoto`.
+   >
+   > `licenciaCodigo` existe para que la excepción sea **comprobable en el artefacto** y no
+   > confiada: sin él, F2 —que lee el JSON publicado, no la ingesta— no puede distinguir «dominio
+   > público, no hay condiciones» de «se nos perdió la URL». Y la **ausencia obligatoria** de
+   > `licenciaUrl` es a propósito: si esa rama admitiera una URL, sería el único sitio del dataset
+   > donde una URL rota no la comprobaría nadie. Lo que la foto de dominio público ofrece **en lugar**
+   > de la URL es `descripcion`, la página del fichero en Commons, que ya era obligatoria: el lector
+   > siempre llega a la fuente.
+   >
+   > **Qué recupera, medido al regenerar.** 63 → **78 fotos de 86**, y quedan **8 huecos**, todos por
+   > motivos buenos: 4 por identificación no comprobable (`Mugil` ×2, `Sepia`, `Venus`), 1 sin ítem
+   > en Wikidata, 1 sin taxón resuelto y 2 porque su única imagen no acredita autor (`gadus-morhua`,
+   > `lophius-spp`).
+   >
+   > **Efecto que hay que decir: 6 de las 63 fotos que ya se publicaban cambian de fichero.** No se
+   > tocó la elección de imagen —`P18`, el orden de la fuente, el rango, la comprobación `P225`
+   > siguen igual—: en esos 6 taxones la **primera** `P18` que manda Wikidata era de dominio público
+   > y el contrato viejo la rechazaba, así que se publicaba la segunda. Al dejar de rechazarla se
+   > publica la que la fuente pone primero, que es la regla que el módulo tenía escrita desde el
+   > principio. Son `homarus-gammarus`, `octopus-vulgaris`, `pagrus-pagrus`, `salmo-salar`,
+   > `sardina-pilchardus` y `scomber-japonicus`.
 3. **Ficha** `/pesca/especies/<slug>/` — retícula **fija**, con estos campos y en este orden:
    nombre del BOE · nombre común · nombre local canario (si lo hay) · taxón aceptado y su estado ·
    rango · **tallas por caladero, cada una con su nota entera** · presencia con su sesgo · áreas
@@ -124,7 +172,10 @@ ingesta tiene que ser **educada**: `User-Agent` que diga quiénes somos y cómo 
    - **F1 · la nota viaja con la cifra, también aquí.** Es el hallazgo H-1 de T-20 y el gate de
      T-19: la ficha es una **tercera** superficie para la misma cifra legal, y nace con el gate
      puesto en vez de esperar a que un adversario lo encuentre.
-   - **F2 · ninguna foto sin autor y licencia** visibles junto a ella.
+   - **F2 · ninguna foto sin autor y licencia** visibles junto a ella. Desde la enmienda 1, también:
+     la licencia se publica **por la rama que le toca** —enlace a su texto cuando tiene condiciones,
+     estado dicho cuando no las tiene— y toda figura enlaza la página de su fichero. **Nunca un
+     crédito que no lleve a ninguna parte.**
    - **F3 · ningún hueco mudo**: todo campo vacío de la retícula publica su motivo.
    - **F4 · nada de puntuar**: ni barras, ni estrellas, ni rareza, ni dificultad, ni ordenación por
      «mejores». Que el gate mire el artefacto, no la intención.
@@ -138,6 +189,18 @@ ingesta tiene que ser **educada**: `User-Agent` que diga quiénes somos y cómo 
 3. **No inventa ninguna magnitud** ni ordena las especies por nada que se parezca a «mejor».
 4. **No mirrorea Commons**: se guardan los metadatos y se enlaza el fichero.
 5. **No añade ni quita especies** al catálogo de T-20.
+
+> ### Enmienda 2 (2026-08-31) · la etiqueta del enlace al fichero no lleva su nombre
+>
+> El crédito de la foto rotulaba su enlace `Ver «File:…» en Wikimedia Commons`, con el nombre del
+> fichero entero. Los nombres de Commons son cadenas cualesquiera, y uno de ellos —`File:Brachsenmakrele
+> (Brama Brama) 22.12.2008 Strand von Callantsoog Nord Holland.JPG`— metía «22.12» en el texto
+> visible de una ficha, donde un lector español lee un decimal con punto inglés y el gate A-19 lee
+> una regresión. Las dos lecturas son razonables. La etiqueta pasa a ser `Ver el fichero en Wikimedia
+> Commons`: un enlace no necesita nombrar su destino cuando el destino **es** la página donde ese
+> nombre está escrito. **El campo `fichero` se queda en el dataset** —es procedencia—; lo que se
+> quita es imprimirlo. Y no se esconde en un `title` ni en un `aria-label`: esconderlo para que el
+> gate no lo vea sería hacer que el gate mienta.
 
 ## Definition of Done
 Suite verde con **el comando de CI**, F1-F4 probados en rojo, ROADMAP y CHANGELOG en el PR, pase de

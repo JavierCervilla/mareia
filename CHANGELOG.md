@@ -2,7 +2,7 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
-## 2026-08-30 — T-23 (carril de la ficha) · Una página por especie, con los mismos nueve campos siempre
+## 2026-08-31 — T-23 · Una página por especie, con los mismos nueve campos siempre — y con su foto
 
 El catálogo de T-20 deja de ser el final del camino: cada una de las **86** especies estrena su
 **ficha** en `/pesca/especies/<clave>/`, enlazada desde el nombre de su fila. El problema de diseño de
@@ -47,15 +47,43 @@ esta trayectoria no es cómo se enseña un dato: es **cómo se enseña que falta
   cae por cuatro vías en las 86 páginas, incluida la palabra «dificultad» —que el propio aviso de la
   página nombra, así que el gate retira los dos avisos literales antes de buscar y los comprueba
   aparte—.
-- **La foto lleva su autor y su licencia dentro de su misma figura, nunca en un pie global.** En la
-  **muestra de 12 ficheros** que midió el plan —**una muestra, no un censo de las 86**— hay **seis
-  licencias distintas**, así que un «fotos de Wikimedia Commons» al pie sería falso para cinco de
-  ellas. Junto a la imagen van autor, licencia con enlace a su texto, enlace al fichero en Commons,
-  **quién identificó el taxón** (Wikidata `P18`, que no somos nosotros) y el aviso de que una foto no
-  sirve para identificar una captura. El dataset lo publica el otro carril de esta trayectoria: hasta
-  que llegue, las 86 fichas dicen que **aún no se ha preguntado** —que no es lo mismo que «esta
-  especie no tiene foto»— y **ninguna publica imagen**, que es lo que mide hoy el gate **F2**;
-  **probado en rojo** colando un `<img>` sin crédito.
+- **La foto lleva su autor y su licencia dentro de su misma figura, nunca en un pie global.** El
+  censo de las **78** publicadas son **ocho** licencias distintas, así que un «fotos de Wikimedia
+  Commons» al pie sería falso para siete de ellas y no acreditaría a ninguna de las **45 personas**
+  que las firman. Junto a la imagen van autor, licencia, enlace al fichero en Commons, **quién
+  identificó el taxón** (Wikidata `P18`, que no somos nosotros) y el aviso de que una foto no sirve
+  para identificar una captura. La imagen no se busca por texto —buscar el nombre científico
+  **siempre devuelve algo**, y ese algo puede ser un sello o un animal distinto—: sale de la `P18`
+  que alguien vinculó a mano al ítem del taxón, y el ítem se comprueba contra el `P225` que él mismo
+  declara. De los **81** taxones consultados, **3** llevan a otro sitio y no publican foto.
+- **Se corrigió un contrato que dejaba 15 especies sin foto y les publicaba una razón falsa.** El
+  contrato congelado exigía `licenciaUrl` en **toda** foto, y eso es un error de categoría: el
+  **dominio público no tiene condiciones de reutilización**, así que no hay ninguna URL de
+  condiciones que enlazar. Medido sobre los 26 ficheros que había detrás de los 23 huecos: **25 son
+  `License = "pd"`, `Copyrighted = "False"` y sin `LicenseUrl`**. Lo grave no era la cobertura: era
+  que **15 fichas publicaban «Una imagen sin autor o sin licencia no se publica» de ficheros que
+  publican las dos cosas**. Un motivo que no es el motivo es peor que no dar ninguno, porque el que
+  lo lee no vuelve a preguntar — y era, además, la única señal de que el contrato estaba mal.
+  Enmienda: `autor` y `licencia` siguen siendo obligatorios **sin excepción**; nace
+  **`licenciaCodigo`** (el `License` legible por máquina de Commons), obligatorio siempre, para que
+  la excepción sea **comprobable en el artefacto** en vez de confiada; y `licenciaUrl` pasa a
+  condicional —obligatoria y URL válida con condiciones, **ausente** sin ellas—. Una licencia cuenta
+  como sin condiciones **sólo si dos campos independientes de la fuente coinciden**: `License` en un
+  allowlist **cerrado** (`pd`, y nada más: `cc0` sí trae texto y URL) **y** `Copyrighted == "False"`.
+  Un campo solo es una afirmación; dos que coinciden es una comprobación. Resultado: **63 → 78 fotos
+  de 86**, y los **8** huecos que quedan son huecos de verdad —4 por identificación no comprobable,
+  1 sin ítem en Wikidata, 1 sin taxón resuelto y **2 porque su única imagen no acredita autor**, que
+  ahí no hay excepción que valga—. **Efecto que hay que decir: 6 de las 63 que ya se publicaban
+  cambian de fichero**, no porque se tocara la elección de imagen sino porque en esos taxones la
+  **primera** `P18` de Wikidata era de dominio público y el contrato viejo la rechazaba.
+- **En la ficha, el dominio público se publica como estado y no como enlace vacío.** Con condiciones,
+  el crédito enlaza el texto de la licencia; sin ellas dice que no hay texto que enlazar porque no
+  hay condiciones que cumplir, y deja el enlace a la página del fichero —que lleva **toda** foto
+  publicada— como evidencia de quién lo declara. **Nunca un crédito que no lleve a ninguna parte**, y
+  el gate **F2** sobre el `dist/` lo mide entrada a entrada. Los cuatro sabotajes, **probados en
+  rojo**: una foto de dominio público con `licenciaUrl` presente (F2 la daba en **verde**), una
+  licencia con condiciones sin URL (roja, pero acusando de faltar el autor), un `License = pd` con
+  `Copyrighted = True` y el lector de la web.
 - **Los espacios protegidos se cuentan por caladero, porque RAMPE no habla de especies.** La fuente
   publica espacios y no dice qué especie está protegida en cada uno, así que la ficha no puede
   decirlo, y lo dice con esas palabras **antes** del recuento. Lo que sí sostiene el cruce con T-21 es
@@ -67,10 +95,21 @@ esta trayectoria no es cómo se enseña un dato: es **cómo se enseña que falta
   slug es la `clave` de T-20 con su digest —fea y difícil de recortar, y se acepta: un slug legible
   las colapsaría en una y los **6,4 kg** del Anexo III desaparecerían de la URL sin que nada se
   pusiera rojo—. Cada una enlaza a la otra, que es lo que el aviso de T-20 no podía hacer.
-- **Cero JavaScript**, como el resto del portal. Las 86 fichas ocupan **828.580 B** de HTML (media
-  **9.634 B**; la de la lubina, **3.454 B** comprimidos), la hoja **6.873 B**, y el `dist/` pasa de
-  193 a **279** páginas. Medido con el comando de CI: `pnpm lint`, `pnpm typecheck`, `pnpm test` y
-  `pnpm --filter web build` en verde.
+- **Y el gate A-19 dejó de exonerar por la forma, que es como se le rompió.** La excepción de las
+  versiones de licencia estaba escrita `^(3|4)\.0$` —un catálogo disfrazado de patrón— y enrojeció en
+  cuanto el dataset de fotos estrenó `CC BY 2.5`. Es exactamente lo que la cabecera del propio test
+  predica para la excepción de millares. Ahora se ata **al sitio**: un decimal se exonera sólo detrás
+  del nombre de una licencia, con su **prueba de sensibilidad** hermana —las **2.713** cifras
+  españolas con forma de versión que el sitio publica, devueltas al punto inglés, tienen que seguir
+  denunciándose, y alguna coincide carácter a carácter con una versión publicada (`2,5` contra el
+  `2.5` de `CC BY 2.5`), que es lo que prueba que exonera por posición y no por valor—. El otro rojo
+  no era del gate: la ficha imprimía el **nombre entero** del fichero de Commons en la etiqueta de su
+  enlace, y uno de ellos metía «22.12» en el texto de la página. La etiqueta pasa a `Ver el fichero en
+  Wikimedia Commons` —el nombre está en la página a la que lleva— y el campo `fichero` se queda en el
+  dataset, que es donde hace falta.
+- **Cero JavaScript**, como el resto del portal. Las 86 fichas ocupan **897.959 B** de HTML (media
+  **10.441 B**), la hoja **6.873 B**, y el `dist/` pasa de 193 a **279** páginas. Medido con el
+  comando de CI: `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm --filter web build` en verde.
 
 ## 2026-08-30 — T-20 · Las 86 especies que el BOE regula, con los dos nombres que tienen
 

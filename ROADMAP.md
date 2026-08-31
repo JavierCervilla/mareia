@@ -249,9 +249,8 @@
       se esperaba que fallara» en los nueve— y conservan su assert canario. Medido con el comando de
       CI: `pnpm test` **667 en verde**, `pnpm test:e2e` **70** midiendo de verdad,
       `pytest` **1.919**, catálogo de **111.516 B** (11.514 comprimidos) con cero scripts
-- [ ] T-23 · **La ficha de cada especie: retícula fija, huecos rotulados y una foto que sabe de quién
-      es.** *(Carril de la ficha entregado; la ingesta de fotos va en el otro carril de la misma
-      trayectoria y cierra con él.)* **86 páginas nuevas** —`/pesca/especies/<clave>/`, una por
+- [x] T-23 · **La ficha de cada especie: retícula fija, huecos rotulados y una foto que sabe de quién
+      es.** **86 páginas nuevas** —`/pesca/especies/<clave>/`, una por
       especie del BOE, enlazadas desde el catálogo de T-20— con **nueve campos fijos y en el mismo
       orden**: nombre de la norma · nombre común · **nombre local canario** · taxón aceptado y su
       estado · a qué alcanza la talla · **talla por caladero con su nota entera** · registros de OBIS
@@ -274,7 +273,17 @@
       nunca en un pie global: hay **seis licencias distintas** en una **muestra de 12** ficheros —una
       muestra, no un censo—), **F3** (ningún hueco mudo: **774** campos comprobados en 86 fichas) y
       **F4** (nada de puntuar, medido sobre el **artefacto**: marcado, vocabulario, listas ordenadas y
-      la hoja). **F1, F2, F3 y F4 probados en rojo** con sabotajes que llegan adonde el gate mira: la
+      la hoja). **F2 mide hoy fotos de verdad: 78 de las 86** especies publican imagen y las **8**
+      restantes su motivo. Y el contrato de `fotos/v1` se **corrigió** al medirlo: exigir
+      `licenciaUrl` en toda foto dejaba fuera 15 especies cuya imagen es de **dominio público** —que
+      no tiene condiciones, así que no hay URL que enlazar— y, peor, **les publicaba una razón falsa**
+      («una imagen sin autor o sin licencia no se publica», de ficheros que publican las dos cosas).
+      `licenciaCodigo` es nuevo y obligatorio para que la excepción sea comprobable **en el
+      artefacto**, `licenciaUrl` es condicional en los dos sentidos (obligatoria con condiciones,
+      **ausente** sin ellas) y el dominio público se corrobora con **dos campos independientes** de la
+      fuente —`License` en un allowlist cerrado **y** `Copyrighted = False`—, porque un campo solo es
+      una afirmación. En la página, el dominio público se publica como **estado** y con el enlace a
+      la página del fichero: nunca un crédito que no lleve a ninguna parte. **F1, F2, F3 y F4 probados en rojo** con sabotajes que llegan adonde el gate mira: la
       nota movida fuera del bloque de su cifra **pero todavía en la página** deja **9 cifras** en rojo
       —un gate a nivel de página habría seguido verde—, el hueco en blanco las **58** fichas que no publican nombre local, la fila omitida
       pone en rojo tres pruebas a la vez, y una barra de dificultad con `<progress>` y estrellas cae
@@ -283,8 +292,12 @@
       dice antes del recuento (**44 de 47** puertos del cantábrico sobre 7 espacios, **73 de 80** del
       mediterráneo sobre 36, **26 de 26** del canario sobre 37) con el aviso de T-21 literal detrás.
       El slug es la `clave` de T-20 con su digest, para que **`Thunnus thynnus` y `Thunnus Thynnus`
-      sigan siendo dos fichas** —y cada una enlaza a la otra—. **Cero JavaScript**; **828.580 B** de
-      HTML en las 86 (media 9.634 B) y el `dist/` pasa de 193 a **279** páginas.
+      sigan siendo dos fichas** —y cada una enlaza a la otra—. **Cero JavaScript**; **897.959 B** de
+      HTML en las 86 (media 10.441 B) y el `dist/` pasa de 193 a **279** páginas. De propina, el pase
+      adversario de T-13: **A-19 dejó de exonerar por la forma** —su excepción de versiones de
+      licencia, `^(3|4)\.0$`, se rompió en cuanto el catálogo estrenó `CC BY 2.5`— y pasa a atarse al
+      **sitio**, con su prueba de sensibilidad hermana sobre las 2.713 cifras españolas con forma de
+      versión.
 - [ ] T-14 · Metodología pública + QC navegable + dataset con su licencia por puerto declarada
       (el reparto real ya publicado en T-14A) + API pública documentada
 - [ ] T-15 · Deploy en producción (Dokploy) + e2e + pase adversario
