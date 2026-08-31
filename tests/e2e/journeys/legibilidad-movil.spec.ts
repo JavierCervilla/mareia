@@ -50,53 +50,66 @@ const PUEDEN_PARTIRSE = [".tabla-especies__boe", ".tabla-especies__aceptado"];
  * línea, la palabra está repartida. La comprobación letra-letra es lo que separa «Cantábri/co» de
  * «(COI-UNESCO)» y de «Anexo II—», que son cortes correctos.
  */
-async function palabrasPartidas(page: import("@playwright/test").Page, eximidos: string[]) {
-  return page.evaluate((exentos) => {
-    const rango = document.createRange();
-    const rotas: string[] = [];
-    const letra = /\p{L}/u;
-    const paseo = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    let nodo: Node | null;
-    while ((nodo = paseo.nextNode())) {
-      const texto = nodo.nodeValue ?? "";
-      if (!texto.trim()) continue;
-      const padre = (nodo as Text).parentElement;
-      if (!padre) continue;
-      const estilo = getComputedStyle(padre);
-      if (estilo.display === "none" || estilo.visibility === "hidden") continue;
-      if (exentos.some((selector) => padre.closest(selector) !== null)) continue;
-      for (const encontrada of texto.matchAll(/[^\s ]{3,}/gu)) {
-        const palabra = encontrada[0];
-        rango.setStart(nodo, encontrada.index);
-        rango.setEnd(nodo, encontrada.index + palabra.length);
-        const cajas = Array.from(rango.getClientRects()).filter((caja) => caja.width > 0);
-        const lineas = new Set(cajas.map((caja) => Math.round(caja.top)));
-        if (lineas.size < 2) continue;
-        // ¿Dónde cortó? Se busca el primer carácter que empieza una línea nueva y se miran sus
-        // vecinos: sólo cuenta si los dos son letras.
-        let corte = -1;
-        let arriba = -1;
-        for (let i = 0; i < palabra.length; i += 1) {
-          rango.setStart(nodo, encontrada.index + i);
-          rango.setEnd(nodo, encontrada.index + i + 1);
-          const caja = rango.getClientRects()[0];
-          if (!caja) continue;
-          const linea = Math.round(caja.top);
-          if (arriba === -1) arriba = linea;
-          else if (linea !== arriba) {
-            corte = i;
-            break;
-          }
-        }
-        if (corte <= 0) continue;
-        if (letra.test(palabra[corte - 1] ?? "") && letra.test(palabra[corte] ?? "")) {
-          rotas.push(`«${palabra.slice(0, 30)}» partida tras «${palabra.slice(0, corte).slice(-6)}»`);
-        }
+/**
+ * El código que corre **en el navegador**, como cadena.
+ *
+ * Es la convención del repo (ver `a5-boletin-desborda.spec.ts`): un `page.evaluate` con `document`
+ * dentro no compila, porque el `tsconfig` del proyecto no trae la `lib` del DOM y relajarla para un
+ * test sería aflojar el typecheck de todo el repo. Se evalúa la expresión en el navegador y se tipa
+ * sólo lo que vuelve.
+ */
+const MEDIR_PARTIDAS = (exentos: readonly string[]) => `(() => {
+  const exentos = ${JSON.stringify(exentos)};
+  const rango = document.createRange();
+  const rotas = [];
+  const letra = /\\p{L}/u;
+  const paseo = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  let nodo;
+  while ((nodo = paseo.nextNode())) {
+    const texto = nodo.nodeValue || "";
+    if (!texto.trim()) continue;
+    const padre = nodo.parentElement;
+    if (!padre) continue;
+    const estilo = getComputedStyle(padre);
+    if (estilo.display === "none" || estilo.visibility === "hidden") continue;
+    if (exentos.some((selector) => padre.closest(selector) !== null)) continue;
+    for (const encontrada of texto.matchAll(/[^\\s\\u00a0]{3,}/gu)) {
+      const palabra = encontrada[0];
+      rango.setStart(nodo, encontrada.index);
+      rango.setEnd(nodo, encontrada.index + palabra.length);
+      const cajas = Array.from(rango.getClientRects()).filter((caja) => caja.width > 0);
+      if (new Set(cajas.map((caja) => Math.round(caja.top))).size < 2) continue;
+      let corte = -1;
+      let arriba = -1;
+      for (let i = 0; i < palabra.length; i += 1) {
+        rango.setStart(nodo, encontrada.index + i);
+        rango.setEnd(nodo, encontrada.index + i + 1);
+        const caja = rango.getClientRects()[0];
+        if (!caja) continue;
+        const linea = Math.round(caja.top);
+        if (arriba === -1) arriba = linea;
+        else if (linea !== arriba) { corte = i; break; }
+      }
+      if (corte <= 0) continue;
+      if (letra.test(palabra[corte - 1] || "") && letra.test(palabra[corte] || "")) {
+        rotas.push("«" + palabra.slice(0, 30) + "» partida tras «" + palabra.slice(0, corte).slice(-6) + "»");
       }
     }
-    return rotas;
-  }, eximidos);
-}
+  }
+  return rotas;
+})()`;
+
+/** Si alguna tipografía del sitio llegó a cargar. Sin ellas, las métricas no son las del sitio. */
+const TIPOGRAFIAS_CARGADAS = `[...document.fonts].some((fuente) => fuente.status === "loaded")`;
+
+/** Los elementos que cruzan el borde derecho, buscados en `body *` y no en un contenedor sospechado. */
+const CULPABLES_DEL_DESBORDE = (ancho: number) => `(() => {
+  if (document.documentElement.scrollWidth <= ${ancho} + 1) return [];
+  return [...document.querySelectorAll("body *")]
+    .filter((el) => el.getBoundingClientRect().right > ${ancho} + 1)
+    .slice(0, 10)
+    .map((el) => el.tagName.toLowerCase() + "." + (el.className || "(sin clase)"));
+})()`;
 
 for (const ruta of PAGINAS) {
   for (const ancho of ANCHOS) {
@@ -114,10 +127,8 @@ for (const ruta of PAGINAS) {
       //
       // Lo que NO se hace es medir igualmente con la fuente de reserva: eso sería un gate que mide
       // una página que nadie ve, verde o rojo por razones que no son las del lector.
-      await page.evaluate(() => document.fonts.ready);
-      const cargadas = await page.evaluate(() =>
-        [...document.fonts].some((fuente) => fuente.status === "loaded"),
-      );
+      await page.evaluate("document.fonts.ready");
+      const cargadas = await page.evaluate<boolean>(TIPOGRAFIAS_CARGADAS);
       if (!cargadas) {
         expect(
           process.env["CI"],
@@ -125,22 +136,16 @@ for (const ruta of PAGINAS) {
         ).toBeFalsy();
         test.skip(true, "sin las tipografías del sitio (proxy local): G1 no puede medir");
       }
-      expect(await palabrasPartidas(page, PUEDEN_PARTIRSE)).toEqual([]);
+      expect(await page.evaluate<string[]>(MEDIR_PARTIDAS(PUEDEN_PARTIRSE))).toEqual([]);
     });
 
     test(`G2 · ${ruta} a ${ancho}px no desborda a lo ancho`, async ({ page }) => {
       await page.setViewportSize({ width: ancho, height: 800 });
       await page.goto(ruta, { waitUntil: "networkidle" });
-      await page.evaluate(() => document.fonts.ready);
+      await page.evaluate("document.fonts.ready");
       // Si desborda, el culpable se busca en `body *` y no en un contenedor que ya sospechemos:
       // acertar el veredicto y fallar el culpable manda a quien lo lea a mirar donde no es (A5).
-      const culpables = await page.evaluate((ancho) => {
-        if (document.documentElement.scrollWidth <= ancho + 1) return [];
-        return [...document.querySelectorAll<HTMLElement>("body *")]
-          .filter((el) => el.getBoundingClientRect().right > ancho + 1)
-          .slice(0, 10)
-          .map((el) => `${el.tagName.toLowerCase()}.${el.className || "(sin clase)"}`);
-      }, ancho);
+      const culpables = await page.evaluate<string[]>(CULPABLES_DEL_DESBORDE(ancho));
       expect(culpables).toEqual([]);
     });
   }
@@ -161,16 +166,15 @@ for (const ruta of PAGINAS) {
 test("G1 sensibilidad · denuncia el corte entre letras y perdona el del guion", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto("/", { waitUntil: "networkidle" });
-  await page.evaluate(() => {
-    document.body.innerHTML =
-      `<div style="width:40px;overflow-wrap:anywhere;font:16px monospace">` +
-      `<p id="rota">supercalifragilistico</p>` +
-      `<p id="guion">alfa-beta-gamma-delta</p>` +
-      `<p class="tabla-especies__boe" id="eximida">supercalifragilistico</p>` +
-      `</div>`;
-  });
-  const conExencion = await palabrasPartidas(page, PUEDEN_PARTIRSE);
-  const sinExencion = await palabrasPartidas(page, []);
+  await page.evaluate(
+    `document.body.innerHTML = '<div style="width:40px;overflow-wrap:anywhere;font:16px monospace">' +
+      '<p id="rota">supercalifragilistico</p>' +
+      '<p id="guion">alfa-beta-gamma-delta</p>' +
+      '<p class="tabla-especies__boe" id="eximida">supercalifragilistico</p>' +
+      '</div>'`,
+  );
+  const conExencion = await page.evaluate<string[]>(MEDIR_PARTIDAS(PUEDEN_PARTIRSE));
+  const sinExencion = await page.evaluate<string[]>(MEDIR_PARTIDAS([]));
 
   expect(
     conExencion.some((r) => r.includes("supercalifragilistico")),
