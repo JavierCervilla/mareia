@@ -288,19 +288,52 @@ export function filasDeEspecies(
  * fuera una talla legal sin decirlo (hallazgo H-3 de T-20).
  */
 function filasDelMismoTaxon(catalogo: CatalogoDeEspecies): ReadonlyMap<string, readonly string[]> {
+  return new Map(
+    [...hermanasPorClave(catalogo)].map(([clave, hermanas]) => [
+      clave,
+      hermanas.map((otra) => otra.nombreBoe),
+    ]),
+  );
+}
+
+/**
+ * Lo mismo, pero devolviendo **la clave** de cada hermana en vez de su nombre.
+ *
+ * Existe porque la ficha de especie (T-23) tiene que **enlazar** a la hermana y el aviso de
+ * `tambienEnOtraFila` sólo trae nombres del BOE: quien lee «el BOE nombra a este mismo taxón también
+ * como “Thunnus Thynnus”» y no puede pulsarlo tiene que volver al catálogo y buscarlo a mano, que es
+ * justo la fricción por la que el hallazgo H-3 se leía mal. La agrupación es **la misma** —de aquí
+ * salen las dos— para que la ficha no pueda enlazar a una hermana distinta de la que nombra la
+ * tabla.
+ */
+export function clavesDelMismoTaxon(
+  catalogo: CatalogoDeEspecies,
+): ReadonlyMap<string, readonly string[]> {
+  return new Map(
+    [...hermanasPorClave(catalogo)].map(([clave, hermanas]) => [
+      clave,
+      hermanas.map((otra) => otra.clave),
+    ]),
+  );
+}
+
+/** Las especies que comparten `AphiaID` con otra, indexadas por clave. La agrupación, una sola vez. */
+function hermanasPorClave(
+  catalogo: CatalogoDeEspecies,
+): ReadonlyMap<string, readonly EspecieDelCatalogo[]> {
   const porAphia = new Map<number, EspecieDelCatalogo[]>();
   for (const especie of catalogo.especies) {
     const aphiaId = especie.worms?.aphiaId;
     if (aphiaId === undefined) continue;
     porAphia.set(aphiaId, [...(porAphia.get(aphiaId) ?? []), especie]);
   }
-  const hermanas = new Map<string, readonly string[]>();
+  const hermanas = new Map<string, readonly EspecieDelCatalogo[]>();
   for (const filas of porAphia.values()) {
     if (filas.length < 2) continue;
     for (const especie of filas) {
       hermanas.set(
         especie.clave,
-        filas.filter((otra) => otra.clave !== especie.clave).map((otra) => otra.nombreBoe),
+        filas.filter((otra) => otra.clave !== especie.clave),
       );
     }
   }
