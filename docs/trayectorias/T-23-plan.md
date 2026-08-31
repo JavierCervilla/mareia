@@ -105,8 +105,13 @@ ingesta tiene que ser **educada**: `User-Agent` que diga quiénes somos y cómo 
      "fotos": { "<clave de T-20>": {
         "fichero": "File:…jpg", "url": "https://upload.wikimedia.org/…",
         "descripcion": "https://commons.wikimedia.org/wiki/File:…",
-        "autor": "…", "licencia": "CC BY-SA 4.0", "licenciaCodigo": "cc-by-sa-4.0",
+        "autor": "…",                 // sólo si la fuente exige atribuir (ver enmienda 3)
+        "atribucionRequerida": true,  // siempre (ver enmienda 3)
+        "licencia": "CC BY-SA 4.0", "licenciaCodigo": "cc-by-sa-4.0",
         "licenciaUrl": "https://…",   // sólo si la licencia tiene condiciones (ver enmienda 1)
+        "prestadaDe": { "tipo": "una_del_genero", "nombre": "Lophius piscatorius",
+                        "nombreBoe": "Lophius piscatorius, L. Budegassa" },  // sólo si la foto no
+                                      // es del taxón de la fila (ver enmienda 3)
         "identificadaPor": { "fuente": "Wikidata", "entidad": "Q217129", "propiedad": "P18" } } },
      "sinFoto": { "<clave>": { "motivo": "el taxón no tiene P18 en Wikidata" } } }
    ```
@@ -159,6 +164,60 @@ ingesta tiene que ser **educada**: `User-Agent` que diga quiénes somos y cómo 
    > publica la que la fuente pone primero, que es la regla que el módulo tenía escrita desde el
    > principio. Son `homarus-gammarus`, `octopus-vulgaris`, `pagrus-pagrus`, `salmo-salar`,
    > `sardina-pilchardus` y `scomber-japonicus`.
+   > ### Enmienda 3 (2026-08-31) · el ítem se identifica por `P225` exacto, el autor pasa a condicional y nace la foto prestada
+   >
+   > Tres cambios que van juntos porque los tres salen del mismo encargo —**las 86 especies con
+   > foto**— y porque los tres hacen la identificación **más estricta**, no más laxa. Cerrar un
+   > hueco publicando una foto de la que no podamos responder sería peor que el hueco.
+   >
+   > **1 · Al ítem se llega por el nombre que declara, no buscando texto.** Hasta hoy se llegaba con
+   > `wbsearchentities` —una búsqueda— y se comprobaba después el `P225` del ítem que saliera. La
+   > comprobación cazaba los errores, pero **el que se equivocaba era el buscador**: medido, `Sepia`
+   > llevaba a `Q286026` («Sapia»), `Mugil` a `Q234014` («Mugil cephalus») y `Venus` a `Q47652`, que
+   > no declara nombre científico. Wikidata sabe responder la pregunta buena —*qué ítem declara
+   > exactamente este nombre*— con `list=search` y `haswbstatement:"P225=<nombre>"`, y los tres salen
+   > bien a la primera: `Q3478857`, `Q631692`, `Q1408724`. **Las comillas del filtro no son adorno**:
+   > sin ellas, un binomio devuelve vacío. La búsqueda de texto se queda **de reserva** para cuando
+   > nadie declara el nombre, y la comprobación del `P225` del ítem devuelto **se queda en los dos
+   > caminos**: por el primero es casi tautológica, pero el índice puede devolver ruido.
+   >
+   > Y si el nombre lo declaran **varios** ítems, **no se elige**: la fila cae a `sinFoto` diciendo
+   > que hay ambigüedad y cuáles son. Elegir el primero sería la conjetura que este módulo no hace.
+   >
+   > **2 · `autor` pasa a condicional, con el mismo patrón que `licenciaUrl`.** Puede faltar **sólo**
+   > cuando la propia Commons declara `AttributionRequired = "false"` **y** `Copyrighted = "False"`.
+   > Medido: `File:Atlantic cod.jpg` y `File:Mugil cephalus.jpg` —los dos de la NOAA, detrás de los
+   > huecos del bacalao y de las lisas— lo declaran los dos; `File:Monkfish.jpg` declara
+   > `AttributionRequired = "true"` y `Copyrighted = "True"`, y con eso y sin autor **no se publica
+   > jamás**: ahí quien lo impide es la licencia, no nosotros. Quien dice que no hace falta atribuir
+   > es Commons; nosotros sólo lo publicamos y lo decimos en la ficha («Sin autor acreditado ·
+   > Public domain. Wikimedia Commons no registra quién hizo esta foto…»), con el enlace a la página
+   > del fichero para quien dude.
+   >
+   > El campo nuevo **`atribucionRequerida`** es obligatorio en toda foto y **booleano de verdad**
+   > (`"false"` es un valor verdadero en JavaScript). Existe por lo mismo que `licenciaCodigo`: para
+   > que F2 pueda **comprobar la excepción sobre el JSON publicado** en vez de confiar en ella. Su
+   > límite, dicho: el `Copyrighted` que corrobora no viaja al artefacto, así que la mitad
+   > corroborante de la regla la aplica la ingesta y lo que el gate comprueba es la condición
+   > publicada. Ausente en la fuente se lee como **`true`**: el silencio de un tercero no es un
+   > permiso.
+   >
+   > **3 · Una fila puede publicar la foto de otro taxón, si la elige la norma y lo dice la página.**
+   > Dos filas del BOE no pueden ilustrarse con el suyo: `Lophius spp` —género cuya única `P18` es
+   > la que la licencia prohíbe publicar— y `Lophius piscatorius, L. Budegassa`, que nombra dos
+   > especies en una celda y por eso el catálogo la deja sin taxón. En las dos, la foto sale de una
+   > especie **que nombra el propio BOE** y la entrada publica `prestadaDe` con `tipo`, `nombre` y
+   > **`nombreBoe`** —la fila donde la norma la nombra—, que es lo que hace comprobable que la
+   > elección no es nuestra. La ficha lo **rotula dentro de la figura**, no en una nota al final, y
+   > el `alt` nombra el taxón de la foto y no el de la fila. Si un género en esa situación no tuviera
+   > ninguna especie nombrada por el BOE, se queda en `sinFoto` con su motivo: ahí sí estaríamos
+   > eligiendo nosotros.
+   >
+   > **Lo que no cambia.** La imagen sigue saliendo de `P18` y **nunca** de una búsqueda de imagen
+   > por texto. `licencia` y `licenciaCodigo` siguen sin excepción. Y **la política de desempate
+   > entre varias `P18` publicables no se toca**: sigue siendo el orden de la fuente (preferidas
+   > primero, descartadas nunca).
+
 3. **Ficha** `/pesca/especies/<slug>/` — retícula **fija**, con estos campos y en este orden:
    nombre del BOE · nombre común · nombre local canario (si lo hay) · taxón aceptado y su estado ·
    rango · **tallas por caladero, cada una con su nota entera** · presencia con su sesgo · áreas
@@ -175,7 +234,10 @@ ingesta tiene que ser **educada**: `User-Agent` que diga quiénes somos y cómo 
    - **F2 · ninguna foto sin autor y licencia** visibles junto a ella. Desde la enmienda 1, también:
      la licencia se publica **por la rama que le toca** —enlace a su texto cuando tiene condiciones,
      estado dicho cuando no las tiene— y toda figura enlaza la página de su fichero. **Nunca un
-     crédito que no lleve a ninguna parte.**
+     crédito que no lleve a ninguna parte.** Desde la enmienda 3, además: una foto sin autor que
+     declare `atribucionRequerida: true` es **rojo**; una sin autor que declare `false` tiene que
+     **decir** que su fuente no registra ninguno, no callarlo; y una foto **prestada** tiene que
+     publicar su rótulo dentro de la misma figura.
    - **F3 · ningún hueco mudo**: todo campo vacío de la retícula publica su motivo.
    - **F4 · nada de puntuar**: ni barras, ni estrellas, ni rareza, ni dificultad, ni ordenación por
      «mejores». Que el gate mire el artefacto, no la intención.
@@ -206,3 +268,66 @@ ingesta tiene que ser **educada**: `User-Agent` que diga quiénes somos y cómo 
 Suite verde con **el comando de CI**, F1-F4 probados en rojo, ROADMAP y CHANGELOG en el PR, pase de
 `verificador` y de **`qa-adversario`**, CI en verde. Y la condición de siempre: **el ledger sin
 hallazgos que hagan mentir a la página**, no el color de CI.
+
+---
+
+## Enmienda 3 (2026-08-31) — de 78 a 85 de 86, endureciendo la identificación
+
+El humano lo dijo sin rodeos: **«quiero con foto, si no la pokédex no tiene ningún valor»**. Los ocho
+huecos que quedaban tras la enmienda 2 no eran, casi ninguno, «no hay foto»: eran **la identificación
+fallando**. Se cierran por tres caminos, y los tres hacen la identificación **más** estricta.
+
+**1 · Preguntar por el ítem que declara el nombre, no buscar el nombre como texto.**
+`haswbstatement:"P225=<nombre>"` — **las comillas importan**: medido, sin ellas los nombres de dos
+palabras devuelven vacío porque el espacio parte el filtro. La búsqueda libre llevaba a `Q234014`
+(que declara *Mugil cephalus*, no el género), `Q286026` (que declara «Sapia») y `Q47652` (que no es
+un animal). El `wbsearchentities` de siempre se queda **como reserva** para cuando nadie declara el
+nombre, y el `P225` del ítem que devuelva se sigue comprobando igual.
+
+**2 · Publicar sin autor sólo cuando la fuente dice que no hace falta.** `AttributionRequired = false`
+**y** `Copyrighted = False`, los dos a la vez. Son cuatro ficheros, todos de dominio público de la
+NOAA, para los que Commons no registra autor porque la obra es de una agencia. Con
+`AttributionRequired = true` y sin autor **no se publica jamás** —`File:Monkfish.jpg` es el caso—:
+ahí quien lo impide es la licencia, y no hay excepción que valga. El booleano viaja en el artefacto
+(`atribucionRequerida`) por la misma razón que `licenciaCodigo`: **la excepción se comprueba, no se
+confía**.
+
+**3 · El género que no puede publicar su imagen curada toma prestada la de una especie que nombra el
+propio BOE**, y la ficha lo rotula. La elección la hace la norma, no nosotros.
+
+### La ambigüedad se deshace con la fuente, o no se deshace
+
+Preguntar por `P225` exacto trae a veces **dos** ítems declarando el mismo nombre. El primer diseño
+—no elegir nunca— era correcto en el principio y **costaba dos fotos que ya se publicaban**
+(`Merluccius merluccius`, `Melanogrammus aeglefinus`). Se deshace por dos caminos, ninguno de ellos
+nuestro:
+
+1. **La marca de duplicado de Wikidata** (`P31 = Q17362920`, *Wikimedia duplicated page*). Leer que
+   la fuente ya decidió no es decidir. Si el filtro se lo lleva todo, **no ha informado de nada** y
+   la lista se devuelve intacta: «no sé cuál» y «no queda ninguno» son dos frases distintas.
+2. **La concordancia de los dos caminos**: si el ítem al que llega la búsqueda de texto está entre
+   los candidatos, esa coincidencia decide. Los dos caminos fallan de maneras **distintas** —el
+   exacto trae de más con ítems repetidos, el de texto trae otra cosa con nombres que se parecen a
+   un apellido o a un planeta—, así que coincidir es una comprobación. Es el mismo principio con el
+   que la enmienda 2 acepta el dominio público: **una señal sola es una afirmación; dos que coinciden
+   son una comprobación.**
+
+Lo que **no** se hace nunca: desempatar por el primero, por el número más bajo, o por cuál tiene
+foto. Si ninguno de los dos caminos deshace el empate, la fila cae nombrando los ítems.
+
+### Los sabotajes, y los dos que pasaban por el camino equivocado
+
+Los cuatro recorridos nuevos se probaron en rojo uno por uno. **Dos no mordieron a la primera**, y
+por la misma razón: pasaban **por el otro camino**. El recorrido de la marca de duplicado se ponía
+verde aunque se quitara el filtro, porque la concordancia lo rescataba; y el de «todos marcados» daba
+el mismo desenlace con la lista vacía que con la lista intacta. Los dos se afinaron hasta que cada
+uno prueba **su** camino y sólo el suyo. Es una forma más del catálogo: **un recorrido que pasa por
+un camino que no es el que dice probar no prueba nada**, y sólo se ve saboteando.
+
+### Lo que queda, dicho
+
+Una especie sin foto: `Panaeux kerathurus` (langostino). No es «no hay imagen»: WoRMS publica el
+nombre aceptado como `Penaeus (Melicertus) kerathurus`, con el subgénero entre paréntesis, y el
+`P225` de Wikidata no escribe así, de modo que ningún ítem declara esa forma exacta ni la búsqueda de
+texto llega. Cerrarlo obligaría al módulo de fotos a caminar la lista de sinónimos de WoRMS —o sea, a
+ampliarle la superficie de fuentes—, y eso es una decisión de diseño que no se toma de pasada.

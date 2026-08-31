@@ -1013,7 +1013,32 @@ def command_fotos(args: argparse.Namespace) -> int:
     for desenlace, cuantos in sorted(reparto.items()):
         print(f"  Wikidata/Commons {desenlace:15} {cuantos} taxones")
 
-    dataset = fotos.construir_dataset(catalogo, resultados, consultado_en=hoy)
+    # Segunda pasada: **sólo** las filas que no han podido publicar su propio taxón. Los préstamos
+    # posibles se calculan para todas las candidatas —es una función pura del catálogo—, pero
+    # preguntar por todos sería pedirle a la fuente los taxones de once géneros que ya publicaron su
+    # foto. Se paga la red de lo que de verdad se va a usar.
+    posibles = fotos.prestamos_posibles(catalogo)
+    prestamos: dict[str, fotos.Prestamo] = {}
+    for especie in catalogo["especies"]:
+        prestamo = posibles.get(especie["clave"])
+        if prestamo is None:
+            continue
+        propio = fotos.nombre_a_consultar(especie)
+        if propio is None or resultados[propio].foto is None:
+            prestamos[especie["clave"]] = prestamo
+    for prestamo in prestamos.values():
+        if prestamo.nombre not in resultados:
+            resultados[prestamo.nombre] = commons.resolver(prestamo.nombre, refresh=args.refresh)
+    for clave, prestamo in sorted(prestamos.items()):
+        publicable = resultados[prestamo.nombre].foto is not None
+        print(
+            f"  préstamo {clave:42} {prestamo.tipo:22} «{prestamo.nombre}» "
+            f"{'sí' if publicable else 'no'}"
+        )
+
+    dataset = fotos.construir_dataset(
+        catalogo, resultados, consultado_en=hoy, prestamos=prestamos
+    )
     errores = [
         *(f"cobertura: {error}" for error in fotos.errores_de_cobertura(dataset, catalogo)),
         *(f"F2 · foto: {error}" for error in fotos.errores_de_fotos(dataset)),
@@ -1028,9 +1053,13 @@ def command_fotos(args: argparse.Namespace) -> int:
     # preguntan con menos nombres, y la que no resuelve en WoRMS ni se pregunta. Es la cifra que se
     # publica en el README, así que se cuenta sobre lo escrito y no sobre lo consultado.
     por_desenlace = Counter(
-        resultados[nombre].desenlace
-        if (nombre := fotos.nombre_a_consultar(especie)) is not None
-        else "sin_taxon"
+        "prestada"
+        if especie["clave"] in dataset["fotos"] and especie["clave"] in prestamos
+        else (
+            resultados[nombre].desenlace
+            if (nombre := fotos.nombre_a_consultar(especie)) is not None
+            else "sin_taxon"
+        )
         for especie in catalogo["especies"]
     )
     for desenlace, cuantas in sorted(por_desenlace.items()):

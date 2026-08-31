@@ -12,6 +12,9 @@ recorrido rojo del recorrido rojo por otro motivo:
   distintos —el primero deja de acreditar a una persona, el segundo deja de decir bajo qué
   condiciones se reutiliza— y los dos tienen que salir en rojo por separado. Vaciar un campo con
   `""` va aparte de borrarlo: un gate escrito con `in` se satisface con la cadena vacía.
+* **Los dos campos condicionales, por sus dos ramas.** `licenciaUrl` y `autor` pueden faltar, pero
+  sólo cuando la propia fuente lo declara (`licenciaCodigo`, `atribucionRequerida`), así que hay un
+  sabotaje por cada mitad: la que quita lo que sí hace falta y la que lo deja donde no debería.
 * **La identificación no es nuestra**, así que hay un sabotaje que no borra nada y sólo cambia el
   dueño (`fuente: "Mareia"`), otro que cambia la propiedad de la que sale la imagen y otro que
   deja un ítem que nadie puede ir a mirar. Los tres dejan el JSON completo y bien formado.
@@ -65,6 +68,17 @@ def _una_foto_de_dominio_publico(dataset: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+def _una_foto_prestada(dataset: dict[str, Any]) -> dict[str, Any]:
+    """La primera foto que **no es del taxón de su fila**, que es la rama del préstamo."""
+    for entrada in dataset["fotos"].values():
+        if fotos.CAMPO_PRESTADA in entrada:
+            return entrada
+    raise AssertionError(
+        "ninguna foto publicada es prestada: o el dataset ha cambiado o la rama que estos "
+        "recorridos vigilan ha dejado de existir"
+    )
+
+
 def _en_rojo(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -104,12 +118,22 @@ def test_el_dataset_publicado_respeta_el_contrato_congelado() -> None:
     assert set(dataset) == {"schema", "consultadoEn", "fotos", "sinFoto"}
     assert dataset["schema"] == fotos.SCHEMA
     for clave, entrada in dataset["fotos"].items():
-        # `licenciaUrl` es el único campo condicional del contrato, y lo es en los dos sentidos:
-        # obligatorio cuando la licencia tiene condiciones y **ausente** cuando no las tiene.
-        esperados = {*fotos.CAMPOS_DE_FOTO, "identificadaPor"}
+        # Tres campos condicionales, y cada uno tiene su condición publicada al lado.
+        # `licenciaUrl` lo es en los dos sentidos —obligatorio con condiciones, **ausente** sin
+        # ellas—; `autor`, en uno solo: puede faltar cuando la foto declara que no hace falta
+        # atribuir, y puede estar igualmente. `prestadaDe`, sólo en las fotos de otra especie.
+        esperados = {*fotos.CAMPOS_DE_FOTO, fotos.CAMPO_ATRIBUCION, "identificadaPor"}
         if entrada.get("licenciaCodigo") not in fotos.LICENCIAS_SIN_CONDICIONES:
             esperados.add(fotos.CAMPO_LICENCIA_URL)
-        assert set(entrada) == esperados, clave
+        if entrada.get(fotos.CAMPO_ATRIBUCION) is not False:
+            esperados.add(fotos.CAMPO_AUTOR)
+        sobran = set(entrada) - esperados - {fotos.CAMPO_AUTOR, fotos.CAMPO_PRESTADA}
+        faltan = esperados - set(entrada)
+        assert not sobran and not faltan, (clave, sobran, faltan)
+        assert isinstance(entrada[fotos.CAMPO_ATRIBUCION], bool), clave
+        if fotos.CAMPO_PRESTADA in entrada:
+            assert set(entrada[fotos.CAMPO_PRESTADA]) == set(fotos.CAMPOS_DE_PRESTAMO), clave
+            assert entrada[fotos.CAMPO_PRESTADA]["tipo"] in fotos.TIPOS_DE_PRESTAMO, clave
         assert set(entrada["identificadaPor"]) == set(fotos.CAMPOS_DE_IDENTIFICACION), clave
     for clave, entrada in dataset["sinFoto"].items():
         assert set(entrada) == {"motivo"}, clave
@@ -136,7 +160,7 @@ def test_una_foto_a_la_que_le_falta_un_campo_del_contrato_no_pasa(
     _en_rojo(monkeypatch, capsys, dataset, f"sin «{campo}»")
 
 
-@pytest.mark.parametrize("campo", ("autor", "licencia", "licenciaUrl"))
+@pytest.mark.parametrize("campo", ("licencia", "licenciaUrl"))
 def test_un_campo_vaciado_tampoco_pasa(
     campo: str, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -148,6 +172,126 @@ def test_un_campo_vaciado_tampoco_pasa(
     dataset = _publicado()
     _una_foto(dataset)[campo] = "   "
     _en_rojo(monkeypatch, capsys, dataset, f"sin «{campo}»")
+
+
+def _una_foto_con_autor(dataset: dict[str, Any]) -> dict[str, Any]:
+    """La primera foto que **exige atribuir**, que es sobre la que se ceban los sabotajes del autor.
+
+    No vale «la primera del fichero» desde que el autor es condicional, y por el mismo motivo que
+    con la URL de la licencia: si el orden alfabético pusiera delante una foto que su fuente declara
+    libre de atribución, los sabotajes que quitan el autor estarían cebándose sobre la única entrada
+    que **no** tiene que traerlo, y pasarían en verde por el motivo equivocado.
+    """
+    for entrada in dataset["fotos"].values():
+        if entrada.get(fotos.CAMPO_ATRIBUCION) is True:
+            return entrada
+    raise AssertionError(
+        "ninguna foto publicada exige atribuir: o el dataset ha cambiado o la rama que estos "
+        "recorridos vigilan ha dejado de existir"
+    )
+
+
+def _una_foto_sin_autor(dataset: dict[str, Any]) -> dict[str, Any]:
+    """La primera foto **que su fuente declara libre de atribución**, que es la rama nueva."""
+    for entrada in dataset["fotos"].values():
+        if entrada.get(fotos.CAMPO_ATRIBUCION) is False:
+            return entrada
+    raise AssertionError(
+        "ninguna foto publicada declara estar libre de atribución: o el dataset ha cambiado o la "
+        "rama que estos recorridos vigilan ha dejado de existir"
+    )
+
+
+def test_una_foto_que_exige_atribuir_y_no_dice_a_quien_no_pasa(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """El rojo de la enmienda del 2026-08-31, y el que la sostiene entera.
+
+    Publicar sin autor una imagen cuya licencia exige atribuir —`File:Monkfish.jpg`,
+    `cc-by-sa-3.0`— no es un descuido de forma: es incumplir la licencia con la que se obtuvo. La
+    excepción que abrió esta enmienda vale **sólo** hacia el otro lado, y sin este recorrido en rojo
+    sería indistinguible de haber relajado el crédito.
+    """
+    dataset = _publicado()
+    del _una_foto_con_autor(dataset)[fotos.CAMPO_AUTOR]
+    _en_rojo(monkeypatch, capsys, dataset, "y no dice de quién es")
+
+
+def test_un_autor_vaciado_no_pasa_ni_donde_el_autor_puede_faltar(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Vaciar no es faltar: `autor: ""` publica «Foto de  · …», que no acredita a nadie.
+
+    Se sabotean **las dos ramas** porque la nueva es la que invita al descuido: donde el campo puede
+    faltar, dejarlo presente y vacío parece inocuo y es exactamente lo contrario.
+    """
+    dataset = _publicado()
+    _una_foto_con_autor(dataset)[fotos.CAMPO_AUTOR] = "  "
+    _en_rojo(monkeypatch, capsys, dataset, "Un crédito vacío no acredita a nadie")
+    dataset = _publicado()
+    _una_foto_sin_autor(dataset)[fotos.CAMPO_AUTOR] = ""
+    _en_rojo(monkeypatch, capsys, dataset, "Un crédito vacío no acredita a nadie")
+
+
+@pytest.mark.parametrize("valor", ("false", "no", 0, None))
+def test_la_condicion_del_autor_tiene_que_ser_un_booleano(
+    valor: object, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """`atribucionRequerida` decide si el autor puede faltar, así que no puede ser una cadena.
+
+    `"false"` es un valor verdadero en casi todos los lenguajes que van a leer este JSON, y `0` y
+    `null` son la forma en que un campo se pierde en una migración. Los tres tienen que salir en
+    rojo aquí y no convertirse en la excepción por accidente.
+    """
+    dataset = _publicado()
+    _una_foto_con_autor(dataset)[fotos.CAMPO_ATRIBUCION] = valor
+    _en_rojo(monkeypatch, capsys, dataset, f"sin «{fotos.CAMPO_ATRIBUCION}» booleano")
+
+
+def test_una_foto_sin_la_condicion_del_autor_no_pasa(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Sin el campo, la excepción no se puede comprobar sobre el artefacto y deja de existir."""
+    dataset = _publicado()
+    del _una_foto_con_autor(dataset)[fotos.CAMPO_ATRIBUCION]
+    _en_rojo(monkeypatch, capsys, dataset, f"sin «{fotos.CAMPO_ATRIBUCION}» booleano")
+
+
+def test_una_foto_prestada_sin_decir_de_que_especie_es_no_pasa(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Una foto de otro taxón sin `prestadaDe` es la foto de otro animal bajo el nombre de éste.
+
+    Y un `prestadaDe` a medias no vale: sin la fila del BOE que nombra la especie, «la elige la
+    norma» es una afirmación nuestra sobre un texto que nadie puede ir a comprobar.
+    """
+    dataset = _publicado()
+    prestada = _una_foto_prestada(dataset)
+    del prestada[fotos.CAMPO_PRESTADA]["nombreBoe"]
+    _en_rojo(monkeypatch, capsys, dataset, "sin decir «nombreBoe»")
+
+
+def test_un_prestamo_que_la_ficha_no_sabe_rotular_no_pasa(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """El sabotaje que no borra nada: el JSON queda entero y el rótulo desaparece de la página."""
+    dataset = _publicado()
+    _una_foto_prestada(dataset)[fotos.CAMPO_PRESTADA]["tipo"] = "la_que_mas_bonita"
+    _en_rojo(monkeypatch, capsys, dataset, "que no es ninguno de los que la ficha sabe rotular")
+
+
+def test_un_prestamo_de_una_especie_que_esa_fila_no_nombra_no_pasa(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Lo que hace legítimo el préstamo es que la elección la haya hecho **la norma**.
+
+    Este sabotaje deja el JSON completo y bien formado y sólo cambia la especie: si el gate se
+    conformara con que los tres campos existan, la elección pasaría a ser nuestra sin que nada
+    enrojeciera, que es justo lo que el préstamo no puede ser.
+    """
+    dataset = _publicado()
+    _una_foto_prestada(dataset)[fotos.CAMPO_PRESTADA]["nombre"] = "Lophius americanus"
+    _en_rojo(monkeypatch, capsys, dataset, "y esa fila no lo nombra")
 
 
 def test_una_licencia_que_no_enlaza_a_sus_condiciones_no_pasa(

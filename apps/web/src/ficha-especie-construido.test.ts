@@ -14,7 +14,11 @@
  *   de la nota —no la marca— **en el bloque de su cifra**, no en cualquier sitio de la página.
  * - **F2 · ninguna foto sin autor y licencia visibles junto a ella**, en su misma `<figure>` y nunca
  *   en un pie global: en la muestra de 12 ficheros del plan hay **seis licencias distintas**, así
- *   que un pie único sería falso para cinco de ellas.
+ *   que un pie único sería falso para cinco de ellas. Desde la enmienda del 2026-08-31, el autor
+ *   puede faltar **sólo** si la foto declara `atribucionRequerida: false` —y entonces la figura
+ *   tiene que decir que Commons no registra autor, no callarlo—; con `true` y sin autor, rojo. Y
+ *   una foto **prestada de otra especie** tiene que publicar su rótulo dentro de la misma figura:
+ *   la imagen de otro animal sin decir de cuál es peor que no publicar ninguna.
  * - **F3 · ningún hueco mudo**: las nueve filas de la retícula se publican en las 86 fichas, en su
  *   orden, y **todo campo vacío publica su motivo**. Es la regla que hace útil un pokédex: un campo
  *   vacío es visible y dice «esto no lo sabemos».
@@ -38,9 +42,14 @@ import { fileURLToPath } from "node:url";
 import {
   AQUI_NO_SE_PUNTUA_NADA,
   CAMPOS_DE_LA_FICHA,
+  creditoSinAutor,
   DOMINIO_PUBLICO_SIN_CONDICIONES,
+  fotoDeLaPrimeraEspecieDeLaFila,
+  fotoDeUnaEspecieDelGenero,
   FUERA_DEL_ANEXO_III,
   LA_FOTO_NO_IDENTIFICA,
+  PRESTAMO_LA_PRIMERA_DE_LA_FILA,
+  PRESTAMO_UNA_DEL_GENERO,
   SIN_DATASET_DE_FOTOS,
 } from "@mareia/module-species";
 import { NO_AUTORIZA_A_PESCAR } from "@mareia/module-protected-areas";
@@ -70,6 +79,22 @@ function textoDe(fragmento: string): string {
     .replace(/&amp;/gu, "&")
     .replace(/\s+/gu, " ")
     .trim();
+}
+
+/**
+ * El rótulo que la ficha tiene que publicar de una foto prestada, o `undefined` si el tipo de
+ * préstamo no es ninguno de los que la página sabe explicar.
+ *
+ * Se escribe aquí y no se importa ya resuelto a propósito: el gate mide **lo que llega al HTML**
+ * contra lo que el dataset dice que debería llegar, y si preguntase por el rótulo a la misma
+ * función que lo compone estaría comprobando que una función es igual a sí misma.
+ */
+function rotuloDelPrestamo(tipo: string, nombre: string, nombreBoe: string): string | undefined {
+  if (tipo === PRESTAMO_UNA_DEL_GENERO) return fotoDeUnaEspecieDelGenero(nombre, nombreBoe);
+  if (tipo === PRESTAMO_LA_PRIMERA_DE_LA_FILA) {
+    return fotoDeLaPrimeraEspecieDeLaFila(nombre, nombreBoe);
+  }
+  return undefined;
 }
 
 /** El HTML de la ficha de una especie, por su clave. */
@@ -259,6 +284,7 @@ test("F2 · toda foto publicada lleva su autor y su licencia en su misma figura"
   const catalogo = await cargarCatalogoDeEspecies();
   const desnudas: string[] = [];
   let comprobadas = 0;
+  let prestadas = 0;
   for (const especie of catalogo.especies) {
     const html = fichaDe(especie.clave);
     const figuras = [...html.matchAll(/<figure class="ficha__figura">([\s\S]*?)<\/figure>/gu)].map(
@@ -278,11 +304,45 @@ test("F2 · toda foto publicada lleva su autor y su licencia en su misma figura"
     // AUTOR Y LICENCIA, los dos, dentro de la figura. No «en la página»: un pie global sería falso
     // —hay seis licencias distintas en la muestra de 12 ficheros del plan— y además no viaja con la
     // imagen que alguien copia.
-    if (!leido.includes(esperada.valor.autor)) {
+    //
+    // El autor es condicional desde la enmienda del 2026-08-31, y las dos ramas se miden. Con
+    // atribución exigida, el nombre tiene que estar. Sin ella, lo que tiene que estar es la frase
+    // que dice que Commons no registra ninguno: una figura que se limitara a no poner crédito
+    // parecería una foto nuestra, que es la tercera forma de no acreditar a nadie.
+    const autor = esperada.valor.autor;
+    if (autor === undefined) {
+      if (esperada.valor.atribucionRequerida) {
+        desnudas.push(
+          `${especie.nombreBoe}: publica una foto sin autor que declara exigir atribución`,
+        );
+      }
+      if (!leido.includes(textoDe(creditoSinAutor(esperada.valor.licencia)))) {
+        desnudas.push(`${especie.nombreBoe}: la figura no dice que su fuente no registra autor`);
+      }
+    } else if (!leido.includes(autor)) {
       desnudas.push(`${especie.nombreBoe}: la figura no publica el autor`);
     }
     if (!leido.includes(esperada.valor.licencia)) {
       desnudas.push(`${especie.nombreBoe}: la figura no publica la licencia`);
+    }
+    // DE QUÉ ANIMAL ES LA FOTO cuando no es del taxón de la fila. Se exige el rótulo entero —no
+    // sólo el nombre de la especie— porque el nombre suelto no explica por qué está ahí, y lo que
+    // hace legítimo el préstamo es que la elección la haya hecho la norma y se diga.
+    const prestada = esperada.valor.prestadaDe;
+    if (prestada !== undefined) {
+      prestadas += 1;
+      const rotulo = rotuloDelPrestamo(prestada.tipo, prestada.nombre, prestada.nombreBoe);
+      if (rotulo === undefined || !leido.includes(textoDe(rotulo))) {
+        desnudas.push(`${especie.nombreBoe}: publica una foto de otra especie sin decir de cuál`);
+      }
+      // Y el `alt` nombra el taxón de la foto, no el de la fila: es la única frase que tiene quien
+      // no puede ver la imagen, y decirle que es de otro animal sería mentirle sólo a él.
+      if (!figura.includes(`alt="Fotografía que ${esperada.valor.identificadaPor.fuente}`)) {
+        desnudas.push(`${especie.nombreBoe}: la figura no dice en el alt quién asocia la imagen`);
+      }
+      if (!figura.includes(prestada.nombre)) {
+        desnudas.push(`${especie.nombreBoe}: el alt de una foto prestada nombra el taxón de la fila`);
+      }
     }
     // Y la imagen que se publica es la del dataset, no otra.
     if (!figura.includes(`src="${esperada.valor.url}"`)) {
@@ -315,7 +375,10 @@ test("F2 · toda foto publicada lleva su autor y su licencia en su misma figura"
   }
   assert.deepEqual(desnudas, [], "fotos publicadas sin su crédito pegado a ellas");
   assert.ok(comprobadas > 0, "ninguna foto medida: el gate no está mirando nada");
-  t.diagnostic(`${comprobadas} fotos publicadas, todas con autor y licencia en su figura`);
+  t.diagnostic(
+    `${comprobadas} fotos publicadas con su crédito en la figura, ${prestadas} de ellas de otra ` +
+      "especie y rotuladas",
+  );
 });
 
 test("F2 · sin dataset de fotos, ninguna ficha publica imagen, y las 86 dicen por qué", async (t) => {

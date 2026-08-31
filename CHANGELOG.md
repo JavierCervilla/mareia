@@ -48,8 +48,8 @@ esta trayectoria no es cómo se enseña un dato: es **cómo se enseña que falta
   página nombra, así que el gate retira los dos avisos literales antes de buscar y los comprueba
   aparte—.
 - **La foto lleva su autor y su licencia dentro de su misma figura, nunca en un pie global.** El
-  censo de las **78** publicadas son **ocho** licencias distintas, así que un «fotos de Wikimedia
-  Commons» al pie sería falso para siete de ellas y no acreditaría a ninguna de las **45 personas**
+  censo de las **85** publicadas son **ocho** licencias distintas, así que un «fotos de Wikimedia
+  Commons» al pie sería falso para siete de ellas y no acreditaría a ninguna de las **46 personas**
   que las firman. Junto a la imagen van autor, licencia, enlace al fichero en Commons, **quién
   identificó el taxón** (Wikidata `P18`, que no somos nosotros) y el aviso de que una foto no sirve
   para identificar una captura. La imagen no se busca por texto —buscar el nombre científico
@@ -70,12 +70,39 @@ esta trayectoria no es cómo se enseña un dato: es **cómo se enseña que falta
   condicional —obligatoria y URL válida con condiciones, **ausente** sin ellas—. Una licencia cuenta
   como sin condiciones **sólo si dos campos independientes de la fuente coinciden**: `License` en un
   allowlist **cerrado** (`pd`, y nada más: `cc0` sí trae texto y URL) **y** `Copyrighted == "False"`.
-  Un campo solo es una afirmación; dos que coinciden es una comprobación. Resultado: **63 → 78 fotos
-  de 86**, y los **8** huecos que quedan son huecos de verdad —4 por identificación no comprobable,
-  1 sin ítem en Wikidata, 1 sin taxón resuelto y **2 porque su única imagen no acredita autor**, que
-  ahí no hay excepción que valga—. **Efecto que hay que decir: 6 de las 63 que ya se publicaban
+  Un campo solo es una afirmación; dos que coinciden es una comprobación. Efecto de esta enmienda
+  sola: **63 → 78 fotos de 86**; los ocho huecos que dejaba los cierra el punto siguiente.
+  **Efecto que hay que decir: 6 de las 63 que ya se publicaban
   cambian de fichero**, no porque se tocara la elección de imagen sino porque en esos taxones la
   **primera** `P18` de Wikidata era de dominio público y el contrato viejo la rechazaba.
+- **85 de las 86 especies publican foto, y los tres caminos que lo consiguen hacen la identificación
+  más estricta, no más laxa.** (1) Se pregunta a Wikidata por **el ítem que declara ese nombre
+  científico** (`haswbstatement:"P225=<nombre>"` — **las comillas importan**: sin ellas los nombres
+  de dos palabras devuelven vacío) en vez de buscar el nombre como texto. La búsqueda de texto
+  llevaba a `Q234014` (que declara *Mugil cephalus*, no el género), a `Q286026` (que declara
+  «Sapia») y a `Q47652` (que no es un animal). (2) Una foto se publica **sin autor** sólo cuando la
+  fuente dice que no hace falta atribuir: `AttributionRequired = false` **y** `Copyrighted = False`,
+  que son los cuatro ficheros de dominio público de la NOAA. Con `AttributionRequired = true` y sin
+  autor **no se publica jamás** —ahí quien lo impide es la licencia, no nosotros: es el caso de
+  `File:Monkfish.jpg`—. (3) Dos filas de género toman prestada la foto de una especie **que nombra
+  el propio BOE** en otra fila, y la ficha lo rotula: la elección la hace la norma.
+- **Cuando dos ítems declaran el mismo nombre científico, la ambigüedad se deshace con la fuente o
+  no se deshace.** Primero se descartan los que Wikidata marca como duplicados (`P31 = Q17362920`):
+  eso no es elegir, es leer lo que la fuente ya decidió. Si aún quedan varios, decide **la
+  concordancia de los dos caminos** —el exacto y el de texto—, que fallan de maneras distintas y por
+  eso su coincidencia es una comprobación y no una preferencia. Lo que no se hace nunca es
+  desempatar por el primero, por el número más bajo o por cuál tiene foto. Sin esto, `Merluccius
+  merluccius` y `Melanogrammus aeglefinus` **perdían** la foto que ya publicaban. Los cuatro
+  recorridos se probaron en rojo uno por uno, y **dos de ellos pasaban por el camino equivocado** —el
+  del duplicado se ponía verde gracias a la concordancia— hasta que se les quitó esa salida.
+- **El único hueco que queda no es «no hay foto»: es que dos autoridades escriben distinto el mismo
+  nombre.** WoRMS publica `Penaeus (Melicertus) kerathurus` con el subgénero entre paréntesis y el
+  `P225` de Wikidata no escribe así, de modo que ningún ítem declara esa forma exacta. Cerrarlo
+  obligaría al módulo de fotos a caminar la lista de sinónimos de WoRMS, o sea a ampliarle la
+  superficie de fuentes; mientras esa decisión no se tome, el hueco **publica su motivo**.
+- **`autor: "  "` colaba.** El lector rechazaba la cadena vacía pero no la de dos espacios, y un
+  autor en blanco pinta «Foto de   · CC BY-SA 4.0»: una atribución que no atribuye a nadie, con todo
+  en verde. Ahora ninguno de los campos publicables admite una cadena que no diga nada.
 - **En la ficha, el dominio público se publica como estado y no como enlace vacío.** Con condiciones,
   el crédito enlaza el texto de la licencia; sin ellas dice que no hay texto que enlazar porque no
   hay condiciones que cumplir, y deja el enlace a la página del fichero —que lleva **toda** foto

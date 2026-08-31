@@ -227,20 +227,40 @@ de ficheros que publican las dos cosas. La regla, enmendada:
 
 ### Ninguna especie se queda sin foto por no tener imagen: se quedan por los metadatos
 
-Censo de la ingesta del **2026-08-30**, contado sobre lo publicado: **78 de las 86 especies publican
-foto** y las otras **8 publican el motivo de no tenerla**.
+Censo de la ingesta del **2026-08-31**, contado sobre lo publicado: **85 de las 86 especies publican
+foto** y **1 publica el motivo de no tenerla**.
 
 | Por qué no hay foto | Especies |
 |---|---|
-| la búsqueda lleva a otro taxón (`Mugil` ×2, `Sepia`, `Venus`) | 4 |
-| su única imagen no acredita autor en Commons (`Gadus morhua`, `Lophius`) | 2 |
-| Wikidata no tiene ítem para ese nombre (`Penaeus (Melicertus) kerathurus`) | 1 |
-| el catálogo no resuelve esa fila a ningún taxón (`Lophius piscatorius, L. Budegassa`) | 1 |
+| WoRMS y Wikidata escriben ese nombre distinto (`Penaeus (Melicertus) kerathurus`) | 1 |
 
-**Ninguna cae por falta de `P18`**: las 80 especies que llegan a mirarlo tienen al menos una imagen
-vinculada. Y ninguna cae ya por el dominio público: los 15 huecos que abría el contrato viejo se
-cerraron con la enmienda de arriba, y los 2 que quedan por metadatos son huecos de verdad —una imagen
-que no dice de quién es no se puede publicar, y ahí no hay excepción que valga—.
+El único hueco no es «no hay foto»: es que las dos autoridades **no escriben igual el mismo nombre**.
+WoRMS publica el subgénero entre paréntesis y el `P225` de Wikidata no, así que ningún ítem declara
+esa forma exacta y la búsqueda de texto tampoco llega. Cerrarlo obligaría al módulo de fotos a
+caminar la lista de sinónimos de WoRMS —o sea, a ampliarle la superficie de fuentes— y esa es una
+decisión de diseño, no un descuido: mientras no se tome, el hueco publica su motivo.
+
+**Ninguna cae por falta de `P18`**, ninguna cae ya por el dominio público, y **ninguna de las 63 que
+se publicaban antes se ha perdido**. Los tres caminos que cerraron los ocho huecos anteriores son, en
+orden de cuántos cierran:
+
+1. **Preguntar por el nombre declarado, no buscarlo como texto.** `haswbstatement:"P225=<nombre>"`
+   lleva al ítem que **declara** ese nombre científico; la búsqueda de texto llevaba a `Q234014`
+   (que declara *Mugil cephalus*, no el género), a `Q286026` (que declara «Sapia») y a `Q47652` (que
+   no es un animal).
+2. **Publicar sin autor sólo cuando la fuente dice que no hace falta.** Son **4 ficheros**, los
+   cuatro con `AttributionRequired = false` y `Copyrighted = False` en Commons. Con
+   `AttributionRequired = true` y sin autor **no se publica jamás**: ahí quien lo impide es la
+   licencia, no nosotros.
+3. **Dos filas toman prestada la foto de una especie que nombra la propia norma** y lo dicen en la
+   ficha: `Lophius spp.` y `Lophius piscatorius, L. Budegassa`. La elección la hace el BOE, no
+   nosotros.
+
+Y cuando dos ítems declaran el mismo nombre científico, la ambigüedad se deshace **con la fuente**:
+primero descartando los que Wikidata marca como duplicados (`P31 = Q17362920`) y, si aún quedan
+varios, quedándose con aquél en el que **coinciden los dos caminos** —el exacto y el de texto—.
+Los dos fallan de maneras distintas, así que su concordancia es una comprobación y no una
+preferencia. Si ninguna de las dos cosas deshace el empate, la fila cae con los ítems nombrados.
 
 **Cambiaron de fichero 6 de las 63 fotos que ya se publicaban**, y no porque se tocara la elección de
 imagen: en esos 6 taxones la **primera** `P18` que manda Wikidata era de dominio público y el
@@ -249,16 +269,16 @@ que la fuente pone primero, que es la regla que este módulo tenía escrita desd
 `homarus-gammarus`, `octopus-vulgaris`, `pagrus-pagrus`, `salmo-salar`, `sardina-pilchardus` y
 `scomber-japonicus`.
 
-### No existe «la licencia de las fotos»: son ocho en 78 ficheros
+### No existe «la licencia de las fotos»: son 8 en 85 ficheros
 
 <!-- gate:licencias-de-fotos -->
 
 | Licencia | Ficheros |
 |---|---|
-| `CC BY-SA 4.0` | 26 |
-| `Public domain` | 21 |
+| `CC BY-SA 4.0` | 28 |
+| `Public domain` | 24 |
 | `CC BY 4.0` | 13 |
-| `CC BY-SA 3.0` | 10 |
+| `CC BY-SA 3.0` | 12 |
 | `CC BY 3.0` | 5 |
 | `CC BY 2.5` | 1 |
 | `CC BY-SA 2.5` | 1 |
@@ -266,7 +286,7 @@ que la fuente pone primero, que es la regla que este módulo tenía escrita desd
 
 <!-- /gate:licencias-de-fotos -->
 
-Esto **sí es un censo** de las 78 fotos publicadas, y lo recuenta un gate de la suite sobre el
+Esto **sí es un censo** de las 85 fotos publicadas, y lo recuenta un gate de la suite sobre el
 propio `fotos.json`: si el dataset cambia y esta tabla no, se pone en rojo. (La tabla de seis
 licencias en doce ficheros del plan de T-23 era **una muestra**, medida para saber si la variedad
 existía; no decía cuántas hay de cada una, y no es la misma cosa.)
@@ -274,8 +294,8 @@ existía; no decía cuántas hay de cada una, y no es la misma cosa.)
 De ahí la consecuencia de diseño: **`autor`, `licencia`, `licenciaCodigo` y —cuando la hay—
 `licenciaUrl` van dentro de cada entrada** y se muestran junto a su foto, nunca en un pie global. Un
 pie que dijera «fotos de Wikimedia Commons» sería falso para las ocho a la vez, y no acreditaría a
-ninguna de las **45 personas distintas** que firman estas 78 fotos. **57 de las 78 traen
-`licenciaUrl`** y las otras 21 son de dominio público, que no la tiene; de esas 57, tres la traen en
+ninguna de las **46 personas distintas** que firman estas 85 fotos. **61 de las 85 traen
+`licenciaUrl`** y las otras 24 son de dominio público, que no la tiene; de esas 61, cinco la traen en
 `http` —la forma que imprimen las plantillas viejas de Commons— y se publica tal cual: reescribirla
 a `https` sería cambiar lo que la fuente dice sobre sus propias condiciones.
 

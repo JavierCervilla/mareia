@@ -22,7 +22,11 @@ import type {
   FotosDeLaFicha,
   Rellenado,
 } from "../ficha.ts";
-import { fichasDeEspecies } from "../ficha.ts";
+import {
+  fichasDeEspecies,
+  PRESTAMO_LA_PRIMERA_DE_LA_FILA,
+  PRESTAMO_UNA_DEL_GENERO,
+} from "../ficha.ts";
 import { FUERA_DEL_ANEXO_III, LA_NORMA_NOMBRA_UNA_ESPECIE, RANGO_SIN_TAXON } from "../textos.ts";
 import type {
   CatalogoDeEspecies,
@@ -133,6 +137,7 @@ const FOTO: FotoDeCommons = {
   url: "https://upload.wikimedia.org/wikipedia/commons/1/1a/Sparus_aurata.jpg",
   descripcion: "https://commons.wikimedia.org/wiki/File:Sparus_aurata.jpg",
   autor: "Roberto Pillon",
+  atribucionRequerida: true,
   licencia: "CC BY-SA 3.0",
   licenciaCodigo: "cc-by-sa-3.0",
   licenciaUrl: "https://creativecommons.org/licenses/by-sa/3.0/",
@@ -145,9 +150,25 @@ const FOTO_DE_DOMINIO_PUBLICO: FotoDeCommons = {
   url: "https://upload.wikimedia.org/wikipedia/commons/d/d2/Belone_belone1.jpg",
   descripcion: "https://commons.wikimedia.org/wiki/File:Belone_belone1.jpg",
   autor: "Krüger",
+  atribucionRequerida: false,
   licencia: "Public domain",
   licenciaCodigo: "pd",
   identificadaPor: { fuente: "Wikidata", entidad: "Q643373", propiedad: "P18" },
+};
+
+/**
+ * La rama que abrió la enmienda del 2026-08-31: Commons **no registra autor** y declara que su
+ * licencia no exige atribuir. Medido en `File:Atlantic cod.jpg` y `File:Mugil cephalus.jpg`, los
+ * dos de la NOAA, que estaban detrás de los huecos del bacalao y de las lisas.
+ */
+const FOTO_SIN_AUTOR: FotoDeCommons = {
+  fichero: "File:Atlantic cod.jpg",
+  url: "https://upload.wikimedia.org/wikipedia/commons/a/a3/Atlantic_cod.jpg",
+  descripcion: "https://commons.wikimedia.org/wiki/File:Atlantic_cod.jpg",
+  atribucionRequerida: false,
+  licencia: "Public domain",
+  licenciaCodigo: "pd",
+  identificadaPor: { fuente: "Wikidata", entidad: "Q199788", propiedad: "P18" },
 };
 
 function conFoto(clave: string, foto: FotoDeCommons = FOTO): FotosDeLaFicha {
@@ -344,6 +365,113 @@ test("una licencia con condiciones y sin URL levanta, no se degrada a «dominio 
     // jurídica sobre una imagen ajena, y es lo que pasaría si la rama se decidiera por la ausencia
     // de la URL en vez de por el código de licencia.
     /tiene condiciones/u,
+  );
+});
+
+test("una foto cuya fuente no exige atribuir se publica diciendo que no hay autor", () => {
+  const especies = [especie()];
+  const [ficha] = fichasDeEspecies(
+    catalogo(especies),
+    datos(especies, { fotos: conFoto("sparus-auratus", FOTO_SIN_AUTOR) }),
+    FORMATO,
+  );
+  assert.equal(ficha?.foto.tipo, "dato");
+  if (ficha?.foto.tipo !== "dato") return;
+  // Ni un «Foto de  · Public domain» con el hueco donde iría el nombre, ni una figura sin línea de
+  // crédito —que parecería una foto nuestra—: se dice el estado y **quién lo declara**.
+  assert.match(ficha.foto.valor.credito, /Sin autor acreditado · Public domain/u);
+  assert.match(ficha.foto.valor.credito, /Wikimedia Commons no registra quién hizo esta foto/u);
+  assert.doesNotMatch(ficha.foto.valor.credito, /Foto de {2}/u);
+});
+
+test("una foto sin autor que declara exigir atribución levanta, y no se publica sin crédito", () => {
+  const especies = [especie()];
+  // El sabotaje: la misma foto de la NOAA, pero declarando lo que declara `File:Monkfish.jpg`. Si
+  // la rama del crédito se decidiera por «hay autor o no», esto publicaría una CC BY-SA sin
+  // atribuir, que de todo lo que hace esta ficha es lo único que además de deshonesto es ilegal.
+  const exigeYNoDice: FotoDeCommons = {
+    ...FOTO_SIN_AUTOR,
+    atribucionRequerida: true,
+    licencia: "CC BY-SA 3.0",
+    licenciaCodigo: "cc-by-sa-3.0",
+    licenciaUrl: "https://creativecommons.org/licenses/by-sa/3.0/",
+  };
+  assert.throws(
+    () =>
+      fichasDeEspecies(
+        catalogo(especies),
+        datos(especies, { fotos: conFoto("sparus-auratus", exigeYNoDice) }),
+        FORMATO,
+      ),
+    /exige atribuir y no dice a quién/u,
+  );
+});
+
+test("una foto prestada de otra especie lo dice en la figura, y el alt nombra ese taxón", () => {
+  const especies = [especie()];
+  const prestada: FotoDeCommons = {
+    ...FOTO,
+    prestadaDe: {
+      tipo: PRESTAMO_UNA_DEL_GENERO,
+      nombre: "Lophius piscatorius",
+      nombreBoe: "Lophius piscatorius, L. Budegassa",
+    },
+  };
+  const [ficha] = fichasDeEspecies(
+    catalogo(especies),
+    datos(especies, { fotos: conFoto("sparus-auratus", prestada) }),
+    FORMATO,
+  );
+  assert.equal(ficha?.foto.tipo, "dato");
+  if (ficha?.foto.tipo !== "dato") return;
+  // El rótulo dice de qué especie es Y de dónde sale la elección: sin la fila del BOE, «la elige la
+  // norma» sería una afirmación nuestra sobre un texto que el lector tendría que ir a buscar.
+  assert.match(ficha.foto.valor.prestamo ?? "", /«Lophius piscatorius»/u);
+  assert.match(ficha.foto.valor.prestamo ?? "", /«Lophius piscatorius, L. Budegassa»/u);
+  // Y el `alt` nombra el taxón de la FOTO, no el de la fila: es la única frase que tiene quien no
+  // puede ver la imagen, y decirle que es de otro animal sería mentirle sólo a él.
+  assert.match(ficha.foto.valor.alternativo, /asocia al taxón «Lophius piscatorius»/u);
+  assert.doesNotMatch(ficha.foto.valor.alternativo, /Sparus auratus/u);
+});
+
+test("una foto prestada de la primera especie que nombra la fila dice que hay más", () => {
+  const especies = [especie()];
+  const prestada: FotoDeCommons = {
+    ...FOTO,
+    prestadaDe: {
+      tipo: PRESTAMO_LA_PRIMERA_DE_LA_FILA,
+      nombre: "Lophius piscatorius",
+      nombreBoe: "Lophius piscatorius, L. Budegassa",
+    },
+  };
+  const [ficha] = fichasDeEspecies(
+    catalogo(especies),
+    datos(especies, { fotos: conFoto("sparus-auratus", prestada) }),
+    FORMATO,
+  );
+  assert.equal(ficha?.foto.tipo, "dato");
+  if (ficha?.foto.tipo !== "dato") return;
+  // Publicar la foto de la primera sin decir que la fila nombra más sería contar media fila.
+  assert.match(ficha.foto.valor.prestamo ?? "", /nombra más de una especie en esta fila/u);
+  assert.match(ficha.foto.valor.prestamo ?? "", /no ilustra a las demás/u);
+});
+
+test("una foto prestada de un tipo que la ficha no sabe rotular levanta, no se publica muda", () => {
+  const especies = [especie()];
+  // Es la forma en que un préstamo nuevo llegaría a la página sin rótulo: el dataset gana un tipo,
+  // la ficha no se entera, y se publica la foto de otro animal bajo el nombre de éste sin decirlo.
+  const prestada: FotoDeCommons = {
+    ...FOTO,
+    prestadaDe: { tipo: "la_que_mas_bonita", nombre: "X y", nombreBoe: "X y" },
+  };
+  assert.throws(
+    () =>
+      fichasDeEspecies(
+        catalogo(especies),
+        datos(especies, { fotos: conFoto("sparus-auratus", prestada) }),
+        FORMATO,
+      ),
+    /que esta ficha no sabe explicar/u,
   );
 });
 

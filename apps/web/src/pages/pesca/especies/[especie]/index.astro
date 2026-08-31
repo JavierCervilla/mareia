@@ -32,7 +32,9 @@
  *    se leería como «esta especie está protegida aquí», que no tenemos con qué sostener.
  * 5. **La foto lleva su autor y su licencia pegados a ella**, nunca en un pie global: en la muestra
  *    de 12 ficheros del plan hay seis licencias distintas, así que un pie único sería falso para
- *    cinco de ellas. Lo mide el gate **F2**.
+ *    cinco de ellas. Lo mide el gate **F2**. Y cuando la foto **no es del taxón de la fila** —dos
+ *    filas de la norma no pueden ilustrarse con el suyo—, el rótulo de qué especie es va lo primero
+ *    de la figura: la elección la hace la norma, y esconderla la haría nuestra.
  *
  * **Cero JavaScript**, como el resto del portal: la ficha es HTML estático y no tiene ningún estado
  * que animar.
@@ -318,6 +320,17 @@ const migas = migasDeFichaDeEspecie(ficha.nombreBoe);
                     decoding="async"
                   />
                   <figcaption class="ficha__credito">
+                    {/*
+                      DE QUÉ ANIMAL ES LA FOTO, cuando no es del taxón de la fila. Va lo PRIMERO de
+                      la figura y no en una nota al final: dos filas de la norma no pueden
+                      ilustrarse con su propio taxón —la que nombra varias especies en una celda y
+                      la de un género cuya única imagen no se puede publicar— y la foto sale
+                      entonces de una especie que nombra el propio BOE. La elección la hace la
+                      norma; esconderla haría nuestra una decisión que no lo es.
+                    */}
+                    {ficha.foto.valor.prestamo !== undefined && (
+                      <span class="ficha__nota-de-campo">{ficha.foto.valor.prestamo}</span>
+                    )}
                     <span class="ficha__dato">{ficha.foto.valor.credito}</span>
                     {/*
                       La licencia, por la rama que le toque. Con condiciones, el enlace a su texto;

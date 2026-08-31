@@ -273,8 +273,17 @@
       nunca en un pie global: hay **seis licencias distintas** en una **muestra de 12** ficheros —una
       muestra, no un censo—), **F3** (ningún hueco mudo: **774** campos comprobados en 86 fichas) y
       **F4** (nada de puntuar, medido sobre el **artefacto**: marcado, vocabulario, listas ordenadas y
-      la hoja). **F2 mide hoy fotos de verdad: 78 de las 86** especies publican imagen y las **8**
-      restantes su motivo. Y el contrato de `fotos/v1` se **corrigió** al medirlo: exigir
+      la hoja). **F2 mide hoy fotos de verdad: 85 de las 86** especies publican imagen y la que
+      falta publica su motivo —y no es «no hay foto», sino que WoRMS escribe el subgénero entre
+      paréntesis y el `P225` de Wikidata no—. Se llegó ahí por tres caminos que hacen la
+      identificación **más** estricta: preguntar por el ítem que **declara** el nombre científico en
+      vez de buscarlo como texto (la búsqueda llevaba a un ítem equivocado en cuatro taxones),
+      publicar sin autor **sólo** cuando la fuente dice que no hace falta atribuir
+      (`AttributionRequired = false` **y** `Copyrighted = False`), y dejar que dos filas de género
+      tomen prestada la foto de una especie **que nombra el propio BOE**. Y cuando dos ítems declaran
+      el mismo nombre, la ambigüedad la deshace la fuente —la marca de duplicado de Wikidata, o la
+      concordancia de los dos caminos— o no se deshace: nunca el primero ni el que tenga foto.
+      Y el contrato de `fotos/v1` se **corrigió** al medirlo: exigir
       `licenciaUrl` en toda foto dejaba fuera 15 especies cuya imagen es de **dominio público** —que
       no tiene condiciones, así que no hay URL que enlazar— y, peor, **les publicaba una razón falsa**
       («una imagen sin autor o sin licencia no se publica», de ficheros que publican las dos cosas).

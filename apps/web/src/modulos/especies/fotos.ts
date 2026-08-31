@@ -7,11 +7,12 @@
  * T-20 los dos carriles divergieron en **nueve campos** porque el contrato no estaba escrito en
  * ninguna parte. Aquí sí lo está (`docs/trayectorias/T-23-plan.md`, entregable 2) y este lector lo
  * respeta al pie de la letra: `schema`, `consultadoEn`, `fotos` por clave de T-20 con
- * `fichero`/`url`/`descripcion`/`autor`/`licencia`/`licenciaCodigo`/`licenciaUrl`/
- * `identificadaPor`, y `sinFoto` por clave con su `motivo`. Ni un nombre inventado. El contrato se
- * **enmendó** el 2026-08-30 —`licenciaUrl` pasó a condicional y nació `licenciaCodigo`— y la
- * enmienda está escrita en el mismo sitio que el contrato, que es lo que la hace una enmienda y no
- * una divergencia de carril.
+ * `fichero`/`url`/`descripcion`/`autor`/`atribucionRequerida`/`licencia`/`licenciaCodigo`/
+ * `licenciaUrl`/`prestadaDe`/`identificadaPor`, y `sinFoto` por clave con su `motivo`. Ni un nombre
+ * inventado. El contrato se **enmendó** dos veces —el 2026-08-30 `licenciaUrl` pasó a condicional y
+ * nació `licenciaCodigo`; el 2026-08-31 `autor` pasó a condicional y nacieron `atribucionRequerida`
+ * y `prestadaDe`— y las dos enmiendas están escritas en el mismo sitio que el contrato, que es lo
+ * que las hace enmiendas y no divergencias de carril.
  *
  * Las tres decisiones que dan forma al fichero:
  *
@@ -33,8 +34,13 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 
-import { esDominioPublico } from "@mareia/module-species";
-import type { FotoDeCommons, FotosDeLaFicha, Rellenado } from "@mareia/module-species";
+import { esDominioPublico, TIPOS_DE_PRESTAMO } from "@mareia/module-species";
+import type {
+  FotoDeCommons,
+  FotoPrestada,
+  FotosDeLaFicha,
+  Rellenado,
+} from "@mareia/module-species";
 
 import { DATA_DIR } from "../../datos/deps.ts";
 
@@ -65,7 +71,11 @@ function objeto(valor: unknown, ruta: string): Record<string, unknown> {
 
 function texto(fuente: Record<string, unknown>, clave: string, ruta: string): string {
   const valor = fuente[clave];
-  if (typeof valor !== "string" || valor.length === 0) {
+  // **En blanco es tan vacío como vacío.** Comprobar sólo `length === 0` dejaba pasar `"  "`, y un
+  // autor de dos espacios pinta «Foto de   · CC BY-SA 4.0»: una atribución que no atribuye a nadie,
+  // con todo verde. Los siete campos de este contrato son texto que se publica, así que ninguno
+  // admite una cadena que no diga nada.
+  if (typeof valor !== "string" || valor.trim().length === 0) {
     throw new FotosMalFormadas(`${ruta}.${clave} debería ser una cadena no vacía`);
   }
   return valor;
@@ -95,12 +105,75 @@ function leerLicenciaUrl(
 }
 
 /**
+ * El booleano que declara la fuente. **Booleano de verdad**, no la cadena `"false"`.
+ *
+ * La distinción no es preciosismo: `"false"` es un valor verdadero en JavaScript, así que un
+ * contrato que aceptase la cadena convertiría «Commons dice que no hace falta atribuir» en «sí hace
+ * falta» —o al revés, según quién lo lea— en el sitio exacto donde eso decide si una foto se
+ * publica con crédito o sin él.
+ */
+function booleano(fuente: Record<string, unknown>, clave: string, ruta: string): boolean {
+  const valor = fuente[clave];
+  if (typeof valor !== "boolean") {
+    throw new FotosMalFormadas(
+      `${ruta}.${clave} debería ser un booleano y es ${JSON.stringify(valor)}`,
+    );
+  }
+  return valor;
+}
+
+/**
+ * El autor, que es **condicional y en un solo sentido** (enmienda del 2026-08-31).
+ *
+ * Obligatorio y no vacío mientras la foto declare que hay que atribuir —la cadena vacía es la forma
+ * en que un crédito desaparece sin que nada enrojezca: `autor: ""` pinta «Foto de  · CC BY-SA 4.0»,
+ * que es una atribución que no atribuye a nadie—. Y puede faltar sólo con
+ * `atribucionRequerida: false`, que es lo que Commons publica de los dos ficheros de la NOAA que
+ * estaban detrás de los huecos del bacalao y de las lisas.
+ *
+ * Al revés que `licenciaUrl`, aquí la ausencia **no** es obligatoria: una foto que no exija
+ * atribuir y que además acredite a su autor lo publica, porque acreditar de más no engaña a nadie.
+ */
+function leerAutor(
+  crudo: Record<string, unknown>,
+  atribucionRequerida: boolean,
+  ruta: string,
+): string | undefined {
+  if (!atribucionRequerida && !("autor" in crudo)) return undefined;
+  return texto(crudo, "autor", ruta);
+}
+
+/**
+ * De qué otra especie es la foto, cuando la fila no puede ilustrarse con su propio taxón.
+ *
+ * Los tres campos son obligatorios y el `tipo` tiene que ser uno de los que la ficha sabe rotular:
+ * una foto prestada que la página no supiera explicar se publicaría muda, y una foto muda de otro
+ * animal bajo el nombre de éste es peor que no publicar ninguna.
+ */
+function leerPrestadaDe(crudo: Record<string, unknown>, ruta: string): FotoPrestada | undefined {
+  if (!("prestadaDe" in crudo)) return undefined;
+  const prestada = objeto(crudo["prestadaDe"], `${ruta}.prestadaDe`);
+  const tipo = texto(prestada, "tipo", `${ruta}.prestadaDe`);
+  if (!TIPOS_DE_PRESTAMO.has(tipo)) {
+    throw new FotosMalFormadas(
+      `${ruta}.prestadaDe.tipo es ${JSON.stringify(tipo)}, que no es ninguno de los préstamos ` +
+        `que la ficha sabe rotular (${[...TIPOS_DE_PRESTAMO].join(", ")})`,
+    );
+  }
+  return {
+    tipo,
+    nombre: texto(prestada, "nombre", `${ruta}.prestadaDe`),
+    nombreBoe: texto(prestada, "nombreBoe", `${ruta}.prestadaDe`),
+  };
+}
+
+/**
  * Una foto, con los campos que hacen falta para poder publicarla.
  *
- * Todos son obligatorios menos `licenciaUrl` y ninguno admite cadena vacía, que es la forma en que
- * un crédito desaparece sin que nada se ponga rojo: `autor: ""` pinta «Foto de  · CC BY-SA 4.0»,
- * que es una atribución que no atribuye a nadie. `licenciaCodigo` **no** es una excepción a eso: es
- * lo que hace que la de `licenciaUrl` sea comprobable en vez de confiada.
+ * Todos son obligatorios menos `autor`, `licenciaUrl` y `prestadaDe`, y ninguno admite cadena
+ * vacía. Los dos condicionales lo son porque **lo dice la fuente**, no porque nos venga bien:
+ * `licenciaCodigo` y `atribucionRequerida` son lo que hace que las dos excepciones se comprueben
+ * sobre el JSON publicado en vez de confiarse a lo que la ingesta se acuerde de haber hecho.
  */
 function leerFoto(valor: unknown, clave: string): FotoDeCommons {
   const ruta = `$.fotos[${JSON.stringify(clave)}]`;
@@ -108,14 +181,19 @@ function leerFoto(valor: unknown, clave: string): FotoDeCommons {
   const identificada = objeto(crudo["identificadaPor"], `${ruta}.identificadaPor`);
   const licenciaCodigo = texto(crudo, "licenciaCodigo", ruta);
   const licenciaUrl = leerLicenciaUrl(crudo, licenciaCodigo, ruta);
+  const atribucionRequerida = booleano(crudo, "atribucionRequerida", ruta);
+  const autor = leerAutor(crudo, atribucionRequerida, ruta);
+  const prestadaDe = leerPrestadaDe(crudo, ruta);
   return {
     fichero: texto(crudo, "fichero", ruta),
     url: texto(crudo, "url", ruta),
     descripcion: texto(crudo, "descripcion", ruta),
-    autor: texto(crudo, "autor", ruta),
+    ...(autor === undefined ? {} : { autor }),
+    atribucionRequerida,
     licencia: texto(crudo, "licencia", ruta),
     licenciaCodigo,
     ...(licenciaUrl === undefined ? {} : { licenciaUrl }),
+    ...(prestadaDe === undefined ? {} : { prestadaDe }),
     identificadaPor: {
       fuente: texto(identificada, "fuente", `${ruta}.identificadaPor`),
       entidad: texto(identificada, "entidad", `${ruta}.identificadaPor`),

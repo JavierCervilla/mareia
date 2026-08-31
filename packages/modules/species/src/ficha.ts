@@ -34,10 +34,13 @@ import type { FormatoDeTallas } from "@mareia/module-regulations";
 
 import {
   creditoDeLaFoto,
+  creditoSinAutor,
   enlaceALaLicencia,
   EL_GENERO_APLICA_A_TODO_EL_GENERO,
   DOMINIO_PUBLICO_SIN_CONDICIONES,
   espaciosEnElCaladero,
+  fotoDeLaPrimeraEspecieDeLaFila,
+  fotoDeUnaEspecieDelGenero,
   FUERA_DEL_ANEXO_III,
   identificadaPor,
   LA_NORMA_NOMBRA_UNA_ESPECIE,
@@ -111,6 +114,37 @@ export function esDominioPublico(licenciaCodigo: string): boolean {
   return LICENCIAS_SIN_CONDICIONES.has(licenciaCodigo.trim().toLowerCase());
 }
 
+/** La fila regula un género y la foto es de una especie de ese género que la norma nombra aparte. */
+export const PRESTAMO_UNA_DEL_GENERO = "una_del_genero";
+
+/** La fila nombra varias especies y la foto es de la primera que la norma nombra. */
+export const PRESTAMO_LA_PRIMERA_DE_LA_FILA = "la_primera_de_la_fila";
+
+/**
+ * Los tipos de préstamo que esta ficha **sabe rotular**, y por eso es un conjunto cerrado.
+ *
+ * Una foto prestada cuyo rótulo la página no supiera escribir se publicaría muda: sería la imagen
+ * de otro taxón bajo el nombre de éste, que es exactamente lo que el módulo entero existe para no
+ * hacer. Por eso un tipo desconocido **levanta** en vez de degradarse a «sin rótulo».
+ */
+export const TIPOS_DE_PRESTAMO: ReadonlySet<string> = new Set([
+  PRESTAMO_UNA_DEL_GENERO,
+  PRESTAMO_LA_PRIMERA_DE_LA_FILA,
+]);
+
+/**
+ * De qué especie es de verdad una foto que ilustra una fila que no puede ilustrarse con su taxón.
+ *
+ * `nombreBoe` es la fila del BOE donde **la norma** nombra esa especie, y no es decoración: es lo
+ * que convierte «la elige la norma» en algo que el lector puede ir a comprobar en vez de tener que
+ * creernos.
+ */
+export interface FotoPrestada {
+  readonly tipo: string;
+  readonly nombre: string;
+  readonly nombreBoe: string;
+}
+
 /**
  * Una foto de Commons con **todo lo que hace falta para poder publicarla**: su fichero, su autor, su
  * licencia y quién identificó el taxón.
@@ -129,10 +163,21 @@ export interface FotoDeCommons {
   readonly fichero: string;
   readonly url: string;
   readonly descripcion: string;
-  readonly autor: string;
+  /** Quién la hizo. **Ausente sólo** cuando `atribucionRequerida` es `false`: ver más abajo. */
+  readonly autor?: string;
+  /**
+   * Lo que la fuente declara sobre atribuir, publicado en **toda** foto.
+   *
+   * Es a `autor` lo que `licenciaCodigo` es a `licenciaUrl` (enmienda del 2026-08-31): sin él,
+   * «Commons dice que no hace falta atribuir» y «se nos perdió el autor» son el mismo JSON. Con
+   * `true` y sin autor la ficha **levanta**, porque ahí quien lo impide es la licencia del fichero.
+   */
+  readonly atribucionRequerida: boolean;
   readonly licencia: string;
   readonly licenciaCodigo: string;
   readonly licenciaUrl?: string;
+  /** De qué otra especie es la foto, cuando la fila no puede ilustrarse con su propio taxón. */
+  readonly prestadaDe?: FotoPrestada;
   readonly identificadaPor: {
     readonly fuente: string;
     readonly entidad: string;
@@ -162,6 +207,11 @@ export interface FotoEscrita {
   readonly alternativo: string;
   /** «Foto de X · CC BY-SA 4.0» — autor y licencia en la misma frase y en el mismo bloque. */
   readonly credito: string;
+  /**
+   * De qué especie es la foto cuando **no** es del taxón de la fila, dicho entero y dentro de la
+   * figura. Ausente en las fotos normales: ahí decir de qué taxón es sería ruido.
+   */
+  readonly prestamo?: string;
   /** La licencia, enlazada a su texto o dicha como estado. Nunca un crédito mudo. */
   readonly licencia: LicenciaEscrita;
   /** Enlace a la página del fichero, que es donde se comprueba el crédito sin fiarse de aquí. */
@@ -405,6 +455,53 @@ function licenciaDeLaFoto(fila: FilaDeEspecie, foto: FotoDeCommons): LicenciaEsc
   return { tipo: "enlace", url: foto.licenciaUrl, rotulo: enlaceALaLicencia(foto.licencia) };
 }
 
+/**
+ * El crédito, por la rama que le toque: **la manda `atribucionRequerida`**, no que haya autor.
+ *
+ * Con autor, la frase de siempre. Sin autor y con la fuente diciendo que no hace falta atribuir, se
+ * publica el estado y **quién lo declara**, que es lo único honrado que se puede decir de una foto
+ * cuyo autor nadie registró.
+ *
+ * Y la tercera combinación —exige atribuir y no dice a quién— **levanta**. No se degrada a una
+ * línea sin nombre ni a «autor desconocido»: ahí quien lo impide es la licencia del fichero, y
+ * publicar la imagen igualmente sería incumplirla, que de todo lo que hace esta ficha es lo único
+ * que además de deshonesto es ilegal.
+ */
+function creditoDeLaFicha(fila: FilaDeEspecie, foto: FotoDeCommons): string {
+  if (foto.autor !== undefined) return creditoDeLaFoto(foto.autor, foto.licencia);
+  if (foto.atribucionRequerida) {
+    throw new CatalogoIncompleto(
+      fila.nombreBoe,
+      `su foto declara que su licencia ${JSON.stringify(foto.licencia)} exige atribuir y no dice ` +
+        "a quién. Publicarla así sería reutilizar una imagen ajena incumpliendo su licencia, y " +
+        "llamarla «sin autor» sería decir por nuestra cuenta que no hace falta acreditar a nadie.",
+    );
+  }
+  return creditoSinAutor(foto.licencia);
+}
+
+/**
+ * El rótulo de una foto prestada, escrito por el tipo de préstamo que declare el dataset.
+ *
+ * Un tipo que esta ficha no sepa rotular **levanta**, y ésa es la decisión: la alternativa sería
+ * publicar la imagen de otro animal sin decir de cuál, que es peor que no publicar ninguna. El
+ * dataset ya cierra el conjunto en su gate; esto es lo mismo del lado de la página, porque el
+ * dataset puede editarse a mano y la página es lo que alguien lee.
+ */
+function prestamoDeLaFoto(fila: FilaDeEspecie, prestada: FotoPrestada): string {
+  if (prestada.tipo === PRESTAMO_UNA_DEL_GENERO) {
+    return fotoDeUnaEspecieDelGenero(prestada.nombre, prestada.nombreBoe);
+  }
+  if (prestada.tipo === PRESTAMO_LA_PRIMERA_DE_LA_FILA) {
+    return fotoDeLaPrimeraEspecieDeLaFila(prestada.nombre, prestada.nombreBoe);
+  }
+  throw new CatalogoIncompleto(
+    fila.nombreBoe,
+    `su foto dice ser un préstamo de tipo ${JSON.stringify(prestada.tipo)}, que esta ficha no sabe ` +
+      "explicar. Publicarla sin rótulo sería publicar la foto de otro taxón bajo el nombre de éste.",
+  );
+}
+
 function fotoDeLaFicha(fila: FilaDeEspecie, datos: DatosDeLaFicha): Rellenado<FotoEscrita> {
   const { fotos } = datos;
   if (fotos.tipo === "sin_dataset") return hueco(SIN_DATASET_DE_FOTOS);
@@ -418,13 +515,22 @@ function fotoDeLaFicha(fila: FilaDeEspecie, datos: DatosDeLaFicha): Rellenado<Fo
   }
   if (encontrada.tipo === "hueco") return encontrada;
   const foto = encontrada.valor;
+  const prestada = foto.prestadaDe;
   return dato({
     url: foto.url,
-    alternativo: textoAlternativoDeLaFoto(fila.nombreBoe, foto.identificadaPor.fuente),
+    // El `alt` nombra el taxón que la fuente asocia a la imagen, que en una foto prestada **no es
+    // el de la fila**. Decir «fotografía que Wikidata asocia al taxón Lophius spp» de una imagen
+    // que Wikidata asocia a `Lophius piscatorius` sería falso justamente para quien no puede ver
+    // la foto y sólo tiene esta frase.
+    alternativo: textoAlternativoDeLaFoto(
+      prestada === undefined ? fila.nombreBoe : prestada.nombre,
+      foto.identificadaPor.fuente,
+    ),
     // Autor y licencia van en la MISMA frase y en el mismo bloque que la imagen, nunca en un pie
     // global de la página: en la muestra de 12 ficheros del plan hay seis licencias distintas, así
     // que un pie único sería falso para cinco de ellas. El gate F2 lo mide ahí.
-    credito: creditoDeLaFoto(foto.autor, foto.licencia),
+    credito: creditoDeLaFicha(fila, foto),
+    ...(prestada === undefined ? {} : { prestamo: prestamoDeLaFoto(fila, prestada) }),
     licencia: licenciaDeLaFoto(fila, foto),
     descripcionUrl: foto.descripcion,
     rotuloDelFichero: VER_EL_FICHERO_EN_COMMONS,

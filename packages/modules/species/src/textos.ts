@@ -764,6 +764,62 @@ export const DOMINIO_PUBLICO_SIN_CONDICIONES =
   "Dominio público: no hay texto de licencia que enlazar porque no hay condiciones que cumplir. " +
   "Quién lo declara así está en la página del fichero.";
 
+/**
+ * El crédito de una foto **cuya fuente declara que no hace falta atribuir**.
+ *
+ * Es la enmienda del 2026-08-31 escrita en la página. Dos ficheros de la NOAA —el bacalao y las
+ * lisas— publican `AttributionRequired = "false"` y `Copyrighted = "False"` y no registran autor:
+ * publicarlos sin acreditar a nadie no incumple nada, y lo que sí incumpliría es publicar así uno
+ * que exija atribuir. Lo que no vale es callarlo: un «Foto de  · Public domain» con el hueco donde
+ * iría el nombre es una atribución que no atribuye, y una foto sin línea de crédito parece nuestra.
+ *
+ * Así que se dice el estado, **quién lo declara** y dónde comprobarlo: la página del fichero en
+ * Commons va justo debajo y la lleva toda foto publicada.
+ */
+export function creditoSinAutor(licencia: string): string {
+  return (
+    `Sin autor acreditado · ${licencia}. Wikimedia Commons no registra quién hizo esta foto y ` +
+    `declara que su licencia no exige atribuir; quien dude puede comprobarlo en la página del ` +
+    `fichero.`
+  );
+}
+
+/**
+ * El rótulo de la foto de una fila que **regula un género** y no puede publicar la imagen del suyo.
+ *
+ * Pasa en `Lophius spp`: la única `P18` del género es `File:Monkfish.jpg`, `CC BY-SA 3.0`, que
+ * exige atribuir y cuya fuente no dice a quién. La salida no es relajar el crédito —eso sería
+ * incumplir la licencia— sino publicar la foto de una especie del género **que nombra la propia
+ * norma**, y decirlo aquí.
+ *
+ * La frase nombra la fila del BOE de donde sale la elección porque eso es lo que la hace
+ * comprobable: sin ella, «la elige la norma» sería una afirmación nuestra sobre un texto que el
+ * lector tendría que ir a buscar. Y va **dentro de la figura**, no en una nota al final: quien mira
+ * la foto tiene que leer de qué animal es sin bajar.
+ */
+export function fotoDeUnaEspecieDelGenero(nombre: string, nombreBoe: string): string {
+  return (
+    `Esta fila regula un género entero y la imagen que Wikidata le vincula no se puede publicar. ` +
+    `La foto es de «${nombre}», una de las especies de ese género que la propia norma nombra —en ` +
+    `la fila «${nombreBoe}»—, y no ilustra a las demás del género.`
+  );
+}
+
+/**
+ * El rótulo de la foto de una fila que **nombra varias especies** en una sola celda.
+ *
+ * Pasa en `Lophius piscatorius, L. Budegassa`. El catálogo deja esa fila sin taxón a propósito
+ * —repartir una fila legal en dos decide a qué alcance se aplica una talla mínima, y esa decisión
+ * no es nuestra—, pero para ilustrarla no hace falta repartir nada: se publica la primera especie
+ * que la norma nombra **diciendo que hay más**. Callarlo sería contar media fila.
+ */
+export function fotoDeLaPrimeraEspecieDeLaFila(nombre: string, nombreBoe: string): string {
+  return (
+    `La norma nombra más de una especie en esta fila («${nombreBoe}»): la foto es de «${nombre}», ` +
+    `la primera que nombra, y no ilustra a las demás.`
+  );
+}
+
 /** El día en que se consultaron los créditos. Una licencia envejece, y se dice cuándo se leyó. */
 export function fotosConsultadasEn(fecha: string): string {
   return `Créditos de las fotos consultados el ${fecha}.`;

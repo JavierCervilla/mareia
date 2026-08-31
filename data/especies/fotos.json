@@ -1,12 +1,13 @@
 {
   "schema": "fotos/v1",
-  "consultadoEn": "2026-08-30",
+  "consultadoEn": "2026-08-31",
   "fotos": {
     "alosa-spp-8c0b29": {
       "fichero": "File:Alosa fallax.jpg",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/de/Alosa_fallax.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Alosa_fallax.jpg",
       "autor": "Hans Hillewaert",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -21,6 +22,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Anguilla_anguilla_France_1.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Anguilla_anguilla_France_1.jpg",
       "autor": "mr_capgras",
+      "atribucionRequerida": true,
       "licencia": "CC BY 4.0",
       "licenciaCodigo": "cc-by-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/4.0",
@@ -35,6 +37,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d2/Belone_belone1.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Belone_belone1.jpg",
       "autor": "Krüger",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -48,6 +51,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d6/Boga_%28Boops_boops%29%2C_franja_marina_Teno-Rasca%2C_Tenerife%2C_Espa%C3%B1a%2C_2022-01-08%2C_DD_99.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Boga_(Boops_boops),_franja_marina_Teno-Rasca,_Tenerife,_Espa%C3%B1a,_2022-01-08,_DD_99.jpg",
       "autor": "Diego Delso",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -62,6 +66,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/8/88/Brachsenmakrele_%28Brama_Brama%29_22.12.2008_Strand_von_Callantsoog_Nord_Holland.JPG",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Brachsenmakrele_(Brama_Brama)_22.12.2008_Strand_von_Callantsoog_Nord_Holland.JPG",
       "autor": "Koggge",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 3.0",
       "licenciaCodigo": "cc-by-sa-3.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -76,6 +81,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/7/71/Cancer_pagurus.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Cancer_pagurus.jpg",
       "autor": "Hans Hillewaert",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -90,6 +96,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Clupea_harengus_New_Jersey.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Clupea_harengus_New_Jersey.jpg",
       "autor": "zakqaryroy",
+      "atribucionRequerida": true,
       "licencia": "CC BY 4.0",
       "licenciaCodigo": "cc-by-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/4.0",
@@ -104,6 +111,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/e/e5/European_conger.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:European_conger.jpg",
       "autor": "West Brom 4ever",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -117,6 +125,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/7/79/Dentex_gibbosus.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Dentex_gibbosus.jpg",
       "autor": "AKIN KAPTAN",
+      "atribucionRequerida": true,
       "licencia": "CC BY 3.0",
       "licenciaCodigo": "cc-by-3.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/3.0",
@@ -131,6 +140,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/8/8c/Dentex_macrophthalmus_head.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Dentex_macrophthalmus_head.jpg",
       "autor": "karimhaddad",
+      "atribucionRequerida": true,
       "licencia": "CC BY 4.0",
       "licenciaCodigo": "cc-by-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/4.0",
@@ -145,6 +155,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Dicentrarchus_labrax_LoroParqueTenerife_seabass_IMG_4959.JPG",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Dicentrarchus_labrax_LoroParqueTenerife_seabass_IMG_4959.JPG",
       "autor": "Bjoertvedt",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -159,6 +170,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/4/48/Dicologlossa_cuneata.JPG",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Dicologlossa_cuneata.JPG",
       "autor": "Myrabella",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 3.0",
       "licenciaCodigo": "cc-by-sa-3.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -173,6 +185,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/2/2c/Sargo_com%C3%BAn_%28Diplodus_sargus%29%2C_Madeira%2C_Portugal%2C_2019-05-31%2C_DD_29.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Sargo_com%C3%BAn_(Diplodus_sargus),_Madeira,_Portugal,_2019-05-31,_DD_29.jpg",
       "autor": "Diego Delso",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -187,6 +200,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/8/8a/Diplodus_annularis.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Diplodus_annularis.jpg",
       "autor": "Alberto Romeo albertoromeo@neomedia.it http://www.romeofotosub.it",
+      "atribucionRequerida": true,
       "licencia": "CC BY 3.0",
       "licenciaCodigo": "cc-by-3.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/3.0",
@@ -201,6 +215,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Sparidae_-_Diplodus_vulgaris.JPG",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Sparidae_-_Diplodus_vulgaris.JPG",
       "autor": "Hectonichus",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 3.0",
       "licenciaCodigo": "cc-by-sa-3.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -215,6 +230,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/0/04/Engraulis_encrasicolus_Portugal.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Engraulis_encrasicolus_Portugal.jpg",
       "autor": "duarte",
+      "atribucionRequerida": true,
       "licencia": "CC BY 4.0",
       "licenciaCodigo": "cc-by-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/4.0",
@@ -229,6 +245,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/5/53/Mero_%28Epinephelus_marginatus%29%2C_Madeira%2C_Portugal%2C_2019-05-31%2C_DD_24.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Mero_(Epinephelus_marginatus),_Madeira,_Portugal,_2019-05-31,_DD_24.jpg",
       "autor": "Diego Delso",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -243,6 +260,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Mero_crestado_gris_%28Epinephelus_tauvina%29%2C_mar_Rojo%2C_Egipto%2C_2023-04-18%2C_DD_68.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Mero_crestado_gris_(Epinephelus_tauvina),_mar_Rojo,_Egipto,_2023-04-18,_DD_68.jpg",
       "autor": "Diego Delso",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -252,11 +270,25 @@
         "propiedad": "P18"
       }
     },
+    "gadus-morhua-b06a04": {
+      "fichero": "File:Atlantic cod.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Atlantic_cod.jpg",
+      "descripcion": "https://commons.wikimedia.org/wiki/File:Atlantic_cod.jpg",
+      "atribucionRequerida": false,
+      "licencia": "Public domain",
+      "licenciaCodigo": "pd",
+      "identificadaPor": {
+        "fuente": "Wikidata",
+        "entidad": "Q199788",
+        "propiedad": "P18"
+      }
+    },
     "gliptocephalus-cynoglossus-332a73": {
       "fichero": "File:Flatfish 2011.jpg",
       "url": "https://upload.wikimedia.org/wikipedia/commons/9/94/Flatfish_2011.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Flatfish_2011.jpg",
       "autor": "Tvabutzku1234",
+      "atribucionRequerida": false,
       "licencia": "CC0",
       "licenciaCodigo": "cc0",
       "licenciaUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
@@ -271,6 +303,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/5/53/Muri%C3%B3n_%28Gymnothorax_unicolor%29%2C_Madeira%2C_Portugal%2C_2019-05-31%2C_DD_49.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Muri%C3%B3n_(Gymnothorax_unicolor),_Madeira,_Portugal,_2019-05-31,_DD_49.jpg",
       "autor": "Diego Delso",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -285,6 +318,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/0/0b/KreeftbijDenOsse.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:KreeftbijDenOsse.jpg",
       "autor": "Bart Braun",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -298,6 +332,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Lepidorhombus_boscii_1G.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Lepidorhombus_boscii_1G.jpg",
       "autor": "Etrusko25",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 3.0",
       "licenciaCodigo": "cc-by-sa-3.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -312,6 +347,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Limanda_limanda.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Limanda_limanda.jpg",
       "autor": "Hans Hillewaert",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -326,6 +362,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/dd/Loligo_vulgaris.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Loligo_vulgaris.jpg",
       "autor": "Hans Hillewaert",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -335,11 +372,52 @@
         "propiedad": "P18"
       }
     },
+    "lophius-piscatorius-l-budegassa-bec159": {
+      "fichero": "File:Seeteufel.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/69/Seeteufel.jpg",
+      "descripcion": "https://commons.wikimedia.org/wiki/File:Seeteufel.jpg",
+      "autor": "User Meocrisis on de.wikipedia",
+      "atribucionRequerida": true,
+      "licencia": "CC BY-SA 3.0",
+      "licenciaCodigo": "cc-by-sa-3.0",
+      "licenciaUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "prestadaDe": {
+        "tipo": "la_primera_de_la_fila",
+        "nombre": "Lophius piscatorius",
+        "nombreBoe": "Lophius piscatorius, L. Budegassa"
+      },
+      "identificadaPor": {
+        "fuente": "Wikidata",
+        "entidad": "Q205015",
+        "propiedad": "P18"
+      }
+    },
+    "lophius-spp-05f70d": {
+      "fichero": "File:Seeteufel.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/69/Seeteufel.jpg",
+      "descripcion": "https://commons.wikimedia.org/wiki/File:Seeteufel.jpg",
+      "autor": "User Meocrisis on de.wikipedia",
+      "atribucionRequerida": true,
+      "licencia": "CC BY-SA 3.0",
+      "licenciaCodigo": "cc-by-sa-3.0",
+      "licenciaUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "prestadaDe": {
+        "tipo": "una_del_genero",
+        "nombre": "Lophius piscatorius",
+        "nombreBoe": "Lophius piscatorius, L. Budegassa"
+      },
+      "identificadaPor": {
+        "fuente": "Wikidata",
+        "entidad": "Q205015",
+        "propiedad": "P18"
+      }
+    },
     "maja-squinado-193977": {
       "fichero": "File:Centolles del cantabrico.jpg",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Centolles_del_cantabrico.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Centolles_del_cantabrico.jpg",
       "autor": "Amasuela",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -354,6 +432,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/0/03/Melanogrammus_aeglefinus.png",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Melanogrammus_aeglefinus.png",
       "autor": "Unknown author Unknown author",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -367,6 +446,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/2/2a/Wijting002.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Wijting002.jpg",
       "autor": "Georges Jansoone ( JoJan ) -",
+      "atribucionRequerida": true,
       "licencia": "CC BY 3.0",
       "licenciaCodigo": "cc-by-3.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/3.0",
@@ -381,6 +461,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/0/01/Merluccius_merluccius.002_-_Aquarium_Finisterrae.JPG",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Merluccius_merluccius.002_-_Aquarium_Finisterrae.JPG",
       "autor": "Fernando Losada Rodríguez",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -395,6 +476,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/6/6d/Micromesistius_poutassou_Gervais.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Micromesistius_poutassou_Gervais.jpg",
       "autor": "Gervais et Boulart",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -408,6 +490,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/f/ff/Microstomus_kitt_1.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Microstomus_kitt_1.jpg",
       "autor": "Hans Hillewaert",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -422,6 +505,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/6/6d/Blauleng.jpeg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Blauleng.jpeg",
       "autor": "hansraul",
+      "atribucionRequerida": true,
       "licencia": "CC BY 3.0",
       "licenciaCodigo": "cc-by-3.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/3.0",
@@ -436,6 +520,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/f/f8/Molva_molva_Gervais.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Molva_molva_Gervais.jpg",
       "autor": "Gervais et Boulart",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -449,6 +534,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/6/64/Galupe_%28Chelon_auratus%29%2C_Parque_natural_de_la_Arr%C3%A1bida%2C_Portugal%2C_2020-07-23%2C_DD_19.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Galupe_(Chelon_auratus),_Parque_natural_de_la_Arr%C3%A1bida,_Portugal,_2020-07-23,_DD_19.jpg",
       "autor": "Diego Delso",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -458,11 +544,38 @@
         "propiedad": "P18"
       }
     },
+    "mugil-spp-cd2ece": {
+      "fichero": "File:Mugil cephalus.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/64/Mugil_cephalus.jpg",
+      "descripcion": "https://commons.wikimedia.org/wiki/File:Mugil_cephalus.jpg",
+      "atribucionRequerida": false,
+      "licencia": "Public domain",
+      "licenciaCodigo": "pd",
+      "identificadaPor": {
+        "fuente": "Wikidata",
+        "entidad": "Q631692",
+        "propiedad": "P18"
+      }
+    },
+    "mugil-spps-9aef58": {
+      "fichero": "File:Mugil cephalus.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/64/Mugil_cephalus.jpg",
+      "descripcion": "https://commons.wikimedia.org/wiki/File:Mugil_cephalus.jpg",
+      "atribucionRequerida": false,
+      "licencia": "Public domain",
+      "licenciaCodigo": "pd",
+      "identificadaPor": {
+        "fuente": "Wikidata",
+        "entidad": "Q631692",
+        "propiedad": "P18"
+      }
+    },
     "mullus-spp-dc725c": {
       "fichero": "File:Mullus surmuletus.JPG",
       "url": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Mullus_surmuletus.JPG",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Mullus_surmuletus.JPG",
       "autor": "Albert Kok at Dutch Wikipedia ( Original text: albert kok )",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -476,6 +589,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/6/6a/Mullus_surmuletus%2C_Bouches-du-Rh%C3%B4ne%2C_Provence-Alpes-C%C3%B4te_d%27Azur%2C_FR_imported_from_iNaturalist_photo_277193780_%28cropped%29.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Mullus_surmuletus,_Bouches-du-Rh%C3%B4ne,_Provence-Alpes-C%C3%B4te_d%27Azur,_FR_imported_from_iNaturalist_photo_277193780_(cropped).jpg",
       "autor": "(c) Julien Renoult, some rights reserved (CC BY)",
+      "atribucionRequerida": true,
       "licencia": "CC BY 4.0",
       "licenciaCodigo": "cc-by-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/4.0",
@@ -490,6 +604,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Two_Black_Moray_Eels_-_Muraena_augusti.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Two_Black_Moray_Eels_-_Muraena_augusti.jpg",
       "autor": "Diving Canary Islands",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -504,6 +619,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Mycteroperca_fusca_121409305.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Mycteroperca_fusca_121409305.jpg",
       "autor": "Julien Renoult",
+      "atribucionRequerida": true,
       "licencia": "CC BY 4.0",
       "licenciaCodigo": "cc-by-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/4.0",
@@ -518,6 +634,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Nephrops_norvegicus.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Nephrops_norvegicus.jpg",
       "autor": "Hans Hillewaert",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -532,6 +649,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/3/32/Octopus_vulgaris_Merculiano.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Octopus_vulgaris_Merculiano.jpg",
       "autor": "Comingio Merculiano (1845-1915) in Jatta Giuseppe (1860-1903)",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -545,6 +663,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/3/30/Pagellus_acarne_France.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Pagellus_acarne_France.jpg",
       "autor": "jujurenoult",
+      "atribucionRequerida": true,
       "licencia": "CC BY 4.0",
       "licenciaCodigo": "cc-by-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/4.0",
@@ -559,6 +678,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Dorade_rose_%28Pagellus_bogaraveo%29_%28Ifremer_00710-82225%29.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Dorade_rose_(Pagellus_bogaraveo)_(Ifremer_00710-82225).jpg",
       "autor": "Isabelle Cheret, null",
+      "atribucionRequerida": true,
       "licencia": "CC BY 4.0",
       "licenciaCodigo": "cc-by-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/4.0",
@@ -573,6 +693,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/9/93/Pagellus_erythrinus_-_Julien_Renoult_-_585827535.jpeg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Pagellus_erythrinus_-_Julien_Renoult_-_585827535.jpeg",
       "autor": "Julien Renoult",
+      "atribucionRequerida": true,
       "licencia": "CC BY 4.0",
       "licenciaCodigo": "cc-by-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/4.0",
@@ -583,10 +704,10 @@
       }
     },
     "pagellus-spp-10da02": {
-      "fichero": "File:Pagellus erythrinus 27-09-05.jpg",
-      "url": "https://upload.wikimedia.org/wikipedia/commons/7/7f/Pagellus_erythrinus_27-09-05.jpg",
-      "descripcion": "https://commons.wikimedia.org/wiki/File:Pagellus_erythrinus_27-09-05.jpg",
-      "autor": "Etrusko25",
+      "fichero": "File:Pagellus bogaraveo - Baron Cuvier.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/48/Pagellus_bogaraveo_-_Baron_Cuvier.jpg",
+      "descripcion": "https://commons.wikimedia.org/wiki/File:Pagellus_bogaraveo_-_Baron_Cuvier.jpg",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -600,6 +721,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/2/23/Pagrus_pagrus_20-10-06.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Pagrus_pagrus_20-10-06.jpg",
       "autor": "Etrusko25",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -613,6 +735,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/3/3e/California_spiny_lobster.JPG",
       "descripcion": "https://commons.wikimedia.org/wiki/File:California_spiny_lobster.JPG",
       "autor": "No machine-readable author provided. DrKjaergaard assumed (based on copyright claims).",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 2.5",
       "licenciaCodigo": "cc-by-sa-2.5",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/2.5",
@@ -627,6 +750,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Pecten_maximus_Pilgermuschel.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Pecten_maximus_Pilgermuschel.jpg",
       "autor": "Manfred Heyde",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 3.0",
       "licenciaCodigo": "cc-by-sa-3.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -641,6 +765,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Pecten_maximus_Pilgermuschel.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Pecten_maximus_Pilgermuschel.jpg",
       "autor": "Manfred Heyde",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 3.0",
       "licenciaCodigo": "cc-by-sa-3.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -655,6 +780,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/2/22/Platichthys_flesus_1.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Platichthys_flesus_1.jpg",
       "autor": "Hans Hillewaert",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -669,6 +795,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/9/95/Pleuronectes_platessa.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Pleuronectes_platessa.jpg",
       "autor": "Hans Hillewaert",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -683,6 +810,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/8/8e/Pollachius_pollachius_aquarium.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Pollachius_pollachius_aquarium.jpg",
       "autor": "This illustration was made by Citron You must credit this : Citron / CC-BY-SA-3.0",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 3.0",
       "licenciaCodigo": "cc-by-sa-3.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -697,6 +825,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/a/aa/Pollachius_virens_01.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Pollachius_virens_01.jpg",
       "autor": "Tino Strauss",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 3.0",
       "licenciaCodigo": "cc-by-sa-3.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/3.0",
@@ -711,6 +840,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Polyprion_americanus.png",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Polyprion_americanus.png",
       "autor": "Unknown author Unknown author",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -724,6 +854,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/8/84/Psetta_maxima_Luc_Viatour.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Psetta_maxima_Luc_Viatour.jpg",
       "autor": "Luc Viatour",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 3.0",
       "licenciaCodigo": "cc-by-sa-3.0",
       "licenciaUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
@@ -738,6 +869,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/2/24/Atlantischer_Lachs.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Atlantischer_Lachs.jpg",
       "autor": "Hartley, William W.",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -751,6 +883,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/3/35/Bachforelle_Zeichnung.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Bachforelle_Zeichnung.jpg",
       "autor": "Duane Raver, U.S. Fish and Wildlife Service",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -764,6 +897,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/7/78/Sardina_pilchardus_Gervais.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Sardina_pilchardus_Gervais.jpg",
       "autor": "Gervais et Boulart",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -777,6 +911,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Salema_%28Sarpa_salpa%29%2C_Catania%2C_Sicilia%2C_Italia%2C_2025-04-04%2C_DD_90.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Salema_(Sarpa_salpa),_Catania,_Sicilia,_Italia,_2025-04-04,_DD_90.jpg",
       "autor": "Diego Delso",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -791,6 +926,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/3/3e/Scomber_japonicus.png",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Scomber_japonicus.png",
       "autor": "Unknown author Unknown author",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -804,6 +940,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Scomber_scombrus.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Scomber_scombrus.jpg",
       "autor": "Hans Hillewaert",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -818,6 +955,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Scomber_scombrus.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Scomber_scombrus.jpg",
       "autor": "Hans Hillewaert",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -832,6 +970,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/2/25/Scophthalmus_rhombus.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Scophthalmus_rhombus.jpg",
       "autor": "MacGillivray",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -840,11 +979,27 @@
         "propiedad": "P18"
       }
     },
+    "sepia-spp-2f3b90": {
+      "fichero": "File:Sepia officinalis (aquarium).jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Sepia_officinalis_%28aquarium%29.jpg",
+      "descripcion": "https://commons.wikimedia.org/wiki/File:Sepia_officinalis_(aquarium).jpg",
+      "autor": "Hans Hillewaert",
+      "atribucionRequerida": true,
+      "licencia": "CC BY-SA 4.0",
+      "licenciaCodigo": "cc-by-sa-4.0",
+      "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "identificadaPor": {
+        "fuente": "Wikidata",
+        "entidad": "Q3478857",
+        "propiedad": "P18"
+      }
+    },
     "serranus-atricauda-6ecfda": {
       "fichero": "File:Serrano imperial (Serranus atricauda), franja marina Teno-Rasca, Tenerife, España, 2022-01-06, DD 67.jpg",
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Serrano_imperial_%28Serranus_atricauda%29%2C_franja_marina_Teno-Rasca%2C_Tenerife%2C_Espa%C3%B1a%2C_2022-01-06%2C_DD_67.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Serrano_imperial_(Serranus_atricauda),_franja_marina_Teno-Rasca,_Tenerife,_Espa%C3%B1a,_2022-01-06,_DD_67.jpg",
       "autor": "Diego Delso",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -859,6 +1014,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Serranus_cabrilla_451099998.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Serranus_cabrilla_451099998.jpg",
       "autor": "Sarah Faulwetter",
+      "atribucionRequerida": true,
       "licencia": "CC BY 4.0",
       "licenciaCodigo": "cc-by-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/4.0",
@@ -873,6 +1029,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/c/cd/Solea_solea_1.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Solea_solea_1.jpg",
       "autor": "Hans Hillewaert",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -887,6 +1044,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/4/42/Viejas_coloradas_%28Sparisoma_cretense%29%2C_Monte_da_Guia%2C_isla_de_Fayal%2C_Azores%2C_Portugal%2C_2020-07-26%2C_DD_07.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Viejas_coloradas_(Sparisoma_cretense),_Monte_da_Guia,_isla_de_Fayal,_Azores,_Portugal,_2020-07-26,_DD_07.jpg",
       "autor": "Diego Delso",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -901,6 +1059,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d6/Sparus_aurata_-_Goldbrasse_167478208.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Sparus_aurata_-_Goldbrasse_167478208.jpg",
       "autor": "Julien Renoult",
+      "atribucionRequerida": true,
       "licencia": "CC BY 4.0",
       "licenciaCodigo": "cc-by-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/4.0",
@@ -915,6 +1074,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d6/Sparus_aurata_-_Goldbrasse_167478208.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Sparus_aurata_-_Goldbrasse_167478208.jpg",
       "autor": "Julien Renoult",
+      "atribucionRequerida": true,
       "licencia": "CC BY 4.0",
       "licenciaCodigo": "cc-by-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/4.0",
@@ -929,6 +1089,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Spondyliosoma_cantharum.png",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Spondyliosoma_cantharum.png",
       "autor": "Roberto Merciai",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -943,6 +1104,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/f/f9/Yellowfin_tuna_nurp.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Yellowfin_tuna_nurp.jpg",
       "autor": "OAR/National Undersea Research Program (NURP)",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -956,6 +1118,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/f/f9/Yellowfin_tuna_nurp.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Yellowfin_tuna_nurp.jpg",
       "autor": "OAR/National Undersea Research Program (NURP)",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -969,6 +1132,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Thunnus_obesus_%28bigeye_tuna%29.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Thunnus_obesus_(bigeye_tuna).jpg",
       "autor": "Allen Shimada, NOAA NMFS OST",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -982,6 +1146,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/1/18/Bluefin-big.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Bluefin-big.jpg",
       "autor": "Unknown author Unknown author",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -995,6 +1160,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/1/18/Bluefin-big.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Bluefin-big.jpg",
       "autor": "Unknown author Unknown author",
+      "atribucionRequerida": false,
       "licencia": "Public domain",
       "licenciaCodigo": "pd",
       "identificadaPor": {
@@ -1008,6 +1174,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/d/d9/MaAji.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:MaAji.jpg",
       "autor": "Izuzuki",
+      "atribucionRequerida": true,
       "licencia": "CC BY 2.5",
       "licenciaCodigo": "cc-by-2.5",
       "licenciaUrl": "https://creativecommons.org/licenses/by/2.5",
@@ -1022,6 +1189,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/6/60/Trachurus_trachurus_France_1.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Trachurus_trachurus_France_1.jpg",
       "autor": "jujurenoult",
+      "atribucionRequerida": true,
       "licencia": "CC BY 4.0",
       "licenciaCodigo": "cc-by-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/4.0",
@@ -1036,6 +1204,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Faneca_%28Trisopterus_luscus%29%2C_Parque_natural_de_la_Arr%C3%A1bida%2C_Portugal%2C_2022-07-29%2C_DD_43.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Faneca_(Trisopterus_luscus),_Parque_natural_de_la_Arr%C3%A1bida,_Portugal,_2022-07-29,_DD_43.jpg",
       "autor": "Diego Delso",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 4.0",
       "licenciaCodigo": "cc-by-sa-4.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
@@ -1050,6 +1219,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Trisopterus_capelanus.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Trisopterus_capelanus.jpg",
       "autor": "Bahadır KARLUK Hüseyin ÖKELEK",
+      "atribucionRequerida": true,
       "licencia": "CC BY 3.0",
       "licenciaCodigo": "cc-by-3.0",
       "licenciaUrl": "https://creativecommons.org/licenses/by/3.0",
@@ -1064,6 +1234,7 @@
       "url": "https://upload.wikimedia.org/wikipedia/commons/e/ef/Venerupis_senegalensis2.jpg",
       "descripcion": "https://commons.wikimedia.org/wiki/File:Venerupis_senegalensis2.jpg",
       "autor": "Jan Johan ter Poorten; modified by Tom Meijer",
+      "atribucionRequerida": true,
       "licencia": "CC BY-SA 3.0",
       "licenciaCodigo": "cc-by-sa-3.0",
       "licenciaUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
@@ -1072,32 +1243,26 @@
         "entidad": "Q1408149",
         "propiedad": "P18"
       }
+    },
+    "venus-spp-6b4d43": {
+      "fichero": "File:Venus verrucosa.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/1c/Venus_verrucosa.jpg",
+      "descripcion": "https://commons.wikimedia.org/wiki/File:Venus_verrucosa.jpg",
+      "autor": "Hans Hillewaert",
+      "atribucionRequerida": true,
+      "licencia": "CC BY-SA 4.0",
+      "licenciaCodigo": "cc-by-sa-4.0",
+      "licenciaUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "identificadaPor": {
+        "fuente": "Wikidata",
+        "entidad": "Q1408724",
+        "propiedad": "P18"
+      }
     }
   },
   "sinFoto": {
-    "gadus-morhua-b06a04": {
-      "motivo": "ninguna de las 1 imágenes P18 de «Gadus morhua» (Q199788) se puede publicar: «File:Atlantic cod.jpg» no publica autor. Una foto sin autor no se publica, y el hueco es más honrado"
-    },
-    "lophius-piscatorius-l-budegassa-bec159": {
-      "motivo": "el catálogo no resuelve esta fila a ningún taxón de WoRMS, así que no hay nombre científico por el que preguntar: buscar el literal del BOE —que puede ser una errata de 1995— sería identificar a un animal por conjetura"
-    },
-    "lophius-spp-05f70d": {
-      "motivo": "ninguna de las 1 imágenes P18 de «Lophius» (Q643135) se puede publicar: «File:Monkfish.jpg» no publica autor. Una foto sin autor no se publica, y el hueco es más honrado"
-    },
-    "mugil-spp-cd2ece": {
-      "motivo": "la búsqueda de «Mugil» lleva al ítem Q234014, que declara ser «Mugil cephalus»: no es el mismo taxón y no se publica su foto"
-    },
-    "mugil-spps-9aef58": {
-      "motivo": "la búsqueda de «Mugil» lleva al ítem Q234014, que declara ser «Mugil cephalus»: no es el mismo taxón y no se publica su foto"
-    },
     "panaeux-kerathurus-0e8ff6": {
-      "motivo": "Wikidata no tiene ningún ítem para «Penaeus (Melicertus) kerathurus»"
-    },
-    "sepia-spp-2f3b90": {
-      "motivo": "la búsqueda de «Sepia» lleva al ítem Q286026, que declara ser «Sapia»: no es el mismo taxón y no se publica su foto"
-    },
-    "venus-spp-6b4d43": {
-      "motivo": "el ítem Q47652 al que llega la búsqueda de «Venus» no declara nombre científico (P225), así que no se puede comprobar que sea ese taxón"
+      "motivo": "ningún ítem de Wikidata declara «Penaeus (Melicertus) kerathurus» como nombre científico (P225), y buscar el nombre como texto tampoco lleva a ninguno"
     }
   }
 }
