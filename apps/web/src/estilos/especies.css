@@ -130,11 +130,11 @@
 /* Lo que hace el filtro: esconder las especies que ese caladero no regula. El
    ancla «todas» no tiene regla, y por eso devuelve la lista entera. */
 #cal-cantabrico-noroeste-y-golfo-de-cadiz:target
-  ~ .tabla-especies
+  ~ .tabla-especies__marco .tabla-especies
   tbody
   tr:not([data-caladeros~="cantabrico-noroeste-y-golfo-de-cadiz"]),
-#cal-mediterraneo:target ~ .tabla-especies tbody tr:not([data-caladeros~="mediterraneo"]),
-#cal-canario:target ~ .tabla-especies tbody tr:not([data-caladeros~="canario"]) {
+#cal-mediterraneo:target ~ .tabla-especies__marco .tabla-especies tbody tr:not([data-caladeros~="mediterraneo"]),
+#cal-canario:target ~ .tabla-especies__marco .tabla-especies tbody tr:not([data-caladeros~="canario"]) {
   display: none;
 }
 
@@ -261,12 +261,49 @@
   color: var(--m-ink);
 }
 
-/* Los nombres científicos son palabras largas sin espacios y la celda de la
-   izquierda es estrecha en un móvil: es el mismo defecto que H-5 curó en el
-   boletín de AEMET y en el ELI de la sección de tallas, y se aplica la misma
-   cura (`anywhere`, no `break-word`: sólo aquélla reduce el tamaño mínimo de
-   contenido, que es lo que empuja al contenedor). */
-.tabla-especies th,
-.tabla-especies td {
+/* `anywhere` SÓLO en el binomio científico, y esta acotación es el arreglo entero
+   de T-26.
+
+   La regla nació aplicada a `th, td` —a las 258 celdas— con este razonamiento,
+   que era correcto: los nombres científicos son palabras largas sin espacios,
+   la celda es estrecha en un móvil, y `anywhere` es la única cura que reduce el
+   tamaño mínimo de contenido, que es lo que empuja al contenedor. El problema
+   es que ESO ES JUSTAMENTE LO QUE HACE: al anular el `min-content` de todas las
+   celdas, el reparto `auto` de la tabla queda libre para dejar la tercera
+   columna en 8,9 `ch` a 360 px, y entonces `anywhere` mete ahí lo que sea,
+   letra a letra.
+
+   Medido en producción el 2026-08-31: **376 palabras partidas a media palabra**
+   a 360 px («Cantábri/co», «Mediterr/áneo», «abundanci/a»), y **365 de ellas
+   son daño colateral** — sólo 11 caen en el binomio que la regla venía a curar.
+   No es un caso límite de móviles pequeños: la página no se arregla hasta los
+   768 px (866 roturas a 320, 484 a 360, 219 a 390, 36 a 600, 0 a 768).
+
+   Acotada al binomio: 376 → 1 rotura, la tercera columna sube a 14,8 `ch` y la
+   página encoge un 34 %. La lección, que vale más que la regla: **una cura que
+   funciona en un elemento puede ser catastrófica aplicada a su contenedor**, y
+   el `min-content` de una celda es de la tabla entera, no de la celda. */
+.tabla-especies__boe,
+.tabla-especies__aceptado {
   overflow-wrap: anywhere;
+}
+
+
+/* El marco de la tabla: si no cabe, se desplaza ELLA, nunca la página.
+
+   Medido con las tipografías del sitio: a 320 px las tres columnas suman 327 px y el documento sale
+   a **347**, o sea 27 px de desbordamiento del cuerpo. A 360 px cabe justo (360) y a 390 sobra. Un
+   cuerpo que se desplaza a lo ancho se lleva por delante la columna izquierda de **todo** lo demás
+   —cabecera, migas, pie—, así que el desplazamiento se encierra aquí.
+
+   `overflow-x: auto` no fuerza nada cuando cabe: por encima de ~340 px esto no se nota. El
+   `focus-visible` está porque el `tabindex` que hace la región recorrible con teclado sin marca de
+   foco es una trampa para quien navega sin ratón. */
+.tabla-especies__marco {
+  overflow-x: auto;
+}
+
+.tabla-especies__marco:focus-visible {
+  outline: 2px solid var(--m-navy);
+  outline-offset: 2px;
 }

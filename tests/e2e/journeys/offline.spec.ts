@@ -227,7 +227,7 @@ test("guardar un puerto es un acto explícito y la página dice cuánto ocupa y 
   await guardarPuerto(page);
 
   // El peso es una medida y va con su unidad completa, en kB del SI.
-  await expect(sello).toContainText(/Ocupa \d+,\d kB de constantes armónicas/u);
+  await expect(sello).toContainText(/Ocupa \d+,\d\skB de constantes armónicas/u);
   await expect(sello).toContainText(/calcula cualquier día entre \d{4} y \d{4} sin cobertura/u);
   await expect(sello).not.toContainText("KiB");
   await capturar(page, "2-guardado");
@@ -286,7 +286,7 @@ test("sin red, pedir el 14 de marzo de 2027 da la tabla del 14 de marzo de 2027"
   const filas = resultado.locator("tr[data-tipo]");
   expect(await filas.count()).toBeGreaterThan(0);
   await expect(filas.first().locator(".tabla-mareas__hora")).toHaveText(/^\d{2}:\d{2}$/u);
-  await expect(filas.first().locator(".tabla-mareas__altura")).toHaveText(/^\d+,\d{2} m$/u);
+  await expect(filas.first().locator(".tabla-mareas__altura")).toHaveText(/^\d+,\d{2}\sm$/u);
   for (const fila of await filas.all()) {
     expect(["pleamar", "bajamar"]).toContain(await fila.getAttribute("data-tipo"));
   }
@@ -487,14 +487,14 @@ test("sin red, el estado del mar se sirve de la copia guardada y con su antigüe
   // registrando, así que la petición de meteo salió sin pasar por él y no hubo copia que guardar.
   // A partir de aquí la página va controlada y cada respuesta que se sirve se queda sellada.
   await page.reload();
-  await expect(page.locator(`${SECCION_METEO} #meteo-mar`)).toContainText("1,68 m");
+  await expect(page.locator(`${SECCION_METEO} #meteo-mar`)).toContainText(/1,68\sm/u);
 
   await arnes.cortar();
   await page.reload();
 
   const mar = page.locator(`${SECCION_METEO} #meteo-mar`);
   // El dato sigue enseñándose —marcarlo no es esconderlo— pero con la edad de la copia delante.
-  await expect(mar).toContainText("1,68 m");
+  await expect(mar).toContainText(/1,68\sm/u);
   await expect(mar.locator(".meteo__sello-titular")).toHaveText(/^Dato de hace /u);
   await expect(mar.locator(".meteo__sello")).toContainText("Sin conexión");
   await expect(mar.locator(".meteo__sello")).toContainText("copia que se guardó en este dispositivo");

@@ -294,7 +294,7 @@ export async function cargarAreasDelPuerto(
     throw new Error(
       `El puerto ${contexto.slug} no está en ${FICHERO_AREAS}. No es lo mismo que no tener áreas ` +
         `cerca: los puertos sin ninguna están en el fichero con su motivo, y publicar «ninguna a ` +
-        `menos de ${criterio.radioKm} km» sin haber mirado sería una advertencia inventada.`,
+        `menos de ${criterio.radioKm}\u00a0km» sin haber mirado sería una advertencia inventada.`,
     );
   }
   return { fuente, criterio, areas: puerto.areas, motivo: puerto.motivo };

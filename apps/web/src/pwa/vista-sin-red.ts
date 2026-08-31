@@ -20,7 +20,7 @@
  * escribe igual que la edad de un dato de meteo, porque para quien lee es la misma pregunta.
  */
 
-import { numero } from "../formato.ts";
+import { conUnidad, numero } from "../formato.ts";
 import { antiguedad } from "../sello.ts";
 import type { SelloDeAntiguedad } from "../sello.ts";
 
@@ -81,7 +81,7 @@ export interface VistaSinRed {
  * escribir «KB» y que cada cual decida— convierte una medida en una impresión.
  */
 export function kilobytes(bytes: number): string {
-  return `${numero(bytes / 1000, 1)} kB`;
+  return conUnidad(numero(bytes / 1000, 1), "kB");
 }
 
 /** Qué se puede hacer con la copia, dicho una vez y reutilizado en los dos estados que la tienen. */

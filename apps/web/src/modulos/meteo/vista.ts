@@ -41,7 +41,7 @@ import type {
   WeatherPayload,
 } from "@mareia/module-weather/ui";
 
-import { acimut, hora, metros, numero } from "../../formato.ts";
+import { acimut, conUnidad, hora, metros, numero } from "../../formato.ts";
 // El sello nació aquí en T-11 y con la PWA (T-12) dejó de ser cosa de la meteo: una página guardada
 // en el teléfono también tiene edad. Vive en el core y esta capa lo re-exporta, así que quien
 // importaba `antiguedad` o `SelloDeAntiguedad` de este módulo no tiene que cambiar nada.
@@ -309,12 +309,12 @@ function huecoDelModelo(que: string): string {
 
 /** Grados centígrados con coma decimal. */
 function celsius(valor: number): string {
-  return `${numero(valor, 1)} °C`;
+  return conUnidad(numero(valor, 1), "°C");
 }
 
 /** Una velocidad de viento en kilómetros por hora. */
 function kmh(valor: number): string {
-  return `${numero(valor, 1)} km/h`;
+  return conUnidad(numero(valor, 1), "km/h");
 }
 
 /**
@@ -324,8 +324,8 @@ function kmh(valor: number): string {
  */
 function visibilidad(metrosDeVisibilidad: number): string {
   return metrosDeVisibilidad >= 1_000
-    ? `${numero(metrosDeVisibilidad / 1_000, 1)} km`
-    : `${Math.round(metrosDeVisibilidad)} m`;
+    ? conUnidad(numero(metrosDeVisibilidad / 1_000, 1), "km")
+    : conUnidad(String(Math.round(metrosDeVisibilidad)), "m");
 }
 
 /**
@@ -340,7 +340,7 @@ function detalleDeOla(direccionDeg: number | null, periodoS: number | null): str
   const direccion =
     direccionDeg === null ? "sin dirección en el modelo" : `de ${acimut(direccionDeg)}`;
   const periodo =
-    periodoS === null ? "sin periodo en el modelo" : `periodo ${numero(periodoS, 1)} s`;
+    periodoS === null ? "sin periodo en el modelo" : `periodo ${conUnidad(numero(periodoS, 1), "s")}`;
   return `${direccion} · ${periodo}`;
 }
 
@@ -403,7 +403,7 @@ function filasDeLaAtmosfera(datos: ForecastConditions, zona: string): readonly F
         ),
     datos.pressureMslHpa === null
       ? filaAusente("Presión", huecoDelModelo("la presión al nivel del mar"))
-      : fila("Presión", `${numero(datos.pressureMslHpa, 1)} hPa`),
+      : fila("Presión", conUnidad(numero(datos.pressureMslHpa, 1), "hPa")),
     datos.visibilityM === null
       ? filaAusente("Visibilidad", huecoDelModelo("la visibilidad"))
       : fila("Visibilidad", visibilidad(datos.visibilityM)),

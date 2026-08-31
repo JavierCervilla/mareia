@@ -505,3 +505,42 @@ test("cero juice sobre una cifra: la hoja del catálogo no anima ni destaca nada
   assert.deepEqual(conTerracota, ["especies__aviso"]);
   t.diagnostic(`hoja de especies.css: ${hoja.length} bytes`);
 });
+
+// =================================================================================================
+// A-T26-2 · la cabecera acortada sigue nombrando las dos cosas que representa
+// =================================================================================================
+
+/**
+ * **La tercera columna publica dos cosas y su rótulo tiene que nombrar las dos.**
+ *
+ * T-26 acortó ese rótulo de `CALADEROS QUE LA REGULAN · REGISTROS EN OBIS` a `CALADEROS · OBIS`
+ * porque el largo se pintaba en **10 líneas a 3,7 caracteres** en una columna de ~104 px. Acortarlo
+ * fue correcto —el detalle sigue entero en cada celda— pero dejó una puerta abierta: **nada
+ * comprobaba que el rótulo siguiera nombrando las dos cosas**. Reproducido en el pase adversario
+ * quitándole `· OBIS`: el sitio se construía, las 86 filas seguían publicando sus registros, y
+ * **ninguno de los 300 tests se enteraba** de que la columna había dejado de decir de dónde salen.
+ *
+ * La procedencia no es adorno en este portal: una cifra de presencia sin su fuente es exactamente lo
+ * que el proyecto no publica. Se comprueba sobre el **HTML construido** y por el sentido —que la
+ * cabecera nombre el caladero y nombre OBIS—, no contra la constante que la escribe: si se comparara
+ * con `COLUMNA_PRESENCIA`, vaciar esa constante movería el gate con ella (A-T23-2).
+ */
+test("A-T26-2 · la cabecera de la tercera columna nombra el caladero y su fuente", (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  const html = readFileSync(CATALOGO, "utf8");
+  const cabeceras = [...html.matchAll(/<th scope="col"[^>]*>([\s\S]*?)<\/th>/gu)].map((th) =>
+    (th[1] ?? "").replace(/<[^>]+>/gu, " "),
+  );
+  const tercera = cabeceras[2] ?? "";
+  assert.ok(
+    /caladero/iu.test(tercera),
+    `la tercera cabecera no nombra el caladero: «${tercera.trim()}»`,
+  );
+  assert.ok(
+    /obis/iu.test(tercera),
+    `la tercera cabecera no nombra a OBIS, que es de donde salen sus cifras: «${tercera.trim()}»`,
+  );
+});
