@@ -857,3 +857,63 @@ def test_leer_las_respuestas_no_toca_la_red(monkeypatch: pytest.MonkeyPatch) -> 
     monkeypatch.setattr(commons.cache, "fetch_educado", _sin_red)
     assert commons.leer_busqueda(_busqueda(), consultado=NOMBRE) == ENTIDAD
     assert commons.leer_metadatos(_imageinfo(), fichero="File:x").completa
+
+
+# =====================================================================================
+# 5 · Hallazgo del pase adversario de T-23 (A-T23-1): la excepción degradaba una foto
+# =====================================================================================
+
+
+def test_entre_dos_publicables_se_prefiere_la_que_acredita_a_su_autor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """La excepción del dominio público no puede **quitar** un crédito que la fuente sí da.
+
+    Reproduce `pagellus-spp` tal cual estaba en producción: su ítem ofrece dos imágenes, la primera
+    de dominio público **sin autor** (`AttributionRequired = false`) y la segunda con autor. Con
+    «la primera completa gana», al abrir la excepción para no perder fotos la primera pasó a ser
+    publicable y **desplazó a la acreditada**: la página decía «Sin autor acreditado» en una especie
+    donde había una foto firmada, igual de curada por Wikidata.
+
+    Es un daño colateral de la excepción, no de la elección de imagen: entre dos candidatas que la
+    fuente ordena igual y las dos se pueden publicar, quedarse con la que **no** acredita a nadie
+    contradice lo único que esta ficha promete de su foto — que sabe de quién es—. Preferir la
+    acreditada no es criterio estético: es un campo de la fuente, `Artist`, presente o ausente.
+    """
+    ficheros = commons.leer_imagenes(_p18(), entidad=ENTIDAD)
+    sin_autor, con_autor = ficheros[0], ficheros[1]
+    respuestas = _respuestas_completas()
+    respuestas[commons.url_imageinfo(sin_autor)] = _imageinfo_sin_atribucion()
+    respuestas[commons.url_imageinfo(con_autor)] = _imageinfo()
+    pedidas = _red(monkeypatch, respuestas)
+    resultado = commons.resolver(NOMBRE)
+    assert resultado.desenlace == commons.PUBLICABLE
+    assert resultado.foto is not None
+    # La aserción va sobre el **crédito** y no sobre el nombre del fichero a propósito: las capturas
+    # reales llevan dentro su propio `title`, así que comparar nombres compararía el doble consigo
+    # mismo y daría rojo tanto si el código acierta como si no. Lo que este hallazgo dice es que se
+    # publicaba una foto sin firmar teniendo una firmada, y eso es exactamente `autor`.
+    assert resultado.foto.autor, (
+        "se ha publicado la candidata sin autor teniendo otra que sí lo acredita: la excepción "
+        "del dominio público existe para no perder fotos, no para perder créditos"
+    )
+    # Y que la anónima se miró de verdad: sin esto, el recorrido pasaría igual si la primera
+    # candidata dejara de consultarse por cualquier motivo, que es verde por el camino equivocado.
+    assert commons.url_imageinfo(sin_autor) in pedidas
+
+
+def test_si_ninguna_acredita_autor_se_publica_la_primera_publicable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """La preferencia sólo puede elegir entre acreditadas: si no hay ninguna, no bloquea nada.
+
+    Sin este recorrido, «prefiere la que tiene autor» podría implementarse como «exige autor», que
+    volvería a cerrar los tres huecos que la excepción abrió (los dos de la NOAA y el suyo).
+    """
+    respuestas = _respuestas_completas()
+    for fichero in commons.leer_imagenes(_p18(), entidad=ENTIDAD):
+        respuestas[commons.url_imageinfo(fichero)] = _imageinfo_sin_atribucion()
+    _red(monkeypatch, respuestas)
+    resultado = commons.resolver(NOMBRE)
+    assert resultado.desenlace == commons.PUBLICABLE
+    assert resultado.foto is not None and resultado.foto.autor is None

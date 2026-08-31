@@ -248,8 +248,8 @@ orden de cuántos cierran:
    lleva al ítem que **declara** ese nombre científico; la búsqueda de texto llevaba a `Q234014`
    (que declara *Mugil cephalus*, no el género), a `Q286026` (que declara «Sapia») y a `Q47652` (que
    no es un animal).
-2. **Publicar sin autor sólo cuando la fuente dice que no hace falta.** Son **4 ficheros**, los
-   cuatro con `AttributionRequired = false` y `Copyrighted = False` en Commons. Con
+2. **Publicar sin autor sólo cuando la fuente dice que no hace falta.** Son **3 ficheros**, los
+   tres con `AttributionRequired = false` y `Copyrighted = False` en Commons. Con
    `AttributionRequired = true` y sin autor **no se publica jamás**: ahí quien lo impide es la
    licencia, no nosotros.
 3. **Dos filas toman prestada la foto de una especie que nombra la propia norma** y lo dicen en la

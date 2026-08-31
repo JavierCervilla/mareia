@@ -42,7 +42,6 @@ import { fileURLToPath } from "node:url";
 import {
   AQUI_NO_SE_PUNTUA_NADA,
   CAMPOS_DE_LA_FICHA,
-  creditoSinAutor,
   DOMINIO_PUBLICO_SIN_CONDICIONES,
   fotoDeLaPrimeraEspecieDeLaFila,
   fotoDeUnaEspecieDelGenero,
@@ -316,8 +315,20 @@ test("F2 · toda foto publicada lleva su autor y su licencia en su misma figura"
           `${especie.nombreBoe}: publica una foto sin autor que declara exigir atribución`,
         );
       }
-      if (!leido.includes(textoDe(creditoSinAutor(esperada.valor.licencia)))) {
-        desnudas.push(`${especie.nombreBoe}: la figura no dice que su fuente no registra autor`);
+      // **Literales, y no `creditoSinAutor(...)`.** Comprobar la página contra la misma función que
+      // la escribe sólo puede demostrar que el código es igual a sí mismo: hallazgo A-T23-2 del pase
+      // adversario, reproducido vaciando esa función —la página se quedó en «Foto · Public domain»,
+      // sin decir una palabra de autoría, y este gate siguió verde porque su expectativa se vació
+      // con ella—. Es el defecto de E4 en T-20 en otro sitio. La duplicación de la frase aquí es el
+      // precio de que el gate sea independiente, y es el mismo trato que hace E6 al recomputar la
+      // consulta en vez de leerla.
+      for (const exigido of ["Sin autor acreditado", "no registra quién hizo esta foto"]) {
+        if (!leido.includes(exigido)) {
+          desnudas.push(
+            `${especie.nombreBoe}: la figura no dice que su fuente no registra autor (falta ` +
+              `«${exigido}»)`,
+          );
+        }
       }
     } else if (!leido.includes(autor)) {
       desnudas.push(`${especie.nombreBoe}: la figura no publica el autor`);

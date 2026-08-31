@@ -100,6 +100,19 @@ esta trayectoria no es cómo se enseña un dato: es **cómo se enseña que falta
   `P225` de Wikidata no escribe así, de modo que ningún ítem declara esa forma exacta. Cerrarlo
   obligaría al módulo de fotos a caminar la lista de sinónimos de WoRMS, o sea a ampliarle la
   superficie de fuentes; mientras esa decisión no se tome, el hueco **publica su motivo**.
+- **El pase adversario encontró dos cosas, y las dos son daño colateral de la enmienda de arriba.**
+  (1) La excepción del dominio público existía para **no perder fotos** y estaba perdiendo
+  **créditos**: `pagellus-spp` publicaba «Sin autor acreditado» teniendo, en el mismo ítem, una foto
+  **firmada** —al volverse publicable la anónima, ganaba por orden de la fuente—. Ahora, entre
+  candidatas igualmente publicables, se prefiere la que **acredita a su autor** (`Artist`, un campo
+  de la fuente, no un criterio nuestro), y la preferencia **sólo elige entre publicables**: si
+  ninguna acredita, se publica la primera, que es lo que impide que «prefiere» se vuelva «exige» y
+  cierre los huecos que la excepción abrió. Fotos sin autor: **4 → 3**. (2) **F2 comprobaba la página
+  llamando a la misma función que la escribe**: vaciándola, la ficha se quedó en «Foto · Public
+  domain» —sin una palabra sobre autoría— y el gate siguió verde, porque su expectativa se vació con
+  ella. Es el defecto de **E4 en T-20** en otro sitio, y se cierra igual que lo cerró **E6**: el gate
+  exige ahora **literales escritos en él mismo**. La duplicación de la frase es el precio de la
+  independencia. Informe en `docs/qa/informe-adversario-t23.md`.
 - **`autor: "  "` colaba.** El lector rechazaba la cadena vacía pero no la de dos espacios, y un
   autor en blanco pinta «Foto de   · CC BY-SA 4.0»: una atribución que no atribuye a nadie, con todo
   en verde. Ahora ninguno de los campos publicables admite una cadena que no diga nada.

@@ -828,28 +828,49 @@ def resolver(nombre: str, *, refresh: bool = False) -> Resultado:
 
     descartadas: list[str] = []
     faltan: set[str] = set()
+    #: La primera publicable que **no** acredita autor. Se guarda en vez de publicarse en el acto:
+    #: mientras queden candidatas por mirar, puede aparecer una firmada, y entre dos que la fuente
+    #: ordena igual y las dos se pueden publicar, quedarse con la anónima contradice lo único que
+    #: esta ficha promete de su foto. Hallazgo del pase adversario de T-23: al abrir la excepción
+    #: del dominio público para **no perder fotos**, `pagellus-spp` perdió su **crédito** —publicaba
+    #: «Sin autor acreditado» teniendo una foto firmada del mismo ítem—. La preferencia no es
+    #: estética: es un campo de la fuente, `Artist`, presente o ausente.
+    anonima: Metadatos | None = None
+
+    def publicar(metadatos: Metadatos) -> Resultado:
+        return Resultado(
+            consultado=consultado,
+            entidad=entidad,
+            foto=Foto(
+                entidad=entidad,
+                fichero=metadatos.fichero,
+                url=metadatos.url or "",
+                descripcion=metadatos.descripcion or "",
+                autor=metadatos.autor,
+                atribucion_requerida=metadatos.exige_atribuir,
+                licencia=metadatos.licencia or "",
+                licencia_codigo=metadatos.licencia_codigo or "",
+                licencia_url=metadatos.licencia_url,
+            ),
+        )
+
     for fichero in ficheros:
         metadatos = leer_metadatos(
             descargar(url_imageinfo(fichero), refresh=refresh), fichero=fichero
         )
         if metadatos.completa:
-            return Resultado(
-                consultado=consultado,
-                entidad=entidad,
-                foto=Foto(
-                    entidad=entidad,
-                    fichero=metadatos.fichero,
-                    url=metadatos.url or "",
-                    descripcion=metadatos.descripcion or "",
-                    autor=metadatos.autor,
-                    atribucion_requerida=metadatos.exige_atribuir,
-                    licencia=metadatos.licencia or "",
-                    licencia_codigo=metadatos.licencia_codigo or "",
-                    licencia_url=metadatos.licencia_url,
-                ),
-            )
+            if metadatos.autor:
+                return publicar(metadatos)
+            if anonima is None:
+                anonima = metadatos
+            continue
         descartadas.append(f"«{fichero}» no publica {', '.join(metadatos.carencias)}")
         faltan.update(metadatos.carencias)
+    # Ninguna firmada: la anónima que la fuente pone primero. La preferencia sólo elige **entre**
+    # publicables; nunca convierte «prefiere» en «exige», que volvería a cerrar los huecos que la
+    # excepción abrió.
+    if anonima is not None:
+        return publicar(anonima)
     return _sin_foto(
         consultado,
         f"ninguna de las {len(ficheros)} imágenes {PROPIEDAD_IMAGEN} de «{consultado}» ({entidad}) "
