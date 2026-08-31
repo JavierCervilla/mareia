@@ -269,6 +269,15 @@ que la fuente pone primero, que es la regla que este módulo tenía escrita desd
 `homarus-gammarus`, `octopus-vulgaris`, `pagrus-pagrus`, `salmo-salar`, `sardina-pilchardus` y
 `scomber-japonicus`.
 
+**Se miraron las seis, y no hay regla de desempate mejor que la de la fuente.** Los cambios van en
+las dos direcciones: el pulpo gana —la lámina de Merculiano (1896) enseña ventosas, color y
+disposición de brazos sobre blanco, y la anterior era una foto submarina turbia— y el salmón pierde
+—antes un dibujo lateral limpio, ahora una foto entre algas—. Cualquier criterio que se añadiera
+(«prefiere fotografías», «prefiere láminas») sería **nuestro gusto aplicado a 85 especies a partir de
+dos ejemplos**, y es justo la conjetura que este módulo existe para no hacer. La única preferencia
+que sí se añadió sale de un campo de la fuente y no de una opinión: entre candidatas igualmente
+publicables, **gana la que acredita a su autor** (ver el hallazgo A-T23-1 del pase adversario).
+
 ### No existe «la licencia de las fotos»: son 8 en 85 ficheros
 
 <!-- gate:licencias-de-fotos -->
