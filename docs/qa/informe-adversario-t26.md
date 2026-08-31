@@ -64,6 +64,30 @@ escribe**, porque compararlo con `COLUMNA_PRESENCIA` haría que vaciar esa const
 con ella (A-T23-2). Probado en rojo: «la tercera cabecera no nombra a OBIS, que es de donde salen sus
 cifras: «Caladeros»».
 
+### A-T26-3 · el gate nuevo encontró lo que yo no verifiqué, y sólo porque CI tiene las tipografías
+
+**Lo encontró G2, en CI, no este pase.** Va aquí porque es lo más instructivo del lote.
+
+A 320 px, `/pesca/especies/` desbordaba el cuerpo de la página: las tres columnas suman 327 px y el
+documento salía a **347**. La auditoría lo había avisado —«a 320 px la tabla fuerza 27 px de scroll:
+decide y dilo en el PR»— y no se actuó.
+
+Lo grave no es el desbordamiento: es **por qué no se vio antes de empujar**. G2 pasaba en verde en
+local y salía rojo en CI, y la diferencia es que **en este contenedor el proxy no deja cargar las
+tipografías del sitio**. Se había previsto para G1 —que se salta cuando no cargan— y **no se cayó en
+que G2 depende de ellas exactamente igual**: con una fuente de reserva más estrecha, la tabla cabía.
+O sea que la ejecución local de G2 estaba midiendo **otra página**.
+
+**Arreglo**: la tabla se desplaza dentro de su propio marco (`overflow-x` en un contenedor con
+`tabindex` y nombre accesible) y el cuerpo no se desplaza nunca. Medido con las tipografías del sitio:
+347 → **320** a 320 px, y el filtro de caladeros sigue funcionando tras mover los tres selectores
+hermanos (`~ .tabla-especies` → `~ .tabla-especies__marco .tabla-especies`), comprobado con la suite
+e2e entera: **80 recorridos en verde**.
+
+Y antes de volver a empujar, **G1 se pre-voló contra el espejo con las tipografías reales**: 0
+palabras partidas en las 9 combinaciones, así que nace verde en CI en vez de nacer rojo y enseñar a
+ignorarlo.
+
 ## No reproducidos
 
 1. **El rótulo del binomio en la exención de G1.** La exención está escrita en el gate y no leída del
@@ -83,6 +107,10 @@ cifras: «Caladeros»».
 
 Dos gates nuevos (culpables-hoja en G2; la cabecera nombra su fuente), los dos probados en rojo. Y una
 lección que va al digest:
+
+> **Un gate que mide el render depende de las tipografías, y sin ellas mide otra página.** Se previó
+> para G1 y se pasó por alto en G2, que verde en local y rojo en CI señalaba un desbordamiento real.
+> La regla: si un gate mira cómo se ve algo, su ejecución local sólo vale con las mismas fuentes.
 
 > **Un gate puede citar la lección que incumple.** G2 llevaba escrito en su comentario que el culpable
 > se busca en `body *` «y no en un contenedor que ya sospeches», y devolvía diez contenedores sin el

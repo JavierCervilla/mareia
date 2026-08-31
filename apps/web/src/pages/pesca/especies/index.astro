@@ -214,6 +214,18 @@ const migas = migasDeEspecies();
       <p class="filtro-caladero__nota">{EL_FILTRO_NO_RECORTA_LA_FILA}</p>
     </nav>
 
+    <!--
+      El marco existe para que, cuando la tabla no quepa, se desplace ELLA y no la página: un
+      cuerpo que se mueve a lo ancho pierde la columna izquierda de todo lo demás. Lleva
+      `tabindex` y nombre accesible porque una región que se desplaza tiene que poder recorrerse
+      con el teclado, no sólo con el dedo.
+    -->
+    <div
+      class="tabla-especies__marco"
+      role="region"
+      tabindex="0"
+      aria-label={tituloDelCatalogo(censo.especies)}
+    >
     <table class="tabla-especies">
       <caption class="solo-lectores">
         {tituloDelCatalogo(censo.especies)}, con el nombre de la norma, el taxón aceptado hoy y los
@@ -340,6 +352,7 @@ const migas = migasDeEspecies();
         }
       </tbody>
     </table>
+    </div>
   </div>
 
   {/*

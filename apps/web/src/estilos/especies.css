@@ -130,11 +130,11 @@
 /* Lo que hace el filtro: esconder las especies que ese caladero no regula. El
    ancla «todas» no tiene regla, y por eso devuelve la lista entera. */
 #cal-cantabrico-noroeste-y-golfo-de-cadiz:target
-  ~ .tabla-especies
+  ~ .tabla-especies__marco .tabla-especies
   tbody
   tr:not([data-caladeros~="cantabrico-noroeste-y-golfo-de-cadiz"]),
-#cal-mediterraneo:target ~ .tabla-especies tbody tr:not([data-caladeros~="mediterraneo"]),
-#cal-canario:target ~ .tabla-especies tbody tr:not([data-caladeros~="canario"]) {
+#cal-mediterraneo:target ~ .tabla-especies__marco .tabla-especies tbody tr:not([data-caladeros~="mediterraneo"]),
+#cal-canario:target ~ .tabla-especies__marco .tabla-especies tbody tr:not([data-caladeros~="canario"]) {
   display: none;
 }
 
@@ -288,3 +288,22 @@
   overflow-wrap: anywhere;
 }
 
+
+/* El marco de la tabla: si no cabe, se desplaza ELLA, nunca la página.
+
+   Medido con las tipografías del sitio: a 320 px las tres columnas suman 327 px y el documento sale
+   a **347**, o sea 27 px de desbordamiento del cuerpo. A 360 px cabe justo (360) y a 390 sobra. Un
+   cuerpo que se desplaza a lo ancho se lleva por delante la columna izquierda de **todo** lo demás
+   —cabecera, migas, pie—, así que el desplazamiento se encierra aquí.
+
+   `overflow-x: auto` no fuerza nada cuando cabe: por encima de ~340 px esto no se nota. El
+   `focus-visible` está porque el `tabindex` que hace la región recorrible con teclado sin marca de
+   foco es una trampa para quien navega sin ratón. */
+.tabla-especies__marco {
+  overflow-x: auto;
+}
+
+.tabla-especies__marco:focus-visible {
+  outline: 2px solid var(--m-navy);
+  outline-offset: 2px;
+}
