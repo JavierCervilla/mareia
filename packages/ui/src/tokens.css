@@ -45,7 +45,15 @@
   --m-font-text: "Newsreader", Georgia, serif;
 
   /* --- Escala tipográfica (valores móvil; el escritorio los sube por media query) --- */
-  --m-text-eyebrow: 11px; /* rótulos versaleta: COEFICIENTE, SOL, LUNA */
+  /* 12 px y no 11, y el porqué está medido (T-28).
+     El escalón entero de este sistema baja un punto en móvil —12→13, 15→16, 46→64— y eso es una
+     decisión del brief que no se toca. Pero **11 px baja del umbral**, y baja **justo en el
+     dispositivo donde peor se lee**: medido en el `dist/`, los únicos elementos por debajo de 12 px
+     en todo el sitio eran **50** —12 en la portada, 5 en el catálogo, 33 en una página de puerto— y
+     eran **todos** este token. Que la letra más pequeña sea aún más pequeña en la pantalla más
+     pequeña es lo contrario de lo que hace falta. Sube a 12 y deja de tener salto en escritorio: un
+     token que declara el valor que ya tiene es ruido que hace dudar de si hace algo. */
+  --m-text-eyebrow: 12px; /* rótulos versaleta: COEFICIENTE, SOL, LUNA */
   --m-text-meta: 12px; /* fecha, ejes del gráfico, tipo de marea */
   --m-text-small: 13px; /* subtítulo del puerto, marca en cabecera */
   --m-text-body: 15px; /* texto corriente */
@@ -70,7 +78,7 @@
    system, no de una página: cualquier superficie que use los tokens escala igual. */
 @media (min-width: 1100px) {
   :root {
-    --m-text-eyebrow: 12px;
+    /* `--m-text-eyebrow` ya no está aquí: desde T-28 vale 12 px en todas partes. */
     --m-text-meta: 13px;
     --m-text-small: 15px;
     --m-text-body: 16px;
