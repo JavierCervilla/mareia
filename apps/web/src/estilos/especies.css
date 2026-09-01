@@ -29,6 +29,13 @@
   font-size: var(--m-text-body);
 }
 
+/* Llamada suelta en su propio párrafo: cromía navegable, 44 px (T-30). */
+.especies__enlace a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--m-tap-comodo);
+}
+
 /* Filete lateral en el acento cálido, como los avisos de la sección de tallas:
    se ve sin gritar más que el «No apto para navegación» del pie. Es el único
    sitio con color de las dos superficies, y no cae sobre ninguna cifra. */
@@ -177,6 +184,19 @@
 .tabla-especies__boe {
   display: block;
   font-style: italic;
+}
+
+/* Los 171 enlaces de la tabla —86 nombres del BOE + 85 fichas de WoRMS— suben a `--m-tap-min`
+   (24 px, WCAG 2.5.8 AA) y **no** a los 44 de la cromía. Medido: a 44 px de alto serían +60 px por
+   ficha, ~25 % más de página, que es deshacer el 42 % que ganó T-27. A 24 crece ~5 %.
+
+   El ancho no se toca porque ya cumple de sobra: 66 px el nombre, 232 px la ficha. Aquí lo único
+   que faltaba era la vertical, como en todo el sitio. */
+.tabla-especies__boe a,
+.tabla-especies__ficha a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--m-tap-min);
 }
 
 .tabla-especies__comun,

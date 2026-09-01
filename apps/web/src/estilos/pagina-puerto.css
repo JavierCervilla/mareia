@@ -235,6 +235,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Cuando el valor es un enlace —la referencia al BOE—, es objetivo táctil y no cifra: 44 px de alto
+   (T-30). Medía 225 x 38. El `inline-flex` no rompe el alineado a la derecha del bloque. */
+.datos__valor a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--m-tap-comodo);
+}
+
 .datos__nota {
   font-size: var(--m-text-meta);
   font-style: italic;

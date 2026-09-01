@@ -77,6 +77,34 @@ svg {
   letter-spacing: var(--m-track-eyebrow);
 }
 
+/* Un enlace que ocupa ÉL SOLO su párrafo no es texto corrido: es una llamada, y se toca. Va a los
+   44 px (T-30).
+
+   La regla es estructural **a propósito**, y la primera versión no lo era: nombraba una clase
+   (`.portada__enlace`) que se le puso a la portada… mientras `404.astro` publicaba **la misma línea
+   sin ella**. Lo cazó el pase adversario, no yo. Un enlace que es el único elemento de su párrafo
+   **no tiene texto alrededor del que formar parte** —que es literalmente la excepción «inline» de
+   WCAG 2.5.8 que el gate aplica—, así que la condición del CSS y la del gate son la misma condición
+   dicha dos veces, y no dos listas de sitios que hay que acordarse de mantener iguales.
+
+   `:only-child` sólo cuenta elementos, no nodos de texto, igual que el gate sólo cuenta texto que no
+   está en blanco: un párrafo con «Ver todas las regiones» y nada más casa aquí y no se exime allí. */
+.pagina p > a:only-child {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--m-tap-comodo);
+}
+
+/* Un rótulo que además es enlace es cromía navegable, no texto: encabeza una región entera de la
+   portada y es lo que se toca para entrar en ella. La regla va sobre `.etiqueta > a` y no sobre
+   `.etiqueta`, porque la inmensa mayoría de los rótulos del sitio NO son enlace y crecerlos sería
+   estirar el ritmo vertical a cambio de nada. */
+.etiqueta > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--m-tap-comodo);
+}
+
 /* --- Cabecera de marca + migas ------------------------------------------- */
 /* Marca a la izquierda, fecha del build a la derecha y el filete doble cruzando debajo: la
    cabecera de una página de anuario. Rejilla y no flex, para que el filete ocupe las dos columnas
@@ -93,7 +121,16 @@ svg {
   grid-column: 1 / -1;
 }
 
+/* El `inline-flex` con `min-height` es el patrón de objetivo táctil de todo el sitio (T-30): la
+   caja del enlace deja de ser la línea de texto y pasa a medir lo que se declara, **sin depender de
+   la tipografía que cargue**. `align-items: center` mantiene el texto en el medio de la caja nueva.
+
+   La cabecera es rejilla con `align-items: baseline`: al crecer la marca a 44 px, el `baseline` que
+   comparte con la fecha se recoloca solo, porque el texto sigue centrado en su caja. */
 .marca__nombre {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--m-tap-comodo);
   font-size: var(--m-text-small);
   font-weight: 600;
   letter-spacing: var(--m-track-wordmark);
@@ -131,7 +168,20 @@ svg {
   color: var(--m-sub);
 }
 
+/* Cada miga es un objetivo de la cromía navegable: 44 px de alto. El ancho ya lo cumple sin tocar
+   nada —la más corta mide 28 px, por encima de los 24 de 2.5.8—, así que no se le pone `min-width`:
+   una caja ancha de más separaría el rastro sin que nadie lo pidiera. */
+.migas a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--m-tap-comodo);
+}
+
+/* El separador NO es objetivo: se centra con las migas ya crecidas y se queda como estaba. */
 .migas__separador {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--m-tap-comodo);
   color: var(--m-sub);
 }
 

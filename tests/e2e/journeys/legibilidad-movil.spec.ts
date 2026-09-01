@@ -8,9 +8,12 @@
  * que es exactamente lo que pasó: `/pesca/especies/` partía **376 palabras a media palabra** a 360 px
  * y ningún test del repositorio se enteró.
  *
- * Los tres nacen **en verde**, que es la única forma de que un gate se respete. El de objetivo táctil
- * (≥ 44 × 44 px) se deja fuera a propósito: hoy nacería en rojo 170 de 170 en la portada, y un gate
- * que nace en rojo se ignora — así es como mueren.
+ * Todos nacen **en verde**, que es la única forma de que un gate se respete. El de objetivo táctil
+ * (**G5**) se dejó fuera en T-26 porque entonces nacía en rojo, y entró en **T-30** cuando el arreglo
+ * de `indices.css` y el de esta trayectoria lo dejaron verde. Ojo con el número: durante cuatro
+ * trayectorias esta cabecera dijo «hoy nacería en rojo 170 de 170 en la portada» **como si fuera el
+ * presente**, y hacía tiempo que no lo era — el propio `indices.css` decía «bajan de 170 a 14» desde
+ * T-26. Un dato correcto que nadie actualiza se convierte en uno falso sin que nadie mienta.
  *
  * **Anchos**: 320, 360 y 390. No el `Pixel 7` del proyecto (412 px), porque a 412 la avería que
  * origina esta trayectoria **ya no se ve**: medido, 219 roturas a 390 y 0 a 412. Un gate que sólo
@@ -362,5 +365,171 @@ for (const ruta of PAGINAS) {
       expect(medida.bajos).toEqual([]);
     });
     }
+  }
+}
+
+/* -----------------------------------------------------------------------------
+ * G5 · objetivo táctil. El gate que T-26 dejó fuera, y por qué entra ahora.
+ *
+ * **El número con el que se aplazó estaba caducado, no equivocado.** La cabecera de este fichero
+ * decía «hoy nacería en rojo 170 de 170 en la portada», y era cierto **antes** del arreglo de T-26
+ * que movió el relleno del `li` al `a`. El propio `indices.css` lo dice desde entonces: «los
+ * objetivos que no llegan a 44 en la portada bajan de 170 a 14». Dos superficies del mismo hecho
+ * desincronizadas —la lección de T-20 y T-29, esta vez en prosa—, y quien las desempató fue medir.
+ *
+ * **Por qué 24 y no 44.** 24 × 24 es WCAG 2.5.8 *Target Size (Minimum)*, nivel **AA**; 44 × 44 es
+ * 2.5.5, nivel AAA. El gate encierra la **obligación**, no la aspiración, y la razón no es comodidad:
+ * exigir 44 a los 171 enlaces de la tabla de especies son **+60 px por ficha**, ~25 % más de página,
+ * deshaciendo el 42 % que ganó T-27. Medido tras el arreglo de esta trayectoria, subir a 24 costó
+ * **+508 px (+1,6 %)** en el catálogo, **+355 px (+3,9 %)** en la portada y **+40 px (+0,3 %)** en una
+ * página de puerto. La **cromía navegable** —marca, migas, rótulos enlazados, llamadas sueltas— sí va
+ * a 44 px de alto, pero eso lo pone el CSS, no lo exige este gate: un gate que pide más de lo que se
+ * puede sostener en todo el sitio es un gate que se acaba bajando, y bajarlo una vez es enseñar que
+ * se puede.
+ *
+ * **Las dos exenciones van escritas AQUÍ y no leídas del CSS** (lección A-T23-2): una exención
+ * inferida del código que se vigila se auto-concede.
+ *
+ * 1. **Enlaces en línea dentro de texto corrido** — excepción explícita de 2.5.8. Se detecta porque
+ *    el elemento comparte padre con texto que no es enlace; hoy son 2 en el catálogo y 16 en la
+ *    página de puerto.
+ * 2. **Objetivos ocultos a la vista** (patrón *screen-reader only*: caja ≤ 1 px y posicionado
+ *    absoluto). Hoy, los 3 `input.solo-lectores` de la portada, que no son objetivo táctil de nadie.
+ *
+ * Y **el gate los nombra en su mensaje** en vez de descontarlos en silencio: un gate que calla a
+ * quién no mira hace creer que mira a todos (lección A-T28-1).
+ *
+ * **Por qué el arreglo va con `min-height` y no fiándose del texto**: este contenedor no carga las
+ * tipografías del sitio (vienen de Google Fonts) y G2 salió verde en local y rojo en CI por eso. Un
+ * alto que sale de `line-height × font-size` cambia con la tipografía que llegue; uno declarado en
+ * píxeles, no. Por eso G5 mide lo mismo aquí que en CI.
+ * -------------------------------------------------------------------------- */
+
+/** WCAG 2.5.8 (AA). El mismo número que `--m-tap-min`, escrito aquí y no leído del token. */
+const LADO_MINIMO = 24;
+
+/**
+ * **El universo de G5, que el pase adversario tuvo que ensanchar dos veces.**
+ *
+ * G1/G2/G4 miran tres páginas —la tabla que se rompió, un puerto y la portada—, y G5 nació copiando
+ * esa lista. Preguntarle *«¿sobre qué universo mide?»* (la lección de T-28) destapó **dos familias
+ * enteras que el gate no visitaba y que sí publicaban objetivos de 14 px**:
+ *
+ * 1. **La ficha individual de especie** (`/pesca/especies/<clave>/`, **87 páginas**): cuatro enlaces
+ *    a 14 px —WoRMS, la licencia de la foto, «ver la ficha de», «volver al catálogo»—.
+ * 2. **La página 404**, que publica la misma llamada que la portada… **sin la clase** con la que se
+ *    había arreglado la portada. El arreglo estaba atado al nombre de una instancia y la segunda
+ *    página que publicaba lo mismo no lo heredaba. Por eso la regla del CSS pasó a ser estructural.
+ *
+ * Ninguna de las dos tenía síntoma: G5 estaba verde en las tres páginas que miraba. **Se quedan aquí
+ * como trinquete**, que es el punto de que el recorrido que encontró el fallo no se retire con él.
+ */
+const PAGINAS_TACTIL = [
+  ...PAGINAS,
+  "/pesca/especies/alosa-spp-8c0b29/",
+  "/404.html",
+] as const;
+
+const MEDIR_OBJETIVOS = `(() => {
+  const SELECTOR = 'a, button, input, select, textarea, summary, [role="button"]';
+  const visibles = [...document.querySelectorAll(SELECTOR)].filter((el) => {
+    const caja = el.getBoundingClientRect();
+    return caja.width > 0 && caja.height > 0;
+  });
+
+  // Excepción «inline» de 2.5.8: el objetivo va dentro de una frase, y agrandarlo rompería el texto.
+  const enLinea = (el) => {
+    const padre = el.parentElement;
+    if (!padre) return false;
+    for (const hijo of padre.childNodes) {
+      if (hijo.nodeType === 3 && (hijo.textContent || "").trim().length > 0) return true;
+    }
+    return false;
+  };
+
+  // Patrón screen-reader-only: no lo toca nadie porque no se ve.
+  const ocultoALaVista = (el) => {
+    const caja = el.getBoundingClientRect();
+    return caja.width <= 1 && caja.height <= 1 && getComputedStyle(el).position === "absolute";
+  };
+
+  const nombre = (el) => {
+    const caja = el.getBoundingClientRect();
+    const texto = (el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 24);
+    return el.tagName.toLowerCase() + " " + Math.round(caja.width) + "x" + Math.round(caja.height) +
+      " «" + texto + "»";
+  };
+
+  const exentosLinea = visibles.filter(enLinea);
+  const exentosOcultos = visibles.filter((el) => !enLinea(el) && ocultoALaVista(el));
+  const sujetos = visibles.filter((el) => !enLinea(el) && !ocultoALaVista(el));
+
+  const pequenos = sujetos.filter((el) => {
+    const caja = el.getBoundingClientRect();
+    return Math.min(caja.width, caja.height) < ${LADO_MINIMO};
+  });
+
+  // CANARIO de sensibilidad: una caja que sabemos pequeña tiene que salir pequeña. Se mide de
+  // verdad —se pinta, se lee su rectángulo y se retira—, no se asume.
+  const testigo = document.createElement("button");
+  testigo.style.cssText = "position:fixed;left:0;top:0;width:10px;height:10px;padding:0;border:0";
+  document.body.appendChild(testigo);
+  const cajaTestigo = testigo.getBoundingClientRect();
+  const canario = Math.min(cajaTestigo.width, cajaTestigo.height);
+  testigo.remove();
+
+  return {
+    visibles: visibles.length,
+    sujetos: sujetos.length,
+    exentosLinea: exentosLinea.length,
+    exentosOcultos: exentosOcultos.map(nombre),
+    pequenos: pequenos.slice(0, 12).map(nombre),
+    total: pequenos.length,
+    canario,
+  };
+})()`;
+
+for (const ruta of PAGINAS_TACTIL) {
+  for (const ancho of ANCHOS) {
+    test(`G5 · ${ruta} a ${ancho}px no publica objetivos táctiles por debajo de ${LADO_MINIMO}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: ancho, height: 900 });
+      await page.goto(ruta, { waitUntil: "networkidle" });
+      await page.evaluate("document.fonts.ready");
+      const medida = await page.evaluate<{
+        visibles: number;
+        sujetos: number;
+        exentosLinea: number;
+        exentosOcultos: string[];
+        pequenos: string[];
+        total: number;
+        canario: number;
+      }>(MEDIR_OBJETIVOS);
+
+      // CANARIO 1 · cobertura. Si no queda nadie a quien medir —porque el selector dejó de casar o
+      // porque las exenciones se lo comieron todo—, el verde de abajo sería el de no haber mirado.
+      expect(
+        medida.sujetos,
+        `no queda ningún objetivo que medir en ${ruta} (${medida.visibles} visibles, ` +
+          `${medida.exentosLinea} exentos por ir en línea, ${medida.exentosOcultos.length} por estar ` +
+          "ocultos a la vista): este gate estaría en verde por vacío",
+      ).toBeGreaterThan(5);
+
+      // CANARIO 2 · sensibilidad. Un objetivo de 10 px tiene que medirse como 10 px.
+      expect(
+        medida.canario,
+        "un botón de 10 px no se mide como menor que el umbral: el instrumento no está midiendo",
+      ).toBeLessThan(LADO_MINIMO);
+
+      expect(
+        medida.pequenos,
+        `objetivos táctiles por debajo de ${LADO_MINIMO}x${LADO_MINIMO} px (WCAG 2.5.8 AA) en ` +
+          `${ruta} a ${ancho}px: ${medida.total} de ${medida.sujetos} medidos. ALCANCE: se eximen ` +
+          `${medida.exentosLinea} enlaces que van dentro de un texto corrido (excepción de 2.5.8) y ` +
+          `estos ${medida.exentosOcultos.length} objetivos ocultos a la vista, que se nombran para ` +
+          `que nadie los dé por medidos: ${JSON.stringify(medida.exentosOcultos)}`,
+      ).toEqual([]);
+    });
   }
 }

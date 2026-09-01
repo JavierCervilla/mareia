@@ -249,6 +249,19 @@
       se esperaba que fallara» en los nueve— y conservan su assert canario. Medido con el comando de
       CI: `pnpm test` **667 en verde**, `pnpm test:e2e` **70** midiendo de verdad,
       `pytest` **1.919**, catálogo de **111.516 B** (11.514 comprimidos) con cero scripts
+- [x] T-30 · **El objetivo táctil, medido antes de prometerlo (G5).** Cierra el último hueco de la
+      auditoría de UX. El número con el que se aplazó —«170 de 170 en rojo en la portada»— estaba
+      **caducado**: cierto antes del arreglo de T-26, y desmentido desde entonces por el propio
+      `indices.css` («bajan de 170 a **14**»). Medir desempató, y confirmó los 14. **Todos los fallos
+      eran de alto**, ninguno de ancho. Nace **G5** (≥ **24 × 24 px**, WCAG 2.5.8 **AA**, 3 páginas ×
+      3 anchos) con sus **dos canarios**, cobertura y sensibilidad. El gate encierra la obligación
+      (24); la cromía navegable sube a 44 de alto porque ahí es barato, y los 171 enlaces de la tabla
+      de especies se quedan en 24 porque a 44 serían ~25 % más de página — deshaciendo el 42 % de
+      T-27. Coste medido: **+1,6 %** en el catálogo, **+3,9 %** en la portada, **+0,3 %** en un puerto.
+      **El pase adversario lo ensanchó dos veces**: la ficha individual de especie (87 páginas, 4
+      enlaces a 14 px) y el **404**, que publicaba la llamada de la portada sin la clase con la que se
+      arregló la portada — por eso la regla pasó a ser estructural (`p > a:only-child`) en vez de
+      nombrar una instancia. G5 va de **9 a 15 casos**, 5 familias × 3 anchos.
 - [x] T-29 · **La procedencia del RMSE deja de ser palabra del propio fichero (hallazgo A-20).** El
       invariante recomputaba la distancia al mareógrafo desde coordenadas que escribe **el mismo
       productor del RMSE**: reconstruido el fraude entero —Cabo de Palos con el RMSE real de Cartagena
@@ -266,8 +279,8 @@
       (contraste AA, mínimo **5,42:1**, 3 páginas × 2 anchos) **con dos canarios**, porque sus dos
       formas de mentir se reprodujeron a mano: parsear `rgb()` sobre `oklch()` da **0 muestras de 487**
       y un «ningún problema»; resolver con canvas sin limpiar el lienzo da **1,00 en los 951**. Exige
-      que las muestras igualen a los elementos y que un par malo salga malo. Fuera: **G5**, que hoy
-      nacería en rojo.
+      que las muestras igualen a los elementos y que un par malo salga malo. Fuera: **G5**, que
+      entonces nacería en rojo — entra en **T-30**.
 - [x] T-27 · **El catálogo de especies apilado en fichas en un móvil, con un solo marcado.** Cada
       especie se lee entera en vez de en tres canales de 14 caracteres: **46,7 → 40 pantallas** a
       360 px, fila media **394 → 332 px** y la peor fila **955 → 549** (−42 %), que es la que decide
