@@ -3,7 +3,7 @@
 **Trayectoria**: `cmtipazpy000ymruypvulgz7i` · hija de E-MAREIA · **Rama**: `claude/T-30-objetivo-tactil`
 **Origen**: el último hueco declarado de la auditoría de UX que abrió el humano con una foto de su móvil.
 
-## Por qué este plan empieza midiendo
+## Por qué este plan empieza midiendo (y qué le pasó al plan al hacerlo)
 
 T-26/T-27/T-28 cerraron la auditoría dejando **G5 fuera a propósito**, y la razón quedó escrita en la
 cabecera de `legibilidad-movil.spec.ts`:
@@ -11,8 +11,17 @@ cabecera de `legibilidad-movil.spec.ts`:
 > «El de objetivo táctil (≥ 44 × 44 px) se deja fuera a propósito: hoy nacería en rojo **170 de 170**
 > en la portada, y un gate que nace en rojo se ignora.»
 
-**Ese número es falso, y lo primero de esta trayectoria fue comprobarlo.** 170 es el total de objetivos
-de la portada, no los que fallan. Medido con el sitio construido, a 360 px:
+**Este plan salió acusando a ese número de falso. Al medir resultó ser algo peor y más interesante:
+está caducado, y en el mismo repositorio hay otro sitio que ya lo desmiente.** El comentario de
+`indices.css` —escrito en T-26, al mover el relleno del `li` al `a` y subirlo de 9 a 12 px— dice:
+
+> «los objetivos que no llegan a 44 en la portada bajan de **170 a 14**».
+
+Los 170 eran ciertos **antes** de ese arreglo. El arreglo entró; la cabecera del spec no se actualizó.
+**Dos superficies del mismo hecho se desincronizaron** — la lección exacta de T-20 y de T-29, ahora en
+prosa en vez de en código.
+
+Medido hoy sobre el sitio **construido**, a 360 px:
 
 | página | objetivos visibles | en línea (exentos 2.5.8) | sueltos | **< 44 px** | **< 24 px** |
 |---|---|---|---|---|---|
@@ -20,9 +29,17 @@ de la portada, no los que fallan. Medido con el sitio construido, a 360 px:
 | `/pesca/especies/` | 179 | 2 | 177 | **173** | 159 |
 | `/mareas/andalucia/cadiz/cadiz/` | 26 | 16 | 10 | **7** | 5 |
 
-Y de los 17 de la portada, **3 son `input.solo-lectores` de 1 × 1 px** —campos ocultos para lector de
-pantalla, que no son objetivo táctil de nadie—, así que los reales son **14**. La decisión de aplazar
-G5 fue correcta; **el número con el que se justificó, no**. Se corrige en el mismo PR.
+De los 17 de la portada, **3 son `input.solo-lectores` de 1 × 1 px** —campos ocultos para lector de
+pantalla, que no son objetivo táctil de nadie—: quedan **14**, que es **exactamente** lo que decía
+`indices.css`. La medición no corrigió al repositorio: **eligió cuál de sus dos versiones era la
+vigente**, y de paso confirmó que la decisión de aplazar G5 estaba bien tomada.
+
+## Un hallazgo que simplifica el trabajo
+
+**Todos los fallos son de ALTO.** Ni un solo objetivo baja de 24 px de ancho: las migas miden 28, los
+encabezados de región 52, la marca 92, los enlaces de la tabla 66 y 232. Lo que falta siempre es la
+vertical (14–19 px). El único caso con ancho corto es el `input.solo-lectores` de 1 × 1, oculto a la
+vista. Eso convierte el arreglo en `min-height` y nada más.
 
 ## Los tres racimos reales (no 170 casos sueltos)
 
@@ -40,9 +57,21 @@ pase: es el único umbral que se puede sostener **en todo el sitio** sin deshace
 hacerse. Subir los 171 enlaces de la tabla de especies a 44 px de alto son **+60 px por ficha**, ~25 %
 más de página — justo lo que T-27 redujo un 42 %. A 24 px son ~+10 px por enlace y la página crece ~5 %.
 
-**Y la cromía navegable sí sube a 44**, porque ahí es barato y es lo que la gente toca de verdad.
-Dicho de otra forma: **el gate encierra la obligación (24), el diseño apunta al oficio (44)**, y el
-mensaje del gate dice cuál de las dos está midiendo.
+**Y la cromía navegable sí sube a 44 de alto**, porque ahí es barato y es lo que la gente toca de
+verdad. Dicho de otra forma: **el gate encierra la obligación (24), el diseño apunta al oficio (44)**,
+y el mensaje del gate dice cuál de las dos está midiendo.
+
+**El coste, medido y no estimado.** El plan dijo «~5 %» en el catálogo. Medido a 360 px contra `main`:
+
+| página | antes | después | coste |
+|---|---|---|---|
+| `/pesca/especies/` | 30 919 px | 31 427 px | **+508 px (+1,6 %)** |
+| `/` | 9 019 px | 9 374 px | **+355 px (+3,9 %)** |
+| `/mareas/andalucia/cadiz/cadiz/` | 13 664 px | 13 704 px | **+40 px (+0,3 %)** |
+
+Sale **tres veces más barato** de lo estimado donde más importaba, porque los enlaces de la tabla ya
+medían 14–19 px y sólo tenían que llegar a 24. La portada es la que más crece en proporción, y es la
+que sube a 44: se paga a gusto.
 
 ## Exenciones, escritas en el gate y no inferidas del CSS
 

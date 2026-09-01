@@ -2,6 +2,35 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-09-01 — T-30 · El objetivo táctil, medido antes de prometerlo (G5)
+
+- **Se cierra el último hueco de la auditoría de UX**, el que T-26 dejó fuera a propósito. Nace
+  **G5**: ningún objetivo táctil por debajo de **24 × 24 px** (WCAG 2.5.8, nivel **AA**), en
+  3 páginas × 3 anchos (320, 360, 390). Verde en los 9 casos.
+- **El número con el que se aplazó estaba caducado, no equivocado.** La cabecera del spec decía «hoy
+  nacería en rojo **170 de 170** en la portada», y era cierto **antes** del arreglo de T-26 que movió
+  el relleno del `li` al `a`; desde entonces `indices.css` decía «bajan de 170 a **14**». Dos
+  superficies del mismo hecho desincronizadas, y quien las desempató fue **medir**: 17 objetivos bajo
+  44 px en la portada, de los cuales 3 son `input.solo-lectores` de 1 × 1 → **14**, exactamente lo que
+  decía el CSS. La cabecera queda corregida.
+- **Todos los fallos eran de ALTO.** Ni un objetivo bajaba de 24 px de ancho: migas 28, encabezados de
+  región 52, marca 92, enlaces de la tabla 66 y 232. El arreglo son `min-height` explícitos —nuevos
+  tokens `--m-tap-min` (24) y `--m-tap-comodo` (44)—, **en píxeles y no en `em`**: un objetivo definido
+  en `em` cambia de tamaño con la tipografía que llegue a cargar, que es lo que hizo que G2 midiera
+  otra página en CI.
+- **El gate exige 24; el diseño apunta a 44, y no son lo mismo.** La cromía navegable —marca, migas,
+  rótulos enlazados, llamadas sueltas— sube a 44 px de alto porque ahí sale barato. Los **171 enlaces
+  de la tabla de especies** se quedan en 24: a 44 serían **+60 px por ficha**, ~25 % más de página,
+  deshaciendo el 42 % que ganó T-27. Coste real medido a 360 px: **+508 px (+1,6 %)** en el catálogo,
+  **+355 px (+3,9 %)** en la portada, **+40 px (+0,3 %)** en una página de puerto.
+- **Dos exenciones, escritas en el gate y no leídas del CSS**: los enlaces que van dentro de un texto
+  corrido (excepción explícita de 2.5.8) y los objetivos ocultos a la vista (patrón *screen-reader
+  only*). El gate **los nombra en su mensaje** en vez de descontarlos en silencio.
+- **Probado en rojo tres veces, verificando antes que el sabotaje se aplicaba**: bajando
+  `--m-tap-min` a 10 px enrojece con **71 de 177** (y prueba que el gate **no lee el token** que
+  vigila); rompiendo el selector salta el canario de **cobertura**; agrandando el testigo a 30 px
+  salta el de **sensibilidad**.
+
 ## 2026-09-01 — T-29 · La procedencia del RMSE deja de ser palabra del propio fichero
 
 - **Un puerto podía publicar una precisión que no había ganado, y todo cuadraba.** El invariante «un

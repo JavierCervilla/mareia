@@ -68,6 +68,24 @@
   --m-track-eyebrow: 0.18em;
   --m-track-tide: 0.14em;
 
+  /* --- Objetivo táctil (T-30) ----------------------------------------------
+     Dos valores porque son dos cosas distintas, y confundirlas es lo que hace que un umbral se
+     acabe bajando para que algo pase.
+
+     `--m-tap-min` es la **obligación**: WCAG 2.5.8 «Target Size (Minimum)», nivel **AA**. Es lo que
+     el gate G5 exige a todo objetivo que no esté exento, y se cumple en todo el sitio.
+
+     `--m-tap-comodo` es el **oficio**: los 44 px de 2.5.5 (AAA) y de las guías de iOS/Android. Se
+     aplica a la cromía navegable —marca, migas, encabezados enlazados, llamadas sueltas—, donde
+     sale barato. NO se aplica a los 171 enlaces de la tabla de especies: a 44 px de alto serían
+     +60 px por ficha, ~25 % más de página, deshaciendo el 42 % que ganó T-27. Ahí manda 2.5.8.
+
+     Van en píxeles y no en `em` **a propósito**: el criterio de la WCAG está en píxeles CSS, y un
+     objetivo definido en `em` cambia de tamaño con la tipografía que llegue a cargar — que es
+     justamente lo que hizo que G2 midiera otra página en CI. */
+  --m-tap-min: 24px;
+  --m-tap-comodo: 44px;
+
   /* --- Ritmo vertical ------------------------------------------------------ */
   --m-gap-bloque: 20px;
   --m-gap-fila: 7px;
