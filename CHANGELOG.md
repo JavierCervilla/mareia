@@ -2,6 +2,32 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-09-01 — T-29 · La procedencia del RMSE deja de ser palabra del propio fichero
+
+- **Un puerto podía publicar una precisión que no había ganado, y todo cuadraba.** El invariante «un
+  puerto sólo publica el error medido en él» recomputa la distancia al mareógrafo desde las
+  coordenadas… **que escribe el mismo productor del RMSE**. El pase adversario de T-13 lo dejó abierto
+  como **A-20**. Reconstruido entero: Cabo de Palos publicando el RMSE real de Cartagena (0,0506 m)
+  bajo el código `carg1`, coordenadas a **0,712 km** de su dársena, distancia **recomputada**, y
+  `estimated`/`grade`/motivos intactos para que los demás invariantes lo re-derivasen bien. Así
+  construido **pasa los 624 controles anteriores**.
+- **Se cierra con un invariante que no mira el fichero sino el dataset entero**: *el mismo mareógrafo
+  tiene que estar en el mismo sitio en todos los ficheros que lo citan*. El fraude enrojece nombrando
+  los dos ficheros y los **26,2 km** de diferencia. Nace verde: los 3 códigos que hoy comparte más de
+  un fichero coinciden con **0,0000 km**.
+- **Y funciona por una razón que conviene decir**: inyectar el error de otro puerto **obliga a citar su
+  mareógrafo**, y ese puerto también lo publica. **El fraude se crea a sí mismo el segundo citador**,
+  así que la estrechez que se temía al planificarlo —«sólo cubre 3 de 32 códigos»— no le aplica.
+- **Lo que sigue abierto va con su nombre**: un RMSE atribuido a un mareógrafo que **ningún otro
+  fichero cite**. Ahí no queda contradicción interna que leer y hace falta un registro **externo** —una
+  captura versionada del IOC, o CI con red—, que es la misma decisión que T-21 dejó abierta.
+- **El plan salió equivocado en dos cosas y las corrigió el trabajo.** Traía **dos** gates: el segundo
+  —«la distancia se recomputa»— **ya existía desde T-13**, con un docstring que decía lo mismo, y se
+  retiró al descubrirlo (dos superficies del mismo invariante se desincronizan). Y afirmaba que el
+  fraude exacto seguiría pasando: la reconstrucción demostró lo contrario. **Un plan es una hipótesis;
+  si al medir sale otra cosa, se reescribe el plan, no el resultado.**
+
+
 ## 2026-09-01 — T-28 · La letra pequeña y el contraste, con un gate que no puede mentir en silencio
 
 - **La letra más pequeña dejaba de serlo justo donde peor se lee.** `--m-text-eyebrow` valía **11 px**

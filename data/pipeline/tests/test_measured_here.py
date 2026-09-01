@@ -224,3 +224,88 @@ def test_the_measured_threshold_is_the_same_one_the_grade_uses() -> None:
     assert grading.estimate(
         gauge_id="g", gauge_distance_km=a_threshold + 0.001, observation_source="IOC x"
     ).estimated is True
+
+
+# =====================================================================================
+# 4 · El cuarto sitio por el que vuelve el atajo (hallazgo A-20)
+# =====================================================================================
+#
+# La cabecera de este fichero dice que ataca «por los tres sitios por los que el atajo puede volver».
+# El pase adversario de T-13 encontró el cuarto: **las coordenadas del mareógrafo las declara el
+# propio fichero**. Reconstruido el fraude de T-05 en su versión de hoy —Cabo de Palos publicando el
+# RMSE real de Cartagena bajo el código `carg1`, con `observation_lat/lon` reescritas a 0,709 km de su
+# dársena y la distancia recomputada para que cuadre—, el invariante de arriba lo acepta: todos los
+# campos son coherentes **entre sí**.
+#
+# Lo que lo convierte en hallazgo y no en queja: **el desmentido ya está en el artefacto publicado y
+# nadie lo mira**. Cartagena publica ese mismo `carg1` en 37,570 N −0,980 E, a 26,6 km. El dataset se
+# contradice a sí mismo.
+#
+# Lo de abajo lo cierra, y se comprobó reconstruyendo el fraude entero: Cabo de Palos con el RMSE de
+# Cartagena, su código, coordenadas a 0,712 km de la dársena, distancia recomputada y `estimated`,
+# `grade` y sus motivos intactos para que los otros invariantes lo re-deriven bien. Así construido
+# **pasa los 624 controles anteriores** y sólo lo ve éste, que nombra los dos ficheros y los 26,2 km.
+#
+# Y esa es la razón de que funcione: **inyectar el error de otro puerto obliga a citar su mareógrafo,
+# y ese puerto también lo publica**. El fraude se crea a sí mismo el segundo citador.
+#
+# Lo que **no** cubre, dicho aquí: un RMSE atribuido a un mareógrafo que **ningún otro fichero cita**.
+# Ahí no hay contradicción interna que leer y haría falta un registro externo —una captura versionada
+# del IOC, o CI con red—, que es la decisión de arquitectura que T-21 dejó abierta.
+#
+# La comprobación hermana —que la distancia declarada se recompute— **ya existe desde T-13**
+# (`test_the_observation_distance_is_recomputed_not_believed`). Se escribió aquí por duplicado y se
+# retiró al descubrirlo: dos superficies del mismo invariante se desincronizan.
+
+
+def _mareografos_publicados() -> dict[str, list[tuple[str, float, float]]]:
+    """Cada código de mareógrafo → los ficheros que lo citan, con las coordenadas que le atribuyen."""
+    porCodigo: dict[str, list[tuple[str, float, float]]] = {}
+    for path in station_files():
+        metrics = json.loads(path.read_text(encoding="utf-8"))["quality"]["metrics"]
+        codigo = metrics.get("observation_code")
+        lat, lon = metrics.get("observation_lat"), metrics.get("observation_lon")
+        if codigo is None or lat is None or lon is None:
+            continue
+        porCodigo.setdefault(codigo, []).append((path.name, lat, lon))
+    return porCodigo
+
+
+def test_a_gauge_is_in_the_same_place_in_every_file_that_cites_it() -> None:
+    """Dos ficheros que citan el mismo mareógrafo tienen que ponerlo en el mismo sitio.
+
+    Es la comprobación que A-20 echaba de menos, y la única de las dos que puede cazar su fraude:
+    reescribir las coordenadas de `carg1` en un fichero deja de cuadrar **con el otro fichero que
+    publica ese mismo código**.
+
+    **Alcance, dicho aquí porque el gate no lo puede inventar**: hoy el dataset publica **32 códigos
+    de mareógrafo** y sólo **3** los cita más de un fichero. Un código con un solo citador **no tiene
+    quien lo desmienta**, así que esta comprobación no le llega. El mensaje del fallo lo repite: un
+    gate que callara su alcance haría creer que cubre 32 cuando cubre 3.
+    """
+    porCodigo = _mareografos_publicados()
+    compartidos = {c: fs for c, fs in porCodigo.items() if len(fs) > 1}
+    # La premisa va en la aserción: el día que ningún código se comparta, esto dejaría de medir en
+    # silencio y hay que verlo.
+    assert compartidos, (
+        f"ningún código de mareógrafo lo citan dos ficheros ({len(porCodigo)} códigos en total): "
+        "esta comprobación ha dejado de medir nada y hace falta otra forma de contrastar la "
+        "procedencia"
+    )
+    discrepantes: list[str] = []
+    for codigo, ficheros in compartidos.items():
+        primero, lat0, lon0 = ficheros[0]
+        for nombre, lat, lon in ficheros[1:]:
+            distancia = haversine_km(lat0, lon0, lat, lon)
+            if distancia > 0.001:
+                discrepantes.append(
+                    f"«{codigo}»: {primero} lo pone en {lat0}, {lon0} y {nombre} en {lat}, {lon} "
+                    f"— {distancia:.3f} km de diferencia"
+                )
+    assert not discrepantes, (
+        "el mismo mareógrafo está en dos sitios distintos según qué fichero se lea, así que al menos "
+        "uno atribuye su RMSE a una observación que no es la que dice: "
+        + "; ".join(discrepantes)
+        + f". ALCANCE: esto compara los {len(compartidos)} códigos que cita más de un fichero, de "
+        f"{len(porCodigo)} publicados; a los demás no les desmiente nadie."
+    )

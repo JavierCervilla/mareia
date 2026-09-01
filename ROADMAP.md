@@ -249,6 +249,16 @@
       se esperaba que fallara» en los nueve— y conservan su assert canario. Medido con el comando de
       CI: `pnpm test` **667 en verde**, `pnpm test:e2e` **70** midiendo de verdad,
       `pytest` **1.919**, catálogo de **111.516 B** (11.514 comprimidos) con cero scripts
+- [x] T-29 · **La procedencia del RMSE deja de ser palabra del propio fichero (hallazgo A-20).** El
+      invariante recomputaba la distancia al mareógrafo desde coordenadas que escribe **el mismo
+      productor del RMSE**: reconstruido el fraude entero —Cabo de Palos con el RMSE real de Cartagena
+      bajo `carg1`, a 0,712 km, distancia recomputada y todo lo demás re-derivable— **pasaba los 624
+      controles**. Se cierra con un invariante que mira **el dataset entero**: el mismo mareógrafo en
+      el mismo sitio en todos los ficheros que lo citan (rojo con los **26,2 km** de discrepancia;
+      verde hoy con **0,0000 km**). Funciona porque **inyectar el error de otro puerto obliga a citar
+      su mareógrafo**, y el fraude se crea a sí mismo el segundo citador. Queda abierto, con su
+      nombre, el RMSE atribuido a un mareógrafo que **nadie más cite**: exige un registro externo, que
+      es la decisión que T-21 dejó pendiente.
 - [x] T-28 · **La letra pequeña y el contraste, con un gate que no puede mentir en silencio.**
       `--m-text-eyebrow` valía 11 px en móvil: medido, los **únicos 50 elementos** de todo el sitio por
       debajo de 12 px eran ese token. Sube a 12 en todas partes. La hipótesis se corrigió al medirla
