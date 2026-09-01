@@ -2,6 +2,38 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-09-01 — T-28 · La letra pequeña y el contraste, con un gate que no puede mentir en silencio
+
+- **La letra más pequeña dejaba de serlo justo donde peor se lee.** `--m-text-eyebrow` valía **11 px**
+  en móvil y 12 en escritorio. Medido sobre el `dist/`: los **únicos** elementos por debajo de 12 px
+  en todo el sitio eran **50** —12 en la portada, 5 en el catálogo, 33 en una página de puerto— y eran
+  **todos** ese token. Sube a 12 px en todas partes y se retira su salto de escritorio, que ya no
+  hacía nada.
+- **Y la hipótesis se corrigió al medirla.** En móvil baja **todo** el escalón (12→13, 15→16, 46→64),
+  no sólo el rótulo. Pero bajo el umbral de la auditoría —12 px— el resto **no incumple**: está *en*
+  el umbral. Reescribir un sistema tipográfico entero apoyándose en un criterio que no se incumple
+  sería cambiarle el diseño a alguien por gusto propio, así que **no se tocó**.
+- **Nace G4 · contraste AA**, en verde con holgura (mínimo medido **5,42:1** contra un umbral de 4,5)
+  sobre 3 páginas × 2 anchos, **con las 487, 943 y 512 muestras cuadrando con sus elementos**.
+- **Lo que distingue a este gate no es el umbral: son sus dos canarios, y están porque sus dos formas
+  de mentir se reprodujeron a mano.** (1) *No ver nada*: parsear `rgb(...)` del `color` computado —que
+  este Chromium serializa como `oklch(...)`— no casa **ni una vez**, da `0 muestras de 487` y un
+  informe que dice «ningún problema». (2) *Verlo todo*: resolver el color con canvas **sin limpiar el
+  lienzo** hace que un fondo transparente devuelva el último color pintado —el del texto— y los 951
+  elementos den **1,00**. Así que el gate exige que **las muestras igualen a los elementos**
+  (cobertura) y que **un par que sabemos malo salga malo** (sensibilidad). Un umbral sin las dos es
+  exactamente el gate que ya mintió dos veces aquí.
+- **Y el pase adversario encontró que el gate miraba la mitad del sitio.** El portal publica **dos
+  paletas** —clara y oscura, con tokens distintos— y G4 nació midiendo sólo la clara: bajando la tinta
+  del bloque oscuro hasta casi su fondo, **pasaba 6 de 6**. La paleta oscura está bien hoy (mínimo
+  **5,68:1**), así que no había avería: había un **agujero en el gate**, que es peor, porque uno
+  incompleto tranquiliza igual que uno completo. Ahora mide los dos temas: 3 páginas × 2 anchos × 2
+  esquemas = **12 casos**. Informe en `docs/qa/informe-adversario-t28.md`.
+- **Probado en rojo por los tres lados**: rebajando de verdad `--m-sub` (denuncia con el ratio y el
+  tamaño de cada elemento: «1,26:1 a 12px»), rompiendo el resolvedor por el lado que no ve, y
+  rompiéndolo por el lado que lo ve todo.
+
+
 ## 2026-09-01 — T-27 · El catálogo de especies apilado en fichas, con un solo marcado
 
 - **Cada especie se lee entera en vez de en tres canales de 14 caracteres.** Tras T-26 el catálogo era

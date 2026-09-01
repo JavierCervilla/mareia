@@ -250,3 +250,117 @@ test("G6 · apilado en fichas, ninguna especie publica menos texto que en escrit
     .map(([clave]) => clave);
   expect(perdidas, "estas especies publican distinto texto apiladas que en escritorio").toEqual([]);
 });
+
+/**
+ * **G4 · ningún texto se publica por debajo del contraste que la WCAG pide para leerlo** (4,5:1
+ * normal, 3:1 grande).
+ *
+ * Nace en verde con holgura —mínimo medido **5,42:1**— y avisará si alguien retoca la paleta. Pero lo
+ * que hace a este gate distinto de los otros no es el umbral: son **los dos canarios**, y están
+ * porque **las dos maneras de mentir de este gate se reprodujeron a mano** antes de escribirlo.
+ *
+ * **1 · No ver nada.** El primer intento parseaba `rgb(...)` del `color` computado. Este Chromium lo
+ * serializa como `oklch(...)`, así que el patrón no casó **ni una vez**: `0 muestras de 487
+ * elementos`, y el informe habría dicho «ningún problema de contraste». La auditoría de la que sale
+ * esta trayectoria tropezó igual, con el mismo número.
+ *
+ * **2 · Verlo todo.** El segundo intento resolvió el color con el motor del navegador (canvas) pero
+ * **sin limpiar el lienzo entre resoluciones**: un fondo transparente devolvía el **último color
+ * pintado** —el del propio texto—, y los 951 elementos daban ratio **1,00**. Un gate que denuncia
+ * todo es tan inútil como uno que no denuncia nada, y además entrena a ignorarlo.
+ *
+ * De ahí los dos:
+ *
+ * * **Cobertura**: las muestras tienen que ser **exactamente** tantas como los elementos con texto.
+ *   Si son menos —o cero—, el color no se está resolviendo y el verde no significa nada.
+ * * **Sensibilidad**: un par que sabemos que falla (dos `oklch()` casi iguales) **tiene que salir**
+ *   por debajo del umbral. Si no sale, el instrumento no mide.
+ *
+ * Un umbral sin las dos es exactamente el gate que ya mintió dos veces aquí.
+ */
+const MEDIR_CONTRASTE = `(() => {
+  const cvs = document.createElement("canvas"); cvs.width = cvs.height = 1;
+  const cx = cvs.getContext("2d", { willReadFrequently: true });
+  // El \`clearRect\` es el arreglo de la segunda mentira: sin él, un color transparente devuelve el
+  // último que se pintó, y todo el sitio da 1,00.
+  const resolver = (c) => { cx.clearRect(0,0,1,1); cx.fillStyle = c; cx.fillRect(0,0,1,1);
+    const d = cx.getImageData(0,0,1,1).data; return { r:d[0], g:d[1], b:d[2], a:d[3]/255 }; };
+  const lum = (c) => { const f = (v) => { v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); };
+    return 0.2126*f(c.r) + 0.7152*f(c.g) + 0.0722*f(c.b); };
+  const mez = (fg,bg) => ({ r:fg.r*fg.a+bg.r*(1-fg.a), g:fg.g*fg.a+bg.g*(1-fg.a), b:fg.b*fg.a+bg.b*(1-fg.a), a:1 });
+  const fondo = (el) => { let n = el, acc = null;
+    while (n && n.nodeType === 1) { const q = resolver(getComputedStyle(n).backgroundColor);
+      if (q.a > 0) { acc = acc ? mez(acc,q) : q; if (acc.a >= 1) return acc; } n = n.parentElement; }
+    return acc && acc.a >= 1 ? acc : { r:255, g:255, b:255, a:1 }; };
+  const ratioDe = (fg,bg) => { const l1 = lum(fg), l2 = lum(bg);
+    return (Math.max(l1,l2)+0.05) / (Math.min(l1,l2)+0.05); };
+  const conTexto = [...document.body.querySelectorAll("*")].filter((el) => {
+    const cs = getComputedStyle(el);
+    if (cs.display === "none" || cs.visibility === "hidden") return false;
+    const r = el.getBoundingClientRect(); if (r.width <= 0 || r.height <= 0) return false;
+    return [...el.childNodes].some((n) => n.nodeType === 3 && n.nodeValue.trim().length > 2); });
+  const bajos = []; let muestras = 0;
+  for (const el of conTexto) {
+    const cs = getComputedStyle(el); const fg0 = resolver(cs.color);
+    if (fg0.a === 0) continue;
+    muestras += 1;
+    const bg = fondo(el); const fg = fg0.a < 1 ? mez(fg0,bg) : fg0;
+    const ratio = ratioDe(fg,bg);
+    const px = parseFloat(cs.fontSize);
+    const grande = px >= 24 || (px >= 18.66 && parseInt(cs.fontWeight,10) >= 700);
+    if (ratio < (grande ? 3 : 4.5)) {
+      bajos.push(el.tagName.toLowerCase() + "." + (el.className || "(sin clase)") +
+        " → " + ratio.toFixed(2) + ":1 a " + px + "px");
+    }
+  }
+  return { elementos: conTexto.length, muestras, bajos: bajos.slice(0,10),
+           canario: ratioDe(resolver("oklch(80% 0.02 90)"), resolver("oklch(85% 0.02 90)")) };
+})()`;
+
+/**
+ * **Los dos temas, y el segundo lo añadió el pase adversario.**
+ *
+ * Este sitio publica una paleta clara y otra oscura (`prefers-color-scheme`), con **tokens distintos**
+ * para cada una. G4 nació midiendo sólo la clara, y eso lo dejaba ciego a la mitad de lo que se
+ * publica: reproducido bajando la tinta del bloque oscuro hasta casi el color de su fondo, **el gate
+ * pasaba 6 de 6**. La paleta oscura está bien hoy —mínimo **5,68:1**—, así que el hallazgo no era una
+ * avería del sitio sino **un agujero del gate**, que es peor: mide algo que nadie mira mientras deja
+ * sin mirar algo que sí se publica.
+ */
+const ESQUEMAS = ["light", "dark"] as const;
+
+for (const ruta of PAGINAS) {
+  for (const ancho of [360, 1280] as const) {
+    for (const esquema of ESQUEMAS) {
+    test(`G4 · ${ruta} a ${ancho}px (${esquema}) no publica texto por debajo del contraste AA`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: esquema });
+      await page.setViewportSize({ width: ancho, height: 900 });
+      await page.goto(ruta, { waitUntil: "networkidle" });
+      await page.evaluate("document.fonts.ready");
+      const medida = await page.evaluate<{
+        elementos: number;
+        muestras: number;
+        bajos: string[];
+        canario: number;
+      }>(MEDIR_CONTRASTE);
+
+      // CANARIO 1 · cobertura. Si el color no se resuelve, esto cae a 0 y el verde de abajo sería
+      // el verde de no haber mirado.
+      expect(medida.elementos, "no hay texto que medir: el gate estaría en verde por vacío").toBeGreaterThan(50);
+      expect(
+        medida.muestras,
+        `sólo se resolvió el color de ${medida.muestras} de ${medida.elementos} elementos: el ` +
+          `resolvedor no entiende lo que el navegador devuelve, y un verde así no significa nada`,
+      ).toBe(medida.elementos);
+
+      // CANARIO 2 · sensibilidad. Un par que sabemos malo tiene que salir malo.
+      expect(
+        medida.canario,
+        "el instrumento no denuncia un par de colores que sabemos que falla: no está midiendo",
+      ).toBeLessThan(4.5);
+
+      expect(medida.bajos).toEqual([]);
+    });
+    }
+  }
+}

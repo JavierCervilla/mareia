@@ -249,6 +249,15 @@
       se esperaba que fallara» en los nueve— y conservan su assert canario. Medido con el comando de
       CI: `pnpm test` **667 en verde**, `pnpm test:e2e` **70** midiendo de verdad,
       `pytest` **1.919**, catálogo de **111.516 B** (11.514 comprimidos) con cero scripts
+- [x] T-28 · **La letra pequeña y el contraste, con un gate que no puede mentir en silencio.**
+      `--m-text-eyebrow` valía 11 px en móvil: medido, los **únicos 50 elementos** de todo el sitio por
+      debajo de 12 px eran ese token. Sube a 12 en todas partes. La hipótesis se corrigió al medirla
+      —en móvil baja **todo** el escalón, pero el resto está *en* el umbral y no se toca—. Nace **G4**
+      (contraste AA, mínimo **5,42:1**, 3 páginas × 2 anchos) **con dos canarios**, porque sus dos
+      formas de mentir se reprodujeron a mano: parsear `rgb()` sobre `oklch()` da **0 muestras de 487**
+      y un «ningún problema»; resolver con canvas sin limpiar el lienzo da **1,00 en los 951**. Exige
+      que las muestras igualen a los elementos y que un par malo salga malo. Fuera: **G5**, que hoy
+      nacería en rojo.
 - [x] T-27 · **El catálogo de especies apilado en fichas en un móvil, con un solo marcado.** Cada
       especie se lee entera en vez de en tres canales de 14 caracteres: **46,7 → 40 pantallas** a
       360 px, fila media **394 → 332 px** y la peor fila **955 → 549** (−42 %), que es la que decide
