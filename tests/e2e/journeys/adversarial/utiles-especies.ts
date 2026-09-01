@@ -159,15 +159,19 @@ export function textoDe(fragmento: string): string {
 
 /** La fila de una especie dentro del catálogo construido, ya sin marcado. */
 export function filaDe(html: string, clave: string): string {
-  const patron = new RegExp(`<tr data-especie="${clave}"[^>]*>([\\s\\S]*?)</tr>`, "u");
+  // `[^>]*` **antes** del atributo: T-27 añadió `role="row"` delante de `data-especie` —los roles
+  // explícitos son lo que impide que apilar la tabla en fichas le quite la semántica a un lector de
+  // pantalla— y este patrón, atado al ORDEN de los atributos, dejó de casar. Denunciaba el marcado,
+  // no el dato: los recorridos decían «la fila no publica su taxón» con las filas enteras.
+  const patron = new RegExp(`<tr[^>]*data-especie="${clave}"[^>]*>([\\s\\S]*?)</tr>`, "u");
   return textoDe(patron.exec(html)?.[1] ?? "");
 }
 
 /** La celda del taxón (la segunda columna) de una fila, ya sin marcado. */
 export function celdaDelTaxon(html: string, clave: string): string {
-  const patron = new RegExp(`<tr data-especie="${clave}"[^>]*>([\\s\\S]*?)</tr>`, "u");
+  const patron = new RegExp(`<tr[^>]*data-especie="${clave}"[^>]*>([\\s\\S]*?)</tr>`, "u");
   const fila = patron.exec(html)?.[1] ?? "";
-  return textoDe(/<td>([\s\S]*?)<\/td>/u.exec(fila)?.[1] ?? "");
+  return textoDe(/<td[^>]*>([\s\S]*?)<\/td>/u.exec(fila)?.[1] ?? "");
 }
 
 /**

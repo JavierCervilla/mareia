@@ -307,3 +307,84 @@
   outline: 2px solid var(--m-navy);
   outline-offset: 2px;
 }
+
+/* =================================================================================================
+   El catálogo apilado en fichas por debajo de 700 px (T-27)
+   =================================================================================================
+
+   Medido antes de tocar: a 360 px la página son **37.373 px (46,7 pantallas)**, la fila media ocupa
+   **394 px** y las tres columnas miden **107, 116 y 104 px** — unos 14 caracteres cada una. T-26 ya
+   quitó las 376 palabras partidas, así que el texto es legible; lo que queda es que se lee en **tres
+   canales paralelos de 14 caracteres**, que es una lista vertical de palabras sueltas.
+
+   Apilado, cada especie usa el ancho entero y su texto vuelve a tener medida de lectura.
+
+   **Un solo DOM, y esto es la decisión entera.** No hay una `<table>` para escritorio y una lista
+   para móvil: hay un marcado y dos presentaciones. Los gates de este portal leen el `dist/` —E1 el
+   nombre literal de la norma en las 86 filas, E5 las 117 tallas campo a campo, E6 los taxones
+   re-derivados—, y con dos marcados o miden uno y dejan el otro sin vigilar, o hay que duplicarlos y
+   entonces se desincronizan. Ya pasó en T-20.
+
+   **Los roles van en el marcado, no aquí.** `display: block` sobre `table`/`tr`/`td` hace que el
+   navegador **retire los roles implícitos**: sin `role="table"`/`row`/`cell` explícitos, quien usa un
+   lector de pantalla se queda sin filas ni celdas. Están puestos en el `.astro` y son inocuos en
+   escritorio, donde coinciden con la semántica nativa.
+
+   **La cabecera se oculta a la vista pero NO se quita del DOM.** Apilada no es la cabecera de nada:
+   deja de estar encima de su columna. Se puede ocultar porque las celdas **se describen solas** —la
+   del taxón dice «WoRMS acepta el nombre de la norma», la de tallas dice «el BOE imprime “25”»—, así
+   que ningún dato queda huérfano de su rótulo. Eso es lo único que autoriza a esconderla, y por eso
+   el gate G6 excluye la fila de cabecera **nombrándola**, en vez de comparar sólo lo que le conviene. */
+@media (width < 700px) {
+  .tabla-especies,
+  .tabla-especies tbody,
+  .tabla-especies tbody tr,
+  .tabla-especies tbody th,
+  .tabla-especies tbody td {
+    display: block;
+  }
+
+  /* Fuera de la vista, dentro del documento: mismas propiedades que `.solo-lectores`. */
+  .tabla-especies thead {
+    clip-path: inset(50%);
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    white-space: nowrap;
+  }
+
+  /* La ficha. El filete de arriba la separa de la anterior; el de la tabla ya no sirve porque las
+     celdas dejan de estar en línea. */
+  .tabla-especies tbody tr {
+    border-top: 1px solid var(--m-rule);
+    padding-block: 14px;
+  }
+
+  /* El nombre de la norma es el titular de la ficha, no una celda más: es el dato con consecuencia
+     legal y el que se busca. Sube de tamaño y suelta el relleno lateral que tenía de celda. */
+  .tabla-especies tbody th {
+    padding: 0;
+    font-size: var(--m-text-lead);
+  }
+
+  .tabla-especies tbody td {
+    padding: 8px 0 0;
+    border-top: 0;
+  }
+
+  /* Los dos campos de debajo quedan sangrados contra un filete suave: se leen como lo que son,
+     acompañamiento del nombre, y no como tres bloques del mismo peso. */
+  .tabla-especies tbody td {
+    border-inline-start: 1px solid var(--m-rule-soft);
+    padding-inline-start: 10px;
+    margin-block-start: 8px;
+  }
+
+  /* Y el marco deja de necesitar desplazamiento: apilado no hay nada que no quepa. */
+  .tabla-especies__marco {
+    overflow-x: visible;
+  }
+}

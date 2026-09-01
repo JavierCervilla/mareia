@@ -66,7 +66,12 @@ function textoDe(fragmento: string): string {
 
 /** La fila de una especie dentro del catálogo, con su marcado. */
 function filaDe(html: string, clave: string): string | undefined {
-  const patron = new RegExp(`<tr data-especie="${clave}"[^>]*>([\\s\\S]*?)</tr>`, "u");
+  // `[^>]*` **antes** del atributo, no sólo después: T-27 añadió `role="row"` delante de
+  // `data-especie` para que el apilado en fichas no le quite la semántica de tabla a un lector de
+  // pantalla, y este patrón —que exigía que `data-especie` fuese el primer atributo— dejó de casar.
+  // Los 86 gates E1/E7 se pusieron rojos diciendo «la fila no se publica» cuando las filas estaban
+  // enteras: un gate atado al ORDEN de los atributos denuncia el marcado, no el dato.
+  const patron = new RegExp(`<tr[^>]*data-especie="${clave}"[^>]*>([\\s\\S]*?)</tr>`, "u");
   return patron.exec(html)?.[1];
 }
 
@@ -153,7 +158,7 @@ test("E1 · el nombre de la norma está LITERAL en las 86 filas del catálogo", 
     "filas que no publican el nombre con el que la norma nombra a la especie, que es el que tiene " +
       "consecuencia legal",
   );
-  const filas = html.match(/<tr data-especie="/gu) ?? [];
+  const filas = html.match(/<tr[^>]*data-especie="/gu) ?? [];
   assert.equal(filas.length, catalogo.especies.length, "el catálogo publica otras tantas filas");
   t.diagnostic(`${catalogo.especies.length} especies con su nombre del BOE literal`);
 });

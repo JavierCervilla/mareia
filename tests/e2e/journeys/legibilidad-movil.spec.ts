@@ -196,3 +196,57 @@ test("G1 sensibilidad · denuncia el corte entre letras y perdona el del guion",
   // quitara ninguna, la exención no existiría; si quitara las dos, se estaría comiendo el hallazgo.
   expect(sinExencion.length - conExencion.length).toBe(1);
 });
+
+/**
+ * **G6 · apilar no puede esconder nada.**
+ *
+ * T-27 apila el catálogo de especies en fichas por debajo de 700 px cambiando **sólo la
+ * presentación**: un único marcado, dos maneras de pintarlo. Eso es lo que deja intactos a los gates
+ * que leen el `dist/` —E1 el nombre literal de la norma en las 86 filas, E5 las 117 tallas campo a
+ * campo, E6 los taxones re-derivados—, porque el HTML publicado es el mismo a 360 px y a 1280.
+ *
+ * Y es exactamente por eso que hace falta este gate: **ninguno de ellos vería un `display: none`**.
+ * Todos leen el HTML; ninguno mira lo que se pinta. Un `display: none` puesto para que una ficha
+ * quepa —la clase de atajo que se toma cuando algo no encaja— dejaría el texto en el fichero, los
+ * 300 tests en verde, y el dato fuera de la pantalla del que lo necesita.
+ *
+ * Se compara **especie por especie** y no la página entera, para que el rojo diga cuál se perdió.
+ *
+ * **La cabecera queda excluida, y se nombra en vez de descontarse en silencio.** Apilada deja de ser
+ * la cabecera de nada: no está encima de su columna. Ocultarla es legítimo **porque las celdas se
+ * describen solas** —la del taxón dice «WoRMS acepta el nombre de la norma», la de tallas dice «el
+ * BOE imprime "25"»—, así que ningún dato queda huérfano de su rótulo. Si algún día dejaran de
+ * describirse, esta exclusión sería el agujero, y por eso está escrita aquí y no dentro de un
+ * selector.
+ */
+test("G6 · apilado en fichas, ninguna especie publica menos texto que en escritorio", async ({
+  page,
+}) => {
+  const TEXTO_POR_ESPECIE = `(() => {
+    const filas = [...document.querySelectorAll("table.tabla-especies tbody tr")];
+    return Object.fromEntries(filas.map((f) => [
+      f.getAttribute("data-especie"),
+      (f.innerText || "").replace(/\\s+/gu, " ").trim(),
+    ]));
+  })()`;
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/pesca/especies/", { waitUntil: "networkidle" });
+  await page.evaluate("document.fonts.ready");
+  const escritorio = await page.evaluate<Record<string, string>>(TEXTO_POR_ESPECIE);
+
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/pesca/especies/", { waitUntil: "networkidle" });
+  await page.evaluate("document.fonts.ready");
+  const movil = await page.evaluate<Record<string, string>>(TEXTO_POR_ESPECIE);
+
+  // La premisa va en la aserción: el día que el catálogo se quede sin filas, este gate dejaría de
+  // medir en silencio, y eso hay que verlo.
+  expect(Object.keys(escritorio).length).toBeGreaterThan(80);
+  expect(Object.keys(movil)).toEqual(Object.keys(escritorio));
+
+  const perdidas = Object.entries(escritorio)
+    .filter(([clave, texto]) => movil[clave] !== texto)
+    .map(([clave]) => clave);
+  expect(perdidas, "estas especies publican distinto texto apiladas que en escritorio").toEqual([]);
+});

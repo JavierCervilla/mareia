@@ -226,23 +226,23 @@ const migas = migasDeEspecies();
       tabindex="0"
       aria-label={tituloDelCatalogo(censo.especies)}
     >
-    <table class="tabla-especies">
+    <table class="tabla-especies" role="table">
       <caption class="solo-lectores">
         {tituloDelCatalogo(censo.especies)}, con el nombre de la norma, el taxón aceptado hoy y los
         caladeros que fijan su talla
       </caption>
-      <thead>
-        <tr>
-          <th scope="col">{COLUMNA_NOMBRE_BOE}</th>
-          <th scope="col">{COLUMNA_TAXON}</th>
-          <th scope="col">{COLUMNA_CALADEROS} · {COLUMNA_PRESENCIA}</th>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader">{COLUMNA_NOMBRE_BOE}</th>
+          <th scope="col" role="columnheader">{COLUMNA_TAXON}</th>
+          <th scope="col" role="columnheader">{COLUMNA_CALADEROS} · {COLUMNA_PRESENCIA}</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody role="rowgroup">
         {
           filas.map((fila) => (
-            <tr data-especie={fila.clave} data-caladeros={fila.idsDeCaladero.join(" ")}>
-              <th scope="row">
+            <tr role="row" data-especie={fila.clave} data-caladeros={fila.idsDeCaladero.join(" ")}>
+              <th scope="row" role="rowheader">
                 {/*
                   EL NOMBRE DEL BOE, literal y primero. No es una preferencia de composición: es el
                   que tiene consecuencia legal, y el gate E1 exige encontrarlo en todas las filas.
@@ -270,7 +270,7 @@ const migas = migasDeEspecies();
                   <span class="tabla-especies__hermana">{fila.tambienEn}</span>
                 )}
               </th>
-              <td>
+              <td role="cell">
                 {fila.taxon.tipo === "sin_resolver" ? (
                   <span class="tabla-especies__ausencia">{fila.taxon.motivo}</span>
                 ) : (
@@ -295,7 +295,7 @@ const migas = migasDeEspecies();
                   </>
                 )}
               </td>
-              <td>
+              <td role="cell">
                 <ul class="tabla-especies__caladeros" role="list">
                   {fila.caladeros.map((caladero) => (
                     <li>
