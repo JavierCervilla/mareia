@@ -77,6 +77,24 @@ svg {
   letter-spacing: var(--m-track-eyebrow);
 }
 
+/* Un enlace que ocupa ÉL SOLO su párrafo no es texto corrido: es una llamada, y se toca. Va a los
+   44 px (T-30).
+
+   La regla es estructural **a propósito**, y la primera versión no lo era: nombraba una clase
+   (`.portada__enlace`) que se le puso a la portada… mientras `404.astro` publicaba **la misma línea
+   sin ella**. Lo cazó el pase adversario, no yo. Un enlace que es el único elemento de su párrafo
+   **no tiene texto alrededor del que formar parte** —que es literalmente la excepción «inline» de
+   WCAG 2.5.8 que el gate aplica—, así que la condición del CSS y la del gate son la misma condición
+   dicha dos veces, y no dos listas de sitios que hay que acordarse de mantener iguales.
+
+   `:only-child` sólo cuenta elementos, no nodos de texto, igual que el gate sólo cuenta texto que no
+   está en blanco: un párrafo con «Ver todas las regiones» y nada más casa aquí y no se exime allí. */
+.pagina p > a:only-child {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--m-tap-comodo);
+}
+
 /* Un rótulo que además es enlace es cromía navegable, no texto: encabeza una región entera de la
    portada y es lo que se toca para entrar en ella. La regla va sobre `.etiqueta > a` y no sobre
    `.etiqueta`, porque la inmensa mayoría de los rótulos del sitio NO son enlace y crecerlos sería

@@ -408,6 +408,28 @@ for (const ruta of PAGINAS) {
 /** WCAG 2.5.8 (AA). El mismo número que `--m-tap-min`, escrito aquí y no leído del token. */
 const LADO_MINIMO = 24;
 
+/**
+ * **El universo de G5, que el pase adversario tuvo que ensanchar dos veces.**
+ *
+ * G1/G2/G4 miran tres páginas —la tabla que se rompió, un puerto y la portada—, y G5 nació copiando
+ * esa lista. Preguntarle *«¿sobre qué universo mide?»* (la lección de T-28) destapó **dos familias
+ * enteras que el gate no visitaba y que sí publicaban objetivos de 14 px**:
+ *
+ * 1. **La ficha individual de especie** (`/pesca/especies/<clave>/`, **87 páginas**): cuatro enlaces
+ *    a 14 px —WoRMS, la licencia de la foto, «ver la ficha de», «volver al catálogo»—.
+ * 2. **La página 404**, que publica la misma llamada que la portada… **sin la clase** con la que se
+ *    había arreglado la portada. El arreglo estaba atado al nombre de una instancia y la segunda
+ *    página que publicaba lo mismo no lo heredaba. Por eso la regla del CSS pasó a ser estructural.
+ *
+ * Ninguna de las dos tenía síntoma: G5 estaba verde en las tres páginas que miraba. **Se quedan aquí
+ * como trinquete**, que es el punto de que el recorrido que encontró el fallo no se retire con él.
+ */
+const PAGINAS_TACTIL = [
+  ...PAGINAS,
+  "/pesca/especies/alosa-spp-8c0b29/",
+  "/404.html",
+] as const;
+
 const MEDIR_OBJETIVOS = `(() => {
   const SELECTOR = 'a, button, input, select, textarea, summary, [role="button"]';
   const visibles = [...document.querySelectorAll(SELECTOR)].filter((el) => {
@@ -467,7 +489,7 @@ const MEDIR_OBJETIVOS = `(() => {
   };
 })()`;
 
-for (const ruta of PAGINAS) {
+for (const ruta of PAGINAS_TACTIL) {
   for (const ancho of ANCHOS) {
     test(`G5 · ${ruta} a ${ancho}px no publica objetivos táctiles por debajo de ${LADO_MINIMO}px`, async ({
       page,

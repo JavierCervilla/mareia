@@ -258,6 +258,10 @@
       (24); la cromía navegable sube a 44 de alto porque ahí es barato, y los 171 enlaces de la tabla
       de especies se quedan en 24 porque a 44 serían ~25 % más de página — deshaciendo el 42 % de
       T-27. Coste medido: **+1,6 %** en el catálogo, **+3,9 %** en la portada, **+0,3 %** en un puerto.
+      **El pase adversario lo ensanchó dos veces**: la ficha individual de especie (87 páginas, 4
+      enlaces a 14 px) y el **404**, que publicaba la llamada de la portada sin la clase con la que se
+      arregló la portada — por eso la regla pasó a ser estructural (`p > a:only-child`) en vez de
+      nombrar una instancia. G5 va de **9 a 15 casos**, 5 familias × 3 anchos.
 - [x] T-29 · **La procedencia del RMSE deja de ser palabra del propio fichero (hallazgo A-20).** El
       invariante recomputaba la distancia al mareógrafo desde coordenadas que escribe **el mismo
       productor del RMSE**: reconstruido el fraude entero —Cabo de Palos con el RMSE real de Cartagena

@@ -181,14 +181,6 @@
   display: none;
 }
 
-/* La llamada suelta bajo la entradilla: un enlace que ocupa su propio párrafo es cromía navegable,
-   no texto corrido, así que va a los 44 px (T-30). Medía 131 x 16. */
-.portada__enlace a {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--m-tap-comodo);
-}
-
 /* Agrupación por provincia dentro de la página de una región. */
 .grupo {
   display: flex;

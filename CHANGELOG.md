@@ -23,6 +23,17 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
   de la tabla de especies** se quedan en 24: a 44 serían **+60 px por ficha**, ~25 % más de página,
   deshaciendo el 42 % que ganó T-27. Coste real medido a 360 px: **+508 px (+1,6 %)** en el catálogo,
   **+355 px (+3,9 %)** en la portada, **+40 px (+0,3 %)** en una página de puerto.
+- **El pase adversario ensanchó G5 dos veces, y las dos veces tenía razón.** Preguntándole *«¿sobre
+  qué universo mide?»* aparecieron **dos familias enteras** que el gate no visitaba y que sí publicaban
+  objetivos de 14 px: la **ficha individual de especie** (87 páginas, 4 enlaces a 14 px — la superficie
+  que estrenó T-23, que no heredó los gates de las viejas) y la **página 404**, que publica la misma
+  llamada que la portada **sin la clase con la que se arregló la portada**. Los dos reproducidos en
+  rojo por el propio G5 (**4 de 7** y **1 de 167**) y arreglados; G5 pasa de **9 a 15 casos**.
+- **El arreglo de la llamada suelta dejó de nombrar una instancia.** Era `.portada__enlace a`, una
+  clase puesta a mano en `index.astro`; ahora es **estructural**: `.pagina p > a:only-child`. Un enlace
+  que es el único elemento de su párrafo no tiene texto alrededor del que formar parte —que es la
+  excepción «inline» de 2.5.8 que el gate aplica—, así que **la condición del CSS y la del gate son la
+  misma condición dicha dos veces**, y no dos listas que hay que acordarse de mantener iguales.
 - **Dos exenciones, escritas en el gate y no leídas del CSS**: los enlaces que van dentro de un texto
   corrido (excepción explícita de 2.5.8) y los objetivos ocultos a la vista (patrón *screen-reader
   only*). El gate **los nombra en su mensaje** en vez de descontarlos en silencio.

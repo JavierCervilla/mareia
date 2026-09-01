@@ -94,6 +94,17 @@
   color: var(--m-sub);
 }
 
+/* Los enlaces de la ficha —«ver la ficha de», WoRMS, la licencia de la foto, «volver al catálogo»—
+   medían 14 px de alto en las 87 páginas de ficha, y **G5 no las miraba**: las destapó el pase
+   adversario preguntándole al gate sobre qué universo medía. Van a `--m-tap-min` como los de la
+   tabla; algunos viven en un `span` y no en un `p`, así que la regla estructural del layout no les
+   llega. */
+.ficha__enlace a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--m-tap-min);
+}
+
 .ficha__enlace {
   font-size: var(--m-text-meta);
 }
