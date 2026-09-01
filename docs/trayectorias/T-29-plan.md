@@ -28,30 +28,38 @@ falsificado lo sitúa. El dataset se contradice a sí mismo y ningún gate lee e
 | discrepancia máxima entre dos ficheros que citan el mismo código | **0,0000 km** |
 | diferencia máxima entre la distancia **declarada** y la **recomputada** | **0,0005 km** (35/35) |
 
-## Entregables
+## Entregables — corregido al medir
 
-1. **Gate · el mismo mareógrafo está en el mismo sitio en todos los ficheros que lo citan.** Nace
-   verde. **Cubre 3 de los 32 códigos**, y el mensaje del gate lo dice con esas cifras: un código que
-   sólo cita un fichero no tiene quien lo desmienta, y un gate que no dijera su alcance haría creer lo
-   contrario. Es la misma honradez que el mensaje de P6 en T-21 («NO cubre las otras 334 de 348»).
-2. **Gate · la distancia declarada se recomputa desde las dos coordenadas publicadas.** Nace verde,
-   **35 de 35**, tolerancia 1 m. Cierra la versión perezosa del fraude —reescribir las coordenadas y
-   dejar la distancia vieja—, que hoy no la caza nadie.
+El plan salió con **dos** gates y con la afirmación de que el fraude exacto de A-20 seguiría pasando.
+**Las dos cosas eran falsas**, y las corrigió el propio trabajo:
 
-## Lo que estos gates NO cierran, dicho aquí y no descubierto luego
+1. **El segundo gate ya existía.** «La distancia declarada se recomputa» es
+   `test_the_observation_distance_is_recomputed_not_believed`, escrito en T-13, con un docstring que
+   dice lo mismo que iba a decir el mío. Se escribió por duplicado y **se retiró al descubrirlo**: dos
+   superficies del mismo invariante se desincronizan, que es la lección de T-20.
+2. **El fraude exacto de A-20 sí queda cerrado.** Se reconstruyó entero —Cabo de Palos publicando el
+   RMSE real de Cartagena (0,0506 m) bajo `carg1`, coordenadas a **0,712 km** de su dársena, distancia
+   **recomputada**, y `estimated`/`grade`/motivos intactos para que los demás invariantes lo
+   re-derivasen bien— y así construido **pasa los 624 controles anteriores**. Sólo lo ve el gate nuevo,
+   que nombra los dos ficheros y los **26,2 km**.
 
-El fraude **exacto** de A-20 —un código citado por **un solo** fichero, con las coordenadas reescritas
-**y** la distancia recomputada— **sigue pasando**. Ninguna de las dos comprobaciones puede verlo,
-porque las dos son internas al artefacto y ahí no queda ninguna contradicción.
+   **Y se entiende por qué**: inyectar el error de otro puerto obliga a **citar su mareógrafo**, y ese
+   puerto también lo publica. **El fraude se crea a sí mismo el segundo citador**, así que la
+   estrechez que se temía —«sólo cubre 3 de 32 códigos»— no le aplica: el código deja de tener un solo
+   citador en el momento en que alguien lo copia.
 
-Cerrarlo exige **saber desde fuera dónde está cada mareógrafo**: una captura versionada del registro
-de estaciones del IOC contra la que re-derivar, o CI con red. Es **la misma decisión de arquitectura
-que T-21 dejó abierta** (H-2/H-4: recorte mayor versionado, CI con red, o dejar de commitear el
-derivado), y no se toma de pasada dentro de esta trayectoria.
+**Así que el entregable es uno**: el mismo mareógrafo tiene que estar en el mismo sitio en todos los
+ficheros que lo citan. Nace verde (0,0000 km de discrepancia entre los 3 códigos compartidos hoy) y
+lleva su alcance en el mensaje del fallo.
 
-**Así que A-20 no se cierra: se estrecha.** Y el ledger lo dirá con esas palabras — «de las tres
-formas de inyectar un RMSE ajeno, dos quedan cerradas y una queda abierta con su nombre» — porque un
-hallazgo marcado como cerrado sin estarlo es peor que uno abierto.
+## Lo que sigue abierto, con su nombre
+
+Un RMSE atribuido a un mareógrafo que **ningún otro fichero cita**. Ahí no queda contradicción interna
+que leer, y hace falta un registro **externo** de dónde está cada estación: una captura versionada del
+IOC contra la que re-derivar, o CI con red. Es la misma decisión de arquitectura que **T-21** dejó
+abierta (H-2/H-4) y no se toma de pasada.
+
+**A-20 se estrecha mucho, no se borra**, y el ledger lo dirá así.
 
 ## Definition of Done
 
