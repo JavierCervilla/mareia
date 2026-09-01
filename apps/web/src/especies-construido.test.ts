@@ -549,3 +549,62 @@ test("A-T26-2 · la cabecera de la tercera columna nombra el caladero y su fuent
     `la tercera cabecera no nombra a OBIS, que es de donde salen sus cifras: «${tercera.trim()}»`,
   );
 });
+
+// =================================================================================================
+// A-T27-1 · los roles explícitos son lo único que sostiene la tabla cuando se apila
+// =================================================================================================
+
+/**
+ * **La semántica de tabla no sobrevive al apilado por sí sola.**
+ *
+ * T-27 pinta cada fila como una ficha por debajo de 700 px con `display: block` sobre
+ * `table`/`tr`/`th`/`td`. Eso hace que el navegador **retire los roles implícitos**: sin declararlos,
+ * quien navega con lector de pantalla deja de tener filas y celdas, y deja de oír la cabecera de la
+ * columna junto al dato. Los roles explícitos son la cura estándar y son **inocuos en escritorio**,
+ * donde coinciden con la semántica nativa.
+ *
+ * Este gate existe porque **nada más los vigilaba**: reproducido en el pase adversario quitándolos
+ * todos con un `sed` — el sitio se construía, las 86 fichas seguían publicando su texto entero y
+ * **ninguno de los ~300 tests se enteraba**. Una regresión de accesibilidad no tiene síntoma visible:
+ * si no hay un gate, no hay nadie.
+ *
+ * Las cuentas **se derivan del catálogo** y no se escriben a mano: con un número mágico, añadir una
+ * especie pondría el gate en rojo sin que nada esté mal, y quien lo viera aprendería a subir el
+ * número — que es como muere un gate.
+ */
+test("A-T27-1 · la tabla del catálogo declara sus roles, que es lo que la sostiene apilada", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  const html = readFileSync(CATALOGO, "utf8");
+  const catalogo = await cargarCatalogoDeEspecies();
+  const especies = catalogo.especies.length;
+  const cuantos = (rol: string): number =>
+    (html.match(new RegExp(`role="${rol}"`, "gu")) ?? []).length;
+
+  assert.deepEqual(
+    {
+      table: cuantos("table"),
+      rowgroup: cuantos("rowgroup"),
+      row: cuantos("row"),
+      columnheader: cuantos("columnheader"),
+      rowheader: cuantos("rowheader"),
+      cell: cuantos("cell"),
+    },
+    {
+      table: 1,
+      // `thead` y `tbody`.
+      rowgroup: 2,
+      // La de cabecera más una por especie.
+      row: 1 + especies,
+      // Las tres columnas.
+      columnheader: 3,
+      // El nombre de la norma de cada especie, que es la cabecera de su fila.
+      rowheader: especies,
+      // Taxón y caladeros, dos por especie.
+      cell: 2 * especies,
+    },
+    "sin estos roles, apilar la tabla le quita las filas y las celdas a quien usa un lector de pantalla",
+  );
+});
