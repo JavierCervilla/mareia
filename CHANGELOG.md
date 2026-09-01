@@ -2,6 +2,62 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-09-01 — T-27 · El catálogo de especies apilado en fichas, con un solo marcado
+
+- **Cada especie se lee entera en vez de en tres canales de 14 caracteres.** Tras T-26 el catálogo era
+  legible —cero palabras partidas— pero seguía siendo una tabla de tres columnas de **107, 116 y
+  104 px** en un teléfono, y una columna de 14 caracteres no es una columna estrecha: es una lista
+  vertical de palabras sueltas. Por debajo de 700 px cada fila se pinta como una **ficha**, con el
+  nombre de la norma de titular y el ancho entero para su texto. Medido a 360 px: **46,7 → 40
+  pantallas**, fila media **394 → 332 px** y **la peor fila de 955 a 549** (−42 %), que es la que
+  decide cuánto se scrollea para ver una especie.
+- **Un solo DOM, y ésa es la decisión entera.** No hay una `<table>` para escritorio y una lista para
+  móvil: hay **un marcado y dos presentaciones**. Con dos, los gates que leen el `dist/` —E1 el
+  nombre literal de la norma en las 86 filas, E5 las 117 tallas campo a campo, E6 los taxones
+  re-derivados— o miden uno y dejan el otro sin vigilar, o hay que duplicarlos y **se
+  desincronizan**: eso ya pasó en T-20, donde el plan predijo la desincronización y tres párrafos
+  después especificó la segunda superficie que la causó.
+- **Los roles ARIA van en el mismo commit que el `display: block`**, porque es él quien retira los
+  implícitos y deja sin filas ni celdas a quien usa un lector de pantalla. Son inocuos en escritorio.
+- **Nace G6 · apilar no puede esconder nada.** Compara **especie por especie** el texto visible a
+  360 px con el de 1280. Existe porque ninguno de los gates actuales vería un `display: none`: todos
+  leen el HTML, ninguno mira lo que se pinta. Probado en rojo escondiendo la nota de la talla. La fila
+  de cabecera queda excluida **y se nombra**: apilada no es la cabecera de nada, y ocultarla sólo es
+  legítimo porque las celdas se describen solas («el BOE imprime "25"»).
+- **El pase adversario encontró que los roles no los vigilaba nadie.** Aterrizan bien —1 `table`, 2
+  `rowgroup`, 87 `row`, 3 `columnheader`, 86 `rowheader`, 172 `cell`— pero quitándolos **todos**, el
+  sitio se construía, las 86 fichas seguían publicando su texto entero y **ninguno de los ~300 tests
+  se enteraba**. Es la peor forma de regresión: **una avería de accesibilidad no tiene síntoma
+  visible**; si no hay un gate, no hay nadie. El gate nuevo deriva sus seis cuentas **del catálogo** y
+  no las escribe a mano.
+- **Tres gates denunciaban el marcado y no el dato.** `filaDe` exigía que `data-especie` fuese el
+  **primer** atributo, así que meter `role="row"` delante puso rojos E1, E7 y dos recorridos
+  adversarios diciendo «la fila no se publica» **con las 86 filas enteras**. Se reconoce porque el
+  rojo aparece **en todas las filas a la vez**: un defecto de datos casi nunca es unánime.
+
+## 2026-08-31 — T-26 · El portal en un móvil, y los tres gates que nunca miraron un ancho de pantalla
+
+> Esta entrada llega con T-27: el script que debía escribirla en su PR buscó un encabezado que no
+> existe y **anunció que había funcionado sin comprobarlo**. Se deja dicho porque la lección es del
+> mismo tamaño que la entrada.
+
+- **`/pesca/especies/` partía 376 palabras a media palabra a 360 px**, y la culpa era de
+  `overflow-wrap: anywhere` aplicado a las **258 celdas** de la tabla para curar dos binomios
+  científicos. El comentario que lo justificaba era **correcto**, y eso es lo instructivo: al anular
+  el `min-content` de todas las celdas, la tercera columna colapsaba a **8,9 `ch`**. **365 de las 376
+  roturas eran daño colateral.** Acotada al binomio: **376 → 3**, y las tres explicadas.
+- **La cabecera de 43 caracteres se pintaba en 10 líneas.** Se probó primero la vía tipográfica
+  —soltar el tracking— y **se midió que no arreglaba nada**: seguía en 5 líneas y sólo encogía la
+  columna. Se arregló por el rótulo: `CALADEROS · OBIS`, **2 líneas**, con el detalle entero en cada
+  celda.
+- **Una cifra y su unidad son un solo dato**: 25 de 31 filas de la tabla del mes separaban `3,33` de
+  su `m`. Arreglado en **las ocho magnitudes** del sitio, no sólo en la que se midió partida.
+- **Área pulsable 21,8 → 45,8 px** (objetivos bajo 44 en la portada: **170 → 14**), y la tabla
+  desplazándose **en su marco** en vez de arrastrar la página (347 → 320 px a 320).
+- **Trinquete**: **G1** (ninguna palabra partida entre letras), **G2** (sin desbordamiento, nombrando
+  las **hojas** y no los contenedores) y el gate de unidades, midiendo a **320/360/390 px** — no al
+  Pixel 7 del proyecto, que son 412 y donde la avería **ya no se ve**.
+
 ## 2026-08-31 — T-23 · Una página por especie, con los mismos nueve campos siempre — y con su foto
 
 El catálogo de T-20 deja de ser el final del camino: cada una de las **86** especies estrena su

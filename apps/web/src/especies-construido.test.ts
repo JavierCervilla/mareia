@@ -66,7 +66,12 @@ function textoDe(fragmento: string): string {
 
 /** La fila de una especie dentro del catálogo, con su marcado. */
 function filaDe(html: string, clave: string): string | undefined {
-  const patron = new RegExp(`<tr data-especie="${clave}"[^>]*>([\\s\\S]*?)</tr>`, "u");
+  // `[^>]*` **antes** del atributo, no sólo después: T-27 añadió `role="row"` delante de
+  // `data-especie` para que el apilado en fichas no le quite la semántica de tabla a un lector de
+  // pantalla, y este patrón —que exigía que `data-especie` fuese el primer atributo— dejó de casar.
+  // Los 86 gates E1/E7 se pusieron rojos diciendo «la fila no se publica» cuando las filas estaban
+  // enteras: un gate atado al ORDEN de los atributos denuncia el marcado, no el dato.
+  const patron = new RegExp(`<tr[^>]*data-especie="${clave}"[^>]*>([\\s\\S]*?)</tr>`, "u");
   return patron.exec(html)?.[1];
 }
 
@@ -153,7 +158,7 @@ test("E1 · el nombre de la norma está LITERAL en las 86 filas del catálogo", 
     "filas que no publican el nombre con el que la norma nombra a la especie, que es el que tiene " +
       "consecuencia legal",
   );
-  const filas = html.match(/<tr data-especie="/gu) ?? [];
+  const filas = html.match(/<tr[^>]*data-especie="/gu) ?? [];
   assert.equal(filas.length, catalogo.especies.length, "el catálogo publica otras tantas filas");
   t.diagnostic(`${catalogo.especies.length} especies con su nombre del BOE literal`);
 });
@@ -542,5 +547,64 @@ test("A-T26-2 · la cabecera de la tercera columna nombra el caladero y su fuent
   assert.ok(
     /obis/iu.test(tercera),
     `la tercera cabecera no nombra a OBIS, que es de donde salen sus cifras: «${tercera.trim()}»`,
+  );
+});
+
+// =================================================================================================
+// A-T27-1 · los roles explícitos son lo único que sostiene la tabla cuando se apila
+// =================================================================================================
+
+/**
+ * **La semántica de tabla no sobrevive al apilado por sí sola.**
+ *
+ * T-27 pinta cada fila como una ficha por debajo de 700 px con `display: block` sobre
+ * `table`/`tr`/`th`/`td`. Eso hace que el navegador **retire los roles implícitos**: sin declararlos,
+ * quien navega con lector de pantalla deja de tener filas y celdas, y deja de oír la cabecera de la
+ * columna junto al dato. Los roles explícitos son la cura estándar y son **inocuos en escritorio**,
+ * donde coinciden con la semántica nativa.
+ *
+ * Este gate existe porque **nada más los vigilaba**: reproducido en el pase adversario quitándolos
+ * todos con un `sed` — el sitio se construía, las 86 fichas seguían publicando su texto entero y
+ * **ninguno de los ~300 tests se enteraba**. Una regresión de accesibilidad no tiene síntoma visible:
+ * si no hay un gate, no hay nadie.
+ *
+ * Las cuentas **se derivan del catálogo** y no se escriben a mano: con un número mágico, añadir una
+ * especie pondría el gate en rojo sin que nada esté mal, y quien lo viera aprendería a subir el
+ * número — que es como muere un gate.
+ */
+test("A-T27-1 · la tabla del catálogo declara sus roles, que es lo que la sostiene apilada", async (t) => {
+  if (!HAY_BUILD) {
+    t.skip(SIN_BUILD);
+    return;
+  }
+  const html = readFileSync(CATALOGO, "utf8");
+  const catalogo = await cargarCatalogoDeEspecies();
+  const especies = catalogo.especies.length;
+  const cuantos = (rol: string): number =>
+    (html.match(new RegExp(`role="${rol}"`, "gu")) ?? []).length;
+
+  assert.deepEqual(
+    {
+      table: cuantos("table"),
+      rowgroup: cuantos("rowgroup"),
+      row: cuantos("row"),
+      columnheader: cuantos("columnheader"),
+      rowheader: cuantos("rowheader"),
+      cell: cuantos("cell"),
+    },
+    {
+      table: 1,
+      // `thead` y `tbody`.
+      rowgroup: 2,
+      // La de cabecera más una por especie.
+      row: 1 + especies,
+      // Las tres columnas.
+      columnheader: 3,
+      // El nombre de la norma de cada especie, que es la cabecera de su fila.
+      rowheader: especies,
+      // Taxón y caladeros, dos por especie.
+      cell: 2 * especies,
+    },
+    "sin estos roles, apilar la tabla le quita las filas y las celdas a quien usa un lector de pantalla",
   );
 });
