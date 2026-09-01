@@ -249,6 +249,33 @@
       se esperaba que fallara» en los nueve— y conservan su assert canario. Medido con el comando de
       CI: `pnpm test` **667 en verde**, `pnpm test:e2e` **70** midiendo de verdad,
       `pytest` **1.919**, catálogo de **111.516 B** (11.514 comprimidos) con cero scripts
+- [x] T-27 · **El catálogo de especies apilado en fichas en un móvil, con un solo marcado.** Cada
+      especie se lee entera en vez de en tres canales de 14 caracteres: **46,7 → 40 pantallas** a
+      360 px, fila media **394 → 332 px** y la peor fila **955 → 549** (−42 %), que es la que decide
+      cuánto se scrollea para ver una especie. Es **CSS y un solo DOM** —nada de una tabla para
+      escritorio y una lista para móvil—: con dos marcados, los gates que leen el `dist/` (E1, E5, E6)
+      o miden uno y dejan el otro sin vigilar, o hay que duplicarlos y **se desincronizan**, que es lo
+      que pasó en T-20. Los **roles ARIA** van en el mismo commit que el `display: block`, porque es
+      él quien retira los implícitos y deja sin filas ni celdas a un lector de pantalla. Nace **G6**
+      (apilar no puede esconder nada: compara el texto visible **especie por especie** a 360 y a
+      1280 px, porque ninguno de los gates actuales vería un `display: none`), probado en rojo
+      escondiendo la nota de la talla. Y se **desatan tres gates que denunciaban el marcado y no el
+      dato**: `filaDe` exigía que `data-especie` fuese el primer atributo, así que meter `role="row"`
+      delante puso rojos E1, E7 y dos recorridos adversarios **con las 86 filas enteras**.
+- [x] T-26 · **El portal en un móvil, y los tres gates que nunca miraron un ancho de pantalla.** Sale
+      de una captura real: `/pesca/especies/` partía **376 palabras a media palabra** a 360 px. La
+      culpa era de `overflow-wrap: anywhere` en las **258 celdas** de la tabla, puesto para curar dos
+      binomios científicos — y el comentario que lo justificaba era correcto, que es lo que lo hace
+      instructivo: al anular el `min-content` de todas las celdas, la tercera columna colapsaba a
+      **8,9 `ch`**. **365 de las 376 roturas eran daño colateral.** Acotada al binomio: **376 → 3**.
+      Además: la cabecera de 43 caracteres que se pintaba en **10 líneas → 2** (se probó primero la
+      vía tipográfica y **se midió que no arreglaba nada**), la cifra pegada a su unidad en **las ocho
+      magnitudes** del sitio (25 de 31 filas de la tabla del mes separaban `3,33` de su `m`), el área
+      pulsable **21,8 → 45,8 px** (objetivos bajo 44 en la portada: **170 → 14**) y la tabla
+      desplazándose **en su marco** en vez de arrastrar la página (347 → 320 px a 320). Trinquete:
+      **G1** (ninguna palabra partida entre letras), **G2** (sin desbordamiento, nombrando las
+      **hojas** y no los contenedores) y el gate de unidades, midiendo a **320/360/390 px** — no al
+      Pixel 7 del proyecto, que son 412 y donde la avería ya no se ve.
 - [x] T-23 · **La ficha de cada especie: retícula fija, huecos rotulados y una foto que sabe de quién
       es.** **86 páginas nuevas** —`/pesca/especies/<clave>/`, una por
       especie del BOE, enlazadas desde el catálogo de T-20— con **nueve campos fijos y en el mismo
