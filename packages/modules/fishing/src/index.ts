@@ -39,6 +39,31 @@ export {
 } from "./module.ts";
 
 export {
+  EntradasIlegiblesError,
+  observacionesDelDia,
+  REGLAS,
+  REGLAS_DECLARADAS,
+  ReglaSinMagnitudesError,
+  reglaPorId,
+  reglasImplementadas,
+} from "./observaciones/index.ts";
+export type {
+  ContextoDelDia,
+  ExtremoDelDia,
+  FaseLunar,
+  FormatoDeObservaciones,
+  MagnitudCalculada,
+  MuestraDeCurva,
+  Observacion,
+  PeriodoDelDia,
+  Procedencia,
+  ReglaDefinida,
+  ReglaId,
+  SolunarDelDia,
+  Unidad,
+} from "./observaciones/index.ts";
+
+export {
   AVISO_SIN_RESPALDO,
   COMO_SE_LEEN_LOS_PERIODOS,
   ENLACE_METODOLOGIA,
