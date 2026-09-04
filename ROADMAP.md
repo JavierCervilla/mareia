@@ -249,6 +249,17 @@
       se esperaba que fallara» en los nueve— y conservan su assert canario. Medido con el comando de
       CI: `pnpm test` **667 en verde**, `pnpm test:e2e` **70** midiendo de verdad,
       `pytest` **1.919**, catálogo de **111.516 B** (11.514 comprimidos) con cero scripts
+- [x] T-22-A · **Las observaciones del día: las 5 reglas derivadas, sin el bloque de FishBase.**
+      Las 153 páginas de puerto publican cinco hechos calculados, cada uno con su regla y sus
+      entradas. **T-22 no estaba tan bloqueada como se dijo**: la spec sólo ata a FishBase el bloque
+      *citado*. Nacen **T1** (una `Observacion` no existe sin procedencia), **T2** (censo: golden +
+      derivación escrita + magnitud real por regla) y **T3** (recomputar el texto desde el `dist/`,
+      probado en rojo con una frase inventada que conserva su procedencia). El censo publicado
+      corrige la spec y lo dice: no hay página de metodología —A-3 de T-09— y `reglas_con_golden` no
+      lo puede derivar producción. **Fuera, con su nombre**: la rama `citada` (Q2, FishBase).
+      **El pase adversario rompió T3**: reordenando tres atributos se publicaba «se pesca de miedo»
+      con la suite en verde, y el canario de cobertura era un umbral que 764 de 765 pasaba. Ahora el
+      nodo se localiza por su atributo y el canario **compara contra los sujetos**.
 - [x] T-30 · **El objetivo táctil, medido antes de prometerlo (G5).** Cierra el último hueco de la
       auditoría de UX. El número con el que se aplazó —«170 de 170 en rojo en la portada»— estaba
       **caducado**: cierto antes del arreglo de T-26, y desmentido desde entonces por el propio

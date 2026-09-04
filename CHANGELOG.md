@@ -2,6 +2,49 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-09-01 — T-22-A · Las observaciones del día, sin el bloque de FishBase
+
+- **Las 153 páginas de puerto publican cinco observaciones derivadas**, cada una con la regla que la
+  produjo y las entradas con las que se produjo. Son hechos del día —«el periodo menor de 14:44 queda
+  a 50 min de la bajamar de 13:54»—, no consejos de pesca, y eso lo sostienen los tipos y tres gates.
+- **T-22 no estaba tan bloqueada como se había dicho.** La spec sólo ata a FishBase el bloque
+  *citado*; las cinco reglas derivadas, el tipo `Observacion`, los gates y el censo sólo necesitan el
+  dominio. **Queda fuera con su nombre**: la rama `citada` de `Procedencia`, donde vive la decisión
+  Q2 sobre CC-BY-NC. Y **no se declara por adelantado** — un tipo con una rama que nadie construye es
+  un camino sin ejercitar (T-29).
+- **T1 · los tipos.** Una `Observacion` no se construye sin su `Procedencia`, y una marca la hace
+  inconstruible fuera del módulo: escribir una a mano exige un `as` que se ve en el diff.
+- **T2 · el censo.** Por cada miembro de `ReglaId`: golden, apartado en `docs/recomendaciones.md` y
+  al menos una `MagnitudCalculada`. **No se exige que las reglas disparen** —que no disparen es
+  información honrada—, se exige que estén declaradas y probadas.
+- **T3 · el trinquete de recomputación.** Por cada observación del `dist/`, se vuelve a ejecutar la
+  función pura de su `data-regla` con las entradas de esa página y se exige el mismo texto. Probado
+  en rojo con el caso que importa: **una frase inventada con su procedencia intacta**, que es
+  exactamente lo que un gate de «existe el atributo» daría por bueno.
+- **El censo publicado, con una corrección a la spec dicha en voz alta.** La spec pedía publicarlo en
+  «la página de metodología» con dos números. No hay tal página —el sitio enlaza al README del repo a
+  propósito: un `/metodologia/` prometido y no construido fue el hallazgo **A-3** de T-09— y
+  `reglas_con_golden` es un hecho de los tests que producción no puede derivar sin meter la tabla de
+  goldens en el bundle. Se publica **un** número (las declaradas) en cada página y T2 encadena el
+  resto. Publicar un segundo a ojo sería peor que no publicarlo.
+- **Dos gates del repo cazaron dos defectos míos al añadir la sección**: el `<ol>` sin `role="list"`
+  (hallazgo **A-6** de T-09: WebKit retira el rol cuando la viñeta es `none`) y el registro de
+  módulos, que enumera secciones a propósito. Los dos, arreglados con su motivo escrito.
+- **El linter anti-slop tenía razón sobre la franja**: complejidad cognitiva 24 porque el cierre del
+  tramo estaba duplicado dentro y fuera del bucle. Se cierra una sola vez con una muestra centinela.
+- **El pase adversario encontró un agujero real en T3, y el canario tampoco lo cazaba.** Reordenando
+  tres atributos del `<li>` —todos presentes y correctos— y falsificando el texto por **«hoy la marea
+  sube un montón y se pesca de miedo»**, la suite seguía en **312 pass, 0 fail**: el patrón de T3
+  definía su universo por la **forma** del marcado, y un nodo que no casa no falla, **desaparece**.
+  Tercer caso de la misma familia en cuatro trayectorias (el `filaDe` de T-27, el `.portada__enlace`
+  de T-30). Peor: el canario de cobertura era un **umbral** (`> 100`), y 764 medidos de 765 pasaban
+  holgadamente — *un umbral sólo caza que el instrumento se quede a cero*. Arreglado en dos piezas:
+  el nodo se localiza **por su atributo en cualquier orden**, y el canario **compara contra los
+  sujetos**, contados aparte con otro patrón. La primera sola cerraba este ataque y dejaba abierto el
+  siguiente.
+- **Q5 sigue abierta** (el nombre de la superficie). El design doc se contradice —la tabla dice
+  «Observaciones del día» y la prosa «Lo que sale del cálculo»—; se sigue la tabla, en una constante.
+
 ## 2026-09-01 — T-30 · El objetivo táctil, medido antes de prometerlo (G5)
 
 - **Se cierra el último hueco de la auditoría de UX**, el que T-26 dejó fuera a propósito. Nace

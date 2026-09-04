@@ -1,0 +1,85 @@
+---
+/**
+ * Las observaciones del día: lo que sale del cálculo, con su procedencia pegada.
+ *
+ * **Cada frase publica de dónde viene.** El `<li>` lleva `data-regla` (qué función la produjo) y
+ * `data-entradas` (con qué números), y ése es el par que permite al trinquete **T3** recomputar el
+ * texto desde el `dist/` y exigir que coincida. No es telemetría ni decoración: es lo que hace que
+ * una frase escrita a mano no pueda colarse aquí, porque no coincidiría con la salida de la función
+ * que dice haberla generado.
+ *
+ * **`role="list"` explícito** y no por gusto: la hoja le quita la viñeta, y WebKit retira el rol de
+ * lista cuando el estilo de viñeta es `none` — en Safari/VoiceOver dejaría de anunciarse como lista.
+ * Es el hallazgo **A-6** del pase adversario de T-09, y su gate cubre todas las listas del sitio: se
+ * puso en rojo en cuanto añadí esta sin él.
+ *
+ * **Por qué el `<ol>` y no párrafos sueltos**: las observaciones son una lista de hechos del mismo
+ * rango, sin orden de importancia entre ellas. Un `<ol>` da a cada una su elemento para colgar la
+ * procedencia y se lee como lista en un lector de pantalla.
+ *
+ * **El censo va en el `<h2>`** (`data-reglas-declaradas`), y aquí hay una corrección a la spec que
+ * conviene decir en voz alta. La spec pide publicarlo «en la página de metodología» con DOS números
+ * —`reglas_declaradas` y `reglas_con_golden`— y exigir que sean iguales. Dos cosas no salieron así:
+ *
+ * 1. **No hay página de metodología.** El sitio enlaza al README del repo a propósito: un
+ *    `/metodologia/` prometido y no construido fue el hallazgo **A-3** del pase adversario de T-09.
+ *    Inventarla ahora sería repetirlo, así que el censo viaja donde vive lo que cuenta.
+ * 2. **Sólo se publica un número, no dos.** `reglas_con_golden` es un hecho de los tests, y el
+ *    código de producción no lo sabe ni debe saberlo: publicarlo obligaría a meter la tabla de
+ *    goldens en el bundle. La propiedad se conserva encadenando: la página publica **las
+ *    declaradas**, y el censo **T2** ya exige que cada declarada tenga golden, apartado en
+ *    `docs/recomendaciones.md` y una magnitud real. Publicar un segundo número que producción no
+ *    puede derivar sería publicarlo a ojo, que es peor que no publicarlo.
+ *
+ * Lo que el censo compra sigue en pie: con cero observaciones, T1 y T3 pasan los dos —no hay nada
+ * mal escrito porque no hay nada—, y este número obliga a **declarar** aunque no se dispare.
+ *
+ * **Cuando no hay ninguna se dice**, en vez de no pintar la sección. Un día sin coincidencia
+ * solunar y sin franja baja publica menos, y esa ausencia es información del día; una sección que
+ * desaparece se lee como que algo ha fallado.
+ */
+import {
+  QUE_SON_LAS_OBSERVACIONES,
+  ROTULO_OBSERVACIONES,
+  SIN_OBSERVACIONES,
+} from "@mareia/module-fishing";
+
+import { REGLAS_DECLARADAS } from "@mareia/module-fishing";
+
+import type { ContextoDeSeccion } from "../../modulos/contexto.ts";
+import { cargarObservaciones } from "../../modulos/observaciones.ts";
+
+interface Props {
+  contexto: ContextoDeSeccion;
+}
+
+const { contexto } = Astro.props;
+const observaciones = await cargarObservaciones(contexto);
+---
+
+<h2
+  class="bloque__titulo"
+  id="titulo-observaciones"
+  data-reglas-declaradas={String(REGLAS_DECLARADAS.length)}
+>
+  {ROTULO_OBSERVACIONES}
+</h2>
+<p class="observaciones__intro">{QUE_SON_LAS_OBSERVACIONES}</p>
+
+{
+  observaciones.length === 0 ? (
+    <p class="observaciones__vacio">{SIN_OBSERVACIONES}</p>
+  ) : (
+    <ol class="observaciones" role="list" data-observaciones>
+      {observaciones.map((observacion) => (
+        <li
+          class="observaciones__punto"
+          data-regla={observacion.procedencia.reglaId}
+          data-entradas={JSON.stringify(observacion.procedencia.entradas)}
+        >
+          {observacion.texto}
+        </li>
+      ))}
+    </ol>
+  )
+}
