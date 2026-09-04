@@ -2,6 +2,20 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-09-03 — T-31 · `qs` a 6.16.0: la escalera de seguridad estaba roja en `main`
+
+- **Dos CVE sobre `qs@6.15.3`** —`GHSA-4mjr-xmp4-gh2g` y `GHSA-x5fp-wj9c-mxmx`, las dos cerradas en
+  **6.16.0**— ponían en rojo el peldaño 3 del Guardián (`osv-scanner`). No la declara nadie: la
+  arrastra `express@4.22.2` (dependencia real del módulo `weather`, para su router) vía `body-parser`.
+- **No era de ningún PR: estaba en `main`.** Se detectó porque fallaba hasta en un commit que sólo
+  añadía un Markdown, y el `pnpm-lock.yaml` de `main` fijaba la misma versión. Los avisos se
+  publicaron después de la última vez que el gate corrió sobre la base, así que **bloqueaba todos los
+  PRs del repositorio**, no uno. Por eso va en su propio PR y no dentro de la trayectoria que lo
+  encontró: un cambio de dos líneas que desbloquea el repo no debe esperar a que se mergee otra cosa.
+- **El override va acotado**: `"qs@<6.16.0": "^6.16.0"` y no `"qs"` a secas, para que deje de aplicar
+  solo el día que el árbol traiga ya una versión sana, en vez de quedarse fijando una para siempre.
+- El lock cambia **13 líneas y sólo de `qs`** — comprobado en el diff, no supuesto. `lint`,
+  `typecheck` y `pnpm test` en verde.
 ## 2026-09-01 — T-22-A · Las observaciones del día, sin el bloque de FishBase
 
 - **Las 153 páginas de puerto publican cinco observaciones derivadas**, cada una con la regla que la
