@@ -16,6 +16,11 @@
     "test:e2e:prod": "playwright test --config playwright.produccion.config.ts",
     "typecheck": "tsc --noEmit"
   },
+  "pnpm": {
+    "overrides": {
+      "qs@<6.16.0": "^6.16.0"
+    }
+  },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
     "@types/node": "^22.20.1",
