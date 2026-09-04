@@ -30,7 +30,7 @@ No se ataca el razonamiento del diff: se ataca **esa frase**.
 | **A9** · el gate lee lo que vigila | ¿Recomputa T3 con el mismo objeto que publicó, en vez de con el HTML? | 🟢 aguantó — el JSON viaja por el atributo y se re-parsea |
 | **A1** · la frontera del slop | ¿Puede una regla acabar prometiendo un beneficio? | 🟢 aguantó — test sobre el texto producido, con diez palabras vetadas |
 
-## Hallazgo
+## Hallazgos
 
 ### A-T22A-1 · Reordenar tres atributos deja publicar «se pesca de miedo» con T3 en verde
 
