@@ -19,7 +19,12 @@ import {
   nombreDeEtiqueta,
   ventanasDeActividad,
 } from "../actividad.ts";
-import { ATRIBUCIONES_FISHING, fishingModule, SECCION_ACTIVIDAD_SOLUNAR } from "../module.ts";
+import {
+  ATRIBUCIONES_FISHING,
+  fishingModule,
+  SECCION_ACTIVIDAD_SOLUNAR,
+  SECCION_OBSERVACIONES_DEL_DIA,
+} from "../module.ts";
 import * as modulo from "../index.ts";
 import {
   AVISO_SIN_RESPALDO,
@@ -69,12 +74,19 @@ const MENOR_DEL_ALBA: PeriodoSolunar = {
   overlapsSolarEvent: false,
 };
 
-test("el módulo cumple el contrato: una sección estática y atribuciones que existen", () => {
+test("el módulo cumple el contrato: dos secciones estáticas y atribuciones que existen", () => {
   assert.equal(fishingModule.id, "fishing");
+  // Desde T-22-A el módulo aporta DOS secciones: la actividad solunar y las observaciones del día.
+  // Van separadas y no como un bloque dentro de la primera porque la solunar habla de la Luna y las
+  // observaciones cruzan Luna, marea y Sol: metidas dentro, la sección solunar pasaría a depender de
+  // los datos de marea del puerto y dejaría de poder darse de baja sola.
   assert.deepEqual(fishingModule.pageSections?.map((seccion) => seccion.component), [
     SECCION_ACTIVIDAD_SOLUNAR,
+    SECCION_OBSERVACIONES_DEL_DIA,
   ]);
-  assert.equal(fishingModule.pageSections?.[0]?.renderMode, "static", "el core no lleva JS");
+  for (const seccion of fishingModule.pageSections ?? []) {
+    assert.equal(seccion.renderMode, "static", `${seccion.id}: el core no lleva JS`);
+  }
   assert.ok(ATRIBUCIONES_FISHING.length > 0, "un módulo sin atribuciones no se publica");
   for (const atribucion of ATRIBUCIONES_FISHING) {
     assert.match(atribucion.url, /^https:\/\//, `${atribucion.name} sin URL absoluta`);

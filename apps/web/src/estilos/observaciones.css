@@ -1,0 +1,36 @@
+/**
+ * Las observaciones del día (T-22-A).
+ *
+ * **Sin viñeta y sin numerar.** Un `<ol>` numerado implicaría un ranking —«la primera es la más
+ * importante»— y las cinco reglas son hechos del mismo rango: la coincidencia solunar no vale más
+ * que la fase de la Luna. Se quita la numeración y el elemento **conserva su `role="list"`** en el
+ * marcado, porque WebKit retira el rol cuando la viñeta es `none` (hallazgo A-6 de T-09).
+ *
+ * **Sin color ni iconos.** Es prosa con cifras, del mismo peso que el resto del cuerpo. El brief
+ * reserva la terracota al coeficiente y a los avisos, y una lista de hechos calculados no es un
+ * aviso. Pintarlas de algo las convertiría en la promesa que el tipo existe para impedir.
+ */
+
+.observaciones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--m-gap-fila);
+}
+
+.observaciones__intro,
+.observaciones__vacio {
+  font-size: var(--m-text-body);
+  color: var(--m-sub);
+}
+
+/* El filete a la izquierda separa cada hecho sin numerarlo: se ve dónde empieza y dónde acaba una
+   observación sin sugerir que hay un primero y un último. */
+.observaciones__punto {
+  border-inline-start: 1px solid var(--m-rule-soft);
+  padding-inline-start: 12px;
+  font-size: var(--m-text-body);
+  color: var(--m-ink);
+}

@@ -50,12 +50,18 @@ test("el registry de producción publica los cinco módulos y sus secciones, en 
   // catálogo de especies va a 35, el último, porque es un enlace que amplía lo que se acaba de
   // leer y puesto delante ofrecería irse de la página antes de enseñar la tabla. Ver los TSDoc de
   // `SECCION_AREAS`, `SECCION_TALLAS` y `SECCION_ESPECIES`.
+  //
+  // Las **observaciones** (T-22-A) entran a 21: detrás de la solunar, porque una de ellas habla de
+  // los periodos que la solunar acaba de enseñar, y una conclusión sobre datos que aún no se han
+  // visto obliga a leer hacia atrás. Empatan por debajo de meteo (20) y quedan delante de las
+  // tallas (30), que ya son consultables.
   assert.deepEqual(
     sectionsForPort(CORUNA).map((seccion) => [seccion.id, seccion.renderMode]),
     [
       ["areas-protegidas", "static"],
       ["actividad-solunar", "static"],
       ["meteo", "island"],
+      ["observaciones", "static"],
       ["tallas-minimas", "static"],
       ["especies", "static"],
     ],

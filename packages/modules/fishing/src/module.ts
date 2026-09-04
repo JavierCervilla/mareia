@@ -31,6 +31,13 @@ export const SECCION_ACTIVIDAD_SOLUNAR = "@mareia/module-fishing/sections/Activi
 /** Ancla de la sección en la página (`#actividad-solunar`). */
 export const ID_SECCION_ACTIVIDAD = "actividad-solunar";
 
+/** Clave lógica de la sección de observaciones, exportada por el mismo motivo que la de arriba. */
+export const SECCION_OBSERVACIONES_DEL_DIA =
+  "@mareia/module-fishing/sections/ObservacionesDelDia";
+
+/** Ancla de la sección de observaciones (`#observaciones`). */
+export const ID_SECCION_OBSERVACIONES = "observaciones";
+
 /**
  * Atribuciones del módulo. La teoría solunar es de dominio público (Knight, 1926) y **no es una
  * fuente de datos**: no se le inventa una URL ni una licencia. Lo que sí hay que citar es de dónde
@@ -65,6 +72,26 @@ export const SECCION_ACTIVIDAD: PageSection = {
 };
 
 /**
+ * Las observaciones del día, **detrás** de la actividad solunar.
+ *
+ * `order: 21` y no 20: las observaciones se leen **después** de haber visto los periodos y el
+ * rating, porque una de ellas habla precisamente de ellos («el periodo mayor de 09:40 queda a
+ * 15 min de la bajamar»). Puesta antes, obliga a leer una conclusión sobre datos que aún no se han
+ * enseñado.
+ *
+ * **Es una sección aparte y no un bloque dentro de la solunar** aunque las dos las aporte este
+ * módulo: la solunar habla de la Luna, y estas observaciones cruzan Luna, marea y Sol. Metidas
+ * dentro, la sección solunar pasaría a depender de los datos de marea del puerto y dejaría de poder
+ * darse de baja sola.
+ */
+export const SECCION_OBSERVACIONES: PageSection = {
+  id: ID_SECCION_OBSERVACIONES,
+  order: 21,
+  renderMode: "static",
+  component: SECCION_OBSERVACIONES_DEL_DIA,
+};
+
+/**
  * El módulo, listo para el registry. Sin dependencias que inyectar: no lee nada del entorno.
  *
  * **No declara `offline` (T-12) y eso es exacto, no un olvido**: los periodos solunares se calculan
@@ -76,5 +103,5 @@ export const fishingModule: AppModule = {
   id: "fishing",
   version: FISHING_MODULE_VERSION,
   attributions: ATRIBUCIONES_FISHING,
-  pageSections: [SECCION_ACTIVIDAD],
+  pageSections: [SECCION_ACTIVIDAD, SECCION_OBSERVACIONES],
 };

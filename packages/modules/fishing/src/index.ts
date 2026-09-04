@@ -34,9 +34,37 @@ export {
   fishingModule,
   FISHING_MODULE_VERSION,
   ID_SECCION_ACTIVIDAD,
+  ID_SECCION_OBSERVACIONES,
   SECCION_ACTIVIDAD,
   SECCION_ACTIVIDAD_SOLUNAR,
+  SECCION_OBSERVACIONES,
+  SECCION_OBSERVACIONES_DEL_DIA,
 } from "./module.ts";
+
+export {
+  EntradasIlegiblesError,
+  observacionesDelDia,
+  REGLAS,
+  REGLAS_DECLARADAS,
+  ReglaSinMagnitudesError,
+  reglaPorId,
+  reglasImplementadas,
+} from "./observaciones/index.ts";
+export type {
+  ContextoDelDia,
+  ExtremoDelDia,
+  FaseLunar,
+  FormatoDeObservaciones,
+  MagnitudCalculada,
+  MuestraDeCurva,
+  Observacion,
+  PeriodoDelDia,
+  Procedencia,
+  ReglaDefinida,
+  ReglaId,
+  SolunarDelDia,
+  Unidad,
+} from "./observaciones/index.ts";
 
 export {
   AVISO_SIN_RESPALDO,
@@ -44,7 +72,10 @@ export {
   ENLACE_METODOLOGIA,
   NOTA_DE_REDONDEO,
   QUE_ES_ESTO,
+  QUE_SON_LAS_OBSERVACIONES,
   RATING_ES_CONVENCION,
+  ROTULO_OBSERVACIONES,
+  SIN_OBSERVACIONES,
   ROTULO_DEL_RATING,
   TITULO_ACTIVIDAD,
   URL_METODOLOGIA_SOLUNAR,

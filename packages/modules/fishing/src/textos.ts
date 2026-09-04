@@ -87,3 +87,28 @@ export const ROTULO_DEL_RATING = "Índice de la convención solunar";
 
 /** Rótulo del enlace a la metodología. */
 export const ENLACE_METODOLOGIA = "Fórmula, constantes y límites del cálculo";
+
+/**
+ * El rótulo de la superficie de observaciones. **Una constante y no una cadena en la plantilla**,
+ * que es la lección que `ROTULO_DEL_RATING` ya lleva escrita en este mismo fichero.
+ *
+ * Y es una decisión **abierta** (Q5 del design doc, que sólo puede contestar el humano). El propio
+ * documento no se pone de acuerdo consigo mismo: la tabla del plan la llama «Observaciones del día»
+ * y la prosa propone «Lo que sale del cálculo». Se sigue la de la tabla. Cambiarla es esta línea.
+ */
+export const ROTULO_OBSERVACIONES = "Observaciones del día";
+
+/**
+ * Qué es esta superficie, antes de la primera frase.
+ *
+ * Va aquí y no en la plantilla por lo mismo que el resto: es un requisito de producto y hay tests
+ * que comprueban que está en el `dist/`.
+ */
+export const QUE_SON_LAS_OBSERVACIONES =
+  "Cada frase de abajo la produce un cálculo sobre los datos de esta página, y viaja con la regla " +
+  "que la generó: son hechos del día, no consejos de pesca. Un día puede tener menos observaciones " +
+  "que otro, y eso también es un dato.";
+
+/** Lo que se publica cuando ninguna regla dispara. Decirlo es más honrado que no pintar nada. */
+export const SIN_OBSERVACIONES =
+  "Hoy ninguna de las reglas encuentra nada que enunciar en este puerto.";
