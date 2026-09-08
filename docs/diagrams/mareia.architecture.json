@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Mareia — mareas, solunar y meteo marina con datos abiertos",
+    "output": "mareia.architecture.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "consulta",
+        "label": "Consulta de un puerto",
+        "focus": ["usuario", "traefik", "web", "usecases", "dataset"],
+        "note": "El camino principal: la página del puerto se calcula en build desde el dataset, no en el navegador."
+      },
+      {
+        "id": "api-modulos",
+        "label": "API pública y módulos",
+        "focus": ["traefik", "api", "usecases", "modulos", "meteo", "kv"],
+        "note": "Las rutas /v1 sirven el core determinista; los módulos enchufables cuelgan de /v1/modules."
+      },
+      {
+        "id": "dataset",
+        "label": "De la fuente al dataset",
+        "focus": ["fuentes", "pipeline", "dataset", "dominio"],
+        "note": "El pipeline Python es offline: convierte constantes públicas en JSON canónico versionado."
+      }
+    ]
+  },
+  "components": [
+    { "id": "usuario", "type": "external", "label": "Pescador", "sublabel": "navegador · PWA", "pos": [40, 110], "size": [130, 60] },
+    { "id": "traefik", "type": "cloud", "label": "Traefik · Dokploy", "sublabel": "mareia.cervilla.es", "tag": "/v1 → API · resto → web", "pos": [250, 110], "size": [160, 64] },
+    { "id": "web", "type": "frontend", "label": "mareia-web", "sublabel": "Astro SSG + nginx", "tag": "una página por puerto", "pos": [490, 110], "size": [160, 64] },
+    { "id": "api", "type": "backend", "label": "mareia-api", "sublabel": "Deno + Express :8787", "tag": "REST pública /v1", "pos": [730, 110], "size": [160, 64] },
+    { "id": "dominio", "type": "backend", "label": "domain-core", "sublabel": "mareas · astro · solunar", "tag": "armónicos Foreman 1977", "pos": [250, 300], "size": [160, 64] },
+    { "id": "usecases", "type": "backend", "label": "Casos de uso", "sublabel": "+ adapters (JSON, KV)", "tag": "clean architecture", "pos": [490, 300], "size": [160, 64] },
+    { "id": "modulos", "type": "backend", "label": "Módulos enchufables", "sublabel": "weather activo hoy", "tag": "AppModule · /v1/modules", "pos": [730, 300], "size": [160, 64] },
+    { "id": "meteo", "type": "external", "label": "Open-Meteo · AEMET", "sublabel": "meteo marina (CC-BY)", "pos": [970, 300], "size": [160, 60] },
+    { "id": "fuentes", "type": "external", "label": "Fuentes abiertas", "sublabel": "TICON-4 · BOE · OBIS", "pos": [40, 490], "size": [130, 64] },
+    { "id": "pipeline", "type": "backend", "label": "Pipeline Python", "sublabel": "offline · make all", "tag": "informe QC por puerto", "pos": [250, 490], "size": [160, 64] },
+    { "id": "dataset", "type": "database", "label": "data/stations", "sublabel": "155 JSON station/v1", "tag": "licencia por puerto", "pos": [490, 490], "size": [160, 64] },
+    { "id": "kv", "type": "database", "label": "Deno KV", "sublabel": "caché del boletín", "pos": [730, 490], "size": [160, 60] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Dokploy · un dominio, dos contenedores", "wraps": ["web", "api"] },
+    { "kind": "security-group", "label": "AEMET_API_KEY solo en el servidor", "wraps": ["modulos", "kv"] }
+  ],
+  "connections": [
+    { "id": "usuario-traefik", "from": "usuario", "to": "traefik", "label": "HTTPS", "variant": "emphasis", "labelDy": -24 },
+    { "id": "traefik-web", "from": "traefik", "to": "web", "label": "nginx :3000", "variant": "emphasis", "labelDy": 24 },
+    { "id": "web-api", "from": "web", "to": "api", "label": "isla meteo", "variant": "dashed", "labelDy": 24 },
+    { "id": "web-usecases", "from": "web", "to": "usecases", "label": "build SSG", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "labelDy": 24 },
+    { "id": "api-usecases", "from": "api", "to": "usecases", "label": "rutas core", "fromSide": "bottom", "toSide": "right" },
+    { "id": "api-modulos", "from": "api", "to": "modulos", "label": "/v1/modules", "fromSide": "bottom", "toSide": "top", "labelDy": 24, "labelDx": 44 },
+    { "id": "usecases-dominio", "from": "usecases", "to": "dominio", "label": "cálculo", "variant": "emphasis", "labelDy": -24 },
+    { "id": "usecases-dataset", "from": "usecases", "to": "dataset", "label": "lee 155 puertos", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "labelDy": 24 },
+    { "id": "modulos-meteo", "from": "modulos", "to": "meteo", "label": "HTTPS", "labelDy": -24 },
+    { "id": "modulos-kv", "from": "modulos", "to": "kv", "label": "cachea 6 h", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelDy": 24 },
+    { "id": "fuentes-pipeline", "from": "fuentes", "to": "pipeline", "label": "descarga", "labelDy": -24 },
+    { "id": "pipeline-dataset", "from": "pipeline", "to": "dataset", "label": "escribe JSON", "labelDy": -24 }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Stack", "items": ["Web: Astro SSG + PWA servida por nginx", "API: Deno + Express, clean architecture", "Monorepo pnpm: dominio, casos de uso, adapters, módulos"] },
+    { "dot": "emerald", "title": "Datos", "items": ["155 puertos con constantes armónicas públicas (TICON-4)", "Pipeline Python offline: armónicos → station/v1 con QC", "Sin licencia única: cada puerto declara la suya en su JSON"] },
+    { "dot": "amber", "title": "Despliegue y licencia", "items": ["Dokploy: dos contenedores tras Traefik, /v1 al API", "Código AGPL-3.0; la API es de libre consulta", "AEMET_API_KEY solo en el entorno del API, nunca en el cliente"] }
+  ]
+}
