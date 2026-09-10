@@ -267,8 +267,16 @@ test("A-1 · la curva no se congela en ningún puerto del catálogo", async () =
  * La pleamar sobre la que se construye la avería **se elige** (`pleamarConSitio`): la primera del
  * día servía sólo 332 días de cada 365. El porqué, con los números, está en esa función.
  */
-test("A-1 bis · una pleamar congelada de cinco horas no se le escapa al gate", async () => {
-  const fechaIso = HAY_BUILD ? fechaDelBuild() : new Date().toISOString().slice(0, 10);
+/** El día que fija la ilustración de abajo, y por qué es **este** y no el mejor que encontré.
+
+    Medido sobre la curva de Vigo, una muestra cada 7 días de 2026 (53 puntos): el cociente
+    `puntas / dentro` va de **0,0011** a **0,1404**, con mediana ~0,055. Este día da **0,0575** —un
+    día del montón, no el más favorable—. Elegir el 0,0011 del 1 de enero haría la ilustración más
+    espectacular y menos honrada: enseñaría el mejor caso del año como si fuera el normal. */
+const DIA_DE_LA_ILUSTRACION = "2026-05-07";
+
+/** Monta la avería —cinco horas planas centradas en una pleamar— sobre la curva de un día. */
+async function averiaDePleamarCongelada(fechaIso: string) {
   const puerto = (await deps.ports.list()).find((candidato) => candidato.slug === "vigo");
   assert.ok(puerto, "Vigo tiene que seguir en el catálogo: es el puerto de marea real de referencia");
   const dia = await curvaDe(puerto.slug, fechaIso);
@@ -295,16 +303,68 @@ test("A-1 bis · una pleamar congelada de cinco horas no se le escapa al gate", 
     plano.minutos >= 4 * 60,
     `la meseta inyectada debería durar horas y dura ${plano.minutos} min`,
   );
+  return { congelada, estacion, plano };
+}
 
+test("A-1 bis · una pleamar congelada de cinco horas no se le escapa al gate", async () => {
+  // EL GATE, y va sobre la curva de HOY a propósito: lo que protege es que la avería siga siendo
+  // visible en la marea real de cualquier día, no en una elegida.
+  const fechaIso = HAY_BUILD ? fechaDelBuild() : new Date().toISOString().slice(0, 10);
+  const { congelada, estacion, plano } = await averiaDePleamarCongelada(fechaIso);
+  const dentro = excursionRealEnLaMeseta(congelada, estacion, plano);
+  assert.ok(
+    dentro > PASO_DE_PUBLICACION_M,
+    `el gate no ve la pleamar congelada: sólo ${(dentro * 1000).toFixed(1)} mm`,
+  );
+
+  // Y que la sonda esté mirando DENTRO y no a las puntas, que es la regresión que da nombre al
+  // hallazgo. Hace falta decirlo aparte: al partir este test en dos (T-33) se probó a devolver la
+  // sonda a los bordes y **la aserción de arriba seguía pasando**, porque los 122 mm que dan las
+  // puntas un día cualquiera también superan el paso de publicación. Era un gate hueco.
+  //
+  // La comparación es válida cualquier día **por construcción**, no por suerte: la meseta se centra
+  // en la pleamar, así que la curva real sube hasta el pico y baja, y el recorrido de dentro es
+  // estrictamente mayor que la diferencia entre sus dos extremos. Por eso esto no vuelve a atar el
+  // gate a la marea del día — que es justo lo que esta trayectoria vino a quitar.
+  const enLasPuntas = Math.abs(
+    heightAt(estacion, plano.hastaUtcMs) - heightAt(estacion, plano.desdeUtcMs),
+  );
+  assert.ok(
+    dentro > enLasPuntas,
+    `la sonda está midiendo en las puntas: dentro da ${(dentro * 1000).toFixed(1)} mm y las ` +
+      `puntas ${(enLasPuntas * 1000).toFixed(1)} mm, y dentro tiene que ser estrictamente mayor`,
+  );
+});
+
+/**
+ * A-1 bis (ilustración) · por qué hubo que cambiar de sonda, sobre un día FIJO.
+ *
+ * **Esto no es un gate: es la demostración de un punto metodológico**, y por eso va en su propio
+ * test y con la fecha clavada. Enseña que la misma avería, medida en las dos puntas del tramo
+ * —que es donde apuntaba la sonda vieja—, casi no se ve.
+ *
+ * **Estuvo mezclado con el gate y tumbaba CI (T-33).** La afirmación `puntas < dentro / 10` se
+ * medía sobre la curva del día del build, y ese cociente lo decide la marea de Vigo de esa fecha:
+ * muestreando 2026 cada 7 días, **10 de 53 días (19 %) lo superan**, con máximo **0,1404**. O sea
+ * que el test se ponía rojo aproximadamente **uno de cada cinco días**, sin que nada estuviera roto
+ * —y en un repo donde cualquier PR mira este job, un rojo recurrente que no significa nada es peor
+ * que no tener el test: enseña a ignorarlo—.
+ *
+ * La tentación era aflojar el `/10`. No se hizo: ajustar un umbral hasta que pase el día que miras
+ * es exactamente lo que este repositorio no hace, y además el peor caso medido (0,1404) obligaría a
+ * bajarlo a `/7`, que ya no demuestra «casi no se ve». Lo que estaba mal no era el número: era
+ * medir una **ilustración** contra datos que cambian solos.
+ */
+test("A-1 bis (ilustración) · en las puntas la misma avería casi no se ve", async () => {
+  const { congelada, estacion, plano } = await averiaDePleamarCongelada(DIA_DE_LA_ILUSTRACION);
   const enLasPuntas = Math.abs(
     heightAt(estacion, plano.hastaUtcMs) - heightAt(estacion, plano.desdeUtcMs),
   );
   const dentro = excursionRealEnLaMeseta(congelada, estacion, plano);
   assert.ok(
     dentro > PASO_DE_PUBLICACION_M,
-    `el gate no ve la pleamar congelada: sólo ${(dentro * 1000).toFixed(1)} mm`,
+    `el día fijado dejó de servir de ejemplo: dentro sólo da ${(dentro * 1000).toFixed(1)} mm`,
   );
-  // Y la razón por la que hizo falta cambiar de sonda: en las puntas, la misma avería casi no se ve.
   assert.ok(
     enLasPuntas < dentro / 10,
     `medida en las puntas la avería da ${(enLasPuntas * 1000).toFixed(1)} mm frente a los ` +

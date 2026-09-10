@@ -2,6 +2,30 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-09-10 — T-33 · A-1 bis: partir el gate de la ilustración
+
+- **CI se ponía roja uno de cada cinco días sin que nada estuviera roto.** El test `A-1 bis` de T-09
+  mezclaba dos cosas: un **gate** (la avería inyectada se ve en la curva de hoy) y una
+  **ilustración** metodológica (medida en las puntas del tramo, la misma avería casi no se ve,
+  `puntas < dentro / 10`). La segunda se medía sobre la curva de Vigo **del día del build**, y ese
+  cociente lo decide la marea de esa fecha.
+- **Medido antes de tocar nada**, una muestra cada 7 días de 2026 (53 puntos): el cociente va de
+  **0,0011** a **0,1404**, mediana ~0,055, y **10 de 53 días (19 %) superan el umbral**. Reproducido
+  a mano: 4-sep pasa · 10-sep **0,1061** · 11-sep **0,1090** · 15-sep pasa.
+- **No se aflojó el umbral.** Habría bastado con poner `/7`, y es exactamente lo que este repositorio
+  no hace: ajustar un número hasta que pase el día que miras. Lo que estaba mal no era el umbral,
+  era medir una **ilustración** contra datos que cambian solos. El gate se queda sobre la curva de
+  hoy —que es lo que de verdad protege— y la ilustración pasa a una **fecha fija**, `2026-05-07`,
+  elegida **del montón** (0,0575) y no la más favorable del año: enseñar el 0,0011 del 1 de enero
+  sería enseñar el mejor caso como si fuera el normal.
+- **Y al partirlo, el gate se quedó hueco — lo destapó un sabotaje.** Devolviendo la sonda a las
+  puntas (la regresión que da nombre al hallazgo), la mitad-gate **seguía pasando**: los ~122 mm que
+  dan las puntas también superan el paso de publicación. Era la *combinación* de las dos aserciones
+  lo que cazaba esa regresión. El gate incorpora ahora `dentro > enLasPuntas`, que vale cualquier día
+  **por construcción** —la meseta se centra en la pleamar, así que el recorrido de dentro es
+  estrictamente mayor que la diferencia entre sus extremos— y no vuelve a atar el gate a la marea
+  del día. Probado en rojo con ese mismo sabotaje.
+
 ## 2026-09-03 — T-31 · `qs` a 6.16.0: la escalera de seguridad estaba roja en `main`
 
 - **Dos CVE sobre `qs@6.15.3`** —`GHSA-4mjr-xmp4-gh2g` y `GHSA-x5fp-wj9c-mxmx`, las dos cerradas en
