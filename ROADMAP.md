@@ -260,6 +260,18 @@
       **El pase adversario rompió T3**: reordenando tres atributos se publicaba «se pesca de miedo»
       con la suite en verde, y el canario de cobertura era un umbral que 764 de 765 pasaba. Ahora el
       nodo se localiza por su atributo y el canario **compara contra los sujetos**.
+- [x] T-34 · **El error medido en las listas de puertos (cierra A-T14B H-3).** Las tres listas
+      publican «± N cm» junto a la palabra de calidad: los **35** puertos con RMSE medido dicen su
+      cifra, los **118** sin medida **no dicen nada** —un «— cm» se leería como una predicción mala
+      y lo que hay es ninguna—. **La decisión se revisó al medir**: el hallazgo pedía enseñar el
+      `grade` «porque ordena por error», y **116 de los 118 sin medir son C** mientras A y B se
+      solapan (el mejor B **0,0359** gana al peor A **0,0587**) — se volvió a preguntar antes de
+      escribir código. Nace el gate sobre el `dist/` contado **contra el dataset**: todo medido
+      publica su cifra exacta en las tres listas y ninguno sin medida publica una, **probado en rojo
+      por las dos mitades** y con sus dos canarios. Y destapó **dos gates que afirmaban la posición
+      y no la promesa** (exigían que la fila *terminara* en `medida`/`estimada`): ahora leen la
+      palabra del `<span>` que la publica, forma **más estrecha** — caza el sabotaje que quita la
+      clase dejando el texto intacto, que la vieja pasaba en verde.
 - [x] T-32 · **P6 contra la fuente entera: se cierra A-T21 H-2 y H-4.** El único gate que compara el
       artefacto contra la fuente pasa de **14 de 348** relaciones a **las 348**: CI baja RAMPE (12 MB,
       ~4 s) en vez de leer el recorte de 7 áreas. Reproducidos los dos ataques contra las dos

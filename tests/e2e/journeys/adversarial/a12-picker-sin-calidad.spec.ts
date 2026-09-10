@@ -68,6 +68,28 @@ function catalogo(): readonly {
 
 const ENTRADAS = "li.indice__entrada";
 
+/**
+ * Lo que cada entrada de la lista dice de sí misma: su nombre y **la palabra de calidad tal cual
+ * la publica su propio `<span>`**.
+ *
+ * Se lee del elemento y no del final del texto de la fila a propósito. Este recorrido afirma que
+ * *la calidad está a la vista*, no que sea lo último que se lee: cuando T-34 añadió el error medido
+ * detrás («Vigo · Europe/Madrid · medida · ±6 cm») el `endsWith` original se puso rojo sin que la
+ * promesa se hubiera roto ni un milímetro. Pinchar el `<span>` es **más estrecho**, no menos: exige
+ * que la palabra viaje en el elemento que le da sentido, y no sobrevive a que alguien la deje caer
+ * suelta en el nombre del puerto.
+ */
+async function filasDe(
+  page: import("@playwright/test").Page,
+): Promise<readonly { texto: string; calidad: string | null }[]> {
+  return page.locator(ENTRADAS).evaluateAll((entradas) =>
+    entradas.map((entrada) => ({
+      texto: (entrada.textContent ?? "").trim(),
+      calidad: entrada.querySelector(".indice__calidad")?.textContent?.trim() ?? null,
+    })),
+  );
+}
+
 test.use({ javaScriptEnabled: false });
 
 test("A12 · la lista de puertos de una región dice la calidad de cada uno, como la portada", async ({
@@ -95,13 +117,15 @@ test("A12 · la lista de puertos de una región dice la calidad de cada uno, com
   for (const region of regiones) {
     qa.step(`recorrer /mareas/${region}/, que lista los puertos de la región`);
     await page.goto(`/mareas/${region}/`);
-    const entradas = (await page.locator(ENTRADAS).allTextContents()).map((texto) => texto.trim());
+    const entradas = await filasDe(page);
     for (const puerto of puertos.filter((candidato) => candidato.region === region)) {
-      const suya = entradas.find((texto) => texto.startsWith(puerto.nombre));
+      const suya = entradas.find((fila) => fila.texto.startsWith(puerto.nombre));
       if (suya === undefined) {
         mudos.push(`${puerto.nombre}: no aparece en /mareas/${region}/`);
-      } else if (!suya.endsWith(puerto.palabra)) {
-        mudos.push(`${puerto.nombre} (/mareas/${region}/): «${suya}» no dice «${puerto.palabra}»`);
+      } else if (suya.calidad !== puerto.palabra) {
+        mudos.push(
+          `${puerto.nombre} (/mareas/${region}/): «${suya.texto}» no dice «${puerto.palabra}»`,
+        );
       }
     }
   }
@@ -124,14 +148,14 @@ test("A12 · el último clic antes del puerto —la página de la provincia— t
   qa.step("bajar hasta la lista de la provincia, el último índice antes de la ficha del puerto");
   await page.goto("/mareas/galicia/pontevedra/");
 
-  const entradas = (await page.locator(ENTRADAS).allTextContents()).map((texto) => texto.trim());
+  const entradas = await filasDe(page);
   const mudos = puertos
     .filter((puerto) => puerto.provincia === "pontevedra")
     .flatMap((puerto) => {
-      const suya = entradas.find((texto) => texto.startsWith(puerto.nombre));
-      return suya === undefined || suya.endsWith(puerto.palabra)
+      const suya = entradas.find((fila) => fila.texto.startsWith(puerto.nombre));
+      return suya === undefined || suya.calidad === puerto.palabra
         ? []
-        : [`${puerto.nombre}: «${suya}» no dice «${puerto.palabra}»`];
+        : [`${puerto.nombre}: «${suya.texto}» no dice «${puerto.palabra}»`];
     });
 
   expect(

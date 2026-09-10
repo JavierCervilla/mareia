@@ -14,6 +14,8 @@
  * de la portada, que es CSS puro (ver `estilos/indices.css`).
  */
 
+import { errorDeLaPrediccion } from "../formato.ts";
+
 interface Entrada {
   readonly nombre: string;
   readonly ruta: string;
@@ -23,6 +25,15 @@ interface Entrada {
    * puertos (regiones, provincias): ahí la pregunta no tiene respuesta, y no se inventa una.
    */
   readonly estimada?: boolean | undefined;
+  /**
+   * RMSE de la predicción en este puerto, en metros. `undefined` cuando **no hay medida** — que es
+   * el caso de 118 de los 153 puertos— y también en los índices cuyas entradas no son puertos.
+   *
+   * Va aparte de `estimada` porque son **dos preguntas distintas** y el catálogo lo demuestra: hay
+   * dos puertos estimados **con** error medido (Garachico y San Sebastián de la Gomera). Fundirlas
+   * en un solo campo obligaría a mentir en uno de los dos.
+   */
+  readonly errorM?: number | undefined;
 }
 
 interface Props {
@@ -44,13 +55,24 @@ const { entradas, titulo } = Astro.props;
       >
         <a class="indice__enlace" href={entrada.ruta}>
           <span class="indice__nombre">{entrada.nombre}</span>
-          {(entrada.meta !== undefined || entrada.estimada !== undefined) && (
+          {(entrada.meta !== undefined ||
+            entrada.estimada !== undefined ||
+            entrada.errorM !== undefined) && (
             <span class="indice__meta">
               {entrada.meta}
               {entrada.estimada !== undefined && (
                 <>
                   {entrada.meta !== undefined && " · "}
                   <span class="indice__calidad">{entrada.estimada ? "estimada" : "medida"}</span>
+                </>
+              )}
+              {/* El error sólo aparece cuando existe. Un «— cm» en los 118 sin medida se leería
+                  como una medida pobre, y lo que pasa es que no hay ninguna: eso ya lo dice la
+                  palabra de al lado. */}
+              {entrada.errorM !== undefined && (
+                <>
+                  {" · "}
+                  <span class="indice__error">{errorDeLaPrediccion(entrada.errorM)}</span>
                 </>
               )}
             </span>

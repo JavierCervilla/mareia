@@ -73,6 +73,9 @@ const migas = migasDeProvincia(
       ruta: rutaPuerto(puerto),
       meta: puerto.timezone,
       estimada: puerto.quality.estimated,
+      // `?? undefined`: el DTO trae `null` cuando no hay observación con la que medir, y el
+      // componente distingue «no hay medida» (undefined) de una medida de cero.
+      errorM: puerto.quality.rmse_m ?? undefined,
     }))}
   />
 </AlmanaqueLayout>

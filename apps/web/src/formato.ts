@@ -83,6 +83,21 @@ export function centimetros(valorEnMetros: number): string {
   return `${Math.round(valorEnMetros * 100)}${PEGADO}cm`;
 }
 
+/**
+ * El error de la predicción de un puerto, para una **lista**: `±4 cm`, `±134 cm`.
+ *
+ * En centímetros y no en metros porque el sitio de esto es un índice de 153 filas: `0,0359 m`
+ * obliga a contar ceros para compararlo con `1,3424 m`, y `±4 cm` frente a `±134 cm` se ve de un
+ * vistazo. La ficha del puerto sigue publicando el metro exacto — ahí se viene a leer un dato, no a
+ * elegir entre ciento cincuenta.
+ *
+ * El `±` no es decoración: sin él, «4 cm» junto al nombre de un puerto se lee como una altura de
+ * marea, que es justo la otra cifra en centímetros que este sitio publica.
+ */
+export function errorDeLaPrediccion(rmseEnMetros: number): string {
+  return `±${centimetros(rmseEnMetros)}`;
+}
+
 /** Un ángulo en grados, redondeado al grado. */
 export function grados(valor: number): string {
   return `${Math.round(valor)}°`;

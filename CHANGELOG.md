@@ -2,6 +2,36 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-09-10 — T-34 · El error medido en las listas de puertos (cierra A-T14B H-3)
+
+- **Las tres listas de puertos publican el error de la predicción, en centímetros**: «Vigo ·
+  Pontevedra · medida · ±6 cm». Lo publican los **35** puertos que tienen RMSE medido; los **118**
+  que no tienen medida **no dicen nada** en vez de decir «— cm», porque un guion o un «±0 cm» se
+  leería como una predicción perfecta o como una mala y lo que pasa es que no hay ninguna. La
+  palabra `medida`/`estimada` se queda: contesta otra pregunta —¿son de aquí las constantes?— y el
+  error **se suma** a ella, no la sustituye.
+- **La decisión se revisó al medir, antes de escribir el código.** El hallazgo pedía enseñar el
+  `grade` porque «el `grade` ordena por error». Los datos dicen que no: **116 de los 118 puertos sin
+  medir son grade C**, y entre los medidos A y B se solapan —el mejor B, *Es Castell* **0,0359**,
+  gana al peor A, *Santander* **0,0587**— con C repartida entre 0,0426 y **1,3424**. Pintar el
+  `grade` habría puesto una C a 116 puertos cuyo único pecado es no tener mareógrafo cerca. Se
+  preguntó de nuevo en vez de entregar algo con forma de arreglo.
+- **Gate nuevo sobre el `dist/`**, contado contra el dataset y no contra un número escrito: todo
+  puerto con `rmse_m` publica **su** cifra exacta en las tres listas, y ninguno sin medida publica
+  una. Probado **en rojo por las dos mitades** —borrando la cifra de *Marín* y poniéndole una
+  inventada a *Baiona*—, con sus dos canarios: que se han visto los 153 puertos × 3 listas contados
+  desde el catálogo, y que entre ellos hay de los dos tipos (sin el segundo, un catálogo que se
+  quedara sin medidas pasaría en verde sin publicar una sola cifra).
+- **Dos gates existentes afirmaban la posición y no la promesa, y esta fila los destapó.** El
+  trinquete de T-14B y el recorrido de la portada exigían que el texto de la fila **terminara** en
+  `medida`/`estimada`; al añadir el error detrás se pusieron rojos sin que la promesa se hubiera
+  movido un milímetro. No se relajaron: ahora leen la palabra **del `<span>` que la publica**, que es
+  **más estrecho** —lo demuestra el sabotaje que le quita la clase `indice__calidad` dejando el
+  texto intacto: la forma nueva lo caza y la vieja pasaba en verde.
+- **Corregido de paso, en el plan de la trayectoria**: decía «119 de 154» y el catálogo tiene **153**
+  puertos, **35** medidos, **118** sin medir. No mueve el argumento (116 de 118 siguen siendo C, el
+  98 %), pero un número mal contado en el documento que justifica una decisión no se deja pasar.
+
 ## 2026-09-10 — T-32 · P6 contra la fuente entera: se cierra A-T21 H-2 y H-4
 
 - **P6 pasa de cubrir 14 de 348 relaciones a cubrir las 348.** Es el único gate que compara el

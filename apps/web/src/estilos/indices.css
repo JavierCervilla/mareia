@@ -86,6 +86,20 @@
   color: var(--m-sub);
 }
 
+/**
+ * El error medido (T-34). **Mismo tono y mismo cuerpo que el resto de la meta**, a propósito.
+ *
+ * La tentación era pintarlo —verde el pequeño, rojo el grande— y es justo lo que el brief veta
+ * (§3, nada de chips): un color convierte una magnitud continua en tres categorías inventadas, y
+ * quien decide dónde cae la frontera es el que elige el color, no el dato. La cifra ya ordena sola.
+ *
+ * `tabular-nums` sí: en una columna de 153 filas, «±4 cm» y «±134 cm» tienen que poder compararse
+ * por su ancho sin leerlos.
+ */
+.indice__error {
+  font-variant-numeric: tabular-nums;
+}
+
 /* Terracota, el mismo tono con el que la página del puerto marca sus avisos. */
 .indice__entrada[data-estimado="true"] .indice__calidad {
   color: var(--m-terra);

@@ -15,10 +15,15 @@ escribir nada:
 
 | | |
 |---|---|
-| puertos **sin** RMSE medido | **119** de 154 — y **116 de ellos son grade C** |
+| puertos **sin** RMSE medido | **118** de 153 — y **116 de ellos son grade C** |
 | solape A/B entre los medidos | A va de 0,0372 a 0,0587; B de **0,0359** a 0,0643 |
 | el mejor B contra el peor A | Es Castell **0,0359** gana a Santander **0,0587** |
 | rango de C entre los medidos | de 0,0426 a **1,3424** |
+
+> **Corregido al implementar (10-sep)**: la tabla decía «119 de 154». El catálogo tiene **153**
+> puertos y **35** medidos, o sea **118** sin medir. El error venía de un recuento anterior y no
+> mueve nada del argumento —116 de 118 siguen siendo C, el 98 %—, pero un número mal contado en el
+> documento que justifica una decisión es exactamente lo que no se deja pasar aquí.
 
 O sea: el `grade` dice sobre todo «no hay medida» (116 casos), y donde la hay **no ordena**. Pintarlo
 habría puesto una C a 116 puertos cuyo único pecado es no tener mareógrafo cerca, y habría dejado el
@@ -36,7 +41,7 @@ habría puesto una C a 116 puertos cuyo único pecado es no tener mareógrafo ce
 
 **Tradeoffs**
 1. **Una cifra más por fila.** Se paga: es exactamente la que faltaba para poder elegir.
-2. **Sólo la publican 35 de 154.** La asimetría es honrada —los otros 119 no tienen medida— pero hay
+2. **Sólo la publican 35 de 153.** La asimetría es honrada —los otros 118 no tienen medida— pero hay
    que evitar que su ausencia se lea como «cero error». Por eso el que no tiene medida **no dice
    nada** en vez de decir «— cm», y la palabra `estimada` sigue explicando por qué.
 

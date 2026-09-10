@@ -48,6 +48,28 @@ function catalogo(): { medidos: readonly string[]; estimados: readonly string[] 
 const ENTRADAS_VISIBLES = "li.indice__entrada:visible";
 const REGIONES_VISIBLES = "section.grupo:visible";
 
+/**
+ * Lo que cada entrada visible dice de sí misma: su texto entero y **la palabra de calidad tal como
+ * la publica su propio `<span>`**.
+ *
+ * La palabra se lee del elemento y no del final del texto de la fila. Este recorrido afirma que la
+ * calidad *se ve* y que el filtro *funciona*, no que la palabra sea lo último que se lee: cuando
+ * T-34 añadió el error medido detrás («Vigo · Pontevedra · medida · ±6 cm») los tres `endsWith` se
+ * pusieron rojos sin que la promesa se hubiera movido. Pinchar el `<span>` es **más estrecho**, no
+ * menos —exige que la palabra viaje en el elemento que le da sentido— y no se lo lleva por delante
+ * lo próximo que se añada a la fila.
+ */
+async function entradasVisibles(
+  page: Page,
+): Promise<readonly { texto: string; calidad: string | null }[]> {
+  return page.locator(ENTRADAS_VISIBLES).evaluateAll((entradas) =>
+    entradas.map((entrada) => ({
+      texto: (entrada.textContent ?? "").trim(),
+      calidad: entrada.querySelector(".indice__calidad")?.textContent?.trim() ?? null,
+    })),
+  );
+}
+
 test.use({ javaScriptEnabled: false });
 
 /**
@@ -79,20 +101,24 @@ test("la portada dice la calidad de cada puerto y se filtra por ella sin JavaScr
 
   qa.step("abrir la portada con el motor de JavaScript apagado");
   await page.goto("/");
-  const todas = await page.locator(ENTRADAS_VISIBLES).allTextContents();
+  const todas = await entradasVisibles(page);
   expect(todas.length, "la portada no lista el catálogo entero").toBe(
     medidos.length + estimados.length,
   );
 
   // La forma de fallar de esto no es «no aparece»: es que aparezca en 148 de 153. Se listan las
   // entradas mudas por su nombre, que es lo que hace falta para arreglarlo.
-  const mudas = todas.filter((entrada) => !/(?:medida|estimada)$/u.test(entrada.trim()));
+  const mudas = todas
+    .filter((entrada) => entrada.calidad !== "medida" && entrada.calidad !== "estimada")
+    .map((entrada) => entrada.texto);
   expect(mudas, `entradas de la portada sin decir su calidad: ${mudas.join(" | ")}`).toEqual([]);
 
   qa.step("filtrar «solo los medidos»: quedan los del dataset y ni un estimado a la vista");
   await page.locator('label[for="calidad-medidos"]').click();
-  const visiblesMedidos = await page.locator(ENTRADAS_VISIBLES).allTextContents();
-  const coladas = visiblesMedidos.filter((entrada) => entrada.endsWith("estimada"));
+  const visiblesMedidos = await entradasVisibles(page);
+  const coladas = visiblesMedidos
+    .filter((entrada) => entrada.calidad === "estimada")
+    .map((entrada) => entrada.texto);
   expect(coladas, `el filtro dejó pasar puertos estimados: ${coladas.join(" | ")}`).toEqual([]);
   expect(visiblesMedidos.length, "el filtro no enseña todos los puertos medidos").toBe(
     medidos.length,
@@ -101,8 +127,10 @@ test("la portada dice la calidad de cada puerto y se filtra por ella sin JavaScr
 
   qa.step("filtrar «solo los estimados»: el complemento exacto, sin ningún medido");
   await page.locator('label[for="calidad-estimados"]').click();
-  const visiblesEstimados = await page.locator(ENTRADAS_VISIBLES).allTextContents();
-  const perdidas = visiblesEstimados.filter((entrada) => entrada.endsWith("medida"));
+  const visiblesEstimados = await entradasVisibles(page);
+  const perdidas = visiblesEstimados
+    .filter((entrada) => entrada.calidad === "medida")
+    .map((entrada) => entrada.texto);
   expect(perdidas, `el filtro dejó pasar puertos medidos: ${perdidas.join(" | ")}`).toEqual([]);
   expect(visiblesEstimados.length).toBe(estimados.length);
 
