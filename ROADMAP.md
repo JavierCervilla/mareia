@@ -272,6 +272,12 @@
       y no la promesa** (exigían que la fila *terminara* en `medida`/`estimada`): ahora leen la
       palabra del `<span>` que la publica, forma **más estrecha** — caza el sabotaje que quita la
       clase dejando el texto intacto, que la vieja pasaba en verde.
+      **El pase adversario entró tres veces, las tres «el gate no alcanza»**: hay una **cuarta**
+      lista (`404.html`, 153 puertos, cero señales) que el gate **no podía ver** porque censaba sus
+      páginas desde el catálogo; iteraba lo esperado contra un `Map`, así que una fila de más y una
+      duplicada pasaban en verde; y **ninguno miraba si la cifra se pinta** (35 escritas, 0 visibles,
+      318 tests verdes). Los tres arreglados: el censo **se lee del `dist/`**, se juzga **cada fila
+      publicada** por su `href`, y nace **G7** (4 listas × 3 anchos × 2 señales).
 - [x] T-32 · **P6 contra la fuente entera: se cierra A-T21 H-2 y H-4.** El único gate que compara el
       artefacto contra la fuente pasa de **14 de 348** relaciones a **las 348**: CI baja RAMPE (12 MB,
       ~4 s) en vez de leer el recorte de 7 áreas. Reproducidos los dos ataques contra las dos

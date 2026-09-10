@@ -49,6 +49,14 @@ const descripcion =
             nombre: puerto.name,
             ruta: rutaPuerto(puerto),
             meta: puerto.province.name,
+            // La **cuarta** lista de puertos, y se le olvidó dos veces: T-14B le dio la palabra de
+            // calidad a tres listas y T-34 la cifra a esas mismas tres, contando ambas veces «las
+            // listas» desde el catálogo — y esta página no sale del catálogo. Aquí se elige puerto
+            // igual que en las otras tres (su cabecera lo dice: quien cae aquí venía a por UN
+            // puerto), así que se elige con lo mismo. Lo destapó el pase adversario de T-34, y el
+            // gate ahora censa las listas leyendo el `dist/`, no el catálogo.
+            estimada: puerto.quality.estimated,
+            errorM: puerto.quality.rmse_m ?? undefined,
           }))}
         />
       </section>

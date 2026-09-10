@@ -15,7 +15,17 @@ import { createReadStream, existsSync, statSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join, normalize, resolve } from "node:path";
 
-const RAIZ = resolve(import.meta.dirname, "..", "..", "apps", "web", "dist");
+/**
+ * Qué se sirve. Por defecto el `dist/` de la web, que es lo que quiere todo el mundo.
+ *
+ * `RAIZ_ESTATICA` existe para un caso concreto: un recorrido adversario que necesita servir una
+ * **copia saboteada** del sitio sin tocar la que están leyendo los demás workers. Antes de que
+ * existiera, el único ataque que medía la pantalla mutaba la hoja compartida del `dist/` mientras
+ * la suite corría — el mismo error que costó cuatro rojos inventados en T-32.
+ */
+const RAIZ = resolve(
+  process.env["RAIZ_ESTATICA"] ?? join(import.meta.dirname, "..", "..", "apps", "web", "dist"),
+);
 const PUERTO = Number(process.env["PUERTO_ESTATICO"] ?? 4321);
 
 /** Tipos MIME de lo único que publica el sitio. Sin adivinanzas: lo que no está, no se sirve. */
