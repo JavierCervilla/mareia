@@ -784,6 +784,53 @@ def alcance_de_la_reconstruccion(
     }
 
 
+class AlcanceInsuficienteError(Exception):
+    """Se pidió que P6 cubriera el artefacto entero y no lo cubre.
+
+    **Es la pieza que evita que este cambio se vuelva contra sí mismo.** Si P6 «usa la fuente si
+    puede y si no el recorte», una descarga fallida en CI baja la cobertura de 348 a 14 y el check
+    sigue en verde: nadie se entera de que el gate encogió. Es «verde por medir a casi nadie», que
+    es exactamente lo que costó A-T22A-1 con otra ropa.
+
+    Así que el alcance **no se descubre: se pide**. Quien llama declara qué cobertura espera y esto
+    comprueba que la obtuvo. Es ``medidos === sujetos`` aplicado al alcance, no ``medidos > umbral``.
+    """
+
+
+def fuente_entera(destino: Path, *, refresh: bool = False) -> Path:
+    """Baja RAMPE y la deja lista para que P6 la lea, o levanta diciendo por qué no.
+
+    No devuelve el recorte como consuelo: quien pide la fuente entera y no la consigue tiene que
+    verlo en rojo, no recibir menos cobertura sin enterarse.
+    """
+    try:
+        return rampe.materializar(destino, refresh=refresh)
+    except (rampe.ErrorRampe, OSError) as error:
+        raise AlcanceInsuficienteError(
+            f"se pidió P6 contra la fuente entera de RAMPE y no se pudo obtener: {error}. "
+            "No se cae al recorte: eso dejaría el gate cubriendo 14 de 348 relaciones con el check "
+            "en verde, que es peor que no tenerlo"
+        ) from error
+
+
+def exigir_alcance_total(dataset: dict[str, Any], origen: Path) -> None:
+    """Comprueba que P6, con ``origen``, cubre **todas** las relaciones publicadas.
+
+    La comprobación es ``cubiertas == publicadas`` y no un umbral, y las dos cifras se cuentan por
+    caminos distintos: las cubiertas salen de los códigos que trae la fuente y las publicadas del
+    propio artefacto. Contarlas con el mismo recorrido no comprobaría nada.
+    """
+    alcance = alcance_de_la_reconstruccion(dataset, origen)
+    if alcance["relacionesCubiertas"] != alcance["relacionesPublicadas"]:
+        sin_cubrir = alcance["relacionesPublicadas"] - alcance["relacionesCubiertas"]
+        raise AlcanceInsuficienteError(
+            f"se pidió P6 contra la fuente entera y cubre "
+            f"{alcance['relacionesCubiertas']} de {alcance['relacionesPublicadas']} relaciones "
+            f"({sin_cubrir} sin cubrir, {alcance['areasCubiertas']} de "
+            f"{alcance['areasEnLaFuente']} áreas): la fuente que se leyó no es la entera"
+        )
+
+
 #: Campos de una relación que P6 compara. Son los cuatro que se leen en la página: el nombre y la
 #: figura, que es lo que se busca en la fuente, y las dos cifras que dicen de qué lado del borde
 #: está el puerto y a cuánto.

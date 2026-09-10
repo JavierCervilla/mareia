@@ -37,6 +37,7 @@ import io
 import json
 import zipfile
 from dataclasses import dataclass
+from pathlib import Path
 
 from mareia_pipeline import utm
 from mareia_pipeline.sources import cache
@@ -153,6 +154,24 @@ def _colecciones(cuerpo: bytes) -> dict[str, bytes]:
             return {nombre: archivo.read(dentro[nombre]) for nombre in FICHEROS}
     except zipfile.BadZipFile as error:
         raise ErrorRampe(f"el ZIP de RAMPE no se puede abrir: {error}") from error
+
+
+def materializar(destino: Path, *, refresh: bool = False) -> Path:
+    """Deja los dos GeoJSON de RAMPE en ``destino``, con **los mismos nombres** que el recorte.
+
+    Existe para que **P6 pueda correr contra la fuente entera** sin estrenar un segundo lector: el
+    gate ya sabe leer un directorio con estos dos ficheros —es como está capturado el recorte—, así
+    que darle la fuente completa es dejarla escrita con esa misma forma y pasarle la ruta.
+
+    Se escribe a disco en vez de devolver los bytes **a propósito**: la alternativa era abrirle a
+    ``areas.py`` una segunda vía de lectura «desde memoria», y entonces el camino que corre en CI
+    (fuente entera) dejaría de ser el mismo que el que corre en local (recorte). Dos caminos se
+    desincronizan, y el que no se ejecuta a diario es el que se pudre.
+    """
+    destino.mkdir(parents=True, exist_ok=True)
+    for nombre, cuerpo in _colecciones(descargar(refresh=refresh)).items():
+        (destino / nombre).write_bytes(cuerpo)
+    return destino
 
 
 def _crs_declarado(coleccion: dict, *, fichero: str) -> utm.Proyeccion:

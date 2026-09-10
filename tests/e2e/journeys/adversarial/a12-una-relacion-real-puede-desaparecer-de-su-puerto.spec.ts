@@ -27,6 +27,23 @@
  *
  * Nada de esto necesita mala fe: es el modo de fallo de un artefacto que se edita a mano, se
  * commitea, y del que ningún gate sabe si sale de la fuente.
+ *
+ * **ACTUALIZADO EN T-32, y conviene leerlo antes de tocar el `test.fail()`.** El hallazgo que este
+ * recorrido reproduce **ya no puede llegar a producción**: desde T-32, CI corre
+ * `run.py check --areas-fuente-entera` y P6 vuelve a derivar **las 348 relaciones desde las 86
+ * áreas** de RAMPE, no desde las 7 del recorte. Un derivado divergente tiene que estar
+ * **commiteado** para publicarse, y ahí CI lo pone en rojo antes del merge. Medido con este mismo
+ * ataque: con el recorte, 8 fallos y **0** `dentro` volcados; con la fuente entera, **194 fallos,
+ * los 5 `dentro` incluidos**.
+ *
+ * **Y aun así el `test.fail()` se queda**, porque este recorrido no afirma eso. Afirma algo más
+ * estrecho y distinto: que **el build valide sus propias entradas**. Se salta CI por diseño —le
+ * mete el derivado manipulado directamente al build con `dataDirEfimero`—, y el build sigue
+ * publicando lo que le den. Retirar el trinquete porque el hallazgo se cerró **por otra vía** sería
+ * decir que este recorrido prueba algo que no prueba. Se comprobó ejecutándolo: sigue en rojo.
+ *
+ * Si algún día se decide que el build valide su data dir, este trinquete salta solo. Si se decide
+ * que no —porque duplicaría P6—, entonces lo honrado es retirar el recorrido, no su `test.fail()`.
  */
 
 import { rmSync } from "node:fs";

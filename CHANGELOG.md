@@ -2,6 +2,30 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-09-10 — T-32 · P6 contra la fuente entera: se cierra A-T21 H-2 y H-4
+
+- **P6 pasa de cubrir 14 de 348 relaciones a cubrir las 348.** Es el único gate que compara el
+  artefacto contra **la fuente** en vez de contra sí mismo, y hasta ahora sólo podía leer el recorte
+  commiteado: **7 de las 86 áreas** de RAMPE, y **ninguna** de las 10 relaciones que dicen «cae
+  dentro». CI baja ahora la fuente (12 MB, ~4 s medidos) y P6 re-deriva el artefacto entero.
+- **Los dos hallazgos abiertos de T-21, reproducidos contra las dos coberturas.** **H-2** (una
+  relación movida de puerto, con el total intacto en 348): verde con el recorte, **rojo** con la
+  fuente entera, nombrando de dónde desapareció y dónde apareció. **H-4** (el semieje del GRS80
+  desviado 255,1 m): **8 fallos y 0 `dentro` volcados** con el recorte, **194 fallos con los 5
+  `dentro`** con la fuente entera.
+- **El alcance se PIDE, no se descubre**, y esa es la pieza que evita que el cambio se vuelva contra
+  sí mismo. Un P6 que «usara la fuente si puede y si no el recorte» bajaría de 348 a 14 cuando MITECO
+  no responda **con el check en verde**: verde por medir a casi nadie, que es lo que costó A-T22A-1.
+  Por eso `--areas-fuente-entera` **levanta** en vez de degradar, el paso de CI **no** lleva
+  `continue-on-error`, y la comprobación es `cubiertas == publicadas` —contadas por caminos
+  distintos— y no un umbral. Los dos modos de fallo están **probados en rojo** con su sabotaje.
+- **Los `test.fail()` de H-2 y H-4 NO se retiran, y el plan decía lo contrario.** Se comprobó
+  ejecutándolos: siguen en rojo, con razón. Esos recorridos no corren `run.py check`; le meten el
+  derivado manipulado **al build**, y afirman que el build valide sus entradas — una propiedad más
+  estrecha y distinta. El hallazgo se cierra por otra vía (un derivado divergente tiene que estar
+  commiteado para publicarse, y ahí CI lo para antes del merge), así que retirar el trinquete sería
+  decir que prueban algo que no prueban. Se quedan, con la cabecera corregida y las cifras medidas.
+
 ## 2026-09-10 — T-33 · A-1 bis: partir el gate de la ilustración
 
 - **CI se ponía roja uno de cada cinco días sin que nada estuviera roto.** El test `A-1 bis` de T-09
