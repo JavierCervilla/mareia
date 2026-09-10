@@ -260,6 +260,24 @@
       **El pase adversario rompió T3**: reordenando tres atributos se publicaba «se pesca de miedo»
       con la suite en verde, y el canario de cobertura era un umbral que 764 de 765 pasaba. Ahora el
       nodo se localiza por su atributo y el canario **compara contra los sujetos**.
+- [x] T-34 · **El error medido en las listas de puertos (cierra A-T14B H-3).** Las tres listas
+      publican «± N cm» junto a la palabra de calidad: los **35** puertos con RMSE medido dicen su
+      cifra, los **118** sin medida **no dicen nada** —un «— cm» se leería como una predicción mala
+      y lo que hay es ninguna—. **La decisión se revisó al medir**: el hallazgo pedía enseñar el
+      `grade` «porque ordena por error», y **116 de los 118 sin medir son C** mientras A y B se
+      solapan (el mejor B **0,0359** gana al peor A **0,0587**) — se volvió a preguntar antes de
+      escribir código. Nace el gate sobre el `dist/` contado **contra el dataset**: todo medido
+      publica su cifra exacta en las tres listas y ninguno sin medida publica una, **probado en rojo
+      por las dos mitades** y con sus dos canarios. Y destapó **dos gates que afirmaban la posición
+      y no la promesa** (exigían que la fila *terminara* en `medida`/`estimada`): ahora leen la
+      palabra del `<span>` que la publica, forma **más estrecha** — caza el sabotaje que quita la
+      clase dejando el texto intacto, que la vieja pasaba en verde.
+      **El pase adversario entró tres veces, las tres «el gate no alcanza»**: hay una **cuarta**
+      lista (`404.html`, 153 puertos, cero señales) que el gate **no podía ver** porque censaba sus
+      páginas desde el catálogo; iteraba lo esperado contra un `Map`, así que una fila de más y una
+      duplicada pasaban en verde; y **ninguno miraba si la cifra se pinta** (35 escritas, 0 visibles,
+      318 tests verdes). Los tres arreglados: el censo **se lee del `dist/`**, se juzga **cada fila
+      publicada** por su `href`, y nace **G7** (4 listas × 3 anchos × 2 señales).
 - [x] T-32 · **P6 contra la fuente entera: se cierra A-T21 H-2 y H-4.** El único gate que compara el
       artefacto contra la fuente pasa de **14 de 348** relaciones a **las 348**: CI baja RAMPE (12 MB,
       ~4 s) en vez de leer el recorte de 7 áreas. Reproducidos los dos ataques contra las dos

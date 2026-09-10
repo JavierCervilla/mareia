@@ -2,6 +2,57 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-09-10 — T-34 · El error medido en las listas de puertos (cierra A-T14B H-3)
+
+- **Las tres listas de puertos publican el error de la predicción, en centímetros**: «Vigo ·
+  Pontevedra · medida · ±6 cm». Lo publican los **35** puertos que tienen RMSE medido; los **118**
+  que no tienen medida **no dicen nada** en vez de decir «— cm», porque un guion o un «±0 cm» se
+  leería como una predicción perfecta o como una mala y lo que pasa es que no hay ninguna. La
+  palabra `medida`/`estimada` se queda: contesta otra pregunta —¿son de aquí las constantes?— y el
+  error **se suma** a ella, no la sustituye.
+- **La decisión se revisó al medir, antes de escribir el código.** El hallazgo pedía enseñar el
+  `grade` porque «el `grade` ordena por error». Los datos dicen que no: **116 de los 118 puertos sin
+  medir son grade C**, y entre los medidos A y B se solapan —el mejor B, *Es Castell* **0,0359**,
+  gana al peor A, *Santander* **0,0587**— con C repartida entre 0,0426 y **1,3424**. Pintar el
+  `grade` habría puesto una C a 116 puertos cuyo único pecado es no tener mareógrafo cerca. Se
+  preguntó de nuevo en vez de entregar algo con forma de arreglo.
+- **Gate nuevo sobre el `dist/`**, contado contra el dataset y no contra un número escrito: todo
+  puerto con `rmse_m` publica **su** cifra exacta en las tres listas, y ninguno sin medida publica
+  una. Probado **en rojo por las dos mitades** —borrando la cifra de *Marín* y poniéndole una
+  inventada a *Baiona*—, con sus dos canarios: que se han visto los 153 puertos × 3 listas contados
+  desde el catálogo, y que entre ellos hay de los dos tipos (sin el segundo, un catálogo que se
+  quedara sin medidas pasaría en verde sin publicar una sola cifra).
+- **Dos gates existentes afirmaban la posición y no la promesa, y esta fila los destapó.** El
+  trinquete de T-14B y el recorrido de la portada exigían que el texto de la fila **terminara** en
+  `medida`/`estimada`; al añadir el error detrás se pusieron rojos sin que la promesa se hubiera
+  movido un milímetro. No se relajaron: ahora leen la palabra **del `<span>` que la publica**, que es
+  **más estrecho** —lo demuestra el sabotaje que le quita la clase `indice__calidad` dejando el
+  texto intacto: la forma nueva lo caza y la vieja pasaba en verde.
+- **El pase adversario entró tres veces, y las tres eran «el gate no alcanza».** (1) Hay una
+  **cuarta** lista de puertos —`404.html`, la que un hosting estático sirve ante cualquier URL que
+  no exista— con los 153 puertos y **cero señales**; y el gate **no podía verla nunca**, porque
+  censaba sus páginas desde el catálogo y su canario contaba «he mirado las que yo mismo enumeré».
+  Tercera vez que esa página se queda fuera de la misma clase de arreglo (A-T14B H-1, A-T30-2).
+  (2) El gate iteraba lo esperado preguntándole a un `Map`, así que una fila **de más** (*Baiona*
+  con `±3 cm` en Illes Balears) y una **duplicada** (dos «Mahón», la falsa delante) pasaban en
+  verde: afirmaba «ninguno sin medida publica una cifra» y comprobaba «ninguno *de los que yo
+  esperaba*». (3) **Ningún gate miraba si la cifra se pinta**: una línea de CSS
+  (`@media (max-width:700px){.indice__error{display:none}}`) dejaba 35 cifras escritas, **0
+  visibles** y los 318 tests en verde — la avería exacta para la que este repo ya escribió **G6**.
+- **Los tres arreglados, con su trinquete retirado.** El 404 lleva las dos señales; el gate **censa
+  las páginas leyendo el `dist/`** y pone en rojo cualquier página que publique puertos y él no sepa
+  juzgar; juzga **cada fila publicada** emparejada por su `href` (único, lo construye el catálogo)
+  y rechaza duplicados y nombres falsificados. Y nace **G7** —«lo que la lista dice, la pantalla lo
+  enseña»— sobre 4 listas × 3 anchos × los dos `<span>`, probado en rojo con el mismo sabotaje.
+- **El recorrido que medía la pantalla cambió de método al quedarse de gate.** Su versión original
+  mutaba la hoja del `dist/` **compartido** mientras la suite corría, y su propia cabecera avisaba
+  de que el día que existiera el gate tendría que servirse su propia copia. Ahora sabotea un espejo
+  efímero en `/tmp` en su propio puerto (el arnés acepta `RAIZ_ESTATICA`). Mutar el árbol con la
+  suite corriendo costó cuatro rojos inventados en T-32; no se hereda por comodidad.
+- **Corregido de paso, en el plan de la trayectoria**: decía «119 de 154» y el catálogo tiene **153**
+  puertos, **35** medidos, **118** sin medir. No mueve el argumento (116 de 118 siguen siendo C, el
+  98 %), pero un número mal contado en el documento que justifica una decisión no se deja pasar.
+
 ## 2026-09-10 — T-32 · P6 contra la fuente entera: se cierra A-T21 H-2 y H-4
 
 - **P6 pasa de cubrir 14 de 348 relaciones a cubrir las 348.** Es el único gate que compara el

@@ -74,6 +74,9 @@ const migas = migasDeRegion({ slug: region.slug, name: region.nombre });
             nombre: puerto.name,
             ruta: rutaPuerto(puerto),
             estimada: puerto.quality.estimated,
+            // `?? undefined`: el DTO trae `null` cuando no hay observación con la que medir, y el
+            // componente distingue «no hay medida» (undefined) de una medida de cero.
+            errorM: puerto.quality.rmse_m ?? undefined,
           }))}
         />
       </section>

@@ -78,8 +78,9 @@ const descripcion =
         Un puerto tiene la marea <strong>medida</strong> cuando el mareógrafo está en su propia
         dársena y la predicción se ha contrastado contra sus observaciones. En los demás es
         una <strong>estimación</strong>: constantes armónicas prestadas del mareógrafo más cercano, o
-        sin observaciones aquí con las que comprobarla. El error concreto de cada uno está en su
-        página.
+        sin observaciones aquí con las que comprobarla. Donde hay observaciones con las que medir el
+        error, la cifra va junto al puerto (<strong>±&nbsp;cm</strong>, error cuadrático medio); en
+        los demás no la hay, y por eso no aparece ninguna.
       </p>
       <div class="filtro__opciones">
         <label class="filtro__opcion" for="calidad-todos">
@@ -115,6 +116,9 @@ const descripcion =
                 ruta: rutaPuerto(puerto),
                 meta: puerto.province.name,
                 estimada: puerto.quality.estimated,
+                // `?? undefined`: el DTO trae `null` cuando no hay observación con la que medir, y el
+                // componente distingue «no hay medida» (undefined) de una medida de cero.
+                errorM: puerto.quality.rmse_m ?? undefined,
               }))}
             />
           </section>

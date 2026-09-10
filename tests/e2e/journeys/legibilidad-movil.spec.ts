@@ -533,3 +533,94 @@ for (const ruta of PAGINAS_TACTIL) {
     });
   }
 }
+
+/**
+ * **G7 · lo que la lista dice, la pantalla lo enseña** (nace del pase adversario de T-34).
+ *
+ * T-34 puso el error medido en las cuatro listas de puertos y lo dejó vigilado por cuatro gates —el
+ * del `dist/`, el del formato y los dos recorridos de calidad reescritos—. **Los cuatro leen
+ * texto**: `readFileSync` del HTML, cadenas a mano, `textContent` (que devuelve igual esté pintado
+ * o no). El pase lo midió con una línea añadida a la hoja construida,
+ * `@media (max-width:700px){.indice__error{display:none}}` — o sea, escondida **sólo en el
+ * teléfono**, que es donde se mira la marea:
+ *
+ * | | |
+ * |---|---|
+ * | `pnpm --filter web test`, 318 tests | **verde**, 0 fallos |
+ * | cifras escritas en el HTML de la portada | 35 |
+ * | cifras **visibles** a 412 px | **0** |
+ *
+ * Es literalmente la avería para la que este repositorio ya escribió **G6** en la tabla de
+ * especies —«todos leen el HTML; ninguno mira lo que se pinta»— y T-34 no la heredó, porque añadió
+ * una regla CSS nueva a una hoja donde el portal ya esconde entradas con `display: none`. La
+ * lección no es sobre esta cifra: **un gate que lee el artefacto no puede afirmar nada sobre lo que
+ * se ve**, y hay que decirlo con un gate distinto, no con más aserciones del mismo tipo.
+ *
+ * Se vigilan **los dos** `<span>` de los que depende elegir puerto —la palabra de calidad y la
+ * cifra—, porque viven en la misma hoja y se esconderían por el mismo atajo. Y se comprueba en las
+ * **cuatro** clases de lista, incluida la del 404, que es la que ya se quedó muda una vez.
+ */
+const LISTAS_DE_PUERTOS = [
+  { nombre: "portada", ruta: "/" },
+  { nombre: "404", ruta: "/404.html" },
+  { nombre: "región", ruta: "/mareas/galicia/" },
+  { nombre: "provincia", ruta: "/mareas/galicia/pontevedra/" },
+] as const;
+
+for (const lista of LISTAS_DE_PUERTOS) {
+  for (const ancho of ANCHOS) {
+    test(`G7 · ${lista.nombre} a ${ancho}px enseña las señales que publica, no solo las escribe`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: ancho, height: 800 });
+      await page.goto(lista.ruta, { waitUntil: "networkidle" });
+      await page.evaluate("document.fonts.ready");
+
+      const medida = await page.evaluate<{
+        escritas: Record<string, number>;
+        ocultas: Record<string, string[]>;
+      }>(`(() => {
+        const CLASES = ["indice__error", "indice__calidad"];
+        const escritas = {};
+        const ocultas = {};
+        for (const clase of CLASES) {
+          const nodos = [...document.querySelectorAll("li.indice__entrada ." + clase)];
+          escritas[clase] = nodos.length;
+          ocultas[clase] = nodos
+            .filter((n) => !n.checkVisibility({
+              contentVisibilityAuto: true,
+              opacityProperty: true,
+              visibilityProperty: true,
+            }))
+            .map((n) => {
+              const fila = n.closest("li.indice__entrada");
+              const nombre = fila?.querySelector(".indice__nombre")?.textContent?.trim();
+              return (nombre ?? "?") + " → " + (n.textContent ?? "").trim();
+            });
+        }
+        return { escritas, ocultas };
+      })()`);
+
+      // El canario. Sin esto, una lista que dejara de publicar la señal entera —o un selector
+      // podrido— haría pasar el gate en verde por no encontrar nada que mirar, que es la primera de
+      // las dos formas de mentir de un instrumento (T-28).
+      expect(
+        medida.escritas["indice__calidad"],
+        `${lista.ruta} no publica ni una palabra de calidad: el gate no está midiendo nada`,
+      ).toBeGreaterThan(0);
+      expect(
+        medida.escritas["indice__error"],
+        `${lista.ruta} no publica ni una cifra de error: el gate no está midiendo nada`,
+      ).toBeGreaterThan(0);
+
+      expect(
+        medida.ocultas["indice__error"],
+        `cifras escritas en el HTML de ${lista.ruta} y no pintadas a ${ancho}px`,
+      ).toEqual([]);
+      expect(
+        medida.ocultas["indice__calidad"],
+        `palabras de calidad escritas en el HTML de ${lista.ruta} y no pintadas a ${ancho}px`,
+      ).toEqual([]);
+    });
+  }
+}
