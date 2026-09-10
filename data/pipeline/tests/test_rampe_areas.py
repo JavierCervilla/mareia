@@ -678,3 +678,91 @@ def test_p6_en_rojo_si_falta_la_fuente_capturada(tmp_path: Path) -> None:
     catalogo = json.loads(areas.PORTS_JSON.read_text(encoding="utf-8"))
     errores = areas.errores_de_reconstruccion(publicado(), catalogo, tmp_path / "no-existe")
     assert errores and "no está la fuente capturada" in errores[0]
+
+
+# --------------------------------------------------------------------------------------------
+# T-32 · el alcance se PIDE, no se descubre
+# --------------------------------------------------------------------------------------------
+#
+# Estos cuatro vigilan la pieza que este cambio podría estropear. P6 puede correr contra el recorte
+# (7 áreas, sin red) o contra la fuente entera (86, con red), y la tentación es «usa la fuente si
+# puedes y si no el recorte». Con eso, **una descarga fallida en CI baja la cobertura de 348 a 14 y
+# el check sigue en verde**: nadie se entera de que el gate encogió. Es «verde por medir a casi
+# nadie», que es exactamente lo que costó A-T22A-1 con otra ropa.
+#
+# Por eso quien pide la fuente entera y no la obtiene se lleva un rojo, y por eso la comprobación es
+# `cubiertas == publicadas` y no un umbral.
+
+
+def test_exigir_alcance_total_pasa_cuando_la_fuente_cubre_todo() -> None:
+    """Con un dataset cuyas relaciones son todas del recorte, exigir el total no levanta."""
+    dataset = publicado()
+    codigos = {area.codigo for area in areas.areas_de_la_fuente_capturada()}
+    solo_del_recorte = {
+        **dataset,
+        "puertos": [
+            {
+                **puerto,
+                "areas": [a for a in puerto.get("areas", []) if a.get("codigo") in codigos],
+            }
+            for puerto in dataset["puertos"]
+        ],
+    }
+    areas.exigir_alcance_total(solo_del_recorte, areas.FUENTE_CAPTURADA)
+
+
+def test_exigir_alcance_total_levanta_con_el_recorte_sobre_el_artefacto_real() -> None:
+    """El caso que importa: el recorte NO cubre el artefacto publicado, y hay que verlo en rojo.
+
+    Si esto pasara en verde, `--areas-fuente-entera` podría estar leyendo el recorte sin que nadie
+    lo notara — que es el modo de fallo entero que esta trayectoria existe para impedir.
+    """
+    with pytest.raises(areas.AlcanceInsuficienteError) as excepcion:
+        areas.exigir_alcance_total(publicado(), areas.FUENTE_CAPTURADA)
+    mensaje = str(excepcion.value)
+    assert "348" in mensaje, f"el error no dice cuántas relaciones hay que cubrir: {mensaje}"
+    assert "sin cubrir" in mensaje, f"el error no dice cuántas faltan: {mensaje}"
+
+
+def test_fuente_entera_levanta_en_vez_de_caer_al_recorte(monkeypatch: Any) -> None:
+    """Si la fuente no se puede bajar, es ROJO. **No** devuelve el recorte como consuelo.
+
+    Es la mitad del invariante que no se puede probar mirando el camino feliz: un `fuente_entera`
+    que devolviese `FUENTE_CAPTURADA` ante un fallo de red dejaría P6 cubriendo 14 de 348 con el
+    check en verde, y este test es lo único que lo impide.
+    """
+
+    def cae(*_args: Any, **_kwargs: Any) -> Path:
+        raise rampe.ErrorRampe("MITECO no responde")
+
+    monkeypatch.setattr(rampe, "materializar", cae)
+    with pytest.raises(areas.AlcanceInsuficienteError) as excepcion:
+        areas.fuente_entera(Path("/tmp/da-igual-no-se-usa"))
+    mensaje = str(excepcion.value)
+    assert "MITECO no responde" in mensaje, "el error se traga el motivo original"
+    assert "no se cae al recorte" in mensaje.lower(), (
+        "el error no dice que NO degrada, que es justo lo que hay que poder leer al depurarlo"
+    )
+
+
+def test_el_alcance_se_cuenta_por_dos_caminos_distintos() -> None:
+    """Las cubiertas salen de la fuente y las publicadas del artefacto: contarlas igual no cuenta.
+
+    Es la forma del canario que T-22-A dejó por escrito. Si ambas cifras salieran del mismo
+    recorrido, `cubiertas == publicadas` sería una tautología y no comprobaría nada.
+    """
+    dataset = publicado()
+    alcance = areas.alcance_de_la_reconstruccion(dataset, areas.FUENTE_CAPTURADA)
+    publicadas_a_mano = sum(len(p.get("areas", [])) for p in dataset["puertos"])
+    codigos_de_la_fuente = {area.codigo for area in areas.areas_de_la_fuente_capturada()}
+    cubiertas_a_mano = sum(
+        1
+        for p in dataset["puertos"]
+        for a in p.get("areas", [])
+        if a.get("codigo") in codigos_de_la_fuente
+    )
+    assert alcance["relacionesPublicadas"] == publicadas_a_mano
+    assert alcance["relacionesCubiertas"] == cubiertas_a_mano
+    assert cubiertas_a_mano < publicadas_a_mano, (
+        "el recorte cubre ya todo el artefacto: este test dejó de medir la diferencia que vigila"
+    )

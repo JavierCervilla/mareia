@@ -260,6 +260,14 @@
       **El pase adversario rompió T3**: reordenando tres atributos se publicaba «se pesca de miedo»
       con la suite en verde, y el canario de cobertura era un umbral que 764 de 765 pasaba. Ahora el
       nodo se localiza por su atributo y el canario **compara contra los sujetos**.
+- [x] T-32 · **P6 contra la fuente entera: se cierra A-T21 H-2 y H-4.** El único gate que compara el
+      artefacto contra la fuente pasa de **14 de 348** relaciones a **las 348**: CI baja RAMPE (12 MB,
+      ~4 s) en vez de leer el recorte de 7 áreas. Reproducidos los dos ataques contra las dos
+      coberturas — H-2 verde con el recorte y **rojo** con la fuente; H-4 **8 fallos sin ningún
+      `dentro`** con el recorte y **194 con los 5** con la fuente. El alcance **se pide y no se
+      descubre**: pedirlo y no alcanzarlo es rojo, sin `continue-on-error` y sin caer al recorte,
+      porque degradar en silencio sería «verde por medir a casi nadie» (A-T22A-1). Los `test.fail()`
+      de H-2/H-4 **se quedan**: se comprobó que siguen en rojo porque atacan el build, no CI.
 - [x] T-30 · **El objetivo táctil, medido antes de prometerlo (G5).** Cierra el último hueco de la
       auditoría de UX. El número con el que se aplazó —«170 de 170 en rojo en la portada»— estaba
       **caducado**: cierto antes del arreglo de T-26, y desmentido desde entonces por el propio

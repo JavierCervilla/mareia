@@ -16,9 +16,11 @@ Todas las fuentes son públicas y anónimas: el pipeline no lee ninguna credenci
 from __future__ import annotations
 
 import argparse
+import contextlib
 import datetime as dt
 import json
 import sys
+import tempfile
 import time
 import urllib.error
 from collections import Counter
@@ -335,7 +337,7 @@ def _prune_stations(published: list[Port]) -> None:
             print(f"– {path.relative_to(REPO_ROOT)} (ya no está en el catálogo)")
 
 
-def command_check(_: argparse.Namespace) -> int:
+def command_check(args: argparse.Namespace) -> int:
     """Valida contra el schema los JSON de estación ya commiteados y su coherencia con el catálogo.
 
     Es el camino **offline**: no toca la red y es el que corre CI. Con doce estaciones bastaba con
@@ -357,7 +359,12 @@ def command_check(_: argparse.Namespace) -> int:
     print(f"✓ {len(files) - failures} de {len(files)} estaciones validan contra station/v1")
     failures += _check_catalogue()
     failures += _check_normativa()
-    failures += _check_areas_protegidas()
+    # Los dos con `getattr`: los tests construyen el Namespace a mano y traen sólo lo que su caso
+    # necesita. Exigirles campos que no usan sería que este gate rompiera 44 tests por una bandera.
+    failures += _check_areas_protegidas(
+        fuente_entera=getattr(args, "areas_fuente_entera", False),
+        refresh=getattr(args, "refresh", False),
+    )
     failures += _check_especies()
     failures += _check_fotos()
     return 1 if failures else 0
@@ -486,7 +493,7 @@ def command_normativa(args: argparse.Namespace) -> int:
     return 0
 
 
-def _check_areas_protegidas() -> int:
+def _check_areas_protegidas(*, fuente_entera: bool = False, refresh: bool = False) -> int:
     """Gates P1, P2 y P4 del derivado de áreas marinas protegidas. Offline y determinista.
 
     Los tres miran cosas distintas y ninguno cubre a los otros:
@@ -573,21 +580,42 @@ def _check_areas_protegidas() -> int:
             f"arista más larga de la fuente mide {comparativa['aristaMaxM']} m"
         )
     catalogo = json.loads(PORTS_JSON.read_text(encoding="utf-8"))
-    reconstruccion = areas.errores_de_reconstruccion(dataset, catalogo)
-    for error in reconstruccion:
-        print(f"✗ P6 · reconstrucción: {error}", file=sys.stderr)
-    problems += len(reconstruccion)
-    if not reconstruccion:
-        alcance = areas.alcance_de_la_reconstruccion(dataset)
-        sin_cubrir = alcance["relacionesPublicadas"] - alcance["relacionesCubiertas"]
-        print(
-            f"✓ P6 · las {alcance['relacionesCubiertas']} relaciones de las "
-            f"{alcance['areasCubiertas']} áreas del recorte capturado se vuelven a derivar de su "
-            f"geometría y coinciden campo a campo (nombre, figura, distancia y «dentro»). NO cubre "
-            f"las otras {sin_cubrir} de {alcance['relacionesPublicadas']}: el fixture son "
-            f"{alcance['areasCubiertas']} de las {alcance['areasEnLaFuente']} áreas de la fuente, "
-            f"porque RAMPE 2025 son 54,8 MB que no se commitean"
-        )
+    # El alcance de P6 se PIDE, no se descubre: sin bandera, el recorte de siempre; con ella, la
+    # fuente entera y rojo si no se alcanza. Un gate que se cae al recorte cuando la descarga falla
+    # encoge de 348 a 14 sin que nadie se entere, que es «verde por medir a casi nadie» (A-T22A-1).
+    #
+    # El directorio de la fuente entera se borra al salir (`TemporaryDirectory`), y no es cosmética:
+    # son **53 MB por ejecución**. En CI da igual —el runner es de usar y tirar— pero en local se
+    # acumulan sin que nadie los mire; medido aquí mismo, siete ejecuciones dejaron 371 MB.
+    with contextlib.ExitStack() as temporales:
+        origen_areas = areas.FUENTE_CAPTURADA
+        if fuente_entera:
+            destino = Path(temporales.enter_context(tempfile.TemporaryDirectory(prefix="rampe-")))
+            origen_areas = areas.fuente_entera(destino, refresh=refresh)
+            areas.exigir_alcance_total(dataset, origen_areas)
+        reconstruccion = areas.errores_de_reconstruccion(dataset, catalogo, origen_areas)
+        for error in reconstruccion:
+            print(f"✗ P6 · reconstrucción: {error}", file=sys.stderr)
+        problems += len(reconstruccion)
+        if not reconstruccion:
+            alcance = areas.alcance_de_la_reconstruccion(dataset, origen_areas)
+            sin_cubrir = alcance["relacionesPublicadas"] - alcance["relacionesCubiertas"]
+            derivadas = (
+                f"las {alcance['relacionesCubiertas']} relaciones de las "
+                f"{alcance['areasCubiertas']} áreas se vuelven a derivar de su geometría y coinciden "
+                "campo a campo (nombre, figura, distancia y «dentro»)"
+            )
+            if sin_cubrir == 0:
+                # La cifra la calcula el propio alcance, no está escrita aquí: si mañana el artefacto
+                # publica más relaciones, esta línea dice el número nuevo o el gate ya habrá enrojecido.
+                print(f"✓ P6 · TODAS {derivadas} — la fuente entera de RAMPE, sin recorte")
+            else:
+                print(
+                    f"✓ P6 · {derivadas}. NO cubre las otras {sin_cubrir} de "
+                    f"{alcance['relacionesPublicadas']}: el fixture son {alcance['areasCubiertas']} de "
+                    f"las {alcance['areasEnLaFuente']} áreas de la fuente, porque RAMPE 2025 son "
+                    "54,8 MB que no se commitean. Con --areas-fuente-entera se cubren todas"
+                )
     cobertura = areas.errores_de_cobertura(dataset, catalogo)
     for error in cobertura:
         print(f"✗ áreas protegidas: {error}", file=sys.stderr)
@@ -1089,7 +1117,16 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="commit de tide-database a citar en el informe (por defecto, el fijado en el código)",
     )
-    subparsers.add_parser("check", help="valida los JSON commiteados contra station/v1")
+    check = subparsers.add_parser("check", help="valida los JSON commiteados contra station/v1")
+    check.add_argument(
+        "--areas-fuente-entera",
+        action="store_true",
+        help=(
+            "P6 contra RAMPE completo en vez del recorte capturado (necesita red). Si no se puede "
+            "bajar o no cubre las 348 relaciones, es ROJO: no cae al recorte, porque eso dejaría "
+            "el gate cubriendo 14 de 348 con el check en verde"
+        ),
+    )
     subparsers.add_parser("normativa", help="ingesta del RD 560/1995 del BOE (tallas mínimas)")
     subparsers.add_parser(
         "verificar-normativa", help="gate G2: comprueba que el RD 560/1995 sigue en vigor"

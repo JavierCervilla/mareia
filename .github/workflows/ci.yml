@@ -151,7 +151,22 @@ jobs:
       # TypeScript pasaba por dos.
       - run: ruff check .
       - run: python -m pytest tests -q
+      # El camino OFFLINE, que es el que manda: valida los JSON commiteados sin tocar la red. P6 va
+      # aquí contra el recorte capturado (14 de 348 relaciones) y lo dice en su propia línea.
       - run: python run.py check
+
+      # Y el camino CON RED, que es lo que cierra A-T21 H-2 y H-4 (T-32). P6 vuelve a derivar las
+      # 348 relaciones desde RAMPE entero en vez de desde las 7 áreas que caben en el repo.
+      #
+      # `continue-on-error` NO se usa aquí a propósito. La tentación es marcarlo como informativo
+      # «porque depende de una fuente externa», y entonces MITECO caído = gate en verde sin
+      # cobertura, que es peor que no tenerlo. Si la fuente no responde, este paso es ROJO y se ve:
+      # `run.py check --areas-fuente-entera` levanta en vez de caerse al recorte, y por eso el rojo
+      # dice «no se pudo obtener» y no «14 de 348».
+      #
+      # Cuesta 12 MB y ~4 s de descarga por ejecución, medidos.
+      - name: P6 contra la fuente entera de RAMPE (cierra A-T21 H-2 y H-4)
+        run: python run.py check --areas-fuente-entera
 
   # Gate del Guardián (skill security-gate): escalera determinista secretos → SAST → deps, con el
   # ruleset vendorizado en .claude/skills/security-gate/presets. Sin cloud: nada sale del runner.
