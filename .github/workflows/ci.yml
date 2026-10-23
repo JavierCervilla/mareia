@@ -25,6 +25,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
+          check-latest: true
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
@@ -81,6 +82,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
+          check-latest: true
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter web build
@@ -236,6 +238,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
+          check-latest: true
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       # Los recorridos atacan `dist/`, no un servidor de desarrollo: hay que construir antes.
