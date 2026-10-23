@@ -64,7 +64,7 @@ RUN set -eu; \
 # y nginx. Lo que no está en la imagen no se puede explotar ni se paga al desplegar.
 # ---------------------------------------------------------------------------------------------
 # Fijada por digest, por lo mismo que la de arriba (cómo subirla: ver el comentario de la etapa 1).
-FROM nginx:alpine@sha256:db35bfc6b2951e7f8a72db5db120288c127ffaeeb4a6d4b95a26fead017d5913 AS runtime
+FROM nginx:1.31.7-alpine@sha256:892bb2152464f0c5d8972593a5f5afaf8054552580b699d95f8ff4af08c2d33d AS runtime
 
 # El `server` por defecto de la imagen escucha en el 80 y sirve su propia portada: fuera, para que
 # el único sitio que responda sea el nuestro.

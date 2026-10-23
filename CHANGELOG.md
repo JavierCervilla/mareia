@@ -2,6 +2,11 @@
 
 Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
+## 2026-10-23 — nginx 1.31.7 en la web (T-328 del AgenticFramework)
+
+- **La imagen de la web pasa de `nginx:alpine` por digest (1.31.4 en el contenedor) a `nginx:1.31.7-alpine` por
+  digest.** Aviso de F5 del 2026-10-14 (K000163408): cinco vulnerabilidades de nginx, entre ellas desbordamientos de memoria con `alias` + `rewrite` (CVE-2026-15176) y con `map` + regex, y un use-after-free con AIO (CVE-2026-97205), arregladas en 1.31.7 y 1.30.6. El tag va ahora a la vista junto al digest, para que se lea qué versión es sin inspeccionar la imagen.
+
 ## 2026-09-10 — T-34 · El error medido en las listas de puertos (cierra A-T14B H-3)
 
 - **Las tres listas de puertos publican el error de la predicción, en centímetros**: «Vigo ·
