@@ -6,6 +6,11 @@ Formato *Keep a Changelog* relajado; lo más reciente arriba.
 
 - **La imagen de la web pasa de `nginx:alpine` por digest (1.31.4 en el contenedor) a `nginx:1.31.7-alpine` por
   digest.** Aviso de F5 del 2026-10-14 (K000163408): cinco vulnerabilidades de nginx, entre ellas desbordamientos de memoria con `alias` + `rewrite` (CVE-2026-15176) y con `map` + regex, y un use-after-free con AIO (CVE-2026-97205), arregladas en 1.31.7 y 1.30.6. El tag va ahora a la vista junto al digest, para que se lea qué versión es sin inspeccionar la imagen.
+- **Node 22.23.4 en la etapa de build** (`node:22.23.4-alpine` por digest; el digest anterior era un `22-alpine` de
+  antes del parche de seguridad de Node del 2026-10-21) y `check-latest: true` en los tres `setup-node` del CI.
+- **Trece dependencias con avisos de seguridad, al día dentro de sus rangos** (lo pedía el Guardián): astro 7.4.2,
+  vite 8.3.5, undici 8.12.3, sharp 0.35.5, devalue, fast-uri, smol-toml, proxy-addr, postcss-selector-parser,
+  brace-expansion, source-map-js, http-cache-semantics. Astro 7.4 exige Node ≥ 22.23.4, de ahí lo anterior.
 
 ## 2026-09-10 — T-34 · El error medido en las listas de puertos (cierra A-T14B H-3)
 

@@ -15,8 +15,8 @@
 # La base va fijada por DIGEST y no solo por el tag: `22-alpine` es una etiqueta móvil, y con el
 # rebuild diario de T-15 la base cambiaría bajo los pies sin que ningún commit lo cuente. Así, la
 # base es dato del repo y actualizarla es un cambio que se revisa. Para subirla:
-#   docker pull node:22-alpine && docker image inspect node:22-alpine --format '{{index .RepoDigests 0}}'
-FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS build
+#   docker pull node:22.23.4-alpine && docker image inspect node:22.23.4-alpine --format '{{index .RepoDigests 0}}'
+FROM node:22.23.4-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914 AS build
 
 # corepack usa el pnpm EXACTO que fija `packageManager` en el package.json de la raíz: la versión
 # del gestor es dato del repo, no de esta imagen, y así no se puede desincronizar del lockfile.
